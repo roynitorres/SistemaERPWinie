@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/historial_ventas.css') }}">
+{% endblock %}
+
+{% block title %}
+Historial Ventas
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Venta /Historial Ventas</li>
+            </ol>
+        </nav>
+
+        <button type="button" class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2"
+            id="btnTogglePanel">
+            <i class="bi bi-chevron-up" id="iconTogglePanel"></i>
+            <span id="textTogglePanel">Ocultar</span>
+        </button>
+    </div>
+
+    <div id="panelHistorialFacturas">
+        <!-- ===================================== -->
+        <!-- TARJETAS KPI -->
+        <!-- ===================================== -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="card kpi-card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="kpi-icon bg-light-green text-green me-3">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+                        <div>
+                            <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total de
+                                Facturas</span>
+                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.total_facturas }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="card kpi-card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="kpi-icon bg-light-green text-green me-3">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div>
+                            <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Facturas
+                                Activas</span>
+                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.facturas_activas }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="card kpi-card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="kpi-icon bg-light-green text-green me-3">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <div>
+                            <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">
+                                Facturas Contado
+                            </span>
+                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.facturas_contado }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="card kpi-card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="kpi-icon bg-light-blue text-blue me-3">
+                            <i class="bi bi-calendar2-check"></i>
+                        </div>
+                        <div>
+                            <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">
+                                Facturas Crédito
+                            </span>
+                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.facturas_credito }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="card kpi-card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="kpi-icon bg-light-red text-red me-3">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </div>
+                        <div>
+                            <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Facturas
+                                Anuladas</span>
+                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.facturas_anuladas }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================== -->
+        <!-- FORMULARIO HISTORIAL DE REGISTROS -->
+        <!-- ===================================== -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+                <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
+                    <i class="bi bi-search me-2"></i>FILTROS
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('ventas.historial_ventas') }}" id="formfiltros">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label text-xs fw-bold text-blue mb-1">FECHA INICIO</label>
+                            <input type="date" class="form-control border-light-subtle" id="form_fecha_inicio"
+                                name="fecha_inicio" value="{{ fecha_inicio }}">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label text-xs fw-bold text-blue mb-1">FECHA FIN</label>
+                            <input type="date" class="form-control border-light-subtle" id="form_fecha_fin"
+                                name="fecha_fin" value="{{ fecha_fin }}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-xs fw-bold text-blue mb-1">CLIENTE</label>
+                            <select class="form-select border-light-subtle" id="cliente_id" name="cliente_id">
+                                <option value="">-- Todos los clientes --</option>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" {% if cliente_id|string==cliente.id|string %}selected{%
+                                    endif %}>
+                                    {{ cliente.nombres }} {{ cliente.apellidos }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label text-xs fw-bold text-blue mb-1">ESTADO</label>
+                            <select class="form-select border-light-subtle fw-semibold" name="estado" id="form_estado">
+                                <option value="TODAS" {% if estado_actual=='TODAS' %}selected{% endif %}>Todas</option>
+                                <option value="ACTIVA" {% if estado_actual=='ACTIVA' %}selected{% endif %}>Activas
+                                </option>
+                                <option value="ANULADA" {% if estado_actual=='ANULADA' %}selected{% endif %}>Anuladas
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label text-xs fw-semibold text-muted mb-1 d-block">&nbsp;</label>
+                            <div class="d-flex gap-2 justify-content-start flex-wrap">
+                                <button type="submit"
+                                    class="btn text-white px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                                    id="btnGuardar" style="background:#7c3aed;">
+                                    <i class="bi bi-search"></i> Buscar
+                                </button>
+
+                                <a href="{{ url_for('ventas.historial_ventas') }}"
+                                    class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2">
+                                    <i class="bi bi-arrow-clockwise"></i> Limpiar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- TABLA / LISTA HISTORIAL FACTURAS-->
+    <!-- ====================================== -->
+    <div class="card border-0 shadow-sm">
+        <div
+            class="card-header bg-white border-0 pt-4 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">HISTORIAL DE FACTURAS
+            </h5>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarfacturas"
+                        placeholder="factura, Cliente...">
+                </div>
+
+                <a href="#" class="btn btn-outline-info d-flex align-items-center gap-2 fw-semibold"
+                    style="min-height: 38px;">
+                    <i class="bi bi-download"></i> Exportar
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover border-light-subtle tabla-historial-ventas"
+                    style="min-width: 1250px;">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                        <tr>
+                            <th class="px-3 py-3 text-center fw-semibold text-nowrap" style="width: 140px;">FACTURA</th>
+                            <th class="px-3 py-3">FACTURACION</th>
+                            <th class="px-3 py-3">FECHA LÍMITE</th>
+                            <th class="px-3 py-3 text-center">CLIENTE</th>
+                            <th class="px-3 py-3 text-center">ITEMS</th>
+                            <th class="px-3 py-3 text-center">TOTAL</th>
+                            <th class="px-3 py-3 text-center">DÍAS</th>
+                            <th class="px-3 py-3 text-center">TIPO</th>
+                            <th class="px-3 py-3 text-center">ESTADO</th>
+                            <th class="px-3 py-3 text-center" style="width: 20px;">ACC.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaVentas">
+                        {% for venta in ventas %}
+                        {% set subtotal = venta.detalle_ventas | sum(attribute='subtotal') %}
+                        {% set iva = venta.total_venta - subtotal %}
+                        <tr>
+                            <td class="px-3 py-3 text-center fw-semibold ">
+                                {{ venta.numero_factura }}
+                            </td>
+                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                                {{ venta.fecha_venta.strftime('%d/%m/%Y') }}
+                            </td>
+                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                                {% if venta.fecha_limite_credito %}
+                                {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') }}
+                                {% else %}
+                                {{ venta.fecha_venta.strftime('%d/%m/%Y') }}
+                                {% endif %}
+                            </td>
+
+
+                            <td class="px-3 py-3 text-start fw-semibold text-muted">
+                                {{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                                {{ venta.detalle_ventas|length }}
+                            </td>
+                            <td class="px-3 py-3 text-center fw-bold text-blue ">
+                                C$ {{ "%.2f"|format(venta.total_venta) }}
+                            </td>
+                            {% set fecha_vencimiento = venta.fecha_limite_credito if venta.fecha_limite_credito else
+                            venta.fecha_venta.date() %}
+                            {% set dias_restantes = (fecha_vencimiento - hoy).days %}
+
+                            <td class="px-3 py-3 text-center">
+                                {% if venta.estado == "ANULADA" %}
+                                <span
+                                    class="badge px-3 py-2 rounded-pill fw-semibold bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                    -
+                                </span>
+                                {% elif dias_restantes < 0 %} <span
+                                    class="badge px-3 py-2 rounded-pill fw-semibold bg-danger-subtle text-danger border border-danger-subtle">
+                                    Vencida {{ dias_restantes|abs }}d
+                                    </span>
+                                    {% elif dias_restantes == 0 %}
+                                    <span
+                                        class="badge px-3 py-2 rounded-pill fw-semibold bg-warning-subtle text-warning border border-warning-subtle">
+                                        Hoy
+                                    </span>
+                                    {% elif dias_restantes <= 3 %} <span
+                                        class="badge px-3 py-2 rounded-pill fw-semibold bg-warning-subtle text-warning border border-warning-subtle">
+                                        {{ dias_restantes }}d
+                                        </span>
+                                        {% else %}
+                                        <span
+                                            class="badge px-3 py-2 rounded-pill fw-semibold bg-success-subtle text-success border border-success-subtle">
+                                            {{ dias_restantes }}d
+                                        </span>
+                                        {% endif %}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                {% if venta.tipo_venta == "CREDITO" %}
+                                <span
+                                    class="badge px-3 py-2 rounded-pill fw-semibold bg-warning-subtle text-warning border border-warning-subtle">
+                                    Crédito
+                                </span>
+                                {% else %}
+                                <span
+                                    class="badge px-3 py-2 rounded-pill fw-semibold bg-success-subtle text-success border border-success-subtle">
+                                    Contado
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                {% if venta.estado == "ACTIVA" %}
+                                <span class="badge badge-activo px-3 py-2 rounded-pill fw-semibold">Activa</span>
+                                {% else %}
+                                <span class="badge badge-inactivo px-3 py-2 rounded-pill fw-semibold">Anulada</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-0 py-3 text-center fw-bold">
+                                <div class="d-flex justify-content-center gap-0">
+
+                                    <a href="{{ url_for('ventas.factura', venta_id=venta.id) }}" target="_blank"
+                                        class="btn  btn-sm " title="Ver factura">
+                                        <i class="bi bi-eye text-blue fw-bold"></i>
+                                    </a>
+
+                                    {% if venta.estado == "ACTIVA" %}
+                                    <form method="POST" action="{{ url_for('ventas.anular_venta', venta_id=venta.id) }}"
+                                        class="form-anular-venta">
+
+                                        <button type="submit" class="btn text-red btn-sm" title="Anular factura">
+                                            <i class="bi bi-x-circle text-red fw-bold"></i>
+                                        </button>
+
+                                    </form>
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% endfor%}
+                    </tbody>
+
+                </table>
+                <div
+                    class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                    <div class="text-muted text-xs" id="ventasPaginationSummary">
+                        Mostrando 0 a 0 de 0 registros
+                    </div>
+
+                    <nav aria-label="Paginación historial ventas">
+                        <ul class="pagination pagination-sm mb-0" id="ventasPaginationControls"></ul>
+                    </nav>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+</div>
+
+<!-- ====================================== -->
+<!-- SCRIPT -->
+<!-- ====================================== -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const formFiltros = document.getElementById("formfiltros");
+    const fechaInicio = document.getElementById("form_fecha_inicio");
+    const fechaFin = document.getElementById("form_fecha_fin");
+    const clienteFiltro = document.getElementById("cliente_id");
+
+    formFiltros.addEventListener("submit", function (e) {
+        if (!fechaInicio.value || !fechaFin.value || !clienteFiltro.value) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "Filtros incompletos",
+                text: "Para buscar debe seleccionar rango de fecha y cliente.",
+                icon: "warning",
+                confirmButtonText: "Entendido",
+                confirmButtonColor: "#7c3aed"
+            });
+
+            return;
+        }
+
+        if (fechaInicio.value > fechaFin.value) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "Rango inválido",
+                text: "La fecha inicio no puede ser mayor que la fecha fin.",
+                icon: "warning",
+                confirmButtonText: "Entendido",
+                confirmButtonColor: "#7c3aed"
+            });
+        }
+    });
+
+
+
+    const buscarFacturas = document.getElementById("buscarfacturas");
+    const filasVentas = Array.from(document.querySelectorAll("#tablaVentas tr"));
+
+    let paginaActualVentas = 1;
+    const ventasPorPagina = 10;
+    let filasFiltradasVentas = [...filasVentas];
+
+    function renderTablaVentas() {
+        const totalItems = filasFiltradasVentas.length;
+        const totalPages = Math.ceil(totalItems / ventasPorPagina) || 1;
+
+        if (paginaActualVentas > totalPages) paginaActualVentas = totalPages;
+        if (paginaActualVentas < 1) paginaActualVentas = 1;
+
+        const startIndex = (paginaActualVentas - 1) * ventasPorPagina;
+        const endIndex = Math.min(startIndex + ventasPorPagina, totalItems);
+
+        filasVentas.forEach(row => row.style.display = "none");
+
+        for (let i = startIndex; i < endIndex; i++) {
+            filasFiltradasVentas[i].style.display = "";
+        }
+
+        document.getElementById("ventasPaginationSummary").innerText =
+            totalItems > 0
+                ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+                : "Mostrando 0 a 0 de 0 registros";
+
+        renderControlesVentas(totalPages);
+    }
+
+    function renderControlesVentas(totalPages) {
+        const container = document.getElementById("ventasPaginationControls");
+        container.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${paginaActualVentas === 1 ? "disabled" : ""}`;
+        prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+        prevLi.addEventListener("click", e => {
+            e.preventDefault();
+            if (paginaActualVentas > 1) {
+                paginaActualVentas--;
+                renderTablaVentas();
+            }
+        });
+        container.appendChild(prevLi);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${paginaActualVentas === i ? "active" : ""}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener("click", e => {
+                e.preventDefault();
+                paginaActualVentas = i;
+                renderTablaVentas();
+            });
+            container.appendChild(li);
+        }
+
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${paginaActualVentas === totalPages ? "disabled" : ""}`;
+        nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+        nextLi.addEventListener("click", e => {
+            e.preventDefault();
+            if (paginaActualVentas < totalPages) {
+                paginaActualVentas++;
+                renderTablaVentas();
+            }
+        });
+        container.appendChild(nextLi);
+    }
+
+    buscarFacturas.addEventListener("input", function () {
+        const query = this.value.toLowerCase().trim();
+
+        filasFiltradasVentas = filasVentas.filter(row => {
+            const factura = row.children[0].innerText.toLowerCase();
+            const cliente = row.children[3].innerText.toLowerCase();
+
+            return factura.includes(query) || cliente.includes(query);
+        });
+
+        paginaActualVentas = 1;
+        renderTablaVentas();
+    });
+    document.querySelectorAll(".form-anular-venta").forEach(form => {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "¿Anular factura?",
+                text: "Esta acción devolverá el stock de los productos y marcará la factura como anulada.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Sí, anular",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+    window.addEventListener("load", renderTablaVentas);
+
+    const btnTogglePanel = document.getElementById("btnTogglePanel");
+    const panelHistorialFacturas = document.getElementById("panelHistorialFacturas");
+    const iconTogglePanel = document.getElementById("iconTogglePanel");
+    const textTogglePanel = document.getElementById("textTogglePanel");
+
+    btnTogglePanel.addEventListener("click", function () {
+        const oculto = panelHistorialFacturas.classList.toggle("d-none");
+
+        if (oculto) {
+            iconTogglePanel.className = "bi-chevron-down";
+            textTogglePanel.textContent = "Mostrar";
+        } else {
+            iconTogglePanel.className = "bi-chevron-up";
+            textTogglePanel.textContent = "Ocultar";
+        }
+    });
+</script>
+
+{% endblock %}

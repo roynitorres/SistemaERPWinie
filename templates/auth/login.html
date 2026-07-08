@@ -1,0 +1,63 @@
+{% extends "auth_base.html" %}
+
+{% block title %}
+Sistema de Gestion Empresarial Winie
+{% endblock %}
+
+{% block content %}
+
+<div class="login-shell login-centered">
+    <section class="login-form-panel">
+        <div class="login-card login-card-centered">
+            <div class="login-logo-block">
+                <div class="login-logo-icon">
+                    <i class="bi bi-bar-chart-line"></i>
+                </div>
+                <div class="login-logo-text">ERP<span>Winie</span></div>
+                <div class="login-logo-version">Sistema de Gestion Empresarial</div>
+            </div>
+
+            <div class="login-heading text-center">
+                <h2>Iniciar sesion</h2>
+                <p>Accede al sistema con tus credenciales</p>
+            </div>
+
+            <form method="POST">
+                <div class="mb-3 mt-3">
+                    <label class="form-label login-label">USUARIO</label>
+                    <input type="text" name="username" class="form-control login-input" placeholder="Ingrese su usuario">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label login-label">CONTRASENA</label>
+                    <input type="password" name="password" class="form-control login-input" placeholder="Ingrese su contrasena">
+                    {% if error_login %}
+                    <div class="login-error">{{ error_login }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="recaptcha-placeholder mb-3">
+                    <div class="fake-checkbox"></div>
+                    <span>No soy un robot</span>
+                    <div class="recaptcha-brand">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <small>reCAPTCHA</small>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login" id="btnLogin">
+                    <span>Ingresar</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="login-footer">ERPWinie · Sistema seguro SSL</div>
+        </div>
+    </section>
+</div>
+
+<script>
+    // Unified login - logic removed
+</script>
+
+{% endblock %}

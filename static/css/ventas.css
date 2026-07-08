@@ -1,0 +1,77 @@
+
+.text-blue {
+    color: #003891 !important;
+}
+.btn-primary{
+    color: #fff;
+    background-color: #003891;
+}
+.formulario-card,
+.card {
+    border-radius: 6px;
+}
+
+.form-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+}
+
+.form-control,
+.form-select {
+    min-height: 38px;
+    border-radius: 6px;
+}
+
+.tabla-detalle-ventas {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.tabla-detalle-ventas th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    padding: 12px;
+}
+
+.tabla-detalle-ventas td {
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+
+.cantidad-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cantidad-control button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.cantidad-control span {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.modal-erp-header {
+    background: #0d3f9f;
+}
+
+.modal-producto-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.text-xs {
+    font-size: 0.72rem;
+}
+.bg-blue{
+    background: #0d3f9f;
+}

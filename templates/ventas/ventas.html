@@ -1,0 +1,879 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ventas.css') }}">
+
+{% endblock %}
+
+{% block title %}
+Nueva Venta
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+            <li class="breadcrumb-item active text-primary" aria-current="page">Ventas</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center">
+            <i class="bi bi-cart2 me-2 text-primary"></i>NUEVA VENTA
+        </h5>
+    </div>
+    <!-- ===================================== -->
+    <!-- FORMULARIO DE VENTAS -->
+    <!-- ===================================== -->
+    <div class="card-body">
+        <form id="formVenta">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label text-xs fw-bold text-blue mb-1">CLIENTE *</label>
+                    <select class="form-select border-light-subtle" id="cliente_id" name="cliente_id" required>
+                        <option value="">-- Seleccionar cliente --</option>
+                        {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" data-direccion="{{ cliente.direccion or '' }}"
+                            data-telefono="{{ cliente.telefono or '' }}">{{ cliente.nombres }} {{ cliente.apellidos }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label text-xs fw-semibold text-blue mb-1">TIPO DE VENTA</label>
+                    <select class="form-select border-light-subtle" id="tipo_venta" name="tipo_venta">
+                        <option value="CONTADO">Contado</option>
+                        <option value="CREDITO">Crédito</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label text-xs fw-semibold text-blue mb-1">SERIE</label>
+                    <input type="text" class="form-control border-light-subtle bg-light" id="serie_factura" name="serie_factura"
+                        value="{{ empresa.serie_factura if empresa else 'F001' }}" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label text-xs fw-semibold text-blue mb-1">N° FACTURA</label>
+                    <input type="text" class="form-control border-light-subtle bg-light text-primary fw-bold" id="numero_factura" name="numero_factura"
+                        value="{{ numero_factura }}" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA VENTA</label>
+                    <input type="date" class="form-control border-light-subtle" id="fecha_venta" name="fecha_venta"
+                        value="{{ fecha_actual }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA LÍMITE</label>
+                    <input type="date" class="form-control border-light-subtle" id="fecha_limite"
+                        name="fecha_limite_credito">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--   DETALLE DE VENTA   -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-blue border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0 fw-bold text-light text-uppercase">
+            DETALLE DE PRODUCTOS
+        </h5>
+
+        <button type="button" class="btn btn-primary fw-semibold d-flex align-items-center gap-2"
+            id="btnAgregarProducto" data-bs-toggle="modal" data-bs-target="#modalProductos">
+            <i class="bi bi-plus-lg"></i> Agregar Producto
+        </button>
+    </div>
+
+    <div class="card-body pt-0">
+        <div class="table-responsive">
+            <table class="table align-middle table-hover tabla-detalle-ventas">
+                <thead class="bg-secondary text-muted text-xs fw-bold">
+                    <tr>
+                        <th>CÓDIGO</th>
+                        <th>DESCRIPCIÓN</th>
+                        <th class="text-center">UND</th>
+                        <th class="text-center">CANTIDAD</th>
+                        <th class="text-end">PRECIO UNITARIO (C$)</th>
+                        <th class="text-end">DESCUENTO (%)</th>
+                        <th class="text-end">SUBTOTAL (C$)</th>
+                        <th class="text-center">ACC.</th>
+                    </tr>
+                </thead>
+
+                <tbody id="detalleVentaBody"></tbody>
+            </table>
+        </div>
+
+        <div class="row g-3 align-items-end border-top pt-3 mt-2">
+            <div class="col-md-5">
+                <label class="form-label text-xs fw-semibold text-blue mb-1">OBSERVACIONES</label>
+                <input type="text" id="observaciones" class="form-control border-light-subtle"
+                    placeholder="Notas internas...">
+            </div>
+
+            <div class="col-md-3 ms-auto">
+                <div class="d-flex justify-content-between text-muted mb-1">
+                    <span>Subtotal</span>
+                    <span id="subtotalVenta">C$ 0.00</span>
+                </div>
+
+                <div class="d-flex justify-content-between text-muted mb-2">
+                    <span>IVA</span>
+                    <span id="ivaVenta">C$ 0.00</span>
+                </div>
+
+                <div class="d-flex justify-content-between fw-bold fs-5 text-blue">
+                    <span>TOTAL</span>
+                    <span id="totalVenta">C$ 0.00</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="d-flex justify-content-end gap-2 flex-wrap">
+                    <button type="button" class="btn btn-light border fw-semibold" id="btnLimpiarVenta">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
+                    </button>
+
+                    <button type="button" class="btn btn-warning text-white fw-semibold" id="btnVistaPrevia">
+                        <i class="bi bi-printer me-1"></i> Vista Previa
+                    </button>
+
+                    <button type="button" class="btn btn-success fw-semibold" id="btnGuardar">
+                        <i class="bi bi-floppy me-1"></i> Guardar Factura
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ===================================== -->
+<!-- MODAL PRODUCTOS -->
+<!-- ===================================== -->
+<div class="modal fade" id="modalProductos" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header modal-erp-header text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-box-seam me-2"></i>Agregar Producto
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="position-relative mb-3">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarProducto"
+                        placeholder="Buscar por código, nombre o marca">
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light text-muted text-xs fw-bold">
+                            <tr>
+                                <th>CODPRODUCTO</th>
+                                <th>NOMBRE</th>
+                                <th class="text-end">PRECIO</th>
+                                <th class="text-center">STOCK</th>
+                                <th class="text-center">SELECCIONAR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyBusquedaProductos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer modal-producto-footer d-block">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label text-xs fw-semibold text-muted mb-1">PRODUCTO SELECCIONADO</label>
+                        <input type="text" class="form-control bg-light border-0 text-dark fw-bold"
+                            id="modalProductoNombre" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-muted mb-1">CANTIDAD</label>
+                        <input type="number" class="form-control" id="modalCantidad" min="1" value="1">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-muted mb-1">PRECIO UNITARIO</label>
+                        <input type="number" class="form-control" id="modalPrecio" min="0" step="0.01" disabled>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-muted mb-1">DESCUENTO</label>
+                        <select class="form-select" id="modalDescuento">
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="10">10%</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-muted mb-1">SUBTOTAL</label>
+                        <input type="text" class="form-control bg-light border-0 fw-bold" id="modalSubtotal" readonly>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button type="button" class="btn btn-light border fw-semibold" id="btnLimpiarModal">
+                        Limpiar
+                    </button>
+                    <button type="button" class="btn btn-success fw-semibold" id="btnAgregarDetalle">
+                        <i class="bi bi-check-lg me-1"></i> Agregar al Detalle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ===================================== -->
+<!-- JAVASCRIPT -->
+<!-- ===================================== -->
+
+<script>
+    function mostrarMensaje(tipo, mensaje) {
+        const container = document.querySelector(".flash-container") || document.body;
+        const div = document.createElement("div");
+
+        div.className = `flash-message flash-${tipo}`;
+        div.innerText = mensaje;
+
+        container.appendChild(div);
+
+        setTimeout(() => {
+            div.remove();
+        }, 5000);
+    }
+
+    let detalleVenta = [];
+    let productoSeleccionado = null;
+
+    const empresaInfo = {
+        razon_social: "{{ empresa.razon_social if empresa else '' }}",
+        ruc: "{{ empresa.ruc if empresa else '' }}",
+        direccion: "{{ empresa.direccion if empresa else '' }}",
+        ciudad: "{{ empresa.ciudad if empresa else '' }}",
+        telefono: "{{ empresa.telefono if empresa else '' }}",
+        email: "{{ empresa.email if empresa else '' }}",
+        sitio_web: "{{ empresa.sitio_web if empresa else '' }}",
+        serie_factura: "{{ empresa.serie_factura if empresa else 'F001' }}",
+        correlativo: "{{ empresa.correlativo if empresa else '00034' }}",
+        iva: Number("{{ empresa.iva if empresa else 15 }}")
+    };
+    const IVA_RATE = empresaInfo.iva / 100;
+    const DESCUENTO_MAXIMO_USUARIO = Number("{{ descuento_maximo }}");
+
+    const tbody = document.getElementById("detalleVentaBody");
+    const tbodyBusqueda = document.getElementById("tbodyBusquedaProductos");
+    const buscarProducto = document.getElementById("buscarProducto");
+
+    const modalProductoNombre = document.getElementById("modalProductoNombre");
+    const modalCantidad = document.getElementById("modalCantidad");
+    const modalPrecio = document.getElementById("modalPrecio");
+    const modalDescuento = document.getElementById("modalDescuento");
+    const modalSubtotal = document.getElementById("modalSubtotal");
+
+    const btnAgregarDetalle = document.getElementById("btnAgregarDetalle");
+    const btnLimpiarModal = document.getElementById("btnLimpiarModal");
+    const btnLimpiarVenta = document.getElementById("btnLimpiarVenta");
+    const btnVistaPrevia = document.getElementById("btnVistaPrevia");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    const tipoVentaSelect = document.getElementById("tipo_venta");
+    const fechaLimite = document.getElementById("fecha_limite");
+
+    function actualizarFechaLimite() {
+        if (tipoVentaSelect.value === "CREDITO") {
+            fechaLimite.disabled = false;
+        } else {
+            fechaLimite.disabled = true;
+            fechaLimite.value = "";
+        }
+    }
+
+    tipoVentaSelect.addEventListener("change", actualizarFechaLimite);
+    actualizarFechaLimite();
+
+    buscarProducto.addEventListener("input", async function () {
+        const texto = this.value.trim();
+
+        if (texto.length < 1) {
+            tbodyBusqueda.innerHTML = "";
+            return;
+        }
+
+        await buscarProductos(texto);
+    });
+
+    async function buscarProductos(textoBusqueda) {
+        tbodyBusqueda.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted py-3">
+                    Buscando...
+                </td>
+            </tr>
+        `;
+
+        try {
+            const respuesta = await fetch(`/buscar-productos?busqueda=${encodeURIComponent(textoBusqueda)}`);
+            const productos = await respuesta.json();
+
+            tbodyBusqueda.innerHTML = "";
+
+            if (productos.length === 0) {
+                tbodyBusqueda.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-danger py-3">
+                            No se encontraron productos
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            productos.forEach(producto => {
+                tbodyBusqueda.innerHTML += `
+                    <tr>
+                        <td>${producto.codigo}</td>
+                        <td>${producto.nombre}</td>
+                        <td class="text-end">C$ ${producto.precio.toFixed(2)}</td>
+                        <td class="text-center">${producto.stock}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-success btn-sm"
+                                onclick='seleccionarProducto(${JSON.stringify(producto)})'>
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            tbodyBusqueda.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-danger py-3">
+                        Error al buscar productos
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function seleccionarProducto(producto) {
+        productoSeleccionado = producto;
+
+        modalProductoNombre.value = producto.nombre;
+        modalCantidad.value = 1;
+        modalPrecio.value = producto.precio.toFixed(2);
+        modalDescuento.value = "0.00";
+
+        calcularSubtotalModal();
+    }
+
+    function calcularSubtotalModal() {
+        const cantidad = parseInt(modalCantidad.value) || 0;
+        const precio = parseFloat(modalPrecio.value) || 0;
+        let descuento = parseFloat(modalDescuento.value) || 0;
+        if (descuento > DESCUENTO_MAXIMO_USUARIO) {
+            descuento = DESCUENTO_MAXIMO_USUARIO;
+            modalDescuento.value = DESCUENTO_MAXIMO_USUARIO;
+            mostrarMensaje("warning", `Su rol permite máximo ${DESCUENTO_MAXIMO_USUARIO}% de descuento`);
+        }
+
+        const bruto = cantidad * precio;
+        const descuentoMonto = bruto * (descuento / 100);
+        const subtotal = Math.max(bruto - descuentoMonto, 0);
+
+        modalSubtotal.value = "C$ " + subtotal.toFixed(2);
+    }
+
+    [modalCantidad, modalPrecio, modalDescuento].forEach(input => {
+        input.addEventListener("input", calcularSubtotalModal);
+    });
+
+    btnAgregarDetalle.addEventListener("click", function () {
+        if (!productoSeleccionado) {
+            mostrarMensaje("warning", "Seleccione un producto");
+            return;
+        }
+
+        const cantidad = parseInt(modalCantidad.value) || 0;
+        const precio = parseFloat(modalPrecio.value) || 0;
+        const descuento = parseFloat(modalDescuento.value) || 0;
+
+        if (cantidad <= 0) {
+            mostrarMensaje("warning", "Cantidad inválida");
+            return;
+        }
+
+        if (cantidad > productoSeleccionado.stock) {
+            mostrarMensaje("danger", "Stock insuficiente");
+            return;
+        }
+
+        const existe = detalleVenta.find(p => p.producto_id === productoSeleccionado.id);
+
+        if (existe) {
+            mostrarMensaje("warning", "El producto ya fue agregado");
+            return;
+        }
+
+        const bruto = cantidad * precio;
+        const descuentoMonto = bruto * (descuento / 100);
+        const subtotal = Math.max(bruto - descuentoMonto, 0);
+
+        detalleVenta.push({
+            producto_id: productoSeleccionado.id,
+            codigo: productoSeleccionado.codigo,
+            nombre: productoSeleccionado.nombre,
+            unidad: productoSeleccionado.unidad || "UND",
+            precio: precio,
+            descuento_porcentaje: descuento,
+            descuento_monto: descuentoMonto,
+            cantidad: cantidad,
+            stock: productoSeleccionado.stock,
+            subtotal: subtotal
+        });
+
+        renderizarTabla();
+        limpiarModalProducto();
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById("modalProductos"));
+        modal.hide();
+    });
+
+    btnLimpiarModal.addEventListener("click", limpiarModalProducto);
+
+    function limpiarModalProducto() {
+        productoSeleccionado = null;
+        modalProductoNombre.value = "";
+        modalCantidad.value = 1;
+        modalPrecio.value = "";
+        modalDescuento.value = "0.00";
+        modalSubtotal.value = "";
+        buscarProducto.value = "";
+        tbodyBusqueda.innerHTML = "";
+    }
+
+    function renderizarTabla() {
+        tbody.innerHTML = "";
+
+        let subtotalGeneral = 0;
+
+        if (detalleVenta.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">
+                        <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem;"></i>
+                        Sin productos agregados
+                    </td>
+                </tr>
+            `;
+
+            actualizarTotales(0);
+            return;
+        }
+
+        detalleVenta.forEach((producto, index) => {
+            subtotalGeneral += producto.subtotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${producto.codigo}</td>
+                    <td>${producto.nombre}</td>
+                    <td class="text-center">${producto.unidad}</td>
+                    <td class="text-center">
+                        <div class="cantidad-control">
+                            <button type="button" onclick="disminuirCantidad(${index})">-</button>
+                            <span>${producto.cantidad}</span>
+                            <button type="button" onclick="aumentarCantidad(${index})">+</button>
+                        </div>
+                    </td>
+                    <td class="text-end">C$ ${producto.precio.toFixed(2)}</td>
+                    <td class="text-end">${producto.descuento_porcentaje.toFixed(2)}%</td>
+                    <td class="text-end fw-semibold">C$ ${producto.subtotal.toFixed(2)}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${index})">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        actualizarTotales(subtotalGeneral);
+    }
+
+    function actualizarTotales(subtotal) {
+        const iva = subtotal * IVA_RATE;
+        const total = subtotal + iva;
+
+        document.getElementById("subtotalVenta").textContent = "C$ " + subtotal.toFixed(2);
+        document.getElementById("ivaVenta").textContent = "C$ " + iva.toFixed(2);
+        document.getElementById("totalVenta").textContent = "C$ " + total.toFixed(2);
+    }
+
+    function recalcularItem(producto) {
+        const bruto = producto.cantidad * producto.precio;
+        producto.descuento_monto = bruto * (producto.descuento_porcentaje / 100);
+        producto.subtotal = Math.max(bruto - producto.descuento_monto, 0);
+    }
+
+    function eliminarProducto(index) {
+        detalleVenta.splice(index, 1);
+        renderizarTabla();
+    }
+
+    function aumentarCantidad(index) {
+        const producto = detalleVenta[index];
+
+        if (producto.cantidad >= producto.stock) {
+            mostrarMensaje("danger", "No hay stock disponible");
+            return;
+        }
+
+        producto.cantidad++;
+        recalcularItem(producto);
+        renderizarTabla();
+    }
+
+    function disminuirCantidad(index) {
+        const producto = detalleVenta[index];
+
+        if (producto.cantidad <= 1) {
+            return;
+        }
+
+        producto.cantidad--;
+        recalcularItem(producto);
+        renderizarTabla();
+    }
+
+    btnLimpiarVenta.addEventListener("click", function () {
+        detalleVenta = [];
+        document.getElementById("formVenta").reset();
+        actualizarFechaLimite();
+        renderizarTabla();
+    });
+
+    btnVistaPrevia.addEventListener("click", function () {
+        if (detalleVenta.length === 0) {
+            mostrarMensaje("warning", "Agregue productos antes de generar vista previa");
+            return;
+        }
+
+        const clienteSelect = document.getElementById("cliente_id");
+        const clienteNombre = clienteSelect.options[clienteSelect.selectedIndex].text;
+        const clienteOption = clienteSelect.options[clienteSelect.selectedIndex];
+        const clienteDireccion = clienteOption.dataset.direccion || "-";
+        const clienteTelefono = clienteOption.dataset.telefono || "-";
+        const tipoVenta = document.getElementById("tipo_venta").value;
+        const fechaVenta = document.getElementById("fecha_venta").value;
+        const observaciones = document.getElementById("observaciones").value;
+
+        let subtotal = detalleVenta.reduce((acc, item) => acc + item.subtotal, 0);
+        let iva = subtotal * IVA_RATE;
+        let total = subtotal + iva;
+
+        let filas = detalleVenta.map(item => `
+        <tr>
+            <td>${item.nombre}</td>
+            <td>${item.unidad}</td>
+            <td>${item.cantidad}</td>
+            <td>C$ ${item.precio.toFixed(2)}</td>
+            <td>${item.descuento_porcentaje.toFixed(2)}%</td>
+            <td>C$ ${item.subtotal.toFixed(2)}</td>
+        </tr>
+    `).join("");
+
+        const ventana = window.open("", "_blank");
+
+        ventana.document.write(`
+        <html>
+        <head>
+            <title>Vista previa factura</title>
+            <style>
+                body {
+                    font-family: 'Inter', Arial, sans-serif;
+                    color: #333;
+                    padding: 40px;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                .header-container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    border-bottom: 2px solid #e5e7eb;
+                    padding-bottom: 20px;
+                    margin-bottom: 30px;
+                }
+                .empresa-logo-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .empresa-nombre {
+                    font-size: 24px;
+                    font-weight: 800;
+                    color: #1e3a8a;
+                    margin: 0 0 10px 0;
+                    text-transform: uppercase;
+                }
+                .info-text {
+                    font-size: 13px;
+                    color: #4b5563;
+                    margin: 3px 0;
+                }
+                .factura-badge {
+                    background-color: #f8fafc;
+                    padding: 15px 25px;
+                    border-radius: 8px;
+                    text-align: right;
+                    border: 1px solid #e2e8f0;
+                }
+                .factura-title {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #64748b;
+                    margin: 0 0 5px 0;
+                    text-transform: uppercase;
+                }
+                .factura-numero {
+                    font-size: 22px;
+                    font-weight: 800;
+                    color: #1e40af;
+                    margin: 5px 0 10px 0;
+                }
+                .factura-fecha {
+                    font-size: 13px;
+                    color: #64748b;
+                    margin: 0;
+                }
+                .cliente-section {
+                    background-color: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-left: 4px solid #3b82f6;
+                    border-radius: 6px;
+                    padding: 15px 20px;
+                    margin-bottom: 30px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+                .cliente-item {
+                    font-size: 13px;
+                    color: #334155;
+                    margin: 0;
+                }
+                .cliente-item strong {
+                    color: #0f172a;
+                    display: inline-block;
+                    width: 100px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 30px;
+                }
+                th {
+                    background-color: #1e3a8a;
+                    color: white;
+                    font-size: 12px;
+                    text-align: left;
+                    padding: 12px;
+                    text-transform: uppercase;
+                }
+                td {
+                    border-bottom: 1px solid #e5e7eb;
+                    padding: 12px;
+                    font-size: 13px;
+                    color: #374151;
+                }
+                .totales-container {
+                    display: flex;
+                    justify-content: flex-end;
+                }
+                .totales-box {
+                    width: 300px;
+                    background-color: #f8fafc;
+                    padding: 20px;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8f0;
+                }
+                .total-row {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 8px 0;
+                    font-size: 14px;
+                    color: #475569;
+                }
+                .total-final {
+                    display: flex;
+                    justify-content: space-between;
+                    padding-top: 12px;
+                    margin-top: 12px;
+                    border-top: 2px solid #cbd5e1;
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: #1e3a8a;
+                }
+                @media print {
+                    body { padding: 0; max-width: 100%; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header-container">
+                <div class="empresa-logo-info">
+                   <h2 class="empresa-nombre">${empresaInfo.razon_social || "Nombre de la Empresa"}</h2>
+                    <p class="info-text"><strong>RUC:</strong> ${empresaInfo.ruc || "-"}</p>
+                    <p class="info-text"><strong>Dirección:</strong> ${empresaInfo.direccion || "-"}</p>
+                    <p class="info-text"><strong>Correo:</strong> ${empresaInfo.email || "-"}</p>
+                    <p class="info-text"><strong>Teléfono:</strong> ${empresaInfo.telefono || "-"}</p>
+                </div>
+                <div class="factura-badge">
+                    <h3 class="factura-title">Factura Electrónica</h3>
+                    <div class="factura-numero">${document.getElementById("numero_factura").value || (empresaInfo.serie_factura + "-00000")}</div>
+                    <p class="factura-fecha"><strong>Fecha:</strong> ${fechaVenta}</p>
+                </div>
+            </div>
+
+            <div class="cliente-section">
+                <p class="cliente-item"><strong>Cliente:</strong> ${clienteNombre}</p>
+                <p class="cliente-item"><strong>Forma pago:</strong> ${tipoVenta}</p>
+                <p class="cliente-item"><strong>Dirección:</strong> ${clienteDireccion}</p>
+                <p class="cliente-item"><strong>Teléfono:</strong> ${clienteTelefono}</p>
+                <p class="cliente-item" style="grid-column: span 2;"><strong>Observaciones:</strong> ${observaciones || "Ninguna"}</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>UND</th>
+                        <th style="text-align: center;">Cant</th>
+                        <th style="text-align: right;">P. Unit.</th>
+                        <th style="text-align: right;">Desc.</th>
+                        <th style="text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filas}
+                </tbody>
+            </table>
+
+            <div class="totales-container">
+                <div class="totales-box">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <strong>C$ ${subtotal.toFixed(2)}</strong>
+                    </div>
+                    <div class="total-row">
+                        <span>IVA:</span>
+                        <strong>C$ ${iva.toFixed(2)}</strong>
+                    </div>
+                    <div class="total-final">
+                        <span>TOTAL:</span>
+                        <span>C$ ${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+
+        ventana.document.close();
+    });
+
+    btnGuardar.addEventListener("click", guardarVenta);
+
+    async function guardarVenta() {
+        const clienteId = document.getElementById("cliente_id").value;
+        const tipoVenta = document.getElementById("tipo_venta").value;
+        const fechaVenta = document.getElementById("fecha_venta").value;
+        const fechaLimiteCredito = document.getElementById("fecha_limite").value;
+        const observaciones = document.getElementById("observaciones").value;
+
+        if (!clienteId) {
+            mostrarMensaje("warning", "Seleccione un cliente");
+            return;
+        }
+
+        if (!fechaVenta) {
+            mostrarMensaje("warning", "Seleccione la fecha de venta");
+            return;
+        }
+
+        if (tipoVenta === "CREDITO" && !fechaLimiteCredito) {
+            mostrarMensaje("warning", "Seleccione la fecha límite del crédito");
+            return;
+        }
+
+        if (detalleVenta.length === 0) {
+            mostrarMensaje("warning", "Debe agregar productos a la venta");
+            return;
+        }
+
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Emitiendo...`;
+
+        const datos = {
+            cliente_id: clienteId,
+            tipo_venta: tipoVenta,
+            fecha_venta: fechaVenta,
+            fecha_limite_credito: fechaLimiteCredito,
+            observaciones: observaciones,
+            productos: detalleVenta
+        };
+
+        try {
+            const respuesta = await fetch("/guardar-venta", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(datos)
+            });
+
+            const resultado = await respuesta.json();
+
+            if (!resultado.success) {
+                mostrarMensaje("danger", resultado.message);
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = `<i class="bi bi-floppy me-1"></i> Emitir Comprobante`;
+                return;
+            }
+
+            window.open(`/factura/${resultado.venta_id}`, "_blank");
+            location.reload();
+
+        } catch (error) {
+            console.error(error);
+            mostrarMensaje("danger", "Error al emitir el comprobante");
+
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = `<i class="bi bi-floppy me-1"></i> Emitir Comprobante`;
+        }
+    }
+
+    renderizarTabla();
+</script>
+{% endblock %}

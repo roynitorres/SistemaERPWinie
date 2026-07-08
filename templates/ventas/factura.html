@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Factura {{ venta.numero_factura }}</title>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            color: #333;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .empresa-logo-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .empresa-nombre {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+        .info-text {
+            font-size: 13px;
+            color: #4b5563;
+            margin: 3px 0;
+        }
+        .factura-badge {
+            background-color: #f8fafc;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: right;
+            border: 1px solid #e2e8f0;
+        }
+        .factura-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #64748b;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+        }
+        .factura-numero {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1e40af;
+            margin: 5px 0 10px 0;
+        }
+        .factura-fecha {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+        .cliente-section {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .cliente-item {
+            font-size: 13px;
+            color: #334155;
+            margin: 0;
+        }
+        .cliente-item strong {
+            color: #0f172a;
+            display: inline-block;
+            width: 100px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th {
+            background-color: #1e3a8a;
+            color: white;
+            font-size: 12px;
+            text-align: left;
+            padding: 12px;
+            text-transform: uppercase;
+        }
+        td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px;
+            font-size: 13px;
+            color: #374151;
+        }
+        .totales-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .totales-box {
+            width: 300px;
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #475569;
+        }
+        .total-final {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 2px solid #cbd5e1;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e3a8a;
+        }
+        .acciones {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .acciones button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .acciones button:hover {
+            background-color: #1e40af;
+        }
+        @media print {
+            body { padding: 0; max-width: 100%; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    {% set subtotal = venta.detalle_ventas | sum(attribute='subtotal') %}
+    {% set iva = venta.total_venta - subtotal %}
+
+    <div class="header-container">
+        <div class="empresa-logo-info">
+            <h2 class="empresa-nombre">{{ empresa.razon_social if empresa else 'Nombre de la Empresa' }}</h2>
+            <p class="info-text"><strong>RUC:</strong> {{ empresa.ruc if empresa and empresa.ruc else '-' }}</p>
+            <p class="info-text"><strong>Dirección:</strong> {{ empresa.direccion if empresa and empresa.direccion else '-' }}</p>
+            <p class="info-text"><strong>Correo:</strong> {{ empresa.email if empresa and empresa.email else '-' }}</p>
+            <p class="info-text"><strong>Teléfono:</strong> {{ empresa.telefono if empresa and empresa.telefono else '-' }}</p>
+        </div>
+        <div class="factura-badge">
+            <h3 class="factura-title">Factura Electrónica</h3>
+            <div class="factura-numero">{{ venta.numero_factura }}</div>
+            <p class="factura-fecha"><strong>Fecha:</strong> {{ venta.fecha_venta.strftime('%d/%m/%Y') }}</p>
+        </div>
+    </div>
+
+    <div class="cliente-section">
+        <p class="cliente-item">
+            <strong>Cliente:</strong> {{ venta.cliente.nombres }} {{ venta.cliente.apellidos or '' }}
+        </p>
+        <p class="cliente-item">
+            <strong>Forma pago:</strong> {{ venta.tipo_venta }}
+        </p>
+        <p class="cliente-item">
+            <strong>Dirección:</strong> {{ venta.cliente.direccion or '-' }}
+        </p>
+        <p class="cliente-item">
+            <strong>Teléfono:</strong> {{ venta.cliente.telefono or '-' }}
+        </p>
+        <p class="cliente-item" style="grid-column: span 2;">
+            <strong>Observaciones:</strong> {{ venta.observaciones or 'Ninguna' }}
+        </p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>UND</th>
+                <th style="text-align: center;">Cant</th>
+                <th style="text-align: right;">P. Unit.</th>
+                <th style="text-align: right;">Desc.</th>
+                <th style="text-align: right;">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in venta.detalle_ventas %}
+            <tr>
+                <td>{{ item.producto.nombre }}</td>
+                <td>{{ item.producto.unidad }}</td>
+                <td style="text-align: center;">{{ item.cantidad }}</td>
+                <td style="text-align: right;">C$ {{ "%.2f"|format(item.precio_unitario) }}</td>
+                <td style="text-align: right;">{{ "%.2f"|format(item.descuento_porcentaje) }}%</td>
+                <td style="text-align: right;">C$ {{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totales-container">
+        <div class="totales-box">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <strong>C$ {{ "%.2f"|format(subtotal) }}</strong>
+            </div>
+            <div class="total-row">
+                <span>IVA:</span>
+                <strong>C$ {{ "%.2f"|format(iva) }}</strong>
+            </div>
+            <div class="total-final">
+                <span>TOTAL:</span>
+                <span>C$ {{ "%.2f"|format(venta.total_venta) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="acciones no-print">
+        <button onclick="window.print()">Imprimir Factura</button>
+    </div>
+</body>
+
+</html>

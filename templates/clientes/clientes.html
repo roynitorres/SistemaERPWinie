@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/clientes.css') }}">
+{% endblock %}
+
+{% block title %}
+Clientes
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+            <li class="breadcrumb-item active text-blue" aria-current="page">Clientes</li>
+        </ol>
+    </nav>
+
+    <!-- ===================================== -->
+    <!-- TARJETAS KPI -->
+    <!-- ===================================== -->
+    <div class="row g-3 mb-4">
+        <!-- TOTAL CLIENTES -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-blue text-blue me-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
+                            Clientes</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{ kpis.total }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ACTIVOS -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-green text-green me-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Activos</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{ kpis.activos }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- INACTIVOS -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-red text-red me-3">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Inactivos</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{ kpis.inactivos }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- NUEVOS ESTE MES -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-purple text-purple me-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div class="w-100">
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Nuevos Este
+                            Mes</span>
+                        <div class="d-flex align-items-baseline">
+                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.nuevos }}</h3>
+                            <span
+                                class="kpi-growth text-xs ms-2 {% if kpis.porcentaje_nuevos.startswith('+') %}text-success{% else %}text-danger{% endif %} fw-semibold">
+                                {{ kpis.porcentaje_nuevos }}% vs ant.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- FORMULARIO NUEVO CLIENTE -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
+                <i class="bi bi-person-plus me-2 text-blue"></i>NUEVO CLIENTE
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="formClientes">
+                <input type="hidden" id="cliente_id" name="cliente_id">
+
+                <!-- Campos en Fila Horizontal -->
+                <div class="row g-3 align-items-end">
+                    <!-- CÓDIGO -->
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CÓDIGO *</label>
+                        <input type="text" class="form-control bg-light border-0 fw-semibold" id="form_codigo"
+                            value="{{ siguiente_codigo }}" readonly>
+                    </div>
+
+                    <!-- NOMBRE / RAZÓN SOCIAL -->
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue  mb-1">NOMBRE / RAZÓN SOCIAL *</label>
+                        <input type="text" class="form-control " name="nombres" placeholder="Empresa S.A.C." required
+                            id="form_nombre">
+                    </div>
+
+                    <!-- TELÉFONO -->
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">TELÉFONO</label>
+                        <input type="text" class="form-control" id="form_telefono" name="telefono" maxlength="8"
+                            minlength="8" pattern="[0-9]{8}" inputmode="numeric" placeholder="1234-5678" required>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">EMAIL</label>
+                        <input type="email" class="form-control " name="email" placeholder="contacto@empresa.com"
+                            id="form_email">
+                    </div>
+
+                    <!-- CIUDAD -->
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CIUDAD</label>
+                        <input type="text" class="form-control " name="ciudad" placeholder="Managua" id="form_ciudad">
+                    </div>
+                    <!-- DIRECCIÓN -->
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">DIRECCIÓN</label>
+                        <input type="text" class="form-control " name="direccion" placeholder="Dirección del cliente"
+                            id="form_direccion">
+                    </div>
+
+                    <!-- ESTADO -->
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
+                        <select class="form-select  fw-semibold" name="estado" id="form_estado">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="d-flex gap-2 mt-3 justify-content-start">
+                    <button type="submit" class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                        id="btnGuardar">
+                        <i class="bi bi-floppy"></i> Guardar
+                    </button>
+                    <button type="button"
+                        class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
+                        id="btnLimpiar">
+                        <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- TABLA / LISTA DE CLIENTES -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm">
+        <div
+            class="card-header bg-white border-0 pt-4 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista de Clientes</h5>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <!-- Buscador -->
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarCliente"
+                        placeholder="Nombre o código..." style="width: 260px; min-height: 38px;">
+                </div>
+
+                <!-- Exportar -->
+                <a href="{{ url_for('clientes.exportar_clientes') }}"
+                    class="btn btn-outline-info d-flex align-items-center gap-2 fw-semibold" style="min-height: 38px;">
+                    <i class="bi bi-download"></i> Exportar
+                </a>
+
+                <!-- Nuevo (Enfocar formulario) -->
+                <button type="button" class="btn btn-primary d-flex align-items-center gap-2 fw-semibold" id="btnIrForm"
+                    style="min-height: 38px; ">
+                    <i class="bi bi-plus-lg"></i> Nuevo
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover border-light-subtle">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                        <tr>
+                            <th class="px-3 py-3 text-center" style="width: 100px;">CÓDIGO</th>
+                            <th class="px-3 py-3">RAZÓN SOCIAL / NOMBRE</th>
+                            <th class="px-3 py-3">TELÉFONO</th>
+                            <th class="px-3 py-3">EMAIL</th>
+                            <th class="px-3 py-3">CIUDAD</th>
+                            <th class="px-3 py-3">DIRECCIÓN</th>
+                            <th class="px-3 py-3 text-center" style="width: 120px;">ESTADO</th>
+                            <th class="px-3 py-3 text-center" style="width: 100px;">ACC.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaClientes">
+                        {% for cliente in clientes %}
+                        <tr data-id="{{ cliente.id }}"
+                            data-codigo="{{ cliente.codigo or 'C' ~ '%03d'|format(cliente.id) }}"
+                            data-nombres="{{ cliente.nombres }}" data-telefono="{{ cliente.telefono }}"
+                            data-email="{{ cliente.email or '' }}" data-ciudad="{{ cliente.ciudad or '' }}"
+                            data-direccion="{{ cliente.direccion or '' }}"
+                            data-estado="{% if cliente.estado %}ACTIVO{% else %}INACTIVO{% endif %}">
+
+                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                                {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
+                            </td>
+                            <td class="px-3 py-3 fw-bold text-dark">
+                                {{ cliente.nombres }}
+                            </td>
+                            <td class="px-3 py-3 text-muted">
+                                {{ cliente.telefono or '-' }}
+                            </td>
+                            <td class="px-3 py-3 text-blue fw-bold">
+                                {{ cliente.email or '-' }}
+                            </td>
+                            <td class="px-3 py-3 text-muted">
+                                {{ cliente.ciudad or '-' }}
+                            </td>
+                            <td class="px-3 py-3 text-muted">
+                                {{ cliente.direccion or '-' }}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                {% if cliente.estado %}
+                                <span class="badge badge-activo px-3 py-2 rounded-pill fw-semibold">Activo</span>
+                                {% else %}
+                                <span class="badge badge-inactivo px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                <button type="button" class="btn btn-sm btn-icon-edit btn-editar-fila"
+                                    title="Editar Cliente">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <form method="POST"
+                                    action="{{ url_for('clientes.restaurar_password_cliente', cliente_id=cliente.id) }}"
+                                    class="form-restaurar-password d-inline">
+
+                                    <button type="submit" class="btn btn-sm btn-reset-password"
+                                        title="Restaurar contraseña">
+                                        <i class="bi bi-key-fill"></i>
+                                    </button>
+                                </form>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer for Summary & Pagination -->
+            <div
+                class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                <div class="text-muted text-xs" id="paginationSummary">
+                    Mostrando 0 a 0 de 0 registros
+                </div>
+                <nav aria-label="Navegación de tabla">
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                        <!-- Generado dinámicamente -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const form = document.getElementById("formClientes");
+    const formTitle = document.getElementById("formTitle");
+    const formCodigo = document.getElementById("form_codigo");
+    const formNombre = document.getElementById("form_nombre");
+    const formTelefono = document.getElementById("form_telefono");
+    const formEmail = document.getElementById("form_email");
+    const formCiudad = document.getElementById("form_ciudad");
+    const formDireccion = document.getElementById("form_direccion");
+    const formEstado = document.getElementById("form_estado");
+    const clienteIdInput = document.getElementById("cliente_id");
+
+    const btnLimpiar = document.getElementById("btnLimpiar");
+    const btnIrForm = document.getElementById("btnIrForm");
+
+    const siguienteCodigo = "{{ siguiente_codigo }}";
+
+    // Función para limpiar el formulario y resetear al estado de "Nuevo"
+    function resetForm() {
+        form.reset();
+        clienteIdInput.value = "";
+        formCodigo.value = siguienteCodigo;
+        formTitle.innerHTML = `<i class="bi bi-person-plus me-2 text-primary"></i>NUEVO CLIENTE`;
+        formNombre.focus();
+    }
+
+    // Evento limpiar
+    btnLimpiar.addEventListener("click", resetForm);
+
+    // Evento enfocar/ir al formulario
+    btnIrForm.addEventListener("click", () => {
+        resetForm();
+        form.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Función para cargar datos de cliente en el formulario
+    function cargarCliente(row) {
+        clienteIdInput.value = row.dataset.id;
+        formCodigo.value = row.dataset.codigo;
+        formNombre.value = row.dataset.nombres;
+        formTelefono.value = row.dataset.telefono;
+        formEmail.value = row.dataset.email;
+        formCiudad.value = row.dataset.ciudad;
+        formDireccion.value = row.dataset.direccion;
+        formEstado.value = row.dataset.estado;
+
+        formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-warning"></i>EDITAR CLIENTE`;
+        form.scrollIntoView({ behavior: 'smooth' });
+        formNombre.focus();
+    }
+
+    // Botones de editar en la tabla
+    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation(); // Evitar doble disparo por el tr doubleclick
+            const row = this.closest("tr");
+            cargarCliente(row);
+        });
+    });
+
+    // Doble clic en la fila
+    document.querySelectorAll("#tablaClientes tr").forEach(row => {
+        row.addEventListener("dblclick", function () {
+            cargarCliente(this);
+        });
+    });
+
+    // === PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE ===
+    let currentPage = 1;
+    const itemsPerPage = 10; // Mostrar 5 registros por página por defecto
+    let filteredRows = [];
+
+    // Obtener todas las filas de la tabla
+    const allRows = Array.from(document.querySelectorAll("#tablaClientes tr"));
+
+    function initPagination() {
+        filteredRows = [...allRows];
+        renderTable();
+    }
+
+    function renderTable() {
+        const totalItems = filteredRows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        // Ajustar página actual si excede el total de páginas o es menor a 1
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+        // Ocultar todas las filas
+        allRows.forEach(row => row.style.display = "none");
+
+        // Mostrar solo las de la página actual
+        for (let i = startIndex; i < endIndex; i++) {
+            filteredRows[i].style.display = "";
+        }
+
+        // Renderizar el resumen (Summary)
+        const summaryText = totalItems > 0
+            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+            : "Mostrando 0 a 0 de 0 registros";
+        document.getElementById("paginationSummary").innerText = summaryText;
+
+        // Renderizar controles de paginación
+        renderControls(totalPages);
+    }
+
+    function renderControls(totalPages) {
+        const controlsContainer = document.getElementById("paginationControls");
+        controlsContainer.innerHTML = "";
+
+        if (totalPages <= 1) return; // No mostrar si es una sola página
+
+        // Botón Anterior
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><i class="bi bg-transparent bi-chevron-left"></i></a>`;
+        if (currentPage > 1) {
+            prevLi.addEventListener("click", (e) => {
+                e.preventDefault();
+                currentPage--;
+                renderTable();
+            });
+        }
+        controlsContainer.appendChild(prevLi);
+
+        // Páginas numeradas
+        for (let i = 1; i <= totalPages; i++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            pageLi.addEventListener("click", (e) => {
+                e.preventDefault();
+                currentPage = i;
+                renderTable();
+            });
+            controlsContainer.appendChild(pageLi);
+        }
+
+        // Botón Siguiente
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><i class="bi bg-transparent bi-chevron-right"></i></a>`;
+        if (currentPage < totalPages) {
+            nextLi.addEventListener("click", (e) => {
+                e.preventDefault();
+                currentPage++;
+                renderTable();
+            });
+        }
+        controlsContainer.appendChild(nextLi);
+    }
+
+    // Búsqueda en tiempo real integrada con paginación
+    document.getElementById("buscarCliente").addEventListener("input", function () {
+        const query = this.value.toLowerCase().trim();
+
+        if (query === "") {
+            filteredRows = [...allRows];
+        } else {
+            filteredRows = allRows.filter(row => {
+                const codigo = row.dataset.codigo.toLowerCase();
+                const nombres = row.dataset.nombres.toLowerCase();
+                const telefono = row.dataset.telefono.toLowerCase();
+                const email = row.dataset.email.toLowerCase();
+                const ciudad = row.dataset.ciudad.toLowerCase();
+                const direccion = row.dataset.direccion.toLowerCase();
+
+                return codigo.includes(query) ||
+                    nombres.includes(query) ||
+                    telefono.includes(query) ||
+                    email.includes(query) ||
+                    ciudad.includes(query) ||
+                    direccion.includes(query);
+            });
+        }
+
+        currentPage = 1;
+        renderTable();
+    });
+
+
+    document.querySelectorAll(".form-restaurar-password").forEach(form => {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "Restaurar contraseña",
+                text: "Se asignará una contraseña temporal y el cliente deberá cambiarla al iniciar sesión.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#0d3f9f",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Sí, restaurar",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // Inicializar paginación al cargar la página
+    window.addEventListener("load", initPagination);
+</script>
+{% endblock %}

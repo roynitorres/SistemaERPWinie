@@ -1,0 +1,674 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pagos.css') }}">
+{% endblock %}
+
+
+{% block title %}
+Registrar Pagos
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Pagos</li>
+            </ol>
+        </nav>
+
+        <button type="button" class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2"
+            id="btnToggleKpis">
+            <i class="bi bi-eye-slash" id="iconToggleKpis"></i>
+            <span id="textToggleKpis">Ocultar KPIs</span>
+        </button>
+    </div>
+    <!-- ===================================== -->
+    <!-- TARJETAS KPI -->
+    <!-- ===================================== -->
+    <div class="row g-3 mb-4" id="panelKpisPagos">
+        <!-- TOTAL FACTURADO -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-blue text-blue me-3">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
+                            Facturado</span>
+                        <h5 class="kpi-value mb-0 fw-bold">
+                            C$ {{ "%.2f"|format(kpis.total_facturado_pagado) }}
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- TOTAL DE FACTURAS -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-green text-green me-3">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
+                            Facturas</span>
+                        <h3 class="kpi-value mb-0 fw-bold">
+                            {{ kpis.total_facturas }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- PAGADAS -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-green text-green me-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">PAGADAS</span>
+                        <h3 class="kpi-value mb-0 fw-bold">
+                            {{ kpis.facturas_pagadas }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- PENDIENTES -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-red text-red me-3">
+                        <i class="bi bi-dash-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">PENDIENTES</span>
+                        <h3 class="kpi-value mb-0 fw-bold">
+                            {{ kpis.facturas_pendientes }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- TABLA / LISTA DE CLIENTES -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm">
+        <div
+            class="card-header bg-white border-0 pt-4 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista Cuntas por cobrar</h5>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarClienteCxc"
+                        placeholder="Buscar cliente o factura..." style="min-height: 38px; width: 260px;">
+                </div>
+
+                <div class="position-relative">
+                    <select class="form-select border-light-subtle fw-semibold" id="filtro_estado_cxc">
+                        <option value="TODAS">Todas</option>
+                        <option value="PAGADAS">Pagadas</option>
+                        <option value="PENDIENTES">Pendientes</option>
+                    </select>
+                </div>
+
+                <a href="{{ url_for('clientes.exportar_clientes') }}"
+                    class="btn btn-outline-info d-flex align-items-center gap-2 fw-semibold" style="min-height: 38px;">
+                    <i class="bi bi-download"></i> Exportar
+                </a>
+            </div>
+
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover border-light-subtle">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                        <tr>
+                            <th class="px-3 py-3 text-center"></th>
+                            <th class="px-3 py-3">FACTURA</th>
+                            <th class="px-3 py-3">CLIENTE</th>
+                            <th class="px-3 py-3">FECHA VENCIMIENTO</th>
+                            <th class="px-3 py-3">TOTAL</th>
+                            <th class="px-3 py-3">ABONOS</th>
+                            <th class="px-3 py-3">SALDOS</th>
+                            <th class="px-3 py-3">FORMA DE PAGO</th>
+                            <th class="px-3 py-3 text-center" style="width: 120px;">ESTADO</th>
+                            <th class="px-3 py-3 text-center" style="width: 100px;">ACC.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPagos">
+                        {% for venta in ventas %}
+                        {% set total_abonado = namespace(valor=0) %}
+                        {% for pago in venta.pagos %}
+                        {% if pago.estado == "ACTIVO" %}
+                        {% set total_abonado.valor =
+                        total_abonado.valor + pago.monto_pago %}
+                        {% endif %}
+                        {% endfor %}
+                        {% set saldo_pendiente =
+                        venta.total_venta - total_abonado.valor %}
+
+                        <!-- FILA PRINCIPAL -->
+                        <tr class="fila-factura" data-target="detalle{{ venta.id }}" style="cursor:pointer;">
+                            <td><i class="bi bi-chevron-right" id="icono{{ venta.id }}"></i></td>
+                            <td>{{ venta.numero_factura }}</td>
+                            <td>{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</td>
+                            <td>{{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else
+                                '-' }}
+                            </td>
+                            <td class="text-end text-dark fw-bold"> C$ {{ "%.2f"|format(venta.total_venta) }}</td>
+                            <td class="text-end text-green fw-bold">C$ {{ "%.2f"|format(total_abonado.valor) }}</td>
+                            <td class="text-end text-secondary fw-bold">C$ {{ "%.2f"|format(saldo_pendiente) }}</td>
+                            <td>{{ venta.tipo_venta }}</td>
+                            <td>{% if saldo_pendiente <= 0 %} <span class="badge bg-success">
+                                    CANCELADA
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">
+                                        PENDIENTE
+                                    </span>
+                                    {% endif %}
+                            </td>
+                            <td>
+                                {% if saldo_pendiente > 0 and venta.estado == "ACTIVA" %}
+                                <button type="button" class="btn btn-success btn-sm btn-abonar"
+                                    data-venta-id="{{ venta.id }}" data-factura="{{ venta.numero_factura }}"
+                                    data-saldo="{{ saldo_pendiente }}">
+                                    Abonar
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr id="abono{{ venta.id }}" class="d-none fila-abono ">
+                            <td colspan="10">
+                                <div class="abono-inline-panel  ">
+                                    <div class="d-flex justify-content-between align-items-center mb-0">
+                                        <h6 class="fw-bold mb-0 text-success">
+                                            <i class="bi bi-wallet2 me-2 text-success"></i>
+                                            Registrar Abono - Factura | {{ venta.numero_factura }}
+                                        </h6>
+
+                                        <span class="badge bg-light text-dark border">
+                                            Saldo: C$ {{ "%.2f"|format(saldo_pendiente) }}
+                                        </span>
+                                    </div>
+
+                                    <form class="form-abono-inline" data-saldo="{{ saldo_pendiente }}">
+                                        <input type="hidden" name="venta_id" value="{{ venta.id }}">
+
+                                        <div class="row g-3 align-items-end">
+                                            <div class="col-md-2">
+                                                <label class="form-label text-xs fw-bold text-blue mb-1">MONTO ABONO
+                                                    *</label>
+                                                <input type="number" class="form-control input-monto" name="monto_pago"
+                                                    min="0.01" step="0.01">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label class="form-label text-xs fw-bold text-blue mb-1">FORMA DE PAGO
+                                                    *</label>
+                                                <select class="form-select input-forma" name="tipo_pago">
+                                                    <option value="">Seleccione</option>
+                                                    <option value="EFECTIVO">Efectivo</option>
+                                                    <option value="TRANSFERENCIA">Transferencia</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label
+                                                    class="form-label text-xs fw-bold text-blue mb-1">REFERENCIA</label>
+                                                <input type="text" class="form-control input-referencia"
+                                                    name="referencia">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label class="form-label text-xs fw-bold text-blue mb-1">FECHA *</label>
+                                                <input type="date" class="form-control input-fecha" name="fecha_pago">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label
+                                                    class="form-label text-xs fw-bold text-blue mb-1">OBSERVACIONES</label>
+                                                <input type="text" class="form-control input-observaciones"
+                                                    name="observaciones">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label
+                                                    class="form-label text-xs fw-bold text-blue mb-1 d-block">&nbsp;</label>
+                                                <div class="d-flex gap-2">
+                                                    <button type="submit" class="btn btn-success fw-semibold">
+                                                        <i class="bi  me-1"></i> Abonar
+                                                    </button>
+
+                                                    <button type="button"
+                                                        class="btn btn-light border fw-semibold btn-limpiar-abono">
+                                                        Limpiar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- ===================================== -->
+                        <!-- DETALLE PAGOS -->
+                        <!-- ===================================== -->
+                        <tr id="detalle{{ venta.id }}" class="d-none detalle-pagos ">
+                            <td colspan="10">
+                                <div class="p-3 bg-light-green border rounded">
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th> #</th>
+                                                <th>Fecha</th>
+                                                <th>Monto Abono</th>
+                                                <th>Forma</th>
+                                                <th>Referencia</th>
+                                                <th>Usario</th>
+                                                <th>Estado</th>
+                                                <th>Motivo anulación</th>
+                                                <th>Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% set saldo_actual = namespace(valor=venta.total_venta) %}
+                                            {% for pago in venta.pagos %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
+                                                <td>C$ {{ "%.2f"|format(pago.monto_pago) }}</td>
+                                                <td>{{ pago.tipo_pago }}</td>
+                                                <td>{{ pago.referencia or '-' }}</td>
+                                                <td>{{ pago.usuario.username }}</td>
+                                                <td>
+                                                    {% if pago.estado == "ACTIVO" %}
+                                                    <span class="badge bg-success">ACTIVO</span>
+                                                    {% else %}
+                                                    <span class="badge bg-danger">ANULADO</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ pago.motivo_anulacion or '-' }}</td>
+                                                <td>
+                                                    {% if pago.estado == "ACTIVO" %}
+                                                    <button type="button"
+                                                        class="btn btn-outline-danger btn-sm btn-anular-pago"
+                                                        data-id="{{ pago.id }}">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Table Footer for Summary & Pagination -->
+            <div
+                class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                <div class="text-muted text-xs" id="paginationSummary">
+                    Mostrando 0 a 0 de 0 registros
+                </div>
+                <nav aria-label="Navegación de tabla">
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                        <!-- Generado dinámicamente -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const btnToggleKpis = document.getElementById("btnToggleKpis");
+    const panelKpisPagos = document.getElementById("panelKpisPagos");
+    const iconToggleKpis = document.getElementById("iconToggleKpis");
+    const textToggleKpis = document.getElementById("textToggleKpis");
+    const buscarClienteCxc = document.getElementById("buscarClienteCxc");
+
+    btnToggleKpis.addEventListener("click", function () {
+        const oculto = panelKpisPagos.classList.toggle("d-none");
+
+        if (oculto) {
+            iconToggleKpis.className = "bi bi-eye";
+            textToggleKpis.textContent = "Mostrar KPIs";
+        } else {
+            iconToggleKpis.className = "bi bi-eye-slash";
+            textToggleKpis.textContent = "Ocultar KPIs";
+        }
+    });
+
+    document.querySelectorAll(".btn-abonar").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+
+            const ventaId = this.dataset.ventaId;
+            const filaAbono = document.getElementById(`abono${ventaId}`);
+
+            if (!filaAbono) {
+                return;
+            }
+
+            document.querySelectorAll(".fila-abono").forEach(fila => {
+                if (fila !== filaAbono) {
+                    fila.classList.add("d-none");
+                    fila.style.display = "none";
+                }
+            });
+
+            const abrir = filaAbono.classList.contains("d-none") || filaAbono.style.display === "none";
+
+            if (abrir) {
+                filaAbono.classList.remove("d-none");
+                filaAbono.style.display = "";
+            } else {
+                filaAbono.classList.add("d-none");
+                filaAbono.style.display = "none";
+            }
+
+            const fecha = filaAbono.querySelector(".input-fecha");
+            if (fecha && !fecha.value) {
+                fecha.value = new Date().toISOString().split("T")[0];
+            }
+        });
+    });
+
+    document.querySelectorAll(".btn-limpiar-abono").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const form = this.closest("form");
+            form.reset();
+
+            const fecha = form.querySelector(".input-fecha");
+            fecha.value = new Date().toISOString().split("T")[0];
+        });
+    });
+
+    document.querySelectorAll(".form-abono-inline").forEach(form => {
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const saldo = Number(this.dataset.saldo || 0);
+            const monto = Number(this.querySelector(".input-monto").value || 0);
+            const forma = this.querySelector(".input-forma").value;
+            const fecha = this.querySelector(".input-fecha").value;
+
+            if (monto <= 0) {
+                Swal.fire("Monto inválido", "Ingrese un monto de abono mayor a cero.", "warning");
+                return;
+            }
+
+            if (monto > saldo) {
+                Swal.fire("Monto inválido", "El abono no puede superar el saldo pendiente.", "warning");
+                return;
+            }
+
+            if (!forma) {
+                Swal.fire("Forma de pago requerida", "Seleccione una forma de pago.", "warning");
+                return;
+            }
+
+            if (!fecha) {
+                Swal.fire("Fecha requerida", "Seleccione la fecha del abono.", "warning");
+                return;
+            }
+
+            const formData = new FormData(this);
+
+            const respuesta = await fetch("/guardar-pago", {
+                method: "POST",
+                body: formData
+            });
+
+            const resultado = await respuesta.json();
+
+            if (resultado.success) {
+                Swal.fire("Registrado", resultado.message, "success")
+                    .then(() => location.reload());
+            } else {
+                Swal.fire("Error", resultado.message, "error");
+            }
+        });
+    });
+
+
+    document.querySelectorAll(".btn-anular-pago").forEach(btn => {
+        btn.addEventListener("click", async function (e) {
+            e.stopPropagation();
+
+            const pagoId = this.dataset.id;
+
+            const result = await Swal.fire({
+                title: "Anular pago",
+                input: "textarea",
+                inputLabel: "Motivo de anulación",
+                inputPlaceholder: "Indique el motivo...",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Anular",
+                cancelButtonText: "Cancelar",
+                confirmButtonColor: "#dc3545",
+                inputValidator: value => {
+                    if (!value) {
+                        return "Debe indicar el motivo";
+                    }
+                }
+            });
+
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            const respuesta = await fetch(`/anular-pago/${pagoId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    motivo: result.value
+                })
+            });
+
+            const resultado = await respuesta.json();
+
+            if (resultado.success) {
+                Swal.fire("Anulado", resultado.message, "success")
+                    .then(() => location.reload());
+            } else {
+                Swal.fire("Error", resultado.message, "error");
+            }
+        });
+    });
+
+    //Despliega el acordeon
+    document.addEventListener("click", function (e) {
+        const fila = e.target.closest(".fila-factura");
+
+        if (!fila) return;
+
+        const target = fila.dataset.target;
+        const detalle = document.getElementById(target);
+        const icono = fila.querySelector("i");
+
+        if (!detalle) return;
+
+        detalle.classList.toggle("d-none");
+        detalle.style.display = detalle.classList.contains("d-none") ? "none" : "";
+
+        if (detalle.classList.contains("d-none")) {
+            icono.classList.remove("bi-chevron-down");
+            icono.classList.add("bi-chevron-right");
+        } else {
+            icono.classList.remove("bi-chevron-right");
+            icono.classList.add("bi-chevron-down");
+        }
+    });
+
+
+    // === PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE ===
+    // === FILTRO Y PAGINACIÓN CUENTAS POR COBRAR ===
+    const filtroEstadoCxc = document.getElementById("filtro_estado_cxc");
+
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    const allRows = Array.from(document.querySelectorAll("#tablaPagos .fila-factura"));
+    let filteredRows = [...allRows];
+
+    function getDetalleRow(row) {
+        return document.getElementById(row.dataset.target);
+    }
+
+    function getEstadoRow(row) {
+        const saldoText = row.children[6].innerText.replace("C$", "").trim();
+        const saldo = Number(saldoText.replace(",", ""));
+
+        return saldo <= 0 ? "PAGADAS" : "PENDIENTES";
+    }
+
+    function filtrarCuentas() {
+        const estado = filtroEstadoCxc.value;
+        const query = buscarClienteCxc.value.toLowerCase().trim();
+
+        filteredRows = allRows.filter(row => {
+            const factura = row.children[1].innerText.toLowerCase();
+            const cliente = row.children[2].innerText.toLowerCase();
+
+            const coincideTexto =
+                factura.includes(query) ||
+                cliente.includes(query);
+
+            const coincideEstado =
+                estado === "TODAS" ||
+                getEstadoRow(row) === estado;
+
+            return coincideTexto && coincideEstado;
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function initPagination() {
+        filteredRows = [...allRows];
+        renderTable();
+    }
+
+    function renderTable() {
+        const totalItems = filteredRows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+        allRows.forEach(row => {
+            row.style.display = "none";
+
+            const detalle = getDetalleRow(row);
+            if (detalle) {
+                detalle.style.display = "none";
+                detalle.classList.add("d-none");
+            }
+
+            const abono = document.getElementById(
+                row.dataset.target.replace("detalle", "abono")
+            );
+
+            if (abono) {
+                abono.style.display = "none";
+                abono.classList.add("d-none");
+            }
+
+            const icono = row.querySelector("i");
+            if (icono) {
+                icono.classList.remove("bi-chevron-down");
+                icono.classList.add("bi-chevron-right");
+            }
+        });
+
+        for (let i = startIndex; i < endIndex; i++) {
+            filteredRows[i].style.display = "";
+        }
+
+        document.getElementById("paginationSummary").innerText =
+            totalItems > 0
+                ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+                : "Mostrando 0 a 0 de 0 registros";
+
+        renderControls(totalPages);
+    }
+
+    function renderControls(totalPages) {
+        const controlsContainer = document.getElementById("paginationControls");
+        controlsContainer.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+        prevLi.addEventListener("click", e => {
+            e.preventDefault();
+
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+        controlsContainer.appendChild(prevLi);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
+            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            pageLi.addEventListener("click", e => {
+                e.preventDefault();
+                currentPage = i;
+                renderTable();
+            });
+            controlsContainer.appendChild(pageLi);
+        }
+
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+        nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+        nextLi.addEventListener("click", e => {
+            e.preventDefault();
+
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+        controlsContainer.appendChild(nextLi);
+    }
+
+    filtroEstadoCxc.addEventListener("change", filtrarCuentas);
+    buscarClienteCxc.addEventListener("input", filtrarCuentas);
+
+    window.addEventListener("load", initPagination);
+</script>
+{% endblock %}

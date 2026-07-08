@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}
+Gestión de Usuarios Internos
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+            <li class="breadcrumb-item active text-primary" aria-current="page">Seguridad / Usuarios</li>
+        </ol>
+    </nav>
+    
+    <!-- ===================================== -->
+    <!-- FORMULARIO USUARIO -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
+                <i class="bi bi-person-plus me-2 text-primary"></i>NUEVO USUARIO (EMPLEADO)
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="formUsuarios" action="{{ url_for('usuarios.usuarios') }}">
+                <input type="hidden" id="usuario_id" name="usuario_id">
+                
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">NOMBRE DE USUARIO *</label>
+                        <input type="text" class="form-control border-light-subtle" id="form_username" name="username" placeholder="p. ej. admin1" required>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CONTRASEÑA</label>
+                        <input type="password" class="form-control border-light-subtle" id="form_password" name="password" placeholder="***" required>
+                        
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">ROL *</label>
+                        <select class="form-select border-light-subtle fw-semibold" id="form_rol" name="rol_id" required>
+                            <option value="">-- Seleccionar --</option>
+                            {% for rol in roles %}
+                            <option value="{{ rol.id }}" data-nombre="{{ rol.nombre }}">{{ rol.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-1 d-flex align-items-center mb-2">
+                        <div class="form-check form-switch mt-4">
+                            <input class="form-check-input fs-5" type="checkbox" role="switch" id="form_estado" name="estado" checked>
+                            <label class="form-check-label text-xs fw-semibold text-blue ms-1 mt-1" for="form_estado">Activo</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2 d-flex gap-2 ms-auto">
+                        <button type="submit" class="btn btn-success flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-1" id="btnGuardar">
+                            <i class="bi bi-floppy"></i> Guardar
+                        </button>
+                        <button type="button" class="btn btn-light border px-3 fw-semibold text-secondary d-flex align-items-center justify-content-center" id="btnLimpiar" title="Limpiar formulario">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- ===================================== -->
+    <!-- TABLA DE USUARIOS -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-4 pb-2">
+            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista de Empleados del Sistema</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover border-light-subtle">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                        <tr>
+                            <th class="px-3 py-3">USUARIO</th>
+                            <th class="px-3 py-3 text-center">ROL ASIGNADO</th>
+                            <th class="px-3 py-3 text-center">ESTADO</th>
+                            <th class="px-3 py-3 text-center" style="width: 100px;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaUsuarios">
+                        {% for usuario in usuarios %}
+                        <tr data-id="{{ usuario.id }}" 
+                            data-username="{{ usuario.username }}" 
+                            data-rol-id="{{ usuario.rol_id }}" 
+                            data-estado="{{ '1' if usuario.estado else '0' }}">
+                            
+                            <td class="px-3 py-3 fw-bold text-blue">
+                                <i class="bi bi-person-circle me-2 text-muted"></i>{{ usuario.username }}
+                            </td>
+                            <td class="px-3 py-3 text-center fw-semibold">
+                                {% if usuario.rol.nombre == 'ADMIN' %}
+                                <span class="text-danger"><i class="bi bi-shield-lock-fill me-1"></i>ADMIN</span>
+                                {% elif usuario.rol.nombre == 'VENDEDOR' %}
+                                <span class="text-primary"><i class="bi bi-briefcase-fill me-1"></i>VENDEDOR</span>
+                                {% else %}
+                                <span class="text-success"><i class="bi bi-person-fill me-1"></i>{{ usuario.rol.nombre }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                {% if usuario.estado %}
+                                <span class="badge bg-success px-3 py-2 rounded-pill fw-semibold">Activo</span>
+                                {% else %}
+                                <span class="badge bg-secondary px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-editar-fila" title="Editar Usuario">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================= -->
+<script>
+    const formulario = document.getElementById("formUsuarios");
+    const formTitle = document.getElementById("formTitle");
+    const formId = document.getElementById("usuario_id");
+    const formUsername = document.getElementById("form_username");
+    const formPassword = document.getElementById("form_password");
+    const passwordHelp = document.getElementById("passwordHelp");
+    const formRol = document.getElementById("form_rol");
+    const formEstado = document.getElementById("form_estado");
+    const btnLimpiar = document.getElementById("btnLimpiar");
+
+    function resetForm() {
+        formulario.reset();
+        formId.value = "";
+        formTitle.innerHTML = `<i class="bi bi-person-plus me-2 text-primary"></i>NUEVO USUARIO (EMPLEADO)`;
+        formEstado.checked = true;
+        
+        passwordHelp.innerText = "Obligatorio al crear";
+        formPassword.required = true;
+        
+        formUsername.focus();
+    }
+
+    function cargarUsuario(row) {
+        formId.value = row.dataset.id;
+        formUsername.value = row.dataset.username;
+        formRol.value = row.dataset.rolId;
+        
+        formEstado.checked = row.dataset.estado === "1";
+        
+        formPassword.value = "";
+        formPassword.required = false;
+        passwordHelp.innerText = "Dejar en blanco para mantener la actual";
+        
+        formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-warning"></i>EDITAR USUARIO`;
+        formulario.scrollIntoView({ behavior: "smooth" });
+        formUsername.focus();
+    }
+
+    btnLimpiar.addEventListener("click", resetForm);
+
+    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+        btn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            cargarUsuario(this.closest("tr"));
+        });
+    });
+
+    document.querySelectorAll("#tablaUsuarios tr").forEach(row => {
+        row.addEventListener("dblclick", function() {
+            cargarUsuario(this);
+        });
+    });
+
+    // Validacion antes de enviar para asegurar que se introduzca la password si es nuevo usuario
+    formulario.addEventListener("submit", function(e) {
+        if (!formId.value && !formPassword.value.trim()) {
+            e.preventDefault();
+            alert("Debe ingresar una contraseña para crear un usuario nuevo.");
+            formPassword.focus();
+        }
+    });
+</script>
+{% endblock %}

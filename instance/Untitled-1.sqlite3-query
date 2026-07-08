@@ -1,0 +1,9 @@
+-- database: ./database.db
+-- database: d:\rtorrez\Desktop\SISTEMA DE COBRO\instance\database.db
+
+-- database: d:\rtorrez\Desktop\SISTEMA DE COBRO\instance\database.db
+-- database: d:\rtorrez\Desktop\SISTEMA DE COBRO\instance\database.db
+
+UPDATE venta
+SET estado = 'ACTIVA'
+WHERE estado = 'PENDIENTE';

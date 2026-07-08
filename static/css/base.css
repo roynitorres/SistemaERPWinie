@@ -1,0 +1,307 @@
+/* =========================================
+   IMPORTAR FUENTE
+========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+
+/* =========================================
+   VARIABLES GLOBALES
+========================================= */
+
+:root {
+
+   /* ==============================
+       COLORES
+    ============================== */
+
+   --color-primario: #1f4fe0;
+
+   --color-secundario: #6c757d;
+
+   --color-fondo: #f4f6f9;
+
+   --color-texto: #212529;
+
+   --color-blanco: #ffffff;
+
+   --color-borde: #dee2e6;
+
+
+   /* ==============================
+       FUENTE
+    ============================== */
+
+   --fuente-principal: 'Inter', sans-serif;
+
+
+   /* ==============================
+       TAMAÑOS
+    ============================== */
+
+   --titulo-principal: 30px;
+
+   --texto-normal: 14px;
+
+   --radius-general: 12px;
+}
+
+
+/* =========================================
+   BODY GLOBAL
+========================================= */
+
+body {
+
+   font-family: var(--fuente-principal);
+
+   background-color: var(--color-fondo);
+
+   color: var(--color-texto);
+
+   margin: 0;
+
+   padding: 0;
+}
+
+
+/* ==========================================
+   FLASH FLOAT
+========================================== */
+
+.flash-container {
+
+   position: fixed;
+
+   top: 20px;
+
+   right: 20px;
+
+   z-index: 9999;
+
+   display: flex;
+
+   flex-direction: column;
+
+   gap: 10px;
+}
+
+/* ==========================================
+   MENSAJE
+========================================== */
+
+.flash-message {
+
+   min-width: 280px;
+
+   padding: 14px 18px;
+
+   border-radius: 10px;
+
+   color: white;
+
+   font-weight: 500;
+
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+   animation:
+      fadeIn 0.3s ease,
+      fadeOut 0.5s ease 4s forwards;
+
+   opacity: 1;
+}
+
+/* ==========================================
+   SUCCESS
+========================================== */
+
+.flash-success {
+
+   background: #198754;
+}
+
+/* ==========================================
+   DANGER
+========================================== */
+
+.flash-danger {
+
+   background: #dc3545;
+}
+
+/* ==========================================
+   WARNING
+========================================== */
+
+.flash-warning {
+
+   background: #ffc107;
+
+   color: #212529;
+}
+
+/* ==========================================
+   ANIMACIONES
+========================================== */
+
+@keyframes fadeIn {
+
+   from {
+
+      opacity: 0;
+
+      transform: translateY(-10px);
+   }
+
+   to {
+
+      opacity: 1;
+
+      transform: translateY(0);
+   }
+}
+
+@keyframes fadeOut {
+
+   to {
+
+      opacity: 0;
+
+      transform: translateX(30px);
+
+      visibility: hidden;
+   }
+}
+
+/* ==========================================
+       SELECT2 ESTILO ERP
+    ========================================== */
+
+.select2-container {
+
+   width: 100% !important;
+
+}
+
+.select2-container--default .select2-selection--single {
+
+   height: 38px;
+
+   border: 1px solid #ced4da;
+
+   border-radius: 0.375rem;
+
+   padding: 4px 12px;
+
+   display: flex;
+
+   align-items: center;
+
+   background-color: #fff;
+
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+
+   line-height: 28px;
+
+   padding-left: 0;
+
+   color: #212529;
+
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+
+   height: 36px;
+
+   right: 10px;
+
+}
+
+.select2-dropdown {
+
+   border-radius: 0.5rem;
+
+   border: 1px solid #ced4da;
+
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+}
+
+.select2-search__field {
+
+   border-radius: 0.375rem !important;
+
+   padding: 8px !important;
+
+}
+
+.select2-results__option--highlighted {
+
+   background-color: #0d6efd !important;
+
+}
+
+
+/* ==========================================
+   CUSTOM NAVBAR (NAVY BLUE FIGMA STYLE)
+   ========================================== */
+
+.navbar-custom {
+   background-color: #003891 !important; /* Deep Blue from Figma */
+   border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.navbar-custom .navbar-brand {
+   font-size: 1.25rem;
+   letter-spacing: 0.5px;
+}
+
+.navbar-custom .logo-text {
+   color: #ffffff;
+}
+
+.navbar-custom .nav-link {
+   color: rgba(255, 255, 255, 0.75) !important;
+   font-weight: 500;
+   font-size: 14px;
+   padding: 0.5rem 0.85rem !important;
+   border-radius: 6px;
+   transition: all 0.15s ease-in-out;
+}
+
+.navbar-custom .nav-link:hover {
+   color: #ffffff !important;
+   background-color: rgba(255, 255, 255, 0.08);
+}
+
+.navbar-custom .nav-link.active {
+   color: #ffffff !important;
+   font-weight: 600;
+   background-color: rgba(255, 255, 255, 0.12);
+}
+
+.navbar-custom .dropdown-menu {
+   font-size: 14px;
+   background-color: #ffffff;
+   border-radius: 8px;
+}
+
+.navbar-custom .dropdown-item {
+   color: #333333;
+   transition: background-color 0.15s;
+}
+
+.navbar-custom .dropdown-item:hover {
+   background-color: #f8f9fa;
+}
+
+.navbar-custom .hover-white:hover {
+   color: #ffffff !important;
+}
+
+/* Avatar details */
+.avatar {
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

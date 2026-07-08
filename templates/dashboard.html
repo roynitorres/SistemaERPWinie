@@ -1,0 +1,188 @@
+﻿{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3 dashboard-page">
+    <section class="dashboard-hero mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">{{ saludo }}, {{ current_user.username.title() }}</h3>
+            <div class="hero-meta">
+                <span>{{ fecha_larga }}</span>
+                <span class="mx-2">|</span>
+                <span id="horaActual"></span>
+            </div>
+        </div>
+        <div class="hero-badge">
+            <i class="bi bi-speedometer2"></i>
+            Panel ejecutivo
+        </div>
+    </section>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card border-0 shadow-sm">
+                <div class="metric-percent">{{ kpis.clientes.porcentaje }}%</div>
+                <div class="metric-icon bg-primary-subtle text-primary"><i class="bi bi-people-fill"></i></div>
+                <div class="metric-label">Total de clientes</div>
+                <div class="metric-total">{{ kpis.clientes.total }}</div>
+                <div class="metric-line"></div>
+                <div class="metric-split">
+                    <div><span>{{ kpis.clientes.izquierda_label }}</span><strong>{{ kpis.clientes.izquierda }}</strong></div>
+                    <div><span>{{ kpis.clientes.derecha_label }}</span><strong>{{ kpis.clientes.derecha }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card border-0 shadow-sm">
+                <div class="metric-percent">{{ kpis.productos.porcentaje }}%</div>
+                <div class="metric-icon bg-success-subtle text-success"><i class="bi bi-box-seam"></i></div>
+                <div class="metric-label">Total productos</div>
+                <div class="metric-total">{{ kpis.productos.total }}</div>
+                <div class="metric-line"></div>
+                <div class="metric-split">
+                    <div><span>{{ kpis.productos.izquierda_label }}</span><strong>{{ kpis.productos.izquierda }}</strong></div>
+                    <div><span>{{ kpis.productos.derecha_label }}</span><strong>{{ kpis.productos.derecha }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card border-0 shadow-sm">
+                <div class="metric-percent">{{ kpis.ventas.porcentaje }}%</div>
+                <div class="metric-icon bg-info-subtle text-info"><i class="bi bi-receipt"></i></div>
+                <div class="metric-label">Total facturas</div>
+                <div class="metric-total">{{ kpis.ventas.total }}</div>
+                <div class="metric-line"></div>
+                <div class="metric-split">
+                    <div><span>{{ kpis.ventas.izquierda_label }}</span><strong>{{ kpis.ventas.izquierda }}</strong></div>
+                    <div><span>{{ kpis.ventas.derecha_label }}</span><strong>{{ kpis.ventas.derecha }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card border-0 shadow-sm">
+                <div class="metric-percent">{{ kpis.pagos.porcentaje }}%</div>
+                <div class="metric-icon bg-warning-subtle text-warning"><i class="bi bi-wallet2"></i></div>
+                <div class="metric-label">Total pagos</div>
+                <div class="metric-total money">C$ {{ "%.2f"|format(kpis.pagos.total) }}</div>
+                <div class="metric-line"></div>
+                <div class="metric-split">
+                    <div><span>{{ kpis.pagos.izquierda_label }}</span><strong>C$ {{ "%.2f"|format(kpis.pagos.izquierda) }}</strong></div>
+                    <div><span>{{ kpis.pagos.derecha_label }}</span><strong>C$ {{ "%.2f"|format(kpis.pagos.derecha) }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="chart-card shadow-sm">
+                <h6><i class="bi bi-pie-chart me-2 text-primary"></i>Facturas por tipo</h6>
+                <canvas id="chartFacturasTipo"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="chart-card shadow-sm">
+                <h6><i class="bi bi-pie-chart-fill me-2 text-success"></i>Estado de pagos</h6>
+                <canvas id="chartPagosEstado"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="chart-card shadow-sm">
+                <h6><i class="bi bi-activity me-2 text-info"></i>Ventas ultimos 7 dias</h6>
+                <canvas id="chartVentas7"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="chart-card shadow-sm">
+                <h6><i class="bi bi-bar-chart me-2 text-warning"></i>Top productos</h6>
+                <canvas id="chartTopProductos"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Clientes a cobrar hoy</h5>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ clientes_a_cobrar|length }} registros</span>
+        </div>
+        <div class="card-body pt-0">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover dashboard-table">
+                    <thead class="bg-light text-muted">
+                        <tr>
+                            <th>Cliente</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Dias en mora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in clientes_a_cobrar %}
+                        <tr>
+                            <td class="fw-semibold">{{ item.cliente }}</td>
+                            <td class="text-center">
+                                {% if item.estado == 'Moroso' %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Moroso</span>
+                                {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Cobrar hoy</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center fw-bold">{{ item.dias }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-4">No hay clientes pendientes para hoy</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-hero { background:#0d3f9f; color:#fff; border-radius:8px; padding:20px 22px; display:flex; justify-content:space-between; align-items:center; gap:16px; box-shadow:0 8px 18px rgba(13,63,159,.18); }
+    .hero-meta { color:rgba(255,255,255,.78); font-weight:600; }
+    .hero-badge { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:8px 12px; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .metric-card { position:relative; background:#fff; border-radius:8px; padding:16px; min-height:170px; }
+    .metric-percent { position:absolute; top:14px; right:14px; background:#eef4ff; color:#0d3f9f; border-radius:999px; padding:4px 9px; font-size:.75rem; font-weight:800; }
+    .metric-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.15rem; margin-bottom:10px; }
+    .metric-label { color:#6c757d; font-size:.72rem; text-transform:uppercase; font-weight:800; letter-spacing:.03em; }
+    .metric-total { font-size:1.65rem; line-height:1.1; font-weight:850; color:#111827; margin-top:4px; }
+    .metric-total.money { font-size:1.25rem; }
+    .metric-line { border-top:1px solid #e9ecef; margin:14px 0 10px; }
+    .metric-split { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .metric-split span { display:block; color:#6c757d; font-size:.72rem; font-weight:700; }
+    .metric-split strong { display:block; color:#111827; font-size:.9rem; white-space:nowrap; }
+    .chart-card { background:#fff; border-radius:8px; padding:16px; height:260px; }
+    .chart-card h6 { font-weight:800; margin-bottom:12px; }
+    .chart-card canvas { max-height:190px; }
+    .dashboard-table th { font-size:.72rem; text-transform:uppercase; padding:11px 12px; }
+    .dashboard-table td { padding:10px 12px; vertical-align:middle; }
+    @media (max-width:768px){ .dashboard-hero{align-items:flex-start; flex-direction:column;} }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="dashboardChartData" type="application/json">{{ chart_data|tojson }}</script>
+<script>
+    function actualizarHora() {
+        const ahora = new Date();
+        document.getElementById("horaActual").textContent = ahora.toLocaleTimeString("es-NI", { hour: "2-digit", minute: "2-digit" });
+    }
+    actualizarHora();
+    setInterval(actualizarHora, 1000);
+
+    const chartData = JSON.parse(document.getElementById("dashboardChartData").textContent);
+    const colors = ["#0d3f9f", "#22c55e", "#f59e0b", "#ef4444", "#38bdf8"];
+
+    new Chart(document.getElementById("chartFacturasTipo"), { type:"doughnut", data:{ labels:chartData.facturas_tipo.labels, datasets:[{ data:chartData.facturas_tipo.values, backgroundColor:[colors[0], colors[2]], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:"bottom" } }, cutout:"62%" } });
+    new Chart(document.getElementById("chartPagosEstado"), { type:"pie", data:{ labels:chartData.pagos_estado.labels, datasets:[{ data:chartData.pagos_estado.values, backgroundColor:[colors[1], colors[3]], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:"bottom" } } } });
+    new Chart(document.getElementById("chartVentas7"), { type:"line", data:{ labels:chartData.ventas_7_dias.labels, datasets:[{ data:chartData.ventas_7_dias.values, borderColor:colors[0], backgroundColor:"rgba(13,63,159,.12)", fill:true, tension:.35 }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } });
+    new Chart(document.getElementById("chartTopProductos"), { type:"bar", data:{ labels:chartData.top_productos.labels, datasets:[{ data:chartData.top_productos.values, backgroundColor:colors[2], borderRadius:6 }] }, options:{ indexAxis:"y", plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } } });
+</script>
+
+{% endblock %}

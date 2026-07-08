@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/productos.css') }}">
+
+{% endblock %}
+
+{% block title %}
+Productos
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+            <li class="breadcrumb-item active text-primary" aria-current="page">Productos</li>
+        </ol>
+    </nav>
+
+    <!-- ===================================== -->
+    <!-- TARJETAS KPI -->
+    <!-- ===================================== -->
+    <div class="row g-3 mb-4">
+        <!-- TOTAL PRODUCTOS -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-blue text-blue me-3">
+                        <i class="bi bi-box-seam "></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
+                            Productos</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{kpis.total}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- STOCK NORMAL -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-green text-green me-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Stock
+                            Normal</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{kpis.stock_normal}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- STOCK CRITICO -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-red text-red me-3">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Stock
+                            Critico</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{kpis.stock_critico}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- SIN STOCK -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-purple text-purple me-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div class="w-100">
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Sin Stock</span>
+                        <div class="d-flex align-items-baseline">
+                            <h3 class="kpi-value mb-0 fw-bold">{{kpis.sin_stock}}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VALOR INVENTARIO -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-blue text-blue me-3">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div class="w-100">
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">
+                            Valor Inventario
+                        </span>
+                        <h5 class="kpi-value mb-0 fw-bold">
+                            C$ {{ "%.2f"|format(kpis.valor_inventario) }}
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- FORMULARIO NUEVO PRODUCTO -->
+    <!-- ===================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
+                <i class="bi bi-box-seam me-2 text-primary"></i>NUEVO PRODUCTO
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <form method="POST" id="formProductos">
+                <input type="hidden" id="producto_id" name="producto_id">
+
+
+                <!-- Campos en Fila Horizontal -->
+                <!-- Fila 1 -->
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CODIGO *</label>
+                        <input type="text" class="form-control bg-light border-0 fw-semibold" id="form_codigo"
+                            name="codigo_producto" value="{{ siguiente_codigo }}" readonly>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">NOMBRE DEL PRODUCTO *</label>
+                        <input type="text" class="form-control " id="form_nombre" name="nombre"
+                            placeholder="Nombre producto" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CATEGORIA *</label>
+                        <select class="form-select " id="form_categoria" name="categoria_id"
+                            required>
+                            <option value="">Seleccionar</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">UNIDAD</label>
+                        <input type="text" class="form-control  fw-semibold" id="form_unidad"
+                            name="unidad" value="UND" readonly>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">P. COSTO(C$)</label>
+                        <input type="number" step="0.01" min="0" class="form-control"
+                            id="form_precio_compra" name="precio_compra" placeholder="0.00" required>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">P. VENTA(C$)</label>
+                        <input type="number" step="0.01" min="0" class="form-control "
+                            id="form_precio_venta" name="precio_venta" placeholder="0.00" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
+                        <select class="form-select  fw-semibold" id="form_estado" name="estado">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Fila 2 -->
+                <div class="row g-3 align-items-end mt-1">
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA *</label>
+                        <input type="date" class="form-control " id="form_fecha_compra"
+                            name="fecha_compra" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CANTIDAD</label>
+                        <input type="number" min="0" class="form-control "
+                            id="form_cantidad_comprada" name="cantidad_comprada" placeholder="0" required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">MARCA *</label>
+                        <input type="text" class="form-control " id="form_marca" name="marca"
+                            placeholder="Marca producto" required>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1 d-block">&nbsp;</label>
+                        <div class="d-flex gap-2 justify-content-start">
+                            <button type="submit"
+                                class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                                id="btnGuardar">
+                                <i class="bi bi-floppy"></i> Guardar
+                            </button>
+
+                            <button type="button"
+                                class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
+                                id="btnLimpiar">
+                                <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- TABLA / LISTA DE PRODUCTOS -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm">
+        <div
+            class="card-header bg-white border-0 pt-4 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista de Productos</h5>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarProducto"
+                        placeholder="Codigo, producto o marca..." style="width: 280px; min-height: 38px;">
+                </div>
+
+                <a href="#" class="btn btn-outline-info d-flex align-items-center gap-2 fw-semibold"
+                    style="min-height: 38px;">
+                    <i class="bi bi-download"></i> Exportar
+                </a>
+
+                <button type="button" class="btn btn-primary d-flex align-items-center gap-2 fw-semibold" id="btnIrForm"
+                    style="min-height: 38px;">
+                    <i class="bi bi-plus-lg"></i> Nuevo
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover border-light-subtle tabla-productos">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                        <tr>
+                            <th class="px-3 py-3 text-center" style="width: 90px;">CODIGO</th>
+                            <th class="px-3 py-3">PRODUCTO</th>
+                            <th class="px-3 py-3">MARCA</th>
+                            <th class="px-3 py-3">CATEGORIA</th>
+                            <th class="px-3 py-3 text-center">UND</th>
+                            <th class="px-3 py-3 text-end">P. COSTO(C$)</th>
+                            <th class="px-3 py-3 text-end">P. VENTA(C$)</th>
+                            <th class="px-3 py-3 text-center">FECHA</th>
+                            <th class="px-3 py-3 text-center">CANTIDAD</th>
+                            <th class="px-3 py-3 text-center">STOCK</th>
+                            <th class="px-3 py-3 text-center">ESTADO</th>
+                            <th class="px-3 py-3 text-center" style="width: 90px;">ACC.</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tablaProductos">
+                        {% for producto in productos %}
+                        <tr data-id="{{ producto.id }}" data-codigo="{{ producto.codigo_producto }}"
+                            data-fecha-compra="{{ producto.fecha_compra }}" data-nombre="{{ producto.nombre }}"
+                            data-marca="{{ producto.marca }}" data-unidad="{{ producto.unidad }}"
+                            data-estado="{{ producto.estado }}" data-categoria="{{ producto.categoria_id }}"
+                            data-precio-compra="{{ producto.precio_compra }}"
+                            data-precio-venta="{{ producto.precio_venta }}"
+                            data-cantidad-comprada="{{ producto.cantidad_comprada }}">
+
+                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                                {{ producto.codigo_producto }}
+                            </td>
+
+                            <td class="px-3 py-3 fw-bold text-dark">
+                                {{ producto.nombre }}
+                            </td>
+
+                            <td class="px-3 py-3 text-muted">
+                                {{ producto.marca }}
+                            </td>
+
+                            <td class="px-3 py-3 text-blue fw-bold">
+                                {{ producto.categoria.nombre }}
+                            </td>
+                            <td class="px-3 py-3 text-center text-muted">
+                                {{ producto.unidad }}
+                            </td>
+
+                            <td class="px-3 py-3 text-end text-muted">
+                                C$ {{ "%.2f"|format(producto.precio_compra) }}
+                            </td>
+
+                            <td class="px-3 py-3 text-end fw-semibold text-dark">
+                                C$ {{ "%.2f"|format(producto.precio_venta) }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center text-muted">
+                                {{ producto.fecha_compra.strftime('%d/%m/%Y') }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center text-muted">
+                                {{ producto.cantidad_comprada }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center fw-semibold">
+                                {{ producto.stock }}
+                            </td>
+
+                            <td class="px-3 py-3 text-center">
+                                {% if producto.estado == "ACTIVO" %}
+                                <span class="badge badge-activo px-3 py-2 rounded-pill fw-semibold">Activo</span>
+                                {% else %}
+                                <span class="badge badge-inactivo px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-3 py-3 text-center">
+                                <button type="button" class="btn btn-sm btn-icon-edit btn-editar-fila"
+                                    title="Editar Producto">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div
+                class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                <div class="text-muted text-xs" id="paginationSummary">
+                    Mostrando 0 a 0 de 0 registros
+                </div>
+
+                <nav aria-label="Navegacion de tabla">
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <!-- ========================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================= -->
+
+    <script>
+        const formulario = document.getElementById("formProductos");
+        const formTitle = document.getElementById("formTitle");
+
+        const productoId = document.getElementById("producto_id");
+        const formCodigo = document.getElementById("form_codigo");
+        const formNombre = document.getElementById("form_nombre");
+        const formCategoria = document.getElementById("form_categoria");
+        const formUnidad = document.getElementById("form_unidad");
+        const formPrecioCompra = document.getElementById("form_precio_compra");
+        const formPrecioVenta = document.getElementById("form_precio_venta");
+        const formEstado = document.getElementById("form_estado");
+        const formFechaCompra = document.getElementById("form_fecha_compra");
+        const formCantidad = document.getElementById("form_cantidad_comprada");
+        const formMarca = document.getElementById("form_marca");
+
+        const btnLimpiar = document.getElementById("btnLimpiar");
+        const btnIrForm = document.getElementById("btnIrForm");
+        const buscarProducto = document.getElementById("buscarProducto");
+
+        const siguienteCodigo = "{{ siguiente_codigo }}";
+
+        function resetForm() {
+            formulario.reset();
+            productoId.value = "";
+            formCodigo.value = siguienteCodigo;
+            formUnidad.value = "UND";
+            formEstado.value = "ACTIVO";
+            formTitle.innerHTML = `<i class="bi bi-box-seam me-2 text-primary"></i>NUEVO PRODUCTO`;
+            formNombre.focus();
+        }
+
+        function cargarProducto(row) {
+            productoId.value = row.dataset.id;
+            formCodigo.value = row.dataset.codigo;
+            formNombre.value = row.dataset.nombre;
+            formCategoria.value = row.dataset.categoria;
+            formUnidad.value = row.dataset.unidad;
+            formEstado.value = row.dataset.estado;
+            formPrecioCompra.value = row.dataset.precioCompra;
+            formPrecioVenta.value = row.dataset.precioVenta;
+            formFechaCompra.value = row.dataset.fechaCompra;
+            formCantidad.value = row.dataset.cantidadComprada;
+            formMarca.value = row.dataset.marca;
+
+
+            formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-warning"></i>EDITAR PRODUCTO`;
+            formulario.scrollIntoView({ behavior: "smooth" });
+            formNombre.focus();
+        }
+
+        btnLimpiar.addEventListener("click", resetForm);
+
+        btnIrForm.addEventListener("click", () => {
+            resetForm();
+            formulario.scrollIntoView({ behavior: "smooth" });
+        });
+
+        document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+            btn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                cargarProducto(this.closest("tr"));
+            });
+        });
+
+        document.querySelectorAll("#tablaProductos tr").forEach(row => {
+            row.addEventListener("dblclick", function () {
+                cargarProducto(this);
+            });
+        });
+
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredRows = [];
+
+        const allRows = Array.from(document.querySelectorAll("#tablaProductos tr"));
+
+        function initPagination() {
+            filteredRows = [...allRows];
+            renderTable();
+        }
+
+        function renderTable() {
+            const totalItems = filteredRows.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+            allRows.forEach(row => row.style.display = "none");
+
+            for (let i = startIndex; i < endIndex; i++) {
+                filteredRows[i].style.display = "";
+            }
+
+            document.getElementById("paginationSummary").innerText =
+                totalItems > 0
+                    ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+                    : "Mostrando 0 a 0 de 0 registros";
+
+            renderControls(totalPages);
+        }
+
+        function renderControls(totalPages) {
+            const controlsContainer = document.getElementById("paginationControls");
+            controlsContainer.innerHTML = "";
+
+            if (totalPages <= 1) return;
+
+            const prevLi = document.createElement("li");
+            prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+            prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+            prevLi.addEventListener("click", e => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+            controlsContainer.appendChild(prevLi);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLi = document.createElement("li");
+                pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
+                pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                pageLi.addEventListener("click", e => {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderTable();
+                });
+                controlsContainer.appendChild(pageLi);
+            }
+
+            const nextLi = document.createElement("li");
+            nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+            nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+            nextLi.addEventListener("click", e => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+            controlsContainer.appendChild(nextLi);
+        }
+
+        buscarProducto.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+
+            filteredRows = allRows.filter(row => {
+                const codigo = row.dataset.codigo.toLowerCase();
+                const nombre = row.dataset.nombre.toLowerCase();
+                const marca = row.dataset.marca.toLowerCase();
+
+                return codigo.includes(query) ||
+                    nombre.includes(query) ||
+                    marca.includes(query);
+            });
+
+            currentPage = 1;
+            renderTable();
+        });
+
+        window.addEventListener("load", initPagination);
+    </script>
+
+    {% endblock %}

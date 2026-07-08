@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}
+Roles y Accesos
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+            <li class="breadcrumb-item active text-primary" aria-current="page">Roles y Accesos</li>
+        </ol>
+    </nav>
+    
+    <!-- ===================================== -->
+    <!-- FORMULARIO EDICION ROL -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
+                <i class="bi bi-shield-lock me-2 text-primary"></i>EDITAR ROL
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="formRoles" action="{{ url_for('roles.roles') }}">
+                <input type="hidden" id="rol_id" name="rol_id" required>
+                
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">NOMBRE ROL</label>
+                        <input type="text" class="form-control bg-light border-0 fw-bold text-muted" id="form_nombre" readonly disabled placeholder="Seleccione un rol">
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">DESCRIPCIÓN</label>
+                        <input type="text" class="form-control border-light-subtle" id="form_descripcion" name="descripcion" placeholder="Descripción del rol" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">DESC. MÁXIMO (%)</label>
+                        <input type="number" class="form-control border-light-subtle" id="form_descuento" name="descuento_maximo" min="0" max="100" step="0.01" required>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-center mb-2">
+                        <div class="form-check form-switch mt-4">
+                            <input class="form-check-input fs-5" type="checkbox" role="switch" id="form_estado" name="estado">
+                            <label class="form-check-label text-xs fw-semibold text-blue ms-2 mt-1" for="form_estado">Activo</label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success px-4 py-2 fw-semibold w-100 d-flex align-items-center justify-content-center gap-2" id="btnGuardar" disabled>
+                            <i class="bi bi-floppy"></i> Guardar 
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="alert alert-info mt-3 py-2 text-sm mb-0 text-center" id="infoMessage">
+                <i class="bi bi-info-circle me-1"></i> Haz clic en <strong>Editar</strong> o doble clic sobre un rol en la tabla para modificar sus propiedades.
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===================================== -->
+    <!-- TABLA DE ROLES -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-4 pb-2">
+            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista de Roles del Sistema</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover border-light-subtle">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                        <tr>
+                            <th class="px-3 py-3">ROL</th>
+                            <th class="px-3 py-3">DESCRIPCIÓN</th>
+                            <th class="px-3 py-3 text-center">DESC. MÁXIMO PERMITIDO</th>
+                            <th class="px-3 py-3 text-center">ESTADO</th>
+                            <th class="px-3 py-3 text-center" style="width: 120px;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRoles">
+                        {% for rol in roles %}
+                        <tr data-id="{{ rol.id }}" 
+                            data-nombre="{{ rol.nombre }}" 
+                            data-descripcion="{{ rol.descripcion or '' }}" 
+                            data-descuento="{{ rol.descuento_maximo }}"
+                            data-estado="{{ '1' if rol.estado else '0' }}">
+                            
+                            <td class="px-3 py-3 fw-bold text-primary">
+                                <i class="bi bi-person-badge me-2 text-muted"></i>{{ rol.nombre }}
+                            </td>
+                            <td class="px-3 py-3 text-muted fw-semibold">
+                                {{ rol.descripcion or '-' }}
+                            </td>
+                            <td class="px-3 py-3 text-center fw-bold text-success">
+                                {{ rol.descuento_maximo }}%
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                {% if rol.estado %}
+                                <span class="badge bg-success px-3 py-2 rounded-pill fw-semibold">Activo</span>
+                                {% else %}
+                                <span class="badge bg-secondary px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-editar-fila d-flex align-items-center gap-1 m-auto" title="Editar Rol">
+                                    <i class="bi bi-pencil-fill"></i> Editar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="text-muted text-xs mt-3 border-top pt-3">
+                <strong>Nota:</strong> No es posible crear nuevos roles ni eliminar los existentes para preservar la integridad del sistema. Sólo se permite modificar sus atributos.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================= -->
+<script>
+    const formulario = document.getElementById("formRoles");
+    const formId = document.getElementById("rol_id");
+    const formNombre = document.getElementById("form_nombre");
+    const formDescripcion = document.getElementById("form_descripcion");
+    const formDescuento = document.getElementById("form_descuento");
+    const formEstado = document.getElementById("form_estado");
+    const btnGuardar = document.getElementById("btnGuardar");
+    const infoMessage = document.getElementById("infoMessage");
+
+    function cargarRol(row) {
+        formId.value = row.dataset.id;
+        formNombre.value = row.dataset.nombre;
+        formDescripcion.value = row.dataset.descripcion;
+        
+        // Formatear descuento_maximo
+        let descuento = parseFloat(row.dataset.descuento) || 0;
+        formDescuento.value = descuento.toFixed(2);
+        
+        formEstado.checked = row.dataset.estado === "1";
+        
+        // Lógica especial para el rol CLIENTE, que usualmente no debería tener descuentos asignados
+        if (row.dataset.nombre.toUpperCase() === "CLIENTE") {
+            formDescuento.value = 0;
+            formDescuento.readOnly = true;
+            formDescuento.title = "El rol CLIENTE no permite descuento";
+        } else {
+            formDescuento.readOnly = false;
+            formDescuento.title = "";
+        }
+        
+        btnGuardar.disabled = false;
+        infoMessage.classList.add("d-none");
+        
+        formulario.scrollIntoView({ behavior: "smooth" });
+        formDescripcion.focus();
+    }
+
+    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+        btn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            cargarRol(this.closest("tr"));
+        });
+    });
+
+    document.querySelectorAll("#tablaRoles tr").forEach(row => {
+        row.addEventListener("dblclick", function() {
+            cargarRol(this);
+        });
+    });
+</script>
+
+{% endblock %}

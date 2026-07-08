@@ -1,0 +1,231 @@
+﻿:root {
+    --login-blue: #0d3f9f;
+    --login-blue-dark: #0a3486;
+    --login-border: #dde3ec;
+    --login-muted: #667085;
+    --fuente-principal: 'Inter', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(13, 63, 159, 0.08), transparent 32%),
+        linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+    font-family: var(--fuente-principal);
+}
+
+.login-shell.login-centered {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.login-brand-panel {
+    display: none;
+}
+
+.login-form-panel {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    width: min(100%, 430px);
+    background: #fff;
+    border: 1px solid rgba(221, 227, 236, 0.92);
+    border-radius: 14px;
+    box-shadow: 0 22px 52px rgba(15, 23, 42, 0.12);
+    padding: 30px;
+}
+
+.login-logo-block {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.login-logo-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: var(--login-blue);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 12px 24px rgba(13, 63, 159, 0.24);
+    margin-bottom: 10px;
+}
+
+.login-logo-text {
+    font-size: 1.3rem;
+    font-weight: 850;
+    color: #111827;
+}
+
+.login-logo-text span {
+    color: var(--login-blue);
+}
+
+.login-logo-version {
+    color: var(--login-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.login-heading {
+    margin-bottom: 22px;
+}
+
+.login-heading h2 {
+    font-size: 1.55rem;
+    font-weight: 850;
+    margin-bottom: 6px;
+    color: #101828;
+}
+
+.login-heading p {
+    color: var(--login-muted);
+    margin: 0;
+}
+
+.access-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--login-border);
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.access-option {
+    min-height: 36px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    color: #667085;
+    font-size: 0.82rem;
+    font-weight: 800;
+    transition: 0.2s ease;
+}
+
+.access-option.active {
+    background: var(--login-blue);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(13, 63, 159, 0.25);
+}
+
+.login-label {
+    color: var(--login-blue);
+    font-size: 0.68rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    margin-left: 10px;
+    margin-bottom: 4px;
+}
+
+.login-input {
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--login-border);
+    color: #101828;
+}
+
+.login-input:focus {
+    border-color: var(--login-blue);
+    box-shadow: 0 0 0 0.2rem rgba(13, 63, 159, 0.16);
+}
+
+.login-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 6px;
+    font-weight: 700;
+}
+
+.recaptcha-placeholder {
+    min-height: 76px;
+    border: 1px solid var(--login-border);
+    border-radius: 10px;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+}
+
+.fake-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #cfd6df;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.recaptcha-brand {
+    margin-left: auto;
+    color: #6b7280;
+    display: grid;
+    justify-items: center;
+    font-size: 1.65rem;
+}
+
+.recaptcha-brand i {
+    color: #3c91d0;
+}
+
+.recaptcha-brand small {
+    font-size: 0.56rem;
+}
+
+.btn-login {
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--login-blue);
+    color: #fff;
+    font-weight: 850;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 18px rgba(13, 63, 159, 0.22);
+}
+
+.btn-login:hover,
+.btn-login:focus {
+    background: var(--login-blue-dark);
+    color: #fff;
+}
+
+.login-footer {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: #98a2b3;
+}
+
+@media (max-width: 480px) {
+    .login-shell.login-centered {
+        padding: 16px;
+    }
+
+    .login-card {
+        padding: 24px;
+    }
+
+    .recaptcha-placeholder {
+        min-height: 70px;
+    }
+}

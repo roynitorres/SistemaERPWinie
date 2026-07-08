@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/categorias.css') }}">
+
+{% endblock %}
+
+{% block title %}
+Categorías
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-3">
+    <!-- ===================================== -->
+    <!-- BREADCRUMBS & TITULO -->
+    <!-- ===================================== -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+            <li class="breadcrumb-item active text-primary" aria-current="page">Prodcutos/Categorias</li>
+        </ol>
+    </nav>
+    <!-- ===================================== -->
+    <!-- TARJETAS KPI -->
+    <!-- ===================================== -->
+    <div class="row g-3 mb-4">
+        <!-- TOTAL CATEGORIAS -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-blue text-blue me-3">
+                        <i class="bi bi-tag "></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
+                            Categorias</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{kpis.total}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ACTIVAS -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-green text-green me-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Activos</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{kpis.activos}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- TOTAL DE PRODUCTOS -->
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card kpi-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-light-blue text-blue me-3">
+                        <i class="bi  bi-box-seam"></i>
+                    </div>
+                    <div>
+                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
+                            Productos</span>
+                        <h3 class="kpi-value mb-0 fw-bold">{{kpis.total_productos}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- FORMULARIO NUEVA CATEGORIA -->
+    <!-- ===================================== -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
+                <i class="bi bi-tag me-2 text-primary"></i>NUEVA CATEGORIA
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="formCategorias">
+                <input type="hidden" id="categoria_id" name="categoria_id">
+                <!-- Campos en Fila Horizontal -->
+                <div class="row g-3 align-items-end">
+                    <!--  CODIGO  -->
+                    <div class="col-md-1">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CODIGO *</label>
+                        <input type="text" class="form-control bg-light border-0 fw-semibold" id="form_codigo"
+                            name="codigo_categoria" value="{{siguiente_codigo}}" readonly>
+                    </div>
+                    <!--  NOMBRE CATEGORIA -->
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">NOMBRE CATEGORIA *</label>
+                        <input type="text" class="form-control border-light-subtle" id="form_nombre" name="nombre"
+                            placeholder="Nombre categoría" required>
+                    </div>
+                    <!--  DESCRIPCION -->
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">DESCRIPCION *</label>
+                        <input type="text" class="form-control borde-light-subtle" id="form_descripcion"
+                            name="descripcion" placeholder="Descripción categoría">
+                    </div>
+                    <!-- ESTADOS -->
+                    <div class="col-md-2">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
+                        <select class="form-select border-light-subtle fw-semibold" id="form_estado" name="estado">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                    <!-- Botones de Acción -->
+                    <div class="col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1 d-block">&nbsp;</label>
+                        <div class="d-flex gap-2 justify-content-start">
+                            <button type="submit"
+                                class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                                id="btnGuardar">
+                                <i class="bi bi-floppy"></i> Guardar
+                            </button>
+
+                            <button type="button"
+                                class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
+                                id="btnLimpiar">
+                                <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- TABLA / LISTA DE CATEGORIAS-->
+<!-- ===================================== -->
+<div class="card border-0 shadow-sm">
+    <div
+        class="card-header bg-white border-0 pt-4 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista de Categorias</h5>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" class="form-control ps-5 border-light-subtle" id="buscarCategoria"
+                    placeholder="Codigo, Categoria..." style="width: 280px; min-height: 38px;">
+            </div>
+
+            <a href="#" class="btn btn-outline-info d-flex align-items-center gap-2 fw-semibold"
+                style="min-height: 38px;">
+                <i class="bi bi-download"></i> Exportar
+            </a>
+
+            <button type="button" class="btn btn-primary d-flex align-items-center gap-2 fw-semibold" id="btnIrForm"
+                style="min-height: 38px;">
+                <i class="bi bi-plus-lg"></i> Nuevo
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle table-hover border-light-subtle tabla-categoria">
+                <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                    <tr>
+                        <th class="px-3 py-3 text-center" style="width: 90px;">CODIGO</th>
+                        <th class="px-3 py-3">CATEGORIA</th>
+                        <th class="px-3 py-3">DESCRIPCION</th>
+                        <th class="px-3 py-3">PRODUCTOS</th>
+                        <th class="px-3 py-3 text-center">ESTADO</th>
+                        <th class="px-3 py-3 text-center" style="width: 90px;">ACC.</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaCategorias">
+                    {% for categoria in categorias %}
+
+                    <tr data-id="{{ categoria.id }}" data-codigo="{{ categoria.codigo }}"
+                        data-nombre="{{ categoria.nombre }}" data-descripcion="{{  categoria.descripcion or ''}}"
+                        data-estado="{{ 'ACTIVO' if categoria.estado else 'INACTIVO' }}">
+                        <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            {{ categoria.codigo }}
+                        </td>
+                        <td class="px-3 py-3 text-center fw-semibold text-blue fw-bold">
+                            {{ categoria.nombre }}
+                        </td>
+                        <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            {{ categoria.descripcion }}
+                        </td>
+                        <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            {{ categoria.productos|length }}
+                        </td>
+                        <td class="px-3 py-3 text-center">
+                            {% if categoria.estado %}
+                            <span class="badge badge-activo px-3 py-2 rounded-pill fw-semibold">Activo</span>
+                            {% else %}
+                            <span class="badge badge-inactivo px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-3 py-3 text-center">
+                            <button type="button" class="btn btn-sm btn-icon-edit btn-editar-fila"
+                                title="Editar Producto">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Table Footer for Summary & Pagination -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+            <div class="text-muted text-xs" id="paginationSummary">
+                Mostrando 0 a 0 de 0 registros
+            </div>
+
+            <nav aria-label="Navegacion de tabla">
+                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================= -->
+
+<script>
+    const formulario = document.getElementById("formCategorias");
+    const formTitle = document.getElementById("formTitle");
+
+    const categoriaId = document.getElementById("categoria_id");
+    const formCodigo = document.getElementById("form_codigo");
+    const formNombre = document.getElementById("form_nombre");
+    const formDescripcion = document.getElementById("form_descripcion");
+    const formEstado = document.getElementById("form_estado");
+
+    const btnLimpiar = document.getElementById("btnLimpiar");
+    const btnIrform = document.getElementById("btnIrForm");
+    const buscarcategoria = document.getElementById("buscarCategoria");
+
+    const siguienteCodigo = "{{ siguiente_codigo}}";
+
+    function resetForm() {
+        formulario.reset();
+        categoriaId.value = "";
+        formCodigo.value = siguienteCodigo;
+        formEstado.value = "ACTIVO";
+        formTitle.innerHTML = `<i class="bi bi-tag me-2 text-primary"></i>NUEVA CATEGORIA`;
+        formNombre.focus();
+    }
+
+    function cargarCategoria(row) {
+        categoriaId.value = row.dataset.id;
+        formCodigo.value = row.dataset.codigo;
+        formNombre.value = row.dataset.nombre;
+        formDescripcion.value = row.dataset.descripcion;
+        formEstado.value = row.dataset.estado;
+
+        formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-warning"></i>EDITAR CATEGORIA`;
+        formulario.scrollIntoView({ behavior: "smooth" });
+        formNombre.focus();
+    }
+
+    btnLimpiar.addEventListener("click", resetForm);
+
+    btnIrform.addEventListener("click", () => {
+        resetForm();
+        formulario.scrollIntoView({ behavior: "smooth" });
+    });
+
+    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            cargarCategoria(this.closest("tr"));
+        });
+    });
+
+    document.querySelectorAll("#tablaCategorias tr").forEach(row => {
+        row.addEventListener("dblclick", function () {
+            cargarCategoria(this);
+        });
+    });
+    // === PAGINACIÓN Y BÚSQUEDA DEL LADO CATEGORIA ===
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let filteredRows = [];
+    // Obtener todas las filas de la tabla
+    const allRows = Array.from(document.querySelectorAll("#tablaCategorias tr"));
+
+    function initPagination() {
+        filteredRows = [...allRows];
+        renderTable();
+    }
+
+    function renderTable() {
+        const totalItems = filteredRows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+        // Ajustar página actual si excede el total de páginas o es menor a 1
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+        // Ocultar todas las filas
+        allRows.forEach(row => row.style.display = "none");
+        // Mostrar solo las de la página actual
+        for (let i = startIndex; i < endIndex; i++) {
+            filteredRows[i].style.display = "";
+        }
+        // Renderizar el resumen (Summary)
+        const summaryText = totalItems > 0 
+            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+            : "Mostrando 0 a 0 de 0 registros";
+        document.getElementById("paginationSummary").innerText = summaryText;
+        // Renderizar controles de paginación
+        renderControls(totalPages);
+    }
+
+    function renderControls(totalPages) {
+        const controlsContainer = document.getElementById("paginationControls");
+        controlsContainer.innerHTML = "";
+
+        if (totalPages <= 1) return;
+        // Botón Anterior
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+        prevLi.addEventListener("click", e => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+        controlsContainer.appendChild(prevLi);
+        // Páginas numeradas
+        for (let i = 1; i <= totalPages; i++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
+            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            pageLi.addEventListener("click", e => {
+                e.preventDefault();
+                currentPage = i;
+                renderTable();
+            });
+            controlsContainer.appendChild(pageLi);
+        }
+        // Botón Siguiente
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+        nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+        nextLi.addEventListener("click", e => {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+        controlsContainer.appendChild(nextLi);
+    }
+
+    buscarcategoria.addEventListener("input", function () {
+        const query = this.value.toLowerCase().trim();
+
+        filteredRows = allRows.filter(row => {
+            const codigo = row.dataset.codigo;
+            const nombre = row.dataset.nombre.toLowerCase();
+            const descripcion = row.dataset.descripcion.toLowerCase();
+
+            return codigo.includes(query) ||
+                nombre.includes(query) ||
+                descripcion.includes(query);
+        });
+
+        currentPage = 1;
+        renderTable();
+    });
+
+    window.addEventListener("load", initPagination);
+
+
+</script>
+
+{% endblock %}
