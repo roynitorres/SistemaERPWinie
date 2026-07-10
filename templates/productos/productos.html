@@ -15,17 +15,28 @@ Productos
     <!-- ===================================== -->
     <!-- BREADCRUMBS & TITULO -->
     <!-- ===================================== -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-            <li class="breadcrumb-item active text-primary" aria-current="page">Productos</li>
-        </ol>
-    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Productos</li>
+            </ol>
+        </nav>
+        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm d-flex align-items-center gap-2" id="btnTogglePanel" style="border-radius: 20px;">
+            <i class="bi bi-chevron-down" id="iconTogglePanel"></i>
+            <span id="textTogglePanel">Mostrar Opciones</span>
+        </button>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- CONTENEDOR DE OPCIONES (KPIs + FORMULARIO) -->
+    <!-- ===================================== -->
+    <div id="panelOpciones" class="d-none">
 
     <!-- ===================================== -->
     <!-- TARJETAS KPI -->
     <!-- ===================================== -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 d-none d-lg-flex">
         <!-- TOTAL PRODUCTOS -->
         <div class="col-lg col-md-4 col-sm-6">
             <div class="card kpi-card border-0 shadow-sm">
@@ -219,6 +230,7 @@ Productos
         </div>
 
     </div>
+    </div> <!-- FIN PANEL OPCIONES -->
 
     <!-- ===================================== -->
     <!-- TABLA / LISTA DE PRODUCTOS -->
@@ -254,15 +266,15 @@ Productos
                         <tr>
                             <th class="px-3 py-3 text-center" style="width: 90px;">CODIGO</th>
                             <th class="px-3 py-3">PRODUCTO</th>
-                            <th class="px-3 py-3">MARCA</th>
+                            <th class="px-3 py-3 d-none d-md-table-cell">MARCA</th>
                             <th class="px-3 py-3">CATEGORIA</th>
-                            <th class="px-3 py-3 text-center">UND</th>
-                            <th class="px-3 py-3 text-end">P. COSTO(C$)</th>
+                            <th class="px-3 py-3 text-center d-none d-md-table-cell">UND</th>
+                            <th class="px-3 py-3 text-end d-none d-md-table-cell">P. COSTO(C$)</th>
                             <th class="px-3 py-3 text-end">P. VENTA(C$)</th>
-                            <th class="px-3 py-3 text-center">FECHA</th>
-                            <th class="px-3 py-3 text-center">CANTIDAD</th>
+                            <th class="px-3 py-3 text-center d-none d-lg-table-cell">FECHA</th>
+                            <th class="px-3 py-3 text-center d-none d-lg-table-cell">CANTIDAD</th>
                             <th class="px-3 py-3 text-center">STOCK</th>
-                            <th class="px-3 py-3 text-center">ESTADO</th>
+                            <th class="px-3 py-3 text-center d-none d-sm-table-cell">ESTADO</th>
                             <th class="px-3 py-3 text-center" style="width: 90px;">ACC.</th>
                         </tr>
                     </thead>
@@ -285,18 +297,18 @@ Productos
                                 {{ producto.nombre }}
                             </td>
 
-                            <td class="px-3 py-3 text-muted">
+                            <td class="px-3 py-3 text-muted d-none d-md-table-cell">
                                 {{ producto.marca }}
                             </td>
 
                             <td class="px-3 py-3 text-blue fw-bold">
                                 {{ producto.categoria.nombre }}
                             </td>
-                            <td class="px-3 py-3 text-center text-muted">
+                            <td class="px-3 py-3 text-center text-muted d-none d-md-table-cell">
                                 {{ producto.unidad }}
                             </td>
 
-                            <td class="px-3 py-3 text-end text-muted">
+                            <td class="px-3 py-3 text-end text-muted d-none d-md-table-cell">
                                 C$ {{ "%.2f"|format(producto.precio_compra) }}
                             </td>
 
@@ -304,11 +316,11 @@ Productos
                                 C$ {{ "%.2f"|format(producto.precio_venta) }}
                             </td>
 
-                            <td class="px-3 py-3 text-center text-muted">
+                            <td class="px-3 py-3 text-center text-muted d-none d-lg-table-cell">
                                 {{ producto.fecha_compra.strftime('%d/%m/%Y') }}
                             </td>
 
-                            <td class="px-3 py-3 text-center text-muted">
+                            <td class="px-3 py-3 text-center text-muted d-none d-lg-table-cell">
                                 {{ producto.cantidad_comprada }}
                             </td>
 
@@ -316,7 +328,7 @@ Productos
                                 {{ producto.stock }}
                             </td>
 
-                            <td class="px-3 py-3 text-center">
+                            <td class="px-3 py-3 text-center d-none d-sm-table-cell">
                                 {% if producto.estado == "ACTIVO" %}
                                 <span class="badge badge-activo px-3 py-2 rounded-pill fw-semibold">Activo</span>
                                 {% else %}
@@ -359,6 +371,25 @@ Productos
     <!-- ========================================= -->
 
     <script>
+        const btnTogglePanel = document.getElementById("btnTogglePanel");
+        const panelOpciones = document.getElementById("panelOpciones");
+        const iconTogglePanel = document.getElementById("iconTogglePanel");
+        const textTogglePanel = document.getElementById("textTogglePanel");
+
+        if (btnTogglePanel) {
+            btnTogglePanel.addEventListener("click", function () {
+                const oculto = panelOpciones.classList.toggle("d-none");
+
+                if (oculto) {
+                    iconTogglePanel.className = "bi bi-chevron-down";
+                    textTogglePanel.textContent = "Mostrar Opciones";
+                } else {
+                    iconTogglePanel.className = "bi bi-chevron-up";
+                    textTogglePanel.textContent = "Ocultar Opciones";
+                }
+            });
+        }
+
         const formulario = document.getElementById("formProductos");
         const formTitle = document.getElementById("formTitle");
 

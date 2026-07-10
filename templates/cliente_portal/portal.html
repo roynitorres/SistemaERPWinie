@@ -1,4 +1,4 @@
-﻿{% extends "cliente_portal/portal_base.html" %}
+{% extends "cliente_portal/portal_base.html" %}
 
 {% block title %}
 Portal Cliente
@@ -27,83 +27,27 @@ Portal Cliente
             </div>
         </div>
 
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-light btn-sm fw-semibold">
+        <button type="button" class="btn btn-light btn-sm fw-semibold" id="btnCerrarSesionPortal">
             <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesion
-        </a>
+        </button>
     </div>
 
-    <div class="row g-3 my-3">
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm kpi-card">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="kpi-icon bg-primary-subtle text-primary">
-                        <i class="bi bi-receipt"></i>
-                    </div>
-                    <div>
-                        <div class="kpi-label">Total facturado</div>
-                        <h4 class="mb-0 fw-bold">C$ {{ "%.2f"|format(kpis.total_facturado) }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm kpi-card">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="kpi-icon bg-success-subtle text-success">
-                        <i class="bi bi-check-circle"></i>
-                    </div>
-                    <div>
-                        <div class="kpi-label">Total pagado</div>
-                        <h4 class="mb-0 fw-bold">C$ {{ "%.2f"|format(kpis.total_pagado) }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm kpi-card">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="kpi-icon bg-warning-subtle text-warning">
-                        <i class="bi bi-clock"></i>
-                    </div>
-                    <div>
-                        <div class="kpi-label">Saldo pendiente</div>
-                        <h4 class="mb-0 fw-bold">C$ {{ "%.2f"|format(kpis.saldo_pendiente) }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6">
-            <div class="card border-0 shadow-sm kpi-card">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="kpi-icon bg-info-subtle text-info">
-                        <i class="bi bi-file-earmark-text"></i>
-                    </div>
-                    <div>
-                        <div class="kpi-label">Facturas</div>
-                        <h4 class="mb-0 fw-bold">{{ kpis.facturas }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <ul class="nav nav-pills portal-tabs shadow-sm mb-3" id="portalTabs" role="tablist">
-        <li class="nav-item flex-fill" role="presentation">
+    <ul class="nav nav-pills portal-tabs shadow-sm mb-3 flex-column flex-sm-row" id="portalTabs" role="tablist">
+        <li class="nav-item flex-fill mb-2 mb-sm-0 me-sm-2" role="presentation">
             <button class="nav-link active w-100" id="facturas-tab" data-bs-toggle="pill" data-bs-target="#facturas" type="button" role="tab">
                 <i class="bi bi-receipt me-1"></i> Mis facturas
             </button>
         </li>
-        <li class="nav-item flex-fill" role="presentation">
+        <li class="nav-item flex-fill mb-2 mb-sm-0 me-sm-2" role="presentation">
             <button class="nav-link w-100" id="perfil-tab" data-bs-toggle="pill" data-bs-target="#perfil" type="button" role="tab">
                 <i class="bi bi-person me-1"></i> Mi perfil
             </button>
         </li>
         <li class="nav-item flex-fill" role="presentation">
             <a class="nav-link w-100" href="{{ url_for('portal_cliente.cambiar_password_cliente') }}">
-                <i class="bi bi-lock me-1"></i> Contrasena
+                <i class="bi bi-lock me-1"></i> Contraseña
             </a>
         </li>
     </ul>
@@ -111,155 +55,150 @@ Portal Cliente
     <div class="tab-content">
         <div class="tab-pane fade show active" id="facturas" role="tabpanel">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 pb-2">
+                <div class="card-header bg-white border-0 pt-3 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                     <h5 class="card-title mb-0 fw-bold text-dark text-uppercase">
                         <i class="bi bi-wallet2 me-2 text-primary"></i>Historial de pagos
                     </h5>
+                    <div>
+                        <div class="input-group shadow-sm" style="min-width: 240px;">
+                            <span class="input-group-text bg-primary text-white border-primary">
+                                <i class="bi bi-funnel-fill"></i>
+                            </span>
+                            <select class="form-select border-primary fw-bold text-primary" id="filtroFacturasPortal">
+                                <option value="TODAS">Todas las facturas</option>
+                                <option value="PAGADAS">Solo Pagadas</option>
+                                <option value="PENDIENTES">Solo Pendientes</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-body pt-0">
-                    <div class="accordion accordion-flush portal-facturas" id="accordionFacturasCliente">
-                        {% for venta in ventas %}
-                        {% set total_abonado = namespace(valor=0) %}
-                        {% for pago in venta.pagos %}
-                        {% if pago.estado == "ACTIVO" %}
-                        {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
-                        {% endif %}
-                        {% endfor %}
-                        {% set saldo = venta.total_venta - total_abonado.valor %}
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover border-light-subtle" id="tablaFacturasPortal">
+                            <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                                <tr>
+                                    <th class="p-2 p-md-3">Factura</th>
+                                    <th class="p-2 p-md-3 d-none d-lg-table-cell">Emisión</th>
+                                    <th class="p-2 p-md-3 d-none d-lg-table-cell">Vencimiento</th>
+                                    <th class="p-2 p-md-3">Total</th>
+                                    <th class="p-2 p-md-3 d-none d-md-table-cell">Abonos</th>
+                                    <th class="p-2 p-md-3">Saldo</th>
+                                    <th class="p-2 p-md-3">Estado</th>
+                                    <th class="p-2 p-md-3 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in ventas %}
+                                {% set total_abonado = namespace(valor=0) %}
+                                {% for pago in venta.pagos %}
+                                {% if pago.estado == "ACTIVO" %}
+                                {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
+                                {% endif %}
+                                {% endfor %}
+                                {% set saldo = venta.total_venta - total_abonado.valor %}
+                                
+                                {% set estado_str = "ANULADA" %}
+                                {% if venta.estado != 'ACTIVA' %}
+                                {% set estado_str = "ANULADA" %}
+                                {% elif saldo <= 0 %}
+                                {% set estado_str = "PAGADAS" %}
+                                {% else %}
+                                {% set estado_str = "PENDIENTES" %}
+                                {% endif %}
 
-                        <div class="accordion-item factura-item">
-                            <h2 class="accordion-header" id="facturaHeading{{ venta.id }}">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#facturaCollapse{{ venta.id }}" aria-expanded="false"
-                                    aria-controls="facturaCollapse{{ venta.id }}">
-                                    <div class="factura-resumen w-100">
-                                        <div>
-                                            <div class="fw-bold">{{ venta.numero_factura }}</div>
-                                            <small class="text-muted">
-                                                Vence: {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}
-                                            </small>
-                                        </div>
-
-                                        <div class="text-end d-none d-md-block">
-                                            <small class="text-muted d-block">Total</small>
-                                            <span class="fw-bold">C$ {{ "%.2f"|format(venta.total_venta) }}</span>
-                                        </div>
-
-                                        <div class="text-end d-none d-md-block">
-                                            <small class="text-muted d-block">Abonos</small>
-                                            <span class="text-success fw-bold">C$ {{ "%.2f"|format(total_abonado.valor) }}</span>
-                                        </div>
-
-                                        <div class="text-end d-none d-md-block">
-                                            <small class="text-muted d-block">Saldo</small>
-                                            <span class="fw-bold">C$ {{ "%.2f"|format(saldo) }}</span>
-                                        </div>
-
-                                        <div class="text-end">
-                                            {% if venta.estado != 'ACTIVA' %}
-                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Anulada</span>
-                                            {% elif saldo <= 0 %}
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Cancelada</span>
+                                <tr class="fila-factura-portal" data-estado="{{ estado_str }}">
+                                    <td class="p-2 p-md-3 fw-bold">{{ venta.numero_factura }}</td>
+                                    <td class="p-2 p-md-3 text-muted d-none d-lg-table-cell">{{ venta.fecha_venta.strftime('%d/%m/%Y') }}</td>
+                                    <td class="p-2 p-md-3 text-muted d-none d-lg-table-cell">{{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}</td>
+                                    <td class="p-2 p-md-3 fw-bold text-dark text-nowrap">C$ {{ "%.2f"|format(venta.total_venta) }}</td>
+                                    <td class="p-2 p-md-3 fw-bold text-success text-nowrap d-none d-md-table-cell">C$ {{ "%.2f"|format(total_abonado.valor) }}</td>
+                                    <td class="p-2 p-md-3 fw-bold text-secondary text-nowrap">C$ {{ "%.2f"|format(saldo) }}</td>
+                                    <td class="p-2 p-md-3">
+                                        {% if venta.estado != 'ACTIVA' %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Anulada</span>
+                                        {% elif saldo <= 0 %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Cancelada</span>
+                                        {% else %}
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendiente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-2 p-md-3 text-center text-nowrap">
+                                        <button class="btn btn-sm btn-outline-primary fw-semibold me-1" type="button" data-bs-toggle="collapse" data-bs-target="#detalleFac{{ venta.id }}">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                        <a href="{{ url_for('ventas.factura', venta_id=venta.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr class="fila-detalle collapse" id="detalleFac{{ venta.id }}" data-estado="{{ estado_str }}">
+                                    <td colspan="8" class="p-0 border-0">
+                                        <div class="p-3 border rounded" style="background-color: #f0fdf4;"> <!-- similar to bg-light-green -->
+                                            {% if saldo > 0 and venta.estado == 'ACTIVA' %}
+                                            <div class="alert alert-warning py-2 px-3 d-flex align-items-center mb-3">
+                                                <i class="bi bi-bell-fill me-2 fs-5"></i>
+                                                <span class="fw-semibold">Recordatorio: Tienes un pago pendiente para esta factura.</span>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <div class="fw-bold text-dark mb-2">Historial de Abonos</div>
+                                            {% if venta.pagos %}
+                                            <table class="table table-sm table-bordered bg-white mb-0">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th class="px-2">Fecha</th>
+                                                        <th class="px-2 text-end">Monto abono</th>
+                                                        <th class="px-2 d-none d-md-table-cell">Forma</th>
+                                                        <th class="px-2 d-none d-md-table-cell">Referencia</th>
+                                                        <th class="px-2 text-center">Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for pago in venta.pagos %}
+                                                    <tr>
+                                                        <td class="px-2 text-nowrap">{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
+                                                        <td class="px-2 text-end fw-bold text-success text-nowrap">C$ {{ "%.2f"|format(pago.monto_pago) }}</td>
+                                                        <td class="px-2 d-none d-md-table-cell">{{ pago.tipo_pago }}</td>
+                                                        <td class="px-2 d-none d-md-table-cell">{{ pago.referencia or '-' }}</td>
+                                                        <td class="px-2 text-center">
+                                                            {% if pago.estado == "ACTIVO" %}
+                                                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i> ACTIVO</span>
+                                                            {% else %}
+                                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-x-circle me-1"></i> ANULADO</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
                                             {% else %}
-                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendiente</span>
+                                            <div class="text-muted text-sm"><i class="bi bi-info-circle me-1"></i>No hay abonos registrados para esta factura.</div>
                                             {% endif %}
                                         </div>
-                                    </div>
-                                </button>
-                            </h2>
-
-                            <div id="facturaCollapse{{ venta.id }}" class="accordion-collapse collapse"
-                                aria-labelledby="facturaHeading{{ venta.id }}" data-bs-parent="#accordionFacturasCliente">
-                                <div class="accordion-body">
-                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                                        <div>
-                                            <div class="fw-bold text-dark">Detalle de abonos</div>
-                                            <small class="text-muted">Factura {{ venta.numero_factura }} · {{ venta.tipo_venta }}</small>
-                                        </div>
-
-                                        <a href="{{ url_for('ventas.factura', venta_id=venta.id) }}" target="_blank"
-                                            class="btn btn-outline-primary btn-sm fw-semibold">
-                                            <i class="bi bi-eye me-1"></i> Ver factura
-                                        </a>
-                                    </div>
-
-                                    <div class="row g-3 mb-3 d-md-none">
-                                        <div class="col-4">
-                                            <small class="text-muted d-block">Total</small>
-                                            <strong>C$ {{ "%.2f"|format(venta.total_venta) }}</strong>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="text-muted d-block">Abonos</small>
-                                            <strong class="text-success">C$ {{ "%.2f"|format(total_abonado.valor) }}</strong>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="text-muted d-block">Saldo</small>
-                                            <strong>C$ {{ "%.2f"|format(saldo) }}</strong>
-                                        </div>
-                                    </div>
-
-                                    <div class="table-responsive">
-                                        <table class="table table-sm align-middle mb-0 historial-abonos">
-                                            <thead class="bg-light text-muted text-xs fw-bold">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Fecha</th>
-                                                    <th class="text-end">Monto abono</th>
-                                                    <th>Forma</th>
-                                                    <th>Referencia</th>
-                                                    <th>Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for pago in venta.pagos %}
-                                                <tr>
-                                                    <td>{{ loop.index }}</td>
-                                                    <td>{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
-                                                    <td class="text-end fw-semibold">C$ {{ "%.2f"|format(pago.monto_pago) }}</td>
-                                                    <td>{{ pago.tipo_pago }}</td>
-                                                    <td>{{ pago.referencia or '-' }}</td>
-                                                    <td>
-                                                        {% if pago.estado == "ACTIVO" %}
-                                                        <span class="badge bg-success-subtle text-success border border-success-subtle">ACTIVO</span>
-                                                        {% else %}
-                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">ANULADO</span>
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                                {% else %}
-                                                <tr>
-                                                    <td colspan="6" class="text-center text-muted py-3">
-                                                        No hay abonos registrados para esta factura.
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div class="factura-totales mt-3">
-                                        <div>
-                                            <span>Total facturado</span>
-                                            <strong>C$ {{ "%.2f"|format(venta.total_venta) }}</strong>
-                                        </div>
-                                        <div>
-                                            <span>Total abonado</span>
-                                            <strong class="text-success">C$ {{ "%.2f"|format(total_abonado.valor) }}</strong>
-                                        </div>
-                                        <div>
-                                            <span>Saldo pendiente</span>
-                                            <strong>C$ {{ "%.2f"|format(saldo) }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        No hay facturas registradas.
+                                    </td>
+                                </tr>
+                                                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Table Footer for Summary & Pagination -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
+                        <div class="text-muted text-xs" id="paginationSummaryPortal">
+                            Mostrando 0 a 0 de 0 registros
                         </div>
-                        {% else %}
-                        <div class="text-center text-muted py-4">
-                            No hay facturas registradas.
-                        </div>
-                        {% endfor %}
+                        <nav aria-label="Navegación de tabla">
+                            <ul class="pagination pagination-sm mb-0" id="paginationControlsPortal">
+                                <!-- Generado dinámicamente -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -301,5 +240,166 @@ Portal Cliente
         </div>
     </div>
 </div>
+
+<!-- MODAL CERRAR SESIÓN -->
+<div class="modal fade" id="modalLogoutPortal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #003891; color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-door-open text-primary mb-3" style="font-size: 3.5rem;"></i>
+                <p class="fs-5 mb-0">¿Estás seguro de que deseas salir del sistema?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-primary" style="background-color: #003891; border-color: #003891;">Sí, salir</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const filtroFacturasPortal = document.getElementById("filtroFacturasPortal");
+        
+        // Paginación y filtro variables
+        let currentPage = 1;
+        const itemsPerPage = 5; // Mostrar de 5 en 5
+        const allRows = Array.from(document.querySelectorAll("#tablaFacturasPortal .fila-factura-portal"));
+        let filteredRows = [...allRows];
+
+        function getDetalleRow(row) {
+            return row.nextElementSibling;
+        }
+
+        function filtrarFacturas() {
+            const estado = filtroFacturasPortal ? filtroFacturasPortal.value : "TODAS";
+
+            filteredRows = allRows.filter(row => {
+                const coincideEstado = (estado === "TODAS" || row.dataset.estado === estado);
+                return coincideEstado;
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function initPagination() {
+            filteredRows = [...allRows];
+            renderTable();
+        }
+
+        function renderTable() {
+            const totalItems = filteredRows.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+            // Ocultar todas las filas primero
+            allRows.forEach(row => {
+                row.style.display = "none";
+                const detalle = getDetalleRow(row);
+                if (detalle && detalle.classList.contains("fila-detalle")) {
+                    detalle.style.display = "none";
+                    // Forzar que se cierre si estaba abierto
+                    const bsCollapse = bootstrap.Collapse.getInstance(detalle);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    } else {
+                        detalle.classList.remove("show");
+                    }
+                }
+            });
+
+            // Mostrar solo las filas de la página actual
+            for (let i = startIndex; i < endIndex; i++) {
+                if (filteredRows[i]) {
+                    filteredRows[i].style.display = "";
+                    const detalle = getDetalleRow(filteredRows[i]);
+                    if (detalle && detalle.classList.contains("fila-detalle")) {
+                        detalle.style.display = "";
+                    }
+                }
+            }
+
+            document.getElementById("paginationSummaryPortal").innerText =
+                totalItems > 0
+                    ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+                    : "Mostrando 0 a 0 de 0 registros";
+
+            renderControls(totalPages);
+        }
+
+        function renderControls(totalPages) {
+            const controlsContainer = document.getElementById("paginationControlsPortal");
+            if (!controlsContainer) return;
+            controlsContainer.innerHTML = "";
+
+            if (totalPages <= 1) return;
+
+            const prevLi = document.createElement("li");
+            prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+            prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+            prevLi.addEventListener("click", e => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+            controlsContainer.appendChild(prevLi);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLi = document.createElement("li");
+                pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
+                pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                pageLi.addEventListener("click", e => {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderTable();
+                });
+                controlsContainer.appendChild(pageLi);
+            }
+
+            const nextLi = document.createElement("li");
+            nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+            nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+            nextLi.addEventListener("click", e => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+            controlsContainer.appendChild(nextLi);
+        }
+
+        if (filtroFacturasPortal) {
+            filtroFacturasPortal.addEventListener("change", filtrarFacturas);
+        }
+
+        // Inicializar
+        initPagination();
+
+        // Modal de Logout
+        const btnLogoutPortal = document.getElementById("btnCerrarSesionPortal");
+        if (btnLogoutPortal) {
+            const modalLogoutPortal = new bootstrap.Modal(document.getElementById("modalLogoutPortal"));
+            btnLogoutPortal.addEventListener("click", function(e) {
+                e.preventDefault();
+                modalLogoutPortal.show();
+            });
+        }
+    });
+</script>
 
 {% endblock %}

@@ -11,26 +11,28 @@ Historial Ventas
     <!-- ===================================== -->
     <!-- BREADCRUMBS & TITULO -->
     <!-- ===================================== -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-                <li class="breadcrumb-item active text-primary" aria-current="page">Venta /Historial Ventas</li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Venta / Historial Ventas</li>
             </ol>
         </nav>
 
-        <button type="button" class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2"
-            id="btnTogglePanel">
-            <i class="bi bi-chevron-up" id="iconTogglePanel"></i>
-            <span id="textTogglePanel">Ocultar</span>
+        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm d-flex align-items-center gap-2" id="btnTogglePanel" style="border-radius: 20px;">
+            <i class="bi bi-chevron-down" id="iconTogglePanel"></i>
+            <span id="textTogglePanel">Mostrar Opciones</span>
         </button>
     </div>
 
-    <div id="panelHistorialFacturas">
+    <!-- ===================================== -->
+    <!-- CONTENEDOR DE OPCIONES (KPIs + FORMULARIO) -->
+    <!-- ===================================== -->
+    <div id="panelOpciones" class="d-none">
         <!-- ===================================== -->
         <!-- TARJETAS KPI -->
         <!-- ===================================== -->
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 d-none d-lg-flex">
             <div class="col-xl col-md-4 col-sm-6">
                 <div class="card kpi-card border-0 shadow-sm">
                     <div class="card-body d-flex align-items-center">
@@ -177,6 +179,7 @@ Historial Ventas
             </div>
         </div>
     </div>
+    </div> <!-- FIN PANEL OPCIONES -->
 
     <!-- ====================================== -->
     <!-- TABLA / LISTA HISTORIAL FACTURAS-->
@@ -207,13 +210,13 @@ Historial Ventas
                     <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
                         <tr>
                             <th class="px-3 py-3 text-center fw-semibold text-nowrap" style="width: 140px;">FACTURA</th>
-                            <th class="px-3 py-3">FACTURACION</th>
-                            <th class="px-3 py-3">FECHA LÍMITE</th>
+                            <th class="px-3 py-3 d-none d-md-table-cell">FACTURACION</th>
+                            <th class="px-3 py-3 d-none d-lg-table-cell">FECHA LÍMITE</th>
                             <th class="px-3 py-3 text-center">CLIENTE</th>
-                            <th class="px-3 py-3 text-center">ITEMS</th>
+                            <th class="px-3 py-3 text-center d-none d-md-table-cell">ITEMS</th>
                             <th class="px-3 py-3 text-center">TOTAL</th>
-                            <th class="px-3 py-3 text-center">DÍAS</th>
-                            <th class="px-3 py-3 text-center">TIPO</th>
+                            <th class="px-3 py-3 text-center d-none d-md-table-cell">DÍAS</th>
+                            <th class="px-3 py-3 text-center d-none d-sm-table-cell">TIPO</th>
                             <th class="px-3 py-3 text-center">ESTADO</th>
                             <th class="px-3 py-3 text-center" style="width: 20px;">ACC.</th>
                         </tr>
@@ -226,10 +229,10 @@ Historial Ventas
                             <td class="px-3 py-3 text-center fw-semibold ">
                                 {{ venta.numero_factura }}
                             </td>
-                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            <td class="px-3 py-3 text-center fw-semibold text-muted d-none d-md-table-cell">
                                 {{ venta.fecha_venta.strftime('%d/%m/%Y') }}
                             </td>
-                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            <td class="px-3 py-3 text-center fw-semibold text-muted d-none d-lg-table-cell">
                                 {% if venta.fecha_limite_credito %}
                                 {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') }}
                                 {% else %}
@@ -242,7 +245,7 @@ Historial Ventas
                                 {{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}
                             </td>
 
-                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            <td class="px-3 py-3 text-center fw-semibold text-muted d-none d-md-table-cell">
                                 {{ venta.detalle_ventas|length }}
                             </td>
                             <td class="px-3 py-3 text-center fw-bold text-blue ">
@@ -252,7 +255,7 @@ Historial Ventas
                             venta.fecha_venta.date() %}
                             {% set dias_restantes = (fecha_vencimiento - hoy).days %}
 
-                            <td class="px-3 py-3 text-center">
+                            <td class="px-3 py-3 text-center d-none d-md-table-cell">
                                 {% if venta.estado == "ANULADA" %}
                                 <span
                                     class="badge px-3 py-2 rounded-pill fw-semibold bg-secondary-subtle text-secondary border border-secondary-subtle">
@@ -278,7 +281,7 @@ Historial Ventas
                                         </span>
                                         {% endif %}
                             </td>
-                            <td class="px-3 py-3 text-center">
+                            <td class="px-3 py-3 text-center d-none d-sm-table-cell">
                                 {% if venta.tipo_venta == "CREDITO" %}
                                 <span
                                     class="badge px-3 py-2 rounded-pill fw-semibold bg-warning-subtle text-warning border border-warning-subtle">
@@ -299,25 +302,28 @@ Historial Ventas
                                 {% endif %}
                             </td>
 
-                            <td class="px-0 py-3 text-center fw-bold">
-                                <div class="d-flex justify-content-center gap-0">
-
-                                    <a href="{{ url_for('ventas.factura', venta_id=venta.id) }}" target="_blank"
-                                        class="btn  btn-sm " title="Ver factura">
-                                        <i class="bi bi-eye text-blue fw-bold"></i>
-                                    </a>
-
-                                    {% if venta.estado == "ACTIVA" %}
-                                    <form method="POST" action="{{ url_for('ventas.anular_venta', venta_id=venta.id) }}"
-                                        class="form-anular-venta">
-
-                                        <button type="submit" class="btn text-red btn-sm" title="Anular factura">
-                                            <i class="bi bi-x-circle text-red fw-bold"></i>
-                                        </button>
-
-                                    </form>
-                                    {% endif %}
-
+                            <td class="px-2 py-3 text-center">
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm rounded-circle border shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones">
+                                        <i class="bi bi-three-dots-vertical text-muted"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 150px; border-radius: 10px;">
+                                        <li>
+                                            <a href="{{ url_for('ventas.factura', venta_id=venta.id) }}" target="_blank" class="dropdown-item py-2 d-flex align-items-center gap-2 fw-semibold">
+                                                <i class="bi bi-eye text-primary"></i> Ver Factura
+                                            </a>
+                                        </li>
+                                        {% if venta.estado == "ACTIVA" %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="POST" action="{{ url_for('ventas.anular_venta', venta_id=venta.id) }}" class="form-anular-venta mb-0">
+                                                <button type="submit" class="dropdown-item py-2 text-danger d-flex align-items-center gap-2 fw-semibold">
+                                                    <i class="bi bi-x-circle"></i> Anular
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
                                 </div>
                             </td>
                         </tr>
@@ -349,6 +355,28 @@ Historial Ventas
 <!-- ====================================== -->
 <!-- SCRIPT -->
 <!-- ====================================== -->
+<!-- MODAL ANULAR FACTURA -->
+<div class="modal fade" id="modalAnularFactura" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #003891; color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>¿Anular factura?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-exclamation-triangle text-danger mb-3" style="font-size: 3.5rem;"></i>
+                <p class="fs-5 mb-0">Esta acción devolverá el stock de los productos y marcará la factura como anulada. ¿Desea continuar?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarAnular" style="background-color: #dc3545;">Sí, anular</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const formFiltros = document.getElementById("formfiltros");
@@ -473,44 +501,45 @@ Historial Ventas
         paginaActualVentas = 1;
         renderTablaVentas();
     });
+    let formAnularToSubmit = null;
+    let modalAnular = null;
+
     document.querySelectorAll(".form-anular-venta").forEach(form => {
         form.addEventListener("submit", function (e) {
             e.preventDefault();
-
-            Swal.fire({
-                title: "¿Anular factura?",
-                text: "Esta acción devolverá el stock de los productos y marcará la factura como anulada.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#dc3545",
-                cancelButtonColor: "#6c757d",
-                confirmButtonText: "Sí, anular",
-                cancelButtonText: "Cancelar"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+            formAnularToSubmit = form;
+            if (!modalAnular) {
+                modalAnular = new bootstrap.Modal(document.getElementById("modalAnularFactura"));
+            }
+            modalAnular.show();
         });
+    });
+
+    document.getElementById("btnConfirmarAnular").addEventListener("click", function() {
+        if (formAnularToSubmit) {
+            formAnularToSubmit.submit();
+        }
     });
     window.addEventListener("load", renderTablaVentas);
 
     const btnTogglePanel = document.getElementById("btnTogglePanel");
-    const panelHistorialFacturas = document.getElementById("panelHistorialFacturas");
+    const panelOpciones = document.getElementById("panelOpciones");
     const iconTogglePanel = document.getElementById("iconTogglePanel");
     const textTogglePanel = document.getElementById("textTogglePanel");
 
-    btnTogglePanel.addEventListener("click", function () {
-        const oculto = panelHistorialFacturas.classList.toggle("d-none");
+    if (btnTogglePanel) {
+        btnTogglePanel.addEventListener("click", function () {
+            const oculto = panelOpciones.classList.toggle("d-none");
 
-        if (oculto) {
-            iconTogglePanel.className = "bi-chevron-down";
-            textTogglePanel.textContent = "Mostrar";
-        } else {
-            iconTogglePanel.className = "bi-chevron-up";
-            textTogglePanel.textContent = "Ocultar";
-        }
-    });
+            if (oculto) {
+                iconTogglePanel.className = "bi bi-chevron-down";
+                textTogglePanel.textContent = "Mostrar Opciones";
+            } else {
+                iconTogglePanel.className = "bi bi-chevron-up";
+                textTogglePanel.textContent = "Ocultar Opciones";
+            }
+        });
+    }
 </script>
 
 {% endblock %}

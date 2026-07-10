@@ -14,17 +14,26 @@ Clientes
     <!-- ===================================== -->
     <!-- BREADCRUMBS & TITULO -->
     <!-- ===================================== -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-            <li class="breadcrumb-item active text-blue" aria-current="page">Clientes</li>
-        </ol>
-    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+                <li class="breadcrumb-item active text-blue" aria-current="page">Clientes</li>
+            </ol>
+        </nav>
+        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm d-flex align-items-center gap-2" id="btnTogglePanel" style="border-radius: 20px;">
+            <i class="bi bi-chevron-down" id="iconTogglePanel"></i>
+            <span id="textTogglePanel">Mostrar Opciones</span>
+        </button>
+    </div>
 
     <!-- ===================================== -->
+    <!-- CONTENEDOR DE OPCIONES (KPIs + FORMULARIO) -->
+    <!-- ===================================== -->
+    <div id="panelOpciones" class="d-none">
     <!-- TARJETAS KPI -->
     <!-- ===================================== -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 d-none d-lg-flex">
         <!-- TOTAL CLIENTES -->
         <div class="col-md-3 col-sm-6">
             <div class="card kpi-card border-0 shadow-sm">
@@ -167,13 +176,14 @@ Clientes
                         id="btnLimpiar">
                         <i class="bi bi-arrow-counterclockwise"></i> Limpiar
                     </button>
-                </div>
-            </form>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    </div> <!-- FIN PANEL OPCIONES -->
 
     <!-- ===================================== -->
-    <!-- TABLA / LISTA DE CLIENTES -->
+    <!-- TABLA / LISTA DE CLIENTES-->
     <!-- ===================================== -->
     <div class="card border-0 shadow-sm">
         <div
@@ -206,13 +216,13 @@ Clientes
                 <table class="table align-middle table-hover border-light-subtle">
                     <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
                         <tr>
-                            <th class="px-3 py-3 text-center" style="width: 100px;">CÓDIGO</th>
+                            <th class="px-3 py-3 text-start" style="width: 60px;">CÓDIGO</th>
                             <th class="px-3 py-3">RAZÓN SOCIAL / NOMBRE</th>
                             <th class="px-3 py-3">TELÉFONO</th>
-                            <th class="px-3 py-3">EMAIL</th>
-                            <th class="px-3 py-3">CIUDAD</th>
-                            <th class="px-3 py-3">DIRECCIÓN</th>
-                            <th class="px-3 py-3 text-center" style="width: 120px;">ESTADO</th>
+                            <th class="px-3 py-3 text-center d-none d-lg-table-cell">EMAIL</th>
+                            <th class="px-3 py-3 d-none d-md-table-cell">CIUDAD</th>
+                            <th class="px-3 py-3 d-none d-md-table-cell">DIRECCIÓN</th>
+                            <th class="px-3 py-3 text-center d-none d-sm-table-cell" style="width: 120px;">ESTADO</th>
                             <th class="px-3 py-3 text-center" style="width: 100px;">ACC.</th>
                         </tr>
                     </thead>
@@ -225,7 +235,7 @@ Clientes
                             data-direccion="{{ cliente.direccion or '' }}"
                             data-estado="{% if cliente.estado %}ACTIVO{% else %}INACTIVO{% endif %}">
 
-                            <td class="px-3 py-3 text-center fw-semibold text-muted">
+                            <td class="px-3 py-3 text-start fw-semibold text-muted">
                                 {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
                             </td>
                             <td class="px-3 py-3 fw-bold text-dark">
@@ -234,20 +244,20 @@ Clientes
                             <td class="px-3 py-3 text-muted">
                                 {{ cliente.telefono or '-' }}
                             </td>
-                            <td class="px-3 py-3 text-blue fw-bold">
+                            <td class="px-3 py-3 text-center text-blue fw-bold d-none d-lg-table-cell">
                                 {{ cliente.email or '-' }}
                             </td>
-                            <td class="px-3 py-3 text-muted">
+                            <td class="px-3 py-3 text-muted d-none d-md-table-cell">
                                 {{ cliente.ciudad or '-' }}
                             </td>
-                            <td class="px-3 py-3 text-muted">
+                            <td class="px-3 py-3 text-muted d-none d-md-table-cell">
                                 {{ cliente.direccion or '-' }}
                             </td>
-                            <td class="px-3 py-3 text-center">
+                            <td class="px-3 py-3 text-center d-none d-sm-table-cell">
                                 {% if cliente.estado %}
-                                <span class="badge badge-activo px-3 py-2 rounded-pill fw-semibold">Activo</span>
+                                <span class="badge bg-success px-3 py-2 rounded-pill fw-semibold">Activo</span>
                                 {% else %}
-                                <span class="badge badge-inactivo px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
+                                <span class="badge bg-secondary px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
                                 {% endif %}
                             </td>
                             <td class="px-3 py-3 text-center">
@@ -287,8 +297,50 @@ Clientes
         </div>
     </div>
 </div>
+
+<!-- MODAL RESTAURAR CONTRASEÑA -->
+<div class="modal fade" id="modalRestaurarPassword" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #003891; color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-key me-2"></i>Restaurar contraseña
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-key text-primary mb-3" style="font-size: 3.5rem;"></i>
+                <p class="fs-5 mb-0">Se asignará una contraseña temporal y el cliente deberá cambiarla al iniciar sesión. ¿Desea continuar?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarRestaurar" style="background-color: #003891; border-color: #003891;">Sí, restaurar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const btnTogglePanel = document.getElementById("btnTogglePanel");
+    const panelOpciones = document.getElementById("panelOpciones");
+    const iconTogglePanel = document.getElementById("iconTogglePanel");
+    const textTogglePanel = document.getElementById("textTogglePanel");
+
+    if (btnTogglePanel) {
+        btnTogglePanel.addEventListener("click", function () {
+            const oculto = panelOpciones.classList.toggle("d-none");
+
+            if (oculto) {
+                iconTogglePanel.className = "bi bi-chevron-down";
+                textTogglePanel.textContent = "Mostrar Opciones";
+            } else {
+                iconTogglePanel.className = "bi bi-chevron-up";
+                textTogglePanel.textContent = "Ocultar Opciones";
+            }
+        });
+    }
+
     const form = document.getElementById("formClientes");
     const formTitle = document.getElementById("formTitle");
     const formCodigo = document.getElementById("form_codigo");
@@ -472,25 +524,24 @@ Clientes
     });
 
 
+    let formToSubmit = null;
+    let modalRestaurar = null;
+
     document.querySelectorAll(".form-restaurar-password").forEach(form => {
         form.addEventListener("submit", function (e) {
             e.preventDefault();
-
-            Swal.fire({
-                title: "Restaurar contraseña",
-                text: "Se asignará una contraseña temporal y el cliente deberá cambiarla al iniciar sesión.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#0d3f9f",
-                cancelButtonColor: "#6c757d",
-                confirmButtonText: "Sí, restaurar",
-                cancelButtonText: "Cancelar"
-            }).then(result => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+            formToSubmit = form;
+            if (!modalRestaurar) {
+                modalRestaurar = new bootstrap.Modal(document.getElementById("modalRestaurarPassword"));
+            }
+            modalRestaurar.show();
         });
+    });
+
+    document.getElementById("btnConfirmarRestaurar").addEventListener("click", function() {
+        if (formToSubmit) {
+            formToSubmit.submit();
+        }
     });
 
     // Inicializar paginación al cargar la página

@@ -150,7 +150,7 @@
 
 /* Table cells padding override */
 .table td, .table th {
-    padding: 0.4rem 0.75rem !important;
+    padding: 0.6rem 0.75rem !important;
     font-size: 13px;
 }
 
@@ -162,41 +162,81 @@ input[readonly] {
 
 /* Pagination Custom styling */
 .pagination .page-link {
-    color: #0f2c59;
+    color: #1f4fe0;
     border-color: #dee2e6;
     padding: 0.25rem 0.55rem;
-    font-size: 12px;
-    transition: all 0.15s;
+    font-size: 13px;
+    transition: all 0.2s ease;
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #0f2c59;
-    border-color: #0f2c59;
+    background-color: #1f4fe0;
+    border-color: #1f4fe0;
     color: #ffffff;
+    box-shadow: 0 2px 4px rgba(31, 79, 224, 0.3);
 }
 
 .pagination .page-link:hover {
-    background-color: #e7f1ff;
-    border-color: #dee2e6;
-    color: #0f2c59;
+    background-color: #eef2ff;
+    border-color: #c7d2fe;
+    color: #1f4fe0;
 }
 
+/* ==========================================
+   ESTILOS DE PAGO Y ABONO (VIDA Y COLOR)
+   ========================================== */
 .abono-inline-panel {
-    background: oklch(84.367% 0.05531 171.348);
-    border: 1px solid rgba(25, 135, 84, 0.25);
-    border-radius: 10px;
-    padding: 16px;
+    background: linear-gradient(145deg, #f0f7ff 0%, #e6f0fa 100%);
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: inset 0 2px 5px rgba(255,255,255,0.8), 0 4px 10px rgba(0, 56, 145, 0.05);
 }
 
 .fila-abono td {
-    background: #f8fffb;
+    background-color: transparent !important;
+    padding: 10px 15px !important;
+    border-bottom: none !important;
 }
 
 .abono-inline-panel .form-control,
 .abono-inline-panel .form-select {
-    background-color: rgba(255, 255, 255, 0.92);
+    background-color: #ffffff;
+    border: 1px solid #a5b4fc;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.abono-inline-panel .form-control:focus,
+.abono-inline-panel .form-select:focus {
+    border-color: #1f4fe0;
+    box-shadow: 0 0 0 0.25rem rgba(31, 79, 224, 0.15);
 }
 
 .abono-inline-panel .btn-success {
     white-space: nowrap;
+    background-color: #198754;
+    border: none;
+    box-shadow: 0 3px 6px rgba(25, 135, 84, 0.3);
+    transition: all 0.2s;
+}
+
+.abono-inline-panel .btn-success:hover {
+    background-color: #157347;
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Detalle de pagos tabla interna */
+.detalle-pagos .bg-light-green {
+    background: linear-gradient(to right, #ffffff, #f8fcf9);
+    border: 1px solid #d1e7dd !important;
+    border-left: 4px solid #198754 !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+}
+
+.detalle-pagos table thead th {
+    background-color: #198754 !important;
+    color: white !important;
+    border: none;
+    font-size: 12px;
 }

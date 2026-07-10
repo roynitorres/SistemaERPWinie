@@ -31,8 +31,9 @@ from routes.empresa import empresa_bp
 from routes.usuarios import usuarios_bp
 from routes.roles import roles_bp
 
-# APP
+from routes.reportes import reportes_bp
 
+# APP
 
 app = Flask(__name__)
 
@@ -62,6 +63,7 @@ app.register_blueprint(portal_cliente_bp)
 app.register_blueprint(empresa_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(roles_bp)
+app.register_blueprint(reportes_bp)
 # =========================
 # USER LOADER
 # =========================

@@ -4,166 +4,263 @@
 Información de la Empresa
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .empresa-card {
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border: none;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+    .empresa-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 56, 145, 0.08);
+    }
+    .empresa-logo-preview {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto;
+        border-radius: 15px;
+        border: 2px dashed #a5b4fc;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8fafc;
+        transition: all 0.3s ease;
+    }
+    .empresa-logo-preview:hover {
+        border-color: #1f4fe0;
+        background-color: #f0f7ff;
+    }
+    .card-header-gradient {
+        background: linear-gradient(135deg, #003891 0%, #1f4fe0 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.2rem 1.5rem;
+    }
+    .card-header-gradient h5 {
+        color: white !important;
+        margin: 0;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 0.6rem 0.85rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #1f4fe0;
+        box-shadow: 0 0 0 0.2rem rgba(31, 79, 224, 0.15);
+    }
+    .form-control:disabled, .form-select:disabled {
+        background-color: #f8fafc;
+        opacity: 0.8;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+    }
+    .section-title {
+        color: #003891;
+        font-weight: 700;
+        font-size: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .input-icon-wrapper {
+        position: relative;
+    }
+    .input-icon-wrapper i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    .input-icon-wrapper .form-control {
+        padding-left: 35px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="container-fluid py-3">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-            <li class="breadcrumb-item active text-primary">Información de la Empresa</li>
-        </ol>
-    </nav>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Configuración</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold">Información de la Empresa</li>
+            </ol>
+        </nav>
+    </div>
 
     <form method="POST" enctype="multipart/form-data" id="formEmpresa"
         data-tiene-empresa="{{ 'true' if empresa else 'false' }}">
-        <div class="row g-3">
-            <div class="col-lg-2">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center">
-                        <div class="empresa-logo-preview mb-3">
+        <div class="row g-4">
+            <!-- PANEL LATERAL: LOGO Y RESUMEN -->
+            <div class="col-lg-3">
+                <div class="card empresa-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="empresa-logo-preview mb-4">
                             {% if empresa and empresa.logo %}
-                            <img src="{{ url_for('static', filename=empresa.logo) }}" class="img-fluid rounded">
+                            <img src="{{ url_for('static', filename=empresa.logo) }}" class="img-fluid rounded" style="object-fit: contain; width: 100%; height: 100%;">
                             {% else %}
-                            <div class="bg-light rounded d-flex align-items-center justify-content-center"
-                                style="height: 130px;">
-                                <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
-                            </div>
+                            <i class="bi bi-building text-primary" style="font-size: 4rem; opacity: 0.5;"></i>
                             {% endif %}
                         </div>
 
-                        <h6 class="fw-bold mb-1">
-                            {{ empresa.razon_social if empresa else 'Empresa' }}
-                        </h6>
-
-                        <div class="text-muted small mb-1">
-                            RUC: {{ empresa.ruc if empresa and empresa.ruc else '-' }}
+                        <h5 class="fw-bold text-dark mb-1">
+                            {{ empresa.razon_social if empresa else 'Mi Empresa' }}
+                        </h5>
+                        
+                        <div class="text-muted small mb-3 fw-semibold">
+                            RUC: {{ empresa.ruc if empresa and empresa.ruc else 'No registrado' }}
                         </div>
 
-                        <span class="badge bg-success mb-3">
-                            Activo
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill mb-4 fw-semibold">
+                            <i class="bi bi-check-circle me-1"></i> Perfil Activo
                         </span>
 
-                        <label class="btn btn-outline-primary btn-sm w-100">
-                            <i class="bi bi-upload me-1"></i> Subir logo
+                        <label class="btn btn-outline-primary w-100 fw-semibold" style="border-radius: 8px;">
+                            <i class="bi bi-cloud-arrow-up me-2"></i> Actualizar Logo
                             <input type="file" name="logo" class="d-none" accept="image/*">
                         </label>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-10">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 pt-3 pb-0">
-                        <h5 class="card-title mb-0 fw-bold text-dark">
-                            Datos de la empresa
-                        </h5>
+            <!-- PANEL PRINCIPAL: FORMULARIO -->
+            <div class="col-lg-9">
+                <div class="card empresa-card">
+                    <div class="card-header card-header-gradient d-flex align-items-center">
+                        <i class="bi bi-building-gear fs-5 me-2 text-white"></i>
+                        <h5 class="card-title fw-bold">Perfil Institucional</h5>
                     </div>
 
-                    <div class="card-body">
-                        <div class="row g-3">
+                    <div class="card-body p-4">
+                        <h6 class="section-title"><i class="bi bi-info-circle me-2"></i>Datos Generales</h6>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-5">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">RAZÓN SOCIAL *</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-buildings"></i>
+                                    <input type="text" class="form-control fw-semibold" name="razon_social"
+                                        value="{{ empresa.razon_social if empresa else '' }}" required placeholder="Ej. Mi Empresa S.A.">
+                                </div>
+                            </div>
+
                             <div class="col-md-4">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">RAZÓN SOCIAL *</label>
-                                <input type="text" class="form-control" name="razon_social"
-                                    value="{{ empresa.razon_social if empresa else '' }}" required>
+                                <label class="form-label text-xs fw-bold text-muted mb-1">RUC *</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-upc-scan"></i>
+                                    <input type="text" class="form-control fw-semibold" name="ruc"
+                                        value="{{ empresa.ruc if empresa else '' }}" required placeholder="Número RUC">
+                                </div>
                             </div>
 
-                            <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">RUC</label>
-                                <input type="text" class="form-control" name="ruc"
-                                    value="{{ empresa.ruc if empresa else '' }}">
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">TIPO</label>
-                                <select class="form-select" name="tipo_empresa">
-                                    <option value="S.A." {% if empresa and empresa.tipo_empresa=='S.A.' %}selected{%
-                                        endif %}>S.A.</option>
-                                    <option value="S.A.C." {% if empresa and empresa.tipo_empresa=='S.A.C.' %}selected{%
-                                        endif %}>S.A.C.</option>
+                            <div class="col-md-3">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">TIPO DE SOCIEDAD</label>
+                                <select class="form-select fw-semibold" name="tipo_empresa">
+                                    <option value="S.A." {% if empresa and empresa.tipo_empresa=='S.A.' %}selected{% endif %}>S.A.</option>
+                                    <option value="S.A.C." {% if empresa and empresa.tipo_empresa=='S.A.C.' %}selected{% endif %}>S.A.C.</option>
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">DIRECCIÓN</label>
-                                <input type="text" class="form-control" name="direccion"
-                                    value="{{ empresa.direccion if empresa else '' }}">
+                            <div class="col-md-6">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">DIRECCIÓN FÍSICA</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <input type="text" class="form-control" name="direccion"
+                                        value="{{ empresa.direccion if empresa else '' }}" placeholder="Dirección completa">
+                                </div>
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">CIUDAD</label>
+                                <label class="form-label text-xs fw-bold text-muted mb-1">CIUDAD</label>
                                 <input type="text" class="form-control" name="ciudad"
-                                    value="{{ empresa.ciudad if empresa else '' }}">
+                                    value="{{ empresa.ciudad if empresa else '' }}" placeholder="Ej. Managua">
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">TELÉFONO</label>
-                                <input type="text" class="form-control" name="telefono"
-                                    value="{{ empresa.telefono if empresa else '' }}">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">TELÉFONO</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-telephone"></i>
+                                    <input type="text" class="form-control" name="telefono"
+                                        value="{{ empresa.telefono if empresa else '' }}" placeholder="Ej. +505 1234 5678">
+                                </div>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">EMAIL</label>
-                                <input type="email" class="form-control" name="email"
-                                    value="{{ empresa.email if empresa else '' }}">
+                            <div class="col-md-6">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">CORREO ELECTRÓNICO</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-envelope"></i>
+                                    <input type="email" class="form-control" name="email"
+                                        value="{{ empresa.email if empresa else '' }}" placeholder="contacto@empresa.com">
+                                </div>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">SITIO WEB</label>
-                                <input type="text" class="form-control" name="sitio_web"
-                                    value="{{ empresa.sitio_web if empresa else '' }}">
+                            <div class="col-md-6">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">SITIO WEB</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-globe"></i>
+                                    <input type="url" class="form-control" name="sitio_web"
+                                        value="{{ empresa.sitio_web if empresa else '' }}" placeholder="https://www.empresa.com">
+                                </div>
                             </div>
                         </div>
 
-                        <hr class="my-4">
-
-                        <h6 class="fw-bold text-dark mb-3">Configuración tributaria</h6>
-
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">RÉGIMEN</label>
+                        <h6 class="section-title mt-2"><i class="bi bi-receipt me-2"></i>Configuración Tributaria y Facturación</h6>
+                        <div class="row g-4 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">RÉGIMEN FISCAL</label>
                                 <select class="form-select" name="regimen">
-                                    <option value="Regimen General" {% if empresa and empresa.regimen=='Regimen General'
-                                        %}selected{% endif %}>Régimen General</option>
-                                    <option value="Regimen MiPYME Tributario" {% if empresa and
-                                        empresa.regimen=='Regimen MiPYME Tributario' %}selected{% endif %}>Régimen
-                                        MiPYME Tributario</option>
+                                    <option value="Regimen General" {% if empresa and empresa.regimen=='Regimen General' %}selected{% endif %}>Régimen General</option>
+                                    <option value="Regimen MiPYME Tributario" {% if empresa and empresa.regimen=='Regimen MiPYME Tributario' %}selected{% endif %}>Régimen MiPYME Tributario</option>
                                 </select>
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">SERIE FACTURA</label>
-                                <input type="text" class="form-control" name="serie_factura"
+                                <label class="form-label text-xs fw-bold text-muted mb-1">SERIE FAC.</label>
+                                <input type="text" class="form-control text-center fw-bold text-primary" name="serie_factura"
                                     value="{{ empresa.serie_factura if empresa else 'F001' }}">
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">CORRELATIVO</label>
-                                <input type="text" class="form-control" name="correlativo"
+                                <label class="form-label text-xs fw-bold text-muted mb-1">CORRELATIVO</label>
+                                <input type="text" class="form-control text-center fw-bold" name="correlativo"
                                     value="{{ empresa.correlativo if empresa else '00034' }}">
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">IVA (%)</label>
-                                <input type="number" class="form-control" name="iva" step="0.01"
-                                    value="{{ empresa.iva if empresa else 15 }}">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">IVA (%)</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="bi bi-percent"></i>
+                                    <input type="number" class="form-control fw-bold" name="iva" step="0.01"
+                                        value="{{ empresa.iva if empresa else 15 }}">
+                                </div>
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">ESTADO</label>
-                                <select class="form-select" name="estado">
+                            <div class="col-md-2">
+                                <label class="form-label text-xs fw-bold text-muted mb-1">ESTADO</label>
+                                <select class="form-select fw-semibold" name="estado">
                                     <option value="ACTIVO" selected>Activo</option>
                                     <option value="INACTIVO">Inactivo</option>
                                 </select>
                             </div>
-
-                            <div class="col-12 d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-warning text-white fw-semibold"
+                        </div>
+                        
+                        <div class="row mt-5">
+                            <div class="col-12 d-flex justify-content-end gap-3 border-top pt-4">
+                                <button type="button" class="btn btn-light border px-4 fw-semibold text-warning"
                                     id="btnEditarEmpresa">
-                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                    <i class="bi bi-pencil-square me-2"></i> Habilitar Edición
                                 </button>
 
-                                <button type="submit" class="btn btn-success fw-semibold" id="btnGuardarEmpresa">
-                                    <i class="bi bi-floppy me-1"></i> Guardar
+                                <button type="submit" class="btn btn-primary px-5 fw-semibold shadow-sm" id="btnGuardarEmpresa">
+                                    <i class="bi bi-floppy me-2"></i> Guardar Cambios
                                 </button>
                             </div>
                         </div>
@@ -173,10 +270,35 @@ Información de la Empresa
         </div>
     </form>
 </div>
+
+<!-- MODAL CONFIRMAR EDICIÓN -->
+<div class="modal fade" id="modalConfirmarEdicion" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header" style="background-color: #003891; color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>¿Habilitar edición?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 py-4">
+                <p class="fs-6 mb-0 text-muted">
+                    Advertencia: estos datos son sensibles y alterarán la información tributaria y facturación del sistema.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarEdicionModal" style="background-color: #003891; border-color: #003891;">Sí, editar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const btnEditarEmpresa = document.getElementById("btnEditarEmpresa");
     const formEmpresa = document.getElementById("formEmpresa");
     const btnGuardarEmpresa = document.getElementById("btnGuardarEmpresa");
+    let modalEdicionInstancia = null;
 
     const tieneEmpresa = formEmpresa.dataset.tieneEmpresa === "true";
 
@@ -198,25 +320,30 @@ Información de la Empresa
         bloquearCamposEmpresa();
         btnGuardarEmpresa.disabled = true;
         btnEditarEmpresa.disabled = false;
+        btnEditarEmpresa.classList.remove('d-none');
     } else {
         habilitarCamposEmpresa();
         btnEditarEmpresa.disabled = true;
+        btnEditarEmpresa.classList.add('d-none');
         btnGuardarEmpresa.disabled = false;
     }
 
     btnEditarEmpresa.addEventListener("click", function () {
-        const confirmar = confirm(
-            "Advertencia: estos datos son sensibles y pueden alterar la información del sistema. ¿Desea habilitar la edición?"
-        );
-
-        if (!confirmar) {
-            return;
+        if (!modalEdicionInstancia) {
+            modalEdicionInstancia = new bootstrap.Modal(document.getElementById('modalConfirmarEdicion'));
         }
+        modalEdicionInstancia.show();
+    });
 
+    document.getElementById("btnConfirmarEdicionModal").addEventListener("click", function () {
+        modalEdicionInstancia.hide();
         habilitarCamposEmpresa();
-
         btnEditarEmpresa.disabled = true;
         btnGuardarEmpresa.disabled = false;
+        
+        // Cambiar el estilo del botón para mostrar que estamos en modo edición
+        btnEditarEmpresa.classList.replace('text-warning', 'text-muted');
+        btnEditarEmpresa.innerHTML = '<i class="bi bi-unlock me-2"></i> Modo Edición Activo';
     });
 </script>
 {% endblock %}

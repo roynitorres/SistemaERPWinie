@@ -13,7 +13,7 @@ Registrar Pagos
     <!-- ===================================== -->
     <!-- BREADCRUMBS & TITULO -->
     <!-- ===================================== -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
@@ -21,16 +21,15 @@ Registrar Pagos
             </ol>
         </nav>
 
-        <button type="button" class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2"
-            id="btnToggleKpis">
-            <i class="bi bi-eye-slash" id="iconToggleKpis"></i>
-            <span id="textToggleKpis">Ocultar KPIs</span>
+        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm d-none d-md-flex align-items-center gap-2" id="btnTogglePanel" style="border-radius: 20px;">
+            <i class="bi bi-chevron-down" id="iconTogglePanel"></i>
+            <span id="textTogglePanel">Mostrar Opciones</span>
         </button>
     </div>
     <!-- ===================================== -->
-    <!-- TARJETAS KPI -->
+    <!-- CONTENEDOR DE OPCIONES (KPIs + FORMULARIO) -->
     <!-- ===================================== -->
-    <div class="row g-3 mb-4" id="panelKpisPagos">
+    <div class="row g-3 mb-4 d-none" id="panelOpciones">
         <!-- TOTAL FACTURADO -->
         <div class="col-md-3 col-sm-6">
             <div class="card kpi-card border-0 shadow-sm">
@@ -97,7 +96,7 @@ Registrar Pagos
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- FIN PANEL OPCIONES -->
 
     <!-- ===================================== -->
     <!-- TABLA / LISTA DE CLIENTES -->
@@ -114,12 +113,17 @@ Registrar Pagos
                         placeholder="Buscar cliente o factura..." style="min-height: 38px; width: 260px;">
                 </div>
 
-                <div class="position-relative">
-                    <select class="form-select border-light-subtle fw-semibold" id="filtro_estado_cxc">
-                        <option value="TODAS">Todas</option>
-                        <option value="PAGADAS">Pagadas</option>
-                        <option value="PENDIENTES">Pendientes</option>
-                    </select>
+                <div>
+                    <div class="input-group shadow-sm" style="min-width: 240px; min-height: 38px;">
+                        <span class="input-group-text bg-primary text-white border-primary">
+                            <i class="bi bi-funnel-fill"></i>
+                        </span>
+                        <select class="form-select border-primary fw-bold text-primary" id="filtro_estado_cxc">
+                            <option value="TODAS">Todas las facturas</option>
+                            <option value="PAGADAS">Solo Pagadas</option>
+                            <option value="PENDIENTES">Solo Pendientes</option>
+                        </select>
+                    </div>
                 </div>
 
                 <a href="{{ url_for('clientes.exportar_clientes') }}"
@@ -137,12 +141,12 @@ Registrar Pagos
                             <th class="px-3 py-3 text-center"></th>
                             <th class="px-3 py-3">FACTURA</th>
                             <th class="px-3 py-3">CLIENTE</th>
-                            <th class="px-3 py-3">FECHA VENCIMIENTO</th>
-                            <th class="px-3 py-3">TOTAL</th>
-                            <th class="px-3 py-3">ABONOS</th>
+                            <th class="px-3 py-3 d-none d-lg-table-cell">FECHA VENCIMIENTO</th>
+                            <th class="px-3 py-3 d-none d-sm-table-cell">TOTAL</th>
+                            <th class="px-3 py-3 d-none d-md-table-cell">ABONOS</th>
                             <th class="px-3 py-3">SALDOS</th>
-                            <th class="px-3 py-3">FORMA DE PAGO</th>
-                            <th class="px-3 py-3 text-center" style="width: 120px;">ESTADO</th>
+                            <th class="px-3 py-3 d-none d-lg-table-cell">FORMA DE PAGO</th>
+                            <th class="px-3 py-3 text-center d-none d-sm-table-cell" style="width: 120px;">ESTADO</th>
                             <th class="px-3 py-3 text-center" style="width: 100px;">ACC.</th>
                         </tr>
                     </thead>
@@ -163,14 +167,14 @@ Registrar Pagos
                             <td><i class="bi bi-chevron-right" id="icono{{ venta.id }}"></i></td>
                             <td>{{ venta.numero_factura }}</td>
                             <td>{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</td>
-                            <td>{{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else
+                            <td class="d-none d-lg-table-cell">{{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else
                                 '-' }}
                             </td>
-                            <td class="text-end text-dark fw-bold"> C$ {{ "%.2f"|format(venta.total_venta) }}</td>
-                            <td class="text-end text-green fw-bold">C$ {{ "%.2f"|format(total_abonado.valor) }}</td>
+                            <td class="text-end text-dark fw-bold d-none d-sm-table-cell"> C$ {{ "%.2f"|format(venta.total_venta) }}</td>
+                            <td class="text-end text-green fw-bold d-none d-md-table-cell">C$ {{ "%.2f"|format(total_abonado.valor) }}</td>
                             <td class="text-end text-secondary fw-bold">C$ {{ "%.2f"|format(saldo_pendiente) }}</td>
-                            <td>{{ venta.tipo_venta }}</td>
-                            <td>{% if saldo_pendiente <= 0 %} <span class="badge bg-success">
+                            <td class="d-none d-lg-table-cell">{{ venta.tipo_venta }}</td>
+                            <td class="d-none d-sm-table-cell">{% if saldo_pendiente <= 0 %} <span class="badge bg-success">
                                     CANCELADA
                                     </span>
                                     {% else %}
@@ -339,25 +343,68 @@ Registrar Pagos
 
 
 
+<!-- MODAL ANULAR PAGO -->
+<div class="modal fade" id="modalAnularPago" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #003891; color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Anular pago
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-exclamation-triangle text-danger mb-3" style="font-size: 3.5rem;"></i>
+                <p class="fs-5 mb-3">Indique el motivo para anular este pago.</p>
+                <div class="mb-3 text-start">
+                    <label for="motivoAnulacionPago" class="form-label">Motivo de anulación</label>
+                    <textarea class="form-control" id="motivoAnulacionPago" rows="3" placeholder="Indique el motivo..."></textarea>
+                    <div class="invalid-feedback">Debe indicar el motivo.</div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarAnularPago" style="background-color: #dc3545;">Anular</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ALERTA GENÉRICA -->
+<div class="modal fade" id="modalAlertaPago" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-4">
+                <i id="alertaPagoIcono" class="bi bi-exclamation-triangle text-warning mb-3" style="font-size: 4rem;"></i>
+                <h5 class="fw-bold mb-2" id="alertaPagoTitulo">Aviso</h5>
+                <p class="text-muted mb-4" id="alertaPagoMensaje">Mensaje de alerta.</p>
+                <button type="button" class="btn btn-primary px-4 fw-semibold" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const btnToggleKpis = document.getElementById("btnToggleKpis");
-    const panelKpisPagos = document.getElementById("panelKpisPagos");
-    const iconToggleKpis = document.getElementById("iconToggleKpis");
-    const textToggleKpis = document.getElementById("textToggleKpis");
+    const btnTogglePanel = document.getElementById("btnTogglePanel");
+    const panelOpciones = document.getElementById("panelOpciones");
+    const iconTogglePanel = document.getElementById("iconTogglePanel");
+    const textTogglePanel = document.getElementById("textTogglePanel");
     const buscarClienteCxc = document.getElementById("buscarClienteCxc");
 
-    btnToggleKpis.addEventListener("click", function () {
-        const oculto = panelKpisPagos.classList.toggle("d-none");
+    if (btnTogglePanel) {
+        btnTogglePanel.addEventListener("click", function () {
+            const oculto = panelOpciones.classList.toggle("d-none");
 
-        if (oculto) {
-            iconToggleKpis.className = "bi bi-eye";
-            textToggleKpis.textContent = "Mostrar KPIs";
-        } else {
-            iconToggleKpis.className = "bi bi-eye-slash";
-            textToggleKpis.textContent = "Ocultar KPIs";
-        }
-    });
+            if (oculto) {
+                iconTogglePanel.className = "bi bi-chevron-down";
+                textTogglePanel.textContent = "Mostrar Opciones";
+            } else {
+                iconTogglePanel.className = "bi bi-chevron-up";
+                textTogglePanel.textContent = "Ocultar Opciones";
+            }
+        });
+    }
 
     document.querySelectorAll(".btn-abonar").forEach(btn => {
         btn.addEventListener("click", function (e) {
@@ -404,6 +451,20 @@ Registrar Pagos
         });
     });
 
+    let modalAlertaPagoInstancia = null;
+    function mostrarAlertaPago(titulo, mensaje, icono = 'bi-exclamation-triangle', color = 'text-warning') {
+        document.getElementById('alertaPagoTitulo').innerText = titulo;
+        document.getElementById('alertaPagoMensaje').innerText = mensaje;
+        
+        const iconoElement = document.getElementById('alertaPagoIcono');
+        iconoElement.className = `bi ${icono} ${color} mb-3`;
+
+        if (!modalAlertaPagoInstancia) {
+            modalAlertaPagoInstancia = new bootstrap.Modal(document.getElementById('modalAlertaPago'));
+        }
+        modalAlertaPagoInstancia.show();
+    }
+
     document.querySelectorAll(".form-abono-inline").forEach(form => {
         form.addEventListener("submit", async function (e) {
             e.preventDefault();
@@ -414,22 +475,22 @@ Registrar Pagos
             const fecha = this.querySelector(".input-fecha").value;
 
             if (monto <= 0) {
-                Swal.fire("Monto inválido", "Ingrese un monto de abono mayor a cero.", "warning");
+                mostrarAlertaPago("Monto inválido", "Ingrese un monto de abono mayor a cero.", "bi-exclamation-circle", "text-warning");
                 return;
             }
 
             if (monto > saldo) {
-                Swal.fire("Monto inválido", "El abono no puede superar el saldo pendiente.", "warning");
+                mostrarAlertaPago("Monto inválido", "El abono no puede superar el saldo pendiente.", "bi-exclamation-circle", "text-warning");
                 return;
             }
 
             if (!forma) {
-                Swal.fire("Forma de pago requerida", "Seleccione una forma de pago.", "warning");
+                mostrarAlertaPago("Forma de pago", "Seleccione una forma de pago.", "bi-info-circle", "text-info");
                 return;
             }
 
             if (!fecha) {
-                Swal.fire("Fecha requerida", "Seleccione la fecha del abono.", "warning");
+                mostrarAlertaPago("Fecha requerida", "Seleccione la fecha del abono.", "bi-calendar-x", "text-warning");
                 return;
             }
 
@@ -443,61 +504,58 @@ Registrar Pagos
             const resultado = await respuesta.json();
 
             if (resultado.success) {
-                Swal.fire("Registrado", resultado.message, "success")
-                    .then(() => location.reload());
+                mostrarAlertaPago("Registrado", resultado.message, "bi-check-circle", "text-success");
+                setTimeout(() => location.reload(), 1500);
             } else {
-                Swal.fire("Error", resultado.message, "error");
+                mostrarAlertaPago("Error", resultado.message, "bi-x-circle", "text-danger");
             }
         });
     });
 
 
+    let pagoIdToCancel = null;
+    let modalAnularPago = null;
+    const txtMotivoAnulacion = document.getElementById("motivoAnulacionPago");
+
     document.querySelectorAll(".btn-anular-pago").forEach(btn => {
-        btn.addEventListener("click", async function (e) {
+        btn.addEventListener("click", function (e) {
             e.stopPropagation();
-
-            const pagoId = this.dataset.id;
-
-            const result = await Swal.fire({
-                title: "Anular pago",
-                input: "textarea",
-                inputLabel: "Motivo de anulación",
-                inputPlaceholder: "Indique el motivo...",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Anular",
-                cancelButtonText: "Cancelar",
-                confirmButtonColor: "#dc3545",
-                inputValidator: value => {
-                    if (!value) {
-                        return "Debe indicar el motivo";
-                    }
-                }
-            });
-
-            if (!result.isConfirmed) {
-                return;
+            pagoIdToCancel = this.dataset.id;
+            txtMotivoAnulacion.value = "";
+            txtMotivoAnulacion.classList.remove("is-invalid");
+            if (!modalAnularPago) {
+                modalAnularPago = new bootstrap.Modal(document.getElementById("modalAnularPago"));
             }
-
-            const respuesta = await fetch(`/anular-pago/${pagoId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    motivo: result.value
-                })
-            });
-
-            const resultado = await respuesta.json();
-
-            if (resultado.success) {
-                Swal.fire("Anulado", resultado.message, "success")
-                    .then(() => location.reload());
-            } else {
-                Swal.fire("Error", resultado.message, "error");
-            }
+            modalAnularPago.show();
         });
+    });
+
+    document.getElementById("btnConfirmarAnularPago").addEventListener("click", async function() {
+        const motivo = txtMotivoAnulacion.value.trim();
+        if (!motivo) {
+            txtMotivoAnulacion.classList.add("is-invalid");
+            return;
+        }
+
+        txtMotivoAnulacion.classList.remove("is-invalid");
+        modalAnularPago.hide();
+
+        const respuesta = await fetch(`/anular-pago/${pagoIdToCancel}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ motivo: motivo })
+        });
+
+        const resultado = await respuesta.json();
+
+        if (resultado.success) {
+            mostrarAlertaPago("Anulado", resultado.message, "bi-check-circle", "text-success");
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            mostrarAlertaPago("Error", resultado.message, "bi-x-circle", "text-danger");
+        }
     });
 
     //Despliega el acordeon

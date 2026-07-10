@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}
 Dashboard
@@ -9,10 +9,15 @@ Dashboard
     <section class="dashboard-hero mb-4">
         <div>
             <h3 class="fw-bold mb-1">{{ saludo }}, {{ current_user.username.title() }}</h3>
-            <div class="hero-meta">
+            <div class="hero-meta d-flex align-items-center">
                 <span>{{ fecha_larga }}</span>
                 <span class="mx-2">|</span>
                 <span id="horaActual"></span>
+                <button type="button" class="btn btn-sm ms-3 text-white fw-bold d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalClientesCobrar" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px;">
+                    <i class="bi bi-bell-fill text-warning"></i>
+                    Clientes a cobrar hoy
+                    <span class="badge bg-danger ms-1 rounded-pill">{{ clientes_a_cobrar|length }}</span>
+                </button>
             </div>
         </div>
         <div class="hero-badge">
@@ -106,39 +111,61 @@ Dashboard
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2 text-primary"></i>Clientes a cobrar hoy</h5>
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ clientes_a_cobrar|length }} registros</span>
-        </div>
-        <div class="card-body pt-0">
-            <div class="table-responsive">
-                <table class="table align-middle table-hover dashboard-table">
-                    <thead class="bg-light text-muted">
-                        <tr>
-                            <th>Cliente</th>
-                            <th class="text-center">Estado</th>
-                            <th class="text-center">Dias en mora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in clientes_a_cobrar %}
-                        <tr>
-                            <td class="fw-semibold">{{ item.cliente }}</td>
-                            <td class="text-center">
-                                {% if item.estado == 'Moroso' %}
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Moroso</span>
+    <!-- MODAL CLIENTES A COBRAR -->
+    <div class="modal fade" id="modalClientesCobrar" tabindex="-1" aria-labelledby="modalClientesCobrarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header" style="background-color: #003891; color: white;">
+                    <h5 class="modal-title fw-bold" id="modalClientesCobrarLabel">
+                        <i class="bi bi-calendar-check me-2"></i>Clientes a cobrar hoy
+                        <span class="badge bg-light text-primary ms-2 rounded-pill">{{ clientes_a_cobrar|length }} registros</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle table-hover mb-0">
+                            <thead class="bg-light text-muted uppercase text-xs fw-bold">
+                                <tr>
+                                    <th class="px-3 py-3 text-center" style="width: 50px;">#</th>
+                                    <th class="px-3 py-3">CLIENTE</th>
+                                    <th class="px-3 py-3 text-center">ESTADO</th>
+                                    <th class="px-3 py-3 text-center">DÍAS MORA</th>
+                                    <th class="px-3 py-3 text-center">ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in clientes_a_cobrar %}
+                                <tr>
+                                    <td class="px-3 py-3 text-center fw-bold text-muted">{{ loop.index }}</td>
+                                    <td class="px-3 py-3 fw-semibold text-dark">{{ item.cliente }}</td>
+                                    <td class="px-3 py-3 text-center">
+                                        {% if item.estado == 'Moroso' %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill">Moroso</span>
+                                        {% else %}
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded-pill">Cobrar hoy</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-center fw-bold">{{ item.dias }}</td>
+                                    <td class="px-3 py-3 text-center">
+                                        <a href="https://wa.me/{{ item.telefono|default('', true) }}?text=Hola%20{{ item.cliente | urlencode }},%20le%20recordamos%20que%20tiene%20un%20pago%20pendiente%20por%20realizar.%20Por%20favor,%20comuníquese%20con%20nosotros." class="btn btn-sm btn-success rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" target="_blank">
+                                            <i class="bi bi-whatsapp"></i> WhatsApp
+                                        </a>
+                                    </td>
+                                </tr>
                                 {% else %}
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Cobrar hoy</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center fw-bold">{{ item.dias }}</td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="3" class="text-center text-muted py-4">No hay clientes pendientes para hoy</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <tr><td colspan="5" class="text-center text-muted py-5">
+                                    <i class="bi bi-emoji-smile fs-1 d-block mb-2"></i>
+                                    No hay clientes pendientes para hoy
+                                </td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center bg-light">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -182,7 +209,7 @@ Dashboard
     new Chart(document.getElementById("chartFacturasTipo"), { type:"doughnut", data:{ labels:chartData.facturas_tipo.labels, datasets:[{ data:chartData.facturas_tipo.values, backgroundColor:[colors[0], colors[2]], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:"bottom" } }, cutout:"62%" } });
     new Chart(document.getElementById("chartPagosEstado"), { type:"pie", data:{ labels:chartData.pagos_estado.labels, datasets:[{ data:chartData.pagos_estado.values, backgroundColor:[colors[1], colors[3]], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:"bottom" } } } });
     new Chart(document.getElementById("chartVentas7"), { type:"line", data:{ labels:chartData.ventas_7_dias.labels, datasets:[{ data:chartData.ventas_7_dias.values, borderColor:colors[0], backgroundColor:"rgba(13,63,159,.12)", fill:true, tension:.35 }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } });
-    new Chart(document.getElementById("chartTopProductos"), { type:"bar", data:{ labels:chartData.top_productos.labels, datasets:[{ data:chartData.top_productos.values, backgroundColor:colors[2], borderRadius:6 }] }, options:{ indexAxis:"y", plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } } });
+    new Chart(document.getElementById("chartTopProductos"), { type:"bar", data:{ labels:chartData.top_productos.labels, datasets:[{ data:chartData.top_productos.values, backgroundColor:colors[2], borderRadius:6 }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } } });
 </script>
 
 {% endblock %}

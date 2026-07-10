@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}
+Reporte Financiero Mensual
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-3px);
+    }
+    .kpi-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+    .bg-light-success { background-color: #d1fae5; color: #059669; }
+    .bg-light-danger { background-color: #fee2e2; color: #dc2626; }
+    .bg-light-primary { background-color: #dbeafe; color: #2563eb; }
+    .bg-light-warning { background-color: #fef3c7; color: #d97706; }
+    .bg-light-info { background-color: #cffafe; color: #0891b2; }
+
+    .stat-panel {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        padding: 1.5rem;
+    }
+    
+    .scrollable-table-container {
+        max-height: 280px; 
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+    .scrollable-table-container thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8fafc;
+        z-index: 1;
+        box-shadow: 0 1px 0 #e2e8f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <!-- ENCABEZADO Y FILTRO -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Reportes</a></li>
+                    <li class="breadcrumb-item active text-primary fw-semibold">Dashboard Mensual</li>
+                </ol>
+            </nav>
+            <h4 class="fw-bold mb-0 text-dark">
+                Análisis de {{ meses[mes_actual] }} {{ anio_actual }}
+            </h4>
+        </div>
+
+        <form method="GET" action="{{ url_for('reportes.financiero') }}" class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm border">
+            <i class="bi bi-calendar3 text-muted ms-2"></i>
+            <select name="mes" class="form-select form-select-sm border-0 fw-semibold" style="width: auto; box-shadow: none;">
+                {% for num, nombre in meses.items() %}
+                <option value="{{ num }}" {% if num == mes_actual %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+            <select name="anio" class="form-select form-select-sm border-0 fw-semibold border-start" style="width: auto; box-shadow: none;">
+                {% for a in anios %}
+                <option value="{{ a }}" {% if a == anio_actual %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm ms-2 fw-semibold px-3 rounded">Consultar</button>
+        </form>
+    </div>
+
+    <!-- KPIs PRINCIPALES -->
+    <div class="row g-3 mb-4">
+        
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="kpi-icon bg-light-info me-3">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-0 text-xs fw-bold">Nuevos Clientes</h6>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-0 ms-1">{{ clientes_nuevos }} <span class="text-muted fs-6 fw-normal">registrados</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card kpi-card h-100 border-primary border-bottom border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="kpi-icon bg-light-primary me-3">
+                            <i class="bi bi-cart-check"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-0 text-xs fw-bold">Ventas Totales</h6>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-primary mb-0 ms-1">C$ {{ "%.2f"|format(ventas_totales) }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="kpi-icon bg-light-danger me-3">
+                            <i class="bi bi-graph-down-arrow"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-0 text-xs fw-bold">Costo de Venta</h6>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-danger mb-0 ms-1">C$ {{ "%.2f"|format(costos_totales) }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="kpi-icon bg-light-success me-3">
+                            <i class="bi bi-piggy-bank"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-0 text-xs fw-bold">Ganancia Neta</h6>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-success mb-0 ms-1">C$ {{ "%.2f"|format(ganancia_aproximada) }}</h3>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- SEGUNDA FILA: FLUJO E INVENTARIO -->
+    <div class="row g-4 mb-4">
+        <!-- Flujo de Caja -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-cash-stack text-success me-2"></i>Flujo de Caja Real</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="stat-panel text-center">
+                                <span class="text-muted text-xs fw-bold d-block mb-1">PAGOS RECOGIDOS</span>
+                                <h4 class="text-success fw-bold mb-0">C$ {{ "%.2f"|format(pagos_recogidos) }}</h4>
+                                <small class="text-muted">Cobros físicos ingresados</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="stat-panel text-center">
+                                <span class="text-muted text-xs fw-bold d-block mb-1">INVERSIÓN COMPRAS</span>
+                                <h4 class="text-danger fw-bold mb-0">C$ {{ "%.2f"|format(inversion_mes) }}</h4>
+                                <small class="text-muted">Nuevos productos añadidos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rendimiento de Producto -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-star text-warning me-2"></i>Rendimiento de Productos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="stat-panel border-success-subtle bg-success-subtle bg-opacity-10">
+                                <span class="text-success text-xs fw-bold d-block mb-2"><i class="bi bi-arrow-up-circle me-1"></i>MÁS VENDIDO</span>
+                                {% if producto_mas_vendido %}
+                                <h6 class="fw-bold mb-1 text-dark text-truncate" title="{{ producto_mas_vendido.nombre }}">{{ producto_mas_vendido.nombre }}</h6>
+                                <span class="badge bg-success">{{ "%.0f"|format(producto_mas_vendido.cantidad_vendida) }} unidades</span>
+                                {% else %}
+                                <span class="text-muted small">Sin datos en este mes</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="stat-panel border-danger-subtle bg-danger-subtle bg-opacity-10">
+                                <span class="text-danger text-xs fw-bold d-block mb-2"><i class="bi bi-arrow-down-circle me-1"></i>MENOS VENDIDO</span>
+                                {% if producto_menos_vendido %}
+                                <h6 class="fw-bold mb-1 text-dark text-truncate" title="{{ producto_menos_vendido.nombre }}">{{ producto_menos_vendido.nombre }}</h6>
+                                <span class="badge bg-danger">{{ "%.0f"|format(producto_menos_vendido.cantidad_vendida) }} unidades</span>
+                                {% else %}
+                                <span class="text-muted small">Sin datos en este mes</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERCERA FILA: PRODUCTOS SIN MOVIMIENTO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 pt-4 pb-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h6 class="card-title fw-bold mb-0">
+                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>Productos Sin Movimiento 
+                        <span class="badge bg-secondary ms-2 rounded-pill">{{ productos_sin_movimiento|length }}</span>
+                    </h6>
+                    <small class="text-muted">Activos en inventario con 0 ventas en el mes seleccionado.</small>
+                </div>
+                <div class="card-body p-3">
+                    {% if productos_sin_movimiento %}
+                    <div class="scrollable-table-container custom-scrollbar">
+                        <table class="table table-hover align-middle mb-0 text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3" style="width: 50px;">#</th>
+                                    <th>CÓDIGO</th>
+                                    <th>PRODUCTO</th>
+                                    <th>MARCA</th>
+                                    <th class="text-center">STOCK ACTUAL</th>
+                                    <th class="text-end pe-3">PRECIO VENTA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in productos_sin_movimiento %}
+                                <tr>
+                                    <td class="ps-3 text-muted fw-bold">{{ loop.index }}</td>
+                                    <td><span class="badge bg-light text-dark border">{{ p.codigo_producto }}</span></td>
+                                    <td class="fw-semibold text-dark">{{ p.nombre }}</td>
+                                    <td class="text-muted">{{ p.marca }}</td>
+                                    <td class="text-center">
+                                        {% if p.stock > 0 %}
+                                            <span class="badge bg-primary-subtle text-primary">{{ p.stock }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger-subtle text-danger">Agotado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-3 fw-semibold">C$ {{ "%.2f"|format(p.precio_venta) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle text-success fs-1 mb-2 d-block"></i>
+                        <p class="mb-0 fw-semibold">¡Excelente! Todos los productos registraron ventas en este mes.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -129,7 +129,7 @@
 
                     <!-- REPORTES -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link {% if request.endpoint == 'reportes.financiero' %}active{% endif %}" href="{{ url_for('reportes.financiero') }}">
                             <i class="bi bi-bar-chart-line me-1"></i> Reportes
                         </a>
                     </li>
@@ -300,57 +300,24 @@
     <!-- ===================================== -->
 
     <div class="modal fade" id="modalLogout" tabindex="-1">
-
         <div class="modal-dialog modal-dialog-centered">
-
             <div class="modal-content">
-
-                <!-- HEADER -->
-
-                <div class="modal-header">
-
+                <div class="modal-header" style="background-color: #003891; color: white;">
                     <h5 class="modal-title">
-
-                        Confirmar salida
-
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
                     </h5>
-
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <!-- BODY -->
-
-                <div class="modal-body">
-
-                    ¿Desea cerrar sesión?
-
+                <div class="modal-body text-center">
+                    <i class="bi bi-door-open text-primary mb-3" style="font-size: 3.5rem;"></i>
+                    <p class="fs-5 mb-0">¿Estás seguro de que deseas salir del sistema?</p>
                 </div>
-
-                <!-- FOOTER -->
-
-                <div class="modal-footer">
-
-                    <!-- CANCELAR -->
-
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-
-                        Cancelar
-
-                    </button>
-
-                    <!-- SALIR -->
-
-                    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">
-
-                        Cerrar Sesión
-
-                    </a>
-
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary" style="background-color: #003891; border-color: #003891;">Sí, salir</a>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
     <script>
