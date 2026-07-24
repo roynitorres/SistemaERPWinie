@@ -19,6 +19,7 @@ from database import db
 from models.cliente import Cliente
 from models.venta import Venta
 from models.pago import Pago
+from models.empresa import Empresa
 from utils.permisos import roles_required
 
 # Fechas
@@ -36,18 +37,29 @@ pagos_bp = Blueprint("pagos",__name__)
 # VISTA PRINCIPAL PAGOS
 # ==================================================
 
-@pagos_bp.route("/pagos",methods=["GET"])
+@pagos_bp.route("/facturas/<tipo>", defaults={"estado": "todas"}, methods=["GET"])
+@pagos_bp.route("/facturas/<tipo>/<estado>", methods=["GET"])
 @login_required
 @roles_required("ADMIN", "VENDEDOR")
-def pagos():
+def facturas(tipo, estado):
+    if tipo not in ["contado", "credito"]:
+        flash("Tipo de factura inválido.", "error")
+        return redirect(url_for("dashboard.dashboard"))
+        
+    if estado not in ["todas", "pagadas", "pendientes"]:
+        estado = "todas"
+
+    tipo_filtro = "CONTADO" if tipo == "contado" else "CREDITO"
+
     clientes = Cliente.query.order_by(Cliente.nombres.asc()).all()
-    ventas = Venta.query.order_by(Venta.fecha_venta.desc()).all()
+    ventas = Venta.query.filter_by(tipo_venta=tipo_filtro).order_by(Venta.fecha_venta.desc()).all()
     
     total_facturado_pagado = 0
     total_facturas = 0
     facturas_pagadas = 0
     facturas_pendientes = 0
     ventas_pendientes = []
+    ventas_filtradas = []
     
     for venta in ventas:
         if venta.estado != "ACTIVA":
@@ -63,12 +75,21 @@ def pagos():
     
         saldo = float(venta.total_venta) - total_abonado
     
-        if saldo <= 0:
+        es_pagada = saldo <= 0
+
+        if es_pagada:
             facturas_pagadas += 1
             total_facturado_pagado += float(venta.total_venta)
         else:
             facturas_pendientes += 1
             ventas_pendientes.append(venta)
+
+        if estado == "todas":
+            ventas_filtradas.append(venta)
+        elif estado == "pagadas" and es_pagada:
+            ventas_filtradas.append(venta)
+        elif estado == "pendientes" and not es_pagada:
+            ventas_filtradas.append(venta)
     
     kpis = {
         "total_facturado_pagado": total_facturado_pagado,
@@ -78,13 +99,19 @@ def pagos():
     }
     
 
+    if tipo_filtro == "CONTADO":
+        plantilla = "pagos/pagos_contado.html"
+    else:
+        plantilla = "pagos/pagos_credito.html"
 
     return render_template(
-        "pagos/pagos.html",
+        plantilla,
         clientes=clientes,
-        ventas=ventas,
+        ventas=ventas_filtradas,
         ventas_pendientes=ventas_pendientes,
-        kpis=kpis
+        kpis=kpis,
+        tipo_factura=tipo_filtro,
+        estado_factura=estado
     )
 
 
@@ -257,3 +284,54 @@ def anular_pago(pago_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False,"message": str(e)})
+
+# ==================================================
+# FACTURA
+# ==================================================
+@pagos_bp.route("/factura/<int:venta_id>")
+@login_required
+def factura(venta_id):
+    
+    # BUSCAR VENTA
+    venta = Venta.query.get_or_404(venta_id)
+    empresa = Empresa.query.first()
+    # MOSTRAR FACTURA
+    
+    return render_template(
+        "ventas/factura.html",
+        venta=venta,
+        empresa=empresa
+    )
+
+# ==================================================
+# ANULAR FACTURA
+# ==================================================
+
+@pagos_bp.route("/anular-venta/<int:venta_id>", methods=["POST"])
+@login_required
+@roles_required("ADMIN")
+def anular_venta(venta_id):
+    venta = Venta.query.get_or_404(venta_id)
+
+    if venta.estado == "ANULADA":
+        flash("La factura ya está anulada", "warning")
+        return redirect(url_for("pagos.facturas", tipo=venta.tipo_venta.lower()))
+
+    total_abonado = sum(p.monto_pago for p in venta.pagos if p.estado == "ACTIVO")
+    saldo_pendiente = venta.total_venta - total_abonado
+
+    if saldo_pendiente <= 0:
+        flash("No se puede anular una factura que ya está pagada.", "danger")
+        return redirect(url_for("pagos.facturas", tipo=venta.tipo_venta.lower()))
+
+    for detalle in venta.detalle_ventas:
+        detalle.producto.stock += detalle.cantidad
+        if detalle.producto.stock > 0:
+            detalle.producto.estado = "EN STOCK"
+
+    venta.estado = "ANULADA"
+    db.session.commit()
+
+    flash("Factura anulada correctamente", "success")
+    return redirect(url_for("pagos.facturas", tipo=venta.tipo_venta.lower()))
+

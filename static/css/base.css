@@ -245,65 +245,252 @@ body {
 
 
 /* ==========================================
-   CUSTOM NAVBAR (NAVY BLUE FIGMA STYLE)
+   SIDEBAR STYLES
    ========================================== */
 
-.navbar-custom {
-   background-color: #003891 !important; /* Deep Blue from Figma */
-   border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+#app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.navbar-custom .navbar-brand {
-   font-size: 1.25rem;
-   letter-spacing: 0.5px;
+#sidebar {
+    width: 260px;
+    background-color: #003891;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    z-index: 1050;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    flex-shrink: 0;
 }
 
-.navbar-custom .logo-text {
-   color: #ffffff;
+#sidebar.collapsed {
+    width: 70px;
 }
 
-.navbar-custom .nav-link {
-   color: rgba(255, 255, 255, 0.75) !important;
-   font-weight: 500;
-   font-size: 14px;
-   padding: 0.5rem 0.85rem !important;
-   border-radius: 6px;
-   transition: all 0.15s ease-in-out;
+#sidebar .sidebar-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.navbar-custom .nav-link:hover {
-   color: #ffffff !important;
-   background-color: rgba(255, 255, 255, 0.08);
+#sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0;
 }
 
-.navbar-custom .nav-link.active {
-   color: #ffffff !important;
-   font-weight: 600;
-   background-color: rgba(255, 255, 255, 0.12);
+#sidebar .logo-text {
+    font-size: 1rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s;
 }
 
-.navbar-custom .dropdown-menu {
-   font-size: 14px;
-   background-color: #ffffff;
-   border-radius: 8px;
+#sidebar.collapsed .logo-text {
+    display: none !important;
 }
 
-.navbar-custom .dropdown-item {
-   color: #333333;
-   transition: background-color 0.15s;
+#sidebar .btn-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    flex-shrink: 0;
 }
 
-.navbar-custom .dropdown-item:hover {
-   background-color: #f8f9fa;
+#sidebar .btn-toggle:hover {
+    color: rgba(255,255,255,0.8);
 }
 
-.navbar-custom .hover-white:hover {
-   color: #ffffff !important;
+#sidebar .sidebar-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 0;
 }
 
-/* Avatar details */
-.avatar {
-   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Custom scrollbar for sidebar */
+#sidebar .sidebar-body::-webkit-scrollbar {
+    width: 4px;
+}
+#sidebar .sidebar-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+#sidebar .sidebar-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+
+#sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+#sidebar .nav-link-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#sidebar .icon-main {
+    font-size: 1.1rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+#sidebar.collapsed .nav-link {
+    justify-content: center;
+}
+
+#sidebar.collapsed .nav-link-content {
+    justify-content: center;
+}
+
+#sidebar.collapsed .text-nav {
+    display: none;
+}
+
+#sidebar.collapsed .nav-link .dropdown-indicator {
+    display: none;
+}
+
+#sidebar .nav-link[aria-expanded="true"] .dropdown-indicator {
+    transform: rotate(90deg);
+}
+
+#sidebar .nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+#sidebar .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left: 4px solid #1f4fe0;
+}
+
+#sidebar .sidebar-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: rgba(0,0,0,0.15);
+}
+
+#sidebar .sidebar-submenu .nav-link {
+    padding-left: 60px;
+    font-size: 0.9rem;
+}
+
+#sidebar.collapsed .sidebar-submenu .nav-link {
+    padding-left: 0;
+}
+
+#sidebar.collapsed .sidebar-submenu {
+    display: none !important;
+}
+
+#sidebar .sidebar-footer {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 15px 20px;
+}
+
+#sidebar.collapsed .sidebar-footer {
+    padding: 15px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#sidebar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+#sidebar.collapsed .user-info {
+    justify-content: center;
+}
+
+#sidebar .user-info .user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar.collapsed .user-info .user-details {
+    display: none;
+}
+
+#sidebar .avatar {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #0dcaf0;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#sidebar .btn-logout {
+    color: #ff6b6b;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 10px 0 0 0;
+    margin-top: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.2s;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+}
+
+#sidebar.collapsed .btn-logout {
+    justify-content: center;
+    border-top: none;
+    padding: 15px 0 0 0;
+}
+
+#sidebar.collapsed .btn-logout span {
+    display: none;
+}
+
+#sidebar .btn-logout:hover {
+    color: #ff4757;
+}
+
+#main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: var(--color-fondo);
+    display: flex;
+    flex-direction: column;
 }
 
 /* ==========================================

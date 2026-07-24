@@ -49,6 +49,35 @@ class Usuario(UserMixin, db.Model):
     )
 
     # =========================
+    # INFORMACIÓN DE PERFIL
+    # =========================
+
+    nombre_completo = db.Column(
+        db.String(150),
+        nullable=True
+    )
+    
+    direccion = db.Column(
+        db.String(255),
+        nullable=True
+    )
+    
+    genero = db.Column(
+        db.String(20),
+        nullable=True
+    )
+    
+    telefono = db.Column(
+        db.String(20),
+        nullable=True
+    )
+    
+    foto_perfil = db.Column(
+        db.String(255),
+        nullable=True
+    )
+
+    # =========================
     # LLAVES FORÁNEAS
     # =========================
 

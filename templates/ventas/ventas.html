@@ -9,148 +9,130 @@ Nueva Venta
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-3">
-    <!-- ===================================== -->
-    <!-- BREADCRUMBS & TITULO -->
-    <!-- ===================================== -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-            <li class="breadcrumb-item active text-primary" aria-current="page">Ventas</li>
-        </ol>
-    </nav>
-</div>
+<div class="d-flex flex-column p-3" style="height: calc(100vh - 60px);">
+    <!-- SECCIÓN FORMULARIO (DATOS DEL CLIENTE) -->
+    <div class="card border-0 shadow-sm mb-3 flex-shrink-0">
+        <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center">
+                <i class="bi bi-person-vcard me-2 text-primary"></i>DATOS DEL CLIENTE
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="formVenta">
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label text-xs fw-bold text-blue mb-1">CLIENTE *</label>
+                        <input type="text" class="form-control border-light-subtle" id="cliente_nombre" 
+                               list="clientesList" placeholder="Escriba o seleccione un cliente..." required autocomplete="off">
+                        <datalist id="clientesList">
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente.nombres }}{% if cliente.apellidos %} {{ cliente.apellidos }}{% endif %}" 
+                                data-id="{{ cliente.id }}" 
+                                data-direccion="{{ cliente.direccion or '' }}" 
+                                data-telefono="{{ cliente.telefono or '' }}"></option>
+                            {% endfor %}
+                        </datalist>
+                        <input type="hidden" id="cliente_id" name="cliente_id" required>
+                    </div>
 
-<div class="card border-0 shadow-sm mb-3">
-    <div class="card-header bg-white border-0 pt-3 pb-0">
-        <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center">
-            <i class="bi bi-cart2 me-2 text-primary"></i>NUEVA VENTA
-        </h5>
-    </div>
-    <!-- ===================================== -->
-    <!-- FORMULARIO DE VENTAS -->
-    <!-- ===================================== -->
-    <div class="card-body">
-        <form id="formVenta">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label text-xs fw-bold text-blue mb-1">CLIENTE *</label>
-                    <select class="form-select border-light-subtle" id="cliente_id" name="cliente_id" required>
-                        <option value="">-- Seleccionar cliente --</option>
-                        {% for cliente in clientes %}
-                        <option value="{{ cliente.id }}" data-direccion="{{ cliente.direccion or '' }}"
-                            data-telefono="{{ cliente.telefono or '' }}">{{ cliente.nombres }} {{ cliente.apellidos }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="col-lg-2 col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">TIPO DE VENTA</label>
+                        <select class="form-select border-light-subtle" id="tipo_venta" name="tipo_venta">
+                            <option value="CONTADO">Contado</option>
+                            <option value="CREDITO">Crédito</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
+
+                    <div class="col-lg-2 col-md-3">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">N° FACTURA</label>
+                        <input type="text" class="form-control border-light-subtle bg-light text-primary fw-bold" id="numero_factura" name="numero_factura"
+                            value="{{ numero_factura }}" readonly>
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA VENTA</label>
+                        <input type="date" class="form-control border-light-subtle" id="fecha_venta" name="fecha_venta"
+                            value="{{ fecha_actual }}">
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA LÍMITE</label>
+                        <input type="date" class="form-control border-light-subtle" id="fecha_limite"
+                            name="fecha_limite_credito">
+                    </div>
                 </div>
-
-                <div class="col-md-2">
-                    <label class="form-label text-xs fw-semibold text-blue mb-1">TIPO DE VENTA</label>
-                    <select class="form-select border-light-subtle" id="tipo_venta" name="tipo_venta">
-                        <option value="CONTADO">Contado</option>
-                        <option value="CREDITO">Crédito</option>
-                    </select>
-                </div>
-
-                <div class="col-md-1">
-                    <label class="form-label text-xs fw-semibold text-blue mb-1">SERIE</label>
-                    <input type="text" class="form-control border-light-subtle bg-light" id="serie_factura" name="serie_factura"
-                        value="{{ empresa.serie_factura if empresa else 'F001' }}" readonly>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label text-xs fw-semibold text-blue mb-1">N° FACTURA</label>
-                    <input type="text" class="form-control border-light-subtle bg-light text-primary fw-bold" id="numero_factura" name="numero_factura"
-                        value="{{ numero_factura }}" readonly>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA VENTA</label>
-                    <input type="date" class="form-control border-light-subtle" id="fecha_venta" name="fecha_venta"
-                        value="{{ fecha_actual }}">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA LÍMITE</label>
-                    <input type="date" class="form-control border-light-subtle" id="fecha_limite"
-                        name="fecha_limite_credito">
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!--   DETALLE DE VENTA   -->
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-blue border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0 fw-bold text-light text-uppercase">
-            DETALLE DE PRODUCTOS
-        </h5>
-
-        <button type="button" class="btn btn-primary fw-semibold d-flex align-items-center gap-2"
-            id="btnAgregarProducto" data-bs-toggle="modal" data-bs-target="#modalProductos">
-            <i class="bi bi-plus-lg"></i> Agregar Producto
-        </button>
+            </form>
+        </div>
     </div>
 
-    <div class="card-body pt-0">
-        <div class="table-responsive">
-            <table class="table align-middle table-hover tabla-detalle-ventas">
-                <thead class="bg-secondary text-muted text-xs fw-bold">
-                    <tr>
-                        <th>CÓDIGO</th>
-                        <th>DESCRIPCIÓN</th>
-                        <th class="text-center">UND</th>
-                        <th class="text-center">CANTIDAD</th>
-                        <th class="text-end">P. UNITARIO (C$)</th>
-                        <th class="text-end">DESCUENTO (%)</th>
-                        <th class="text-end">SUBTOTAL (C$)</th>
-                        <th class="text-center">ACC.</th>
-                    </tr>
-                </thead>
-
-                <tbody id="detalleVentaBody"></tbody>
-            </table>
+    <!-- SECCIÓN TABLA DE PRODUCTOS (SCROLLABLE & FOOTER FIJO) -->
+    <div class="card border-0 shadow-sm flex-grow-1 d-flex flex-column" style="min-height: 0;">
+        <div class="card-header bg-blue border-0 pt-3 pb-2 d-flex justify-content-between align-items-center flex-shrink-0">
+            <h5 class="card-title mb-0 fw-bold text-light text-uppercase">
+                DETALLE DE PRODUCTOS
+            </h5>
+            <button type="button" class="btn btn-primary fw-semibold d-flex align-items-center gap-2"
+                id="btnAgregarProducto" data-bs-toggle="modal" data-bs-target="#modalProductos">
+                <i class="bi bi-plus-lg"></i> Agregar Producto
+            </button>
         </div>
 
-        <div class="row g-3 align-items-end border-top pt-3 mt-2">
-            <div class="col-md-5">
-                <label class="form-label text-xs fw-semibold text-blue mb-1">OBSERVACIONES</label>
-                <input type="text" id="observaciones" class="form-control border-light-subtle"
-                    placeholder="Notas internas...">
+        <div class="card-body p-0 d-flex flex-column h-100" style="min-height: 0;">
+            <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
+                <table class="table align-middle table-hover tabla-detalle-ventas mb-0">
+                    <thead class="bg-secondary text-muted text-xs fw-bold sticky-top z-1" style="top: 0;">
+                        <tr>
+                            <th>CÓDIGO</th>
+                            <th>DESCRIPCIÓN</th>
+                            <th class="text-center">CANTIDAD</th>
+                            <th class="text-end">P. UNITARIO (C$)</th>
+                            <th class="text-end">DESCUENTO (%)</th>
+                            <th class="text-end">SUBTOTAL (C$)</th>
+                            <th class="text-center">ACC.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalleVentaBody"></tbody>
+                </table>
             </div>
 
-            <div class="col-md-3 ms-auto">
-                <div class="d-flex justify-content-between text-muted mb-1">
-                    <span>Subtotal</span>
-                    <span id="subtotalVenta">C$ 0.00</span>
-                </div>
+            <div class="bg-light p-3 border-top mt-auto flex-shrink-0 z-2">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">OBSERVACIONES</label>
+                        <input type="text" id="observaciones" class="form-control border-light-subtle"
+                            placeholder="Notas internas...">
+                    </div>
 
-                <div class="d-flex justify-content-between text-muted mb-2">
-                    <span>IVA</span>
-                    <span id="ivaVenta">C$ 0.00</span>
-                </div>
+                    <div class="col-md-3 ms-auto">
+                        <div class="d-flex justify-content-between text-muted mb-1">
+                            <span>Subtotal</span>
+                            <span id="subtotalVenta">C$ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted mb-2">
+                            <span>IVA</span>
+                            <span id="ivaVenta">C$ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold fs-5 text-blue">
+                            <span>TOTAL</span>
+                            <span id="totalVenta">C$ 0.00</span>
+                        </div>
+                    </div>
 
-                <div class="d-flex justify-content-between fw-bold fs-5 text-blue">
-                    <span>TOTAL</span>
-                    <span id="totalVenta">C$ 0.00</span>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="d-flex justify-content-end gap-2 flex-wrap">
-                    <button type="button" class="btn btn-light border fw-semibold" id="btnLimpiarVenta">
-                        <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
-                    </button>
-
-                    <button type="button" class="btn btn-warning text-white fw-semibold" id="btnVistaPrevia">
-                        <i class="bi bi-printer me-1"></i> Vista Previa
-                    </button>
-
-                    <button type="button" class="btn btn-success fw-semibold" id="btnGuardar">
-                        <i class="bi bi-floppy me-1"></i> Guardar Factura
-                    </button>
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-end gap-2 flex-wrap">
+                            <button type="button" class="btn btn-light border fw-semibold" id="btnLimpiarVenta">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
+                            </button>
+                            <button type="button" class="btn btn-warning text-white fw-semibold" id="btnVistaPrevia">
+                                <i class="bi bi-printer me-1"></i> Vista Previa
+                            </button>
+                            <button type="button" class="btn btn-success fw-semibold" id="btnGuardar">
+                                <i class="bi bi-floppy me-1"></i> Guardar Factura
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -182,7 +164,6 @@ Nueva Venta
                     <table class="table table-hover align-middle">
                         <thead class="bg-light text-muted text-xs fw-bold">
                             <tr>
-                                <th>CODPRODUCTO</th>
                                 <th>NOMBRE</th>
                                 <th class="text-end">PRECIO</th>
                                 <th class="text-center">STOCK</th>
@@ -298,6 +279,35 @@ Nueva Venta
     const tipoVentaSelect = document.getElementById("tipo_venta");
     const fechaLimite = document.getElementById("fecha_limite");
 
+    // Lógica para el Combobox del Cliente (Datalist)
+    const inputClienteNombre = document.getElementById("cliente_nombre");
+    const inputClienteId = document.getElementById("cliente_id");
+    const datalistClientes = document.getElementById("clientesList");
+    let clienteSeleccionado = { nombre: "", direccion: "-", telefono: "-" };
+
+    function checkClienteSelection() {
+        const val = inputClienteNombre.value.trim();
+        const options = Array.from(datalistClientes.options);
+        
+        // Buscar coincidencia exacta (ignorando espacios extra y mayúsculas/minúsculas)
+        const selectedOption = options.find(opt => opt.value.trim().toLowerCase() === val.toLowerCase());
+
+        if (selectedOption) {
+            inputClienteId.value = selectedOption.dataset.id;
+            clienteSeleccionado = {
+                nombre: val,
+                direccion: selectedOption.dataset.direccion || "-",
+                telefono: selectedOption.dataset.telefono || "-"
+            };
+        } else {
+            inputClienteId.value = "";
+            clienteSeleccionado = { nombre: val, direccion: "-", telefono: "-" };
+        }
+    }
+
+    inputClienteNombre.addEventListener("input", checkClienteSelection);
+    inputClienteNombre.addEventListener("change", checkClienteSelection);
+
     function actualizarFechaLimite() {
         if (tipoVentaSelect.value === "CREDITO") {
             fechaLimite.disabled = false;
@@ -324,7 +334,7 @@ Nueva Venta
     async function buscarProductos(textoBusqueda) {
         tbodyBusqueda.innerHTML = `
             <tr>
-                <td colspan="5" class="text-center text-muted py-3">
+                <td colspan="4" class="text-center text-muted py-3">
                     Buscando...
                 </td>
             </tr>
@@ -339,7 +349,7 @@ Nueva Venta
             if (productos.length === 0) {
                 tbodyBusqueda.innerHTML = `
                     <tr>
-                        <td colspan="5" class="text-center text-danger py-3">
+                        <td colspan="4" class="text-center text-danger py-3">
                             No se encontraron productos
                         </td>
                     </tr>
@@ -350,7 +360,6 @@ Nueva Venta
             productos.forEach(producto => {
                 tbodyBusqueda.innerHTML += `
                     <tr>
-                        <td>${producto.codigo}</td>
                         <td>${producto.nombre}</td>
                         <td class="text-end">C$ ${producto.precio.toFixed(2)}</td>
                         <td class="text-center">${producto.stock}</td>
@@ -369,7 +378,7 @@ Nueva Venta
 
             tbodyBusqueda.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-danger py-3">
+                    <td colspan="4" class="text-center text-danger py-3">
                         Error al buscar productos
                     </td>
                 </tr>
@@ -444,7 +453,6 @@ Nueva Venta
             producto_id: productoSeleccionado.id,
             codigo: productoSeleccionado.codigo,
             nombre: productoSeleccionado.nombre,
-            unidad: productoSeleccionado.unidad || "UND",
             precio: precio,
             descuento_porcentaje: descuento,
             descuento_monto: descuentoMonto,
@@ -499,7 +507,6 @@ Nueva Venta
                 <tr>
                     <td>${producto.codigo}</td>
                     <td>${producto.nombre}</td>
-                    <td class="text-center">${producto.unidad}</td>
                     <td class="text-center">
                         <div class="cantidad-control">
                             <button type="button" onclick="disminuirCantidad(${index})">-</button>
@@ -580,11 +587,14 @@ Nueva Venta
             return;
         }
 
-        const clienteSelect = document.getElementById("cliente_id");
-        const clienteNombre = clienteSelect.options[clienteSelect.selectedIndex].text;
-        const clienteOption = clienteSelect.options[clienteSelect.selectedIndex];
-        const clienteDireccion = clienteOption.dataset.direccion || "-";
-        const clienteTelefono = clienteOption.dataset.telefono || "-";
+        if (!document.getElementById("cliente_id").value) {
+            mostrarMensaje("warning", "Seleccione un cliente válido de la lista");
+            return;
+        }
+
+        const clienteNombre = clienteSeleccionado.nombre;
+        const clienteDireccion = clienteSeleccionado.direccion;
+        const clienteTelefono = clienteSeleccionado.telefono;
         const tipoVenta = document.getElementById("tipo_venta").value;
         const fechaVenta = document.getElementById("fecha_venta").value;
         const observaciones = document.getElementById("observaciones").value;
@@ -596,11 +606,10 @@ Nueva Venta
         let filas = detalleVenta.map(item => `
         <tr>
             <td>${item.nombre}</td>
-            <td>${item.unidad}</td>
-            <td>${item.cantidad}</td>
-            <td>C$ ${item.precio.toFixed(2)}</td>
-            <td>${item.descuento_porcentaje.toFixed(2)}%</td>
-            <td>C$ ${item.subtotal.toFixed(2)}</td>
+            <td style="text-align: center;">${item.cantidad}</td>
+            <td style="text-align: right;">C$ ${item.precio.toFixed(2)}</td>
+            <td style="text-align: right;">${item.descuento_porcentaje.toFixed(2)}%</td>
+            <td style="text-align: right;">C$ ${item.subtotal.toFixed(2)}</td>
         </tr>
     `).join("");
 
@@ -768,7 +777,6 @@ Nueva Venta
                 <thead>
                     <tr>
                         <th>Producto</th>
-                        <th>UND</th>
                         <th style="text-align: center;">Cant</th>
                         <th style="text-align: right;">P. Unit.</th>
                         <th style="text-align: right;">Desc.</th>

@@ -102,7 +102,6 @@ def buscar_productos():
             "marca":producto.marca,
             "categoria":producto.categoria.nombre,
             "precio":float(producto.precio_venta),
-            "unidad":producto.unidad,
             "stock":producto.stock
         })
     return jsonify(resultado)
@@ -206,6 +205,8 @@ def guardar_venta():
             db.session.add(detalle)
             # DESCONTAR STOCK
             producto.stock -= cantidad
+            if producto.stock == 0:
+                producto.estado = "VENDIDO"
         db.session.commit()
 
         # RESPUESTA
@@ -216,120 +217,3 @@ def guardar_venta():
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False,"message": str(e)})
-    
-
-# ==================================================
-# FACTURA
-# ==================================================
-@ventas_bp.route("/factura/<int:venta_id>")
-@login_required
-def factura(venta_id):
-    
-    # BUSCAR VENTA
-    venta = Venta.query.get_or_404(venta_id)
-    empresa = Empresa.query.first()
-    # MOSTRAR FACTURA
-    
-    return render_template(
-        "ventas/factura.html",
-        venta=venta,
-        empresa=empresa
-    )
-# ==================================================
-# ANULAR FACTURA
-# ==================================================
-
-@ventas_bp.route("/anular-venta/<int:venta_id>", methods=["POST"])
-@login_required
-@roles_required("ADMIN")
-def anular_venta(venta_id):
-    venta = Venta.query.get_or_404(venta_id)
-
-    if venta.estado == "ANULADA":
-        flash("La factura ya está anulada", "warning")
-        return redirect(url_for("ventas.historial_ventas"))
-
-    for detalle in venta.detalle_ventas:
-        detalle.producto.stock += detalle.cantidad
-
-    venta.estado = "ANULADA"
-    db.session.commit()
-
-    flash("Factura anulada correctamente", "success")
-    return redirect(url_for("ventas.historial_ventas"))
-# ==============================================
-# BUSQUEDA
-# ==============================================
-
-@ventas_bp.route("/historial-ventas")
-@login_required
-def historial_ventas():
-    busqueda = request.args.get("busqueda", "").strip()
-    estado = request.args.get("estado", "TODAS")
-    fecha_inicio = request.args.get("fecha_inicio", "")
-    fecha_fin = request.args.get("fecha_fin", "")
-    cliente_id = request.args.get("cliente_id", "")
-
-    query = Venta.query
-
-    if busqueda:
-        query = query.join(Cliente).filter(
-            db.or_(
-                Venta.numero_factura.ilike(f"%{busqueda}%"),
-                Cliente.nombres.ilike(f"%{busqueda}%"),
-                Cliente.apellidos.ilike(f"%{busqueda}%")
-            )
-        )
-
-    if estado != "TODAS":
-        query = query.filter(Venta.estado == estado)
-
-    if cliente_id:
-        query = query.filter(Venta.cliente_id == cliente_id)
-
-    if fecha_inicio:
-        query = query.filter(Venta.fecha_venta >= datetime.strptime(fecha_inicio, "%Y-%m-%d"))
-
-    if fecha_fin:
-        query = query.filter(Venta.fecha_venta <= datetime.strptime(fecha_fin, "%Y-%m-%d"))
-
-    ventas = query.order_by(Venta.fecha_venta.desc()).all()
-    clientes = Cliente.query.order_by(Cliente.nombres.asc()).all()
-
-    facturas_activas = len([v for v in ventas if v.estado == "ACTIVA"])
-    facturas_anuladas = len([v for v in ventas if v.estado == "ANULADA"])
-    facturas_credito = len([v for v in ventas if v.tipo_venta == "CREDITO"])
-    facturas_contado = len([v for v in ventas if v.tipo_venta == "CONTADO"])
-    total_facturas = len(ventas)
-    
-    kpis = {
-        "facturas_activas": facturas_activas,
-        "facturas_anuladas": facturas_anuladas,
-        "facturas_credito": facturas_credito,
-        "facturas_contado": facturas_contado,
-        "total_facturas": total_facturas
-    }
-
-    return render_template(
-        "ventas/historial_ventas.html",
-        ventas=ventas,
-        clientes=clientes,
-        kpis=kpis,
-        busqueda=busqueda,
-        estado_actual=estado,
-        fecha_inicio=fecha_inicio,
-        fecha_fin=fecha_fin,
-        cliente_id=cliente_id,
-        hoy=date.today()
-    )
-
-
-@ventas_bp.route("/vista-previa-factura")
-@login_required
-def vista_previa_factura():
-    empresa = Empresa.query.first()
-
-    return render_template(
-        "ventas/vista_previa_factura.html",
-        empresa=empresa
-    )

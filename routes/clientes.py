@@ -44,7 +44,6 @@ def clientes():
         cliente_id = request.form.get("cliente_id")
         nombre = request.form.get("nombres", "").strip().title()
         telefono = request.form.get("telefono", "").strip()
-        email = request.form.get("email", "").strip()
         ciudad = request.form.get("ciudad", "").strip().title()
         direccion = request.form.get("direccion", "").strip().title()
         estado_val = request.form.get("estado", "ACTIVO")
@@ -90,7 +89,6 @@ def clientes():
                 cliente.telefono = telefono
                 if cliente.usuario:
                     cliente.usuario.username = telefono
-                cliente.email = email
                 cliente.ciudad = ciudad
                 cliente.direccion = direccion
                 cliente.estado = estado
@@ -108,7 +106,6 @@ def clientes():
                 nombres=nombre,
                 apellidos="",
                 telefono=telefono,
-                email=email,
                 ciudad=ciudad,
                 direccion=direccion,
                 fecha_ingreso=datetime.now().date(),
@@ -141,7 +138,7 @@ def clientes():
     # ==========================================
     # GET
     # ==========================================
-    lista_clientes = Cliente.query.order_by(Cliente.id.asc()).all()
+    lista_clientes = Cliente.query.order_by(Cliente.id.desc()).all()
 
     # Calcular KPIs
     total_clientes = len(lista_clientes)
@@ -216,7 +213,7 @@ def exportar_clientes():
     cw = csv.writer(si)
 
     # Encabezados (Sin RUC ni Categoría)
-    cw.writerow(["Código", "Nombre / Razón Social", "Teléfono", "Email", "Ciudad", "Estado"])
+    cw.writerow(["Código", "Nombre / Razón Social", "Teléfono", "Ciudad", "Estado"])
 
     # Escribir filas
     for c in clientes:
@@ -225,7 +222,6 @@ def exportar_clientes():
             c.codigo or f"C{c.id:03d}",
             c.nombres,
             c.telefono,
-            c.email or "",
             c.ciudad or "",
             estado_str
         ])

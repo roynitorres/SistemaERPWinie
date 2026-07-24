@@ -9,221 +9,175 @@ Clientes
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-3">
+<div class="container-fluid pt-1 pb-2">
 
     <!-- ===================================== -->
-    <!-- BREADCRUMBS & TITULO -->
+    <!-- HEADER / TOP BAR -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-                <li class="breadcrumb-item active text-blue" aria-current="page">Clientes</li>
-            </ol>
-        </nav>
-        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm d-flex align-items-center gap-2" id="btnTogglePanel" style="border-radius: 20px;">
-            <i class="bi bi-chevron-down" id="iconTogglePanel"></i>
-            <span id="textTogglePanel">Mostrar Opciones</span>
-        </button>
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
+        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
+            Clientes
+        </h4>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-bell fs-5 text-secondary"></i>
+            </button>
+            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-gear fs-5 text-secondary"></i>
+            </a>
+            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-moon fs-5 text-secondary"></i>
+            </button>
+                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
+                {% if current_user and current_user.foto_perfil %}
+                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
+                {% else %}
+                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
+                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
+                    </div>
+                {% endif %}
+            </a>
+        </div>
     </div>
 
+
+
     <!-- ===================================== -->
-    <!-- CONTENEDOR DE OPCIONES (KPIs + FORMULARIO) -->
+    <!-- BARRA DE CONTROLES DE LA TABLA (FLOTANTES) -->
     <!-- ===================================== -->
-    <div id="panelOpciones" class="d-none">
-    <!-- TARJETAS KPI -->
-    <!-- ===================================== -->
-    <div class="row g-3 mb-4 d-none d-lg-flex">
-        <!-- TOTAL CLIENTES -->
-        <div class="col-md-3 col-sm-6">
-            <div class="card kpi-card border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon bg-light-blue text-blue me-3">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <div>
-                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Total
-                            Clientes</span>
-                        <h3 class="kpi-value mb-0 fw-bold">{{ kpis.total }}</h3>
-                    </div>
-                </div>
+    <div class="d-flex justify-content-start align-items-center mb-3">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <!-- Nuevo (Enfocar formulario) -->
+            <button type="button" class="btn btn-info text-white rounded-pill d-flex align-items-center justify-content-center gap-2 fw-bold px-4 shadow-sm" id="btnIrForm"
+                style="min-height: 42px; background-color: #0dcaf0; border: none;">
+                <i class="bi bi-plus-lg fs-5"></i> Nuevo cliente
+            </button>
+
+            <!-- Buscador -->
+            <div class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" class="form-control ps-5 border-light-subtle rounded-pill bg-white shadow-sm" id="buscarCliente"
+                    placeholder="Búsqueda" style="width: 250px; min-height: 42px;">
             </div>
-        </div>
-        <!-- ACTIVOS -->
-        <div class="col-md-3 col-sm-6">
-            <div class="card kpi-card border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon bg-light-green text-green me-3">
-                        <i class="bi bi-check-circle-fill"></i>
-                    </div>
-                    <div>
-                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Activos</span>
-                        <h3 class="kpi-value mb-0 fw-bold">{{ kpis.activos }}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- INACTIVOS -->
-        <div class="col-md-3 col-sm-6">
-            <div class="card kpi-card border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon bg-light-red text-red me-3">
-                        <i class="bi bi-exclamation-circle-fill"></i>
-                    </div>
-                    <div>
-                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Inactivos</span>
-                        <h3 class="kpi-value mb-0 fw-bold">{{ kpis.inactivos }}</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- NUEVOS ESTE MES -->
-        <div class="col-md-3 col-sm-6">
-            <div class="card kpi-card border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon bg-light-purple text-purple me-3">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <div class="w-100">
-                        <span class="kpi-label text-muted d-block text-xs text-uppercase fw-semibold">Nuevos Este
-                            Mes</span>
-                        <div class="d-flex align-items-baseline">
-                            <h3 class="kpi-value mb-0 fw-bold">{{ kpis.nuevos }}</h3>
-                            <span
-                                class="kpi-growth text-xs ms-2 {% if kpis.porcentaje_nuevos.startswith('+') %}text-success{% else %}text-danger{% endif %} fw-semibold">
-                                {{ kpis.porcentaje_nuevos }}% vs ant.
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            <!-- Filtro Estado -->
+            <select class="form-select border-light-subtle rounded-pill bg-white shadow-sm text-secondary" id="filtroEstadoCliente" style="width: 150px; min-height: 42px;">
+                <option value="TODOS">Todos</option>
+                <option value="ACTIVO">Activos</option>
+                <option value="INACTIVO">Inactivos</option>
+            </select>
+
+            <!-- Exportar -->
+            <a href="{{ url_for('clientes.exportar_clientes') }}"
+                class="btn btn-dark rounded-pill d-flex align-items-center justify-content-center gap-2 fw-semibold px-4 shadow-sm" style="min-height: 42px;">
+                <i class="bi bi-download"></i> Exportación
+            </a>
         </div>
     </div>
 
     <!-- ===================================== -->
-    <!-- FORMULARIO NUEVO CLIENTE -->
+    <!-- MODAL FORMULARIO NUEVO CLIENTE -->
     <!-- ===================================== -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white border-0 pt-3 pb-0">
-            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center" id="formTitle">
-                <i class="bi bi-person-plus me-2 text-blue"></i>NUEVO CLIENTE
-            </h5>
-        </div>
-        <div class="card-body">
+    <div class="modal fade" id="modalFormCliente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
+                    <h5 class="modal-title mb-0 fw-bold d-flex align-items-center" id="formTitle">
+                        <i class="bi bi-person-plus me-2 text-white"></i>NUEVO CLIENTE
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
             <form method="POST" id="formClientes">
                 <input type="hidden" id="cliente_id" name="cliente_id">
 
-                <!-- Campos en Fila Horizontal -->
-                <div class="row g-3 align-items-end">
+                <!-- Campos en Columna Vertical -->
+                <div class="row g-3">
                     <!-- CÓDIGO -->
-                    <div class="col-md-1">
+                    <div class="col-md-6">
                         <label class="form-label text-xs fw-semibold text-blue mb-1">CÓDIGO *</label>
-                        <input type="text" class="form-control bg-light border-0 fw-semibold" id="form_codigo"
-                            value="{{ siguiente_codigo }}" readonly>
-                    </div>
-
-                    <!-- NOMBRE / RAZÓN SOCIAL -->
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-blue  mb-1">NOMBRE / RAZÓN SOCIAL *</label>
-                        <input type="text" class="form-control " name="nombres" placeholder="Empresa S.A.C." required
-                            id="form_nombre">
-                    </div>
-
-                    <!-- TELÉFONO -->
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">TELÉFONO</label>
-                        <input type="text" class="form-control" id="form_telefono" name="telefono" maxlength="8"
-                            minlength="8" pattern="[0-9]{8}" inputmode="numeric" placeholder="1234-5678" required>
-                    </div>
-
-                    <!-- EMAIL -->
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">EMAIL</label>
-                        <input type="email" class="form-control " name="email" placeholder="contacto@empresa.com"
-                            id="form_email">
-                    </div>
-
-                    <!-- CIUDAD -->
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">CIUDAD</label>
-                        <input type="text" class="form-control " name="ciudad" placeholder="Managua" id="form_ciudad">
-                    </div>
-                    <!-- DIRECCIÓN -->
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">DIRECCIÓN</label>
-                        <input type="text" class="form-control " name="direccion" placeholder="Dirección del cliente"
-                            id="form_direccion">
+                        <div class="input-group">
+                            
+                            <input type="text" class="form-control bg-light border-0 fw-semibold" id="form_codigo"
+                                value="{{ siguiente_codigo }}" readonly>
+                        </div>
                     </div>
 
                     <!-- ESTADO -->
-                    <div class="col-md-1">
+                    <div class="col-md-6">
                         <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
-                        <select class="form-select  fw-semibold" name="estado" id="form_estado">
-                            <option value="ACTIVO">Activo</option>
-                            <option value="INACTIVO">Inactivo</option>
-                        </select>
+                        <div class="input-group">
+                            
+                            <select class="form-select border-0 bg-light fw-semibold" name="estado" id="form_estado">
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <!-- NOMBRE DEL CLIENTE -->
+                    <div class="col-12">
+                        <label class="form-label text-xs fw-semibold text-blue  mb-1">NOMBRE DEL CLIENTE *</label>
+                        <div class="input-group">
+                            
+                            <input type="text text-uppercase" class="form-control" name="nombres" placeholder="Royni Jose Torres Acuña" required
+                                id="form_nombre">
+                        </div>
+                    </div>
+
+                    <!-- TELÉFONO -->
+                    <div class="col-md-6">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">TELÉFONO</label>
+                        <div class="input-group">
+                            
+                            <input type="text" class="form-control" id="form_telefono" name="telefono" maxlength="8"
+                                minlength="8" pattern="[0-9]{8}" inputmode="numeric" placeholder="1234-5678" required>
+                        </div>
+                    </div>
+
+                    <!-- CIUDAD -->
+                    <div class="col-md-6">
+                        <label class="form-label text-xs fw-semibold text-blue mb-1">CIUDAD</label>
+                        <div class="input-group">
+                            
+                            <input type="text" class="form-control" name="ciudad" placeholder="Managua" id="form_ciudad">
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Botones de Acción -->
-                <div class="d-flex gap-2 mt-3 justify-content-start">
-                    <button type="submit" class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
-                        id="btnGuardar">
-                        <i class="bi bi-floppy"></i> Guardar
-                    </button>
+                <div class="d-flex gap-2 mt-4 justify-content-end">
                     <button type="button"
                         class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
                         id="btnLimpiar">
                         <i class="bi bi-arrow-counterclockwise"></i> Limpiar
                     </button>
-                    </div>
+                    <button type="submit" class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
+                        id="btnGuardar">
+                        <i class="bi bi-floppy"></i> Guardar
+                    </button>
+                </div>    </div>
                 </form>
             </div>
         </div>
-    </div> <!-- FIN PANEL OPCIONES -->
+    </div>
+</div> <!-- FIN MODAL CLIENTE -->
 
     <!-- ===================================== -->
     <!-- TABLA / LISTA DE CLIENTES-->
     <!-- ===================================== -->
-    <div class="card border-0 shadow-sm">
-        <div
-            class="card-header bg-white border-0 pt-4 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-            <h5 class="card-title mb-0 fw-bold text-dark text-uppercase letter-spacing-1">Lista de Clientes</h5>
-
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <!-- Buscador -->
-                <div class="position-relative">
-                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarCliente"
-                        placeholder="Nombre o código..." style="width: 260px; min-height: 38px;">
-                </div>
-
-                <!-- Exportar -->
-                <a href="{{ url_for('clientes.exportar_clientes') }}"
-                    class="btn btn-outline-info d-flex align-items-center gap-2 fw-semibold" style="min-height: 38px;">
-                    <i class="bi bi-download"></i> Exportar
-                </a>
-
-                <!-- Nuevo (Enfocar formulario) -->
-                <button type="button" class="btn btn-primary d-flex align-items-center gap-2 fw-semibold" id="btnIrForm"
-                    style="min-height: 38px; ">
-                    <i class="bi bi-plus-lg"></i> Nuevo
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
+    <div class="card border-0 shadow-sm d-flex flex-column" style="border-radius: 12px; overflow: hidden; height: calc(100vh - 200px); min-height: 400px;">
+        <div class="card-body p-0 d-flex flex-column h-100">
+            <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
                 <table class="table align-middle table-hover border-light-subtle">
-                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom" style="position: sticky; top: 0; z-index: 2; box-shadow: 0 1px 0 rgba(0,0,0,0.1);">
                         <tr>
-                            <th class="px-3 py-3 text-start" style="width: 60px;">CÓDIGO</th>
-                            <th class="px-3 py-3">RAZÓN SOCIAL / NOMBRE</th>
-                            <th class="px-3 py-3">TELÉFONO</th>
-                            <th class="px-3 py-3 text-center d-none d-lg-table-cell">EMAIL</th>
-                            <th class="px-3 py-3 d-none d-md-table-cell">CIUDAD</th>
-                            <th class="px-3 py-3 d-none d-md-table-cell">DIRECCIÓN</th>
-                            <th class="px-3 py-3 text-center d-none d-sm-table-cell" style="width: 120px;">ESTADO</th>
-                            <th class="px-3 py-3 text-center" style="width: 100px;">ACC.</th>
+                            <th class="px-3 py-3 text-start bg-light" style="width: 60px;">CÓDIGO</th>
+                            <th class="px-3 py-3 bg-light">NOMBRE DEL CLIENTE</th>
+                            <th class="px-3 py-3 bg-light">TELÉFONO</th>
+                            <th class="px-3 py-3 d-none d-md-table-cell bg-light">CIUDAD</th>
+                            <th class="px-3 py-3 text-center bg-light" style="width: 100px;">ACC.</th>
                         </tr>
                     </thead>
                     <tbody id="tablaClientes">
@@ -231,49 +185,55 @@ Clientes
                         <tr data-id="{{ cliente.id }}"
                             data-codigo="{{ cliente.codigo or 'C' ~ '%03d'|format(cliente.id) }}"
                             data-nombres="{{ cliente.nombres }}" data-telefono="{{ cliente.telefono }}"
-                            data-email="{{ cliente.email or '' }}" data-ciudad="{{ cliente.ciudad or '' }}"
+                            data-ciudad="{{ cliente.ciudad or '' }}"
                             data-direccion="{{ cliente.direccion or '' }}"
                             data-estado="{% if cliente.estado %}ACTIVO{% else %}INACTIVO{% endif %}">
 
                             <td class="px-3 py-3 text-start fw-semibold text-muted">
-                                {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
+                                <i class=" text-secondary me-1"></i>{{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
                             </td>
                             <td class="px-3 py-3 fw-bold text-dark">
-                                {{ cliente.nombres }}
+                                <i class="bi bi-person-circle text-secondary me-1"></i>{{ cliente.nombres }}
                             </td>
                             <td class="px-3 py-3 text-muted">
-                                {{ cliente.telefono or '-' }}
-                            </td>
-                            <td class="px-3 py-3 text-center text-blue fw-bold d-none d-lg-table-cell">
-                                {{ cliente.email or '-' }}
+                                <i class="bi bi-telephone text-secondary me-1"></i>{{ cliente.telefono or '-' }}
                             </td>
                             <td class="px-3 py-3 text-muted d-none d-md-table-cell">
-                                {{ cliente.ciudad or '-' }}
-                            </td>
-                            <td class="px-3 py-3 text-muted d-none d-md-table-cell">
-                                {{ cliente.direccion or '-' }}
-                            </td>
-                            <td class="px-3 py-3 text-center d-none d-sm-table-cell">
-                                {% if cliente.estado %}
-                                <span class="badge bg-success px-3 py-2 rounded-pill fw-semibold">Activo</span>
-                                {% else %}
-                                <span class="badge bg-secondary px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
-                                {% endif %}
+                                <i class="bi bi-geo-alt text-secondary me-1"></i>{{ cliente.ciudad or '-' }}
                             </td>
                             <td class="px-3 py-3 text-center">
-                                <button type="button" class="btn btn-sm btn-icon-edit btn-editar-fila"
-                                    title="Editar Cliente">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-                                <form method="POST"
-                                    action="{{ url_for('clientes.restaurar_password_cliente', cliente_id=cliente.id) }}"
-                                    class="form-restaurar-password d-inline">
-
-                                    <button type="submit" class="btn btn-sm btn-reset-password"
-                                        title="Restaurar contraseña">
-                                        <i class="bi bi-key-fill"></i>
-                                    </button>
-                                </form>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm border" type="button" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                            <li>
+                                                <h6 class="dropdown-header text-white fw-bold d-flex align-items-center"
+                                                    style="background-color: #003891;">
+                                                    <i class="bi bi-gear-fill me-2"></i> Acciones
+                                                </h6>
+                                            </li>
+                                            <li>
+                                                <button type="button" class="dropdown-item py-2  btn-editar-fila"
+                                                    title="Editar Cliente">
+                                                    <i class="bi bi-pencil-fill me-2 "></i> Editar 
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <form method="POST"
+                                                    action="{{ url_for('clientes.restaurar_password_cliente', cliente_id=cliente.id) }}"
+                                                    class="form-restaurar-password m-0">
+                                                    <button type="submit" class="dropdown-item py-2 "
+                                                        title="Restaurar contraseña">
+                                                        <i class="bi bi-key-fill me-2 "></i> Restaurar
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </td>
 
                         </tr>
@@ -283,9 +243,8 @@ Clientes
             </div>
 
             <!-- Table Footer for Summary & Pagination -->
-            <div
-                class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                <div class="text-muted text-xs" id="paginationSummary">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center p-3 bg-light border-top gap-2 mt-auto" style="position: sticky; bottom: 0; z-index: 10;">
+                <div class="text-muted text-xs fw-semibold" id="paginationSummary">
                     Mostrando 0 a 0 de 0 registros
                 </div>
                 <nav aria-label="Navegación de tabla">
@@ -322,23 +281,13 @@ Clientes
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const btnTogglePanel = document.getElementById("btnTogglePanel");
-    const panelOpciones = document.getElementById("panelOpciones");
-    const iconTogglePanel = document.getElementById("iconTogglePanel");
-    const textTogglePanel = document.getElementById("textTogglePanel");
-
-    if (btnTogglePanel) {
-        btnTogglePanel.addEventListener("click", function () {
-            const oculto = panelOpciones.classList.toggle("d-none");
-
-            if (oculto) {
-                iconTogglePanel.className = "bi bi-chevron-down";
-                textTogglePanel.textContent = "Mostrar Opciones";
-            } else {
-                iconTogglePanel.className = "bi bi-chevron-up";
-                textTogglePanel.textContent = "Ocultar Opciones";
-            }
-        });
+    // El control de KPIs ya no usa toggle
+    let modalFormCliente = null;
+    function getModalCliente() {
+        if (!modalFormCliente) {
+            modalFormCliente = new bootstrap.Modal(document.getElementById('modalFormCliente'));
+        }
+        return modalFormCliente;
     }
 
     const form = document.getElementById("formClientes");
@@ -346,9 +295,7 @@ Clientes
     const formCodigo = document.getElementById("form_codigo");
     const formNombre = document.getElementById("form_nombre");
     const formTelefono = document.getElementById("form_telefono");
-    const formEmail = document.getElementById("form_email");
     const formCiudad = document.getElementById("form_ciudad");
-    const formDireccion = document.getElementById("form_direccion");
     const formEstado = document.getElementById("form_estado");
     const clienteIdInput = document.getElementById("cliente_id");
 
@@ -362,17 +309,17 @@ Clientes
         form.reset();
         clienteIdInput.value = "";
         formCodigo.value = siguienteCodigo;
-        formTitle.innerHTML = `<i class="bi bi-person-plus me-2 text-primary"></i>NUEVO CLIENTE`;
+        formTitle.innerHTML = `<i class="bi bi-person-plus me-2 text-white"></i>NUEVO CLIENTE`;
         formNombre.focus();
     }
 
     // Evento limpiar
     btnLimpiar.addEventListener("click", resetForm);
 
-    // Evento enfocar/ir al formulario
+    // Evento enfocar/ir al formulario (Nuevo)
     btnIrForm.addEventListener("click", () => {
         resetForm();
-        form.scrollIntoView({ behavior: 'smooth' });
+        getModalCliente().show();
     });
 
     // Función para cargar datos de cliente en el formulario
@@ -381,14 +328,11 @@ Clientes
         formCodigo.value = row.dataset.codigo;
         formNombre.value = row.dataset.nombres;
         formTelefono.value = row.dataset.telefono;
-        formEmail.value = row.dataset.email;
         formCiudad.value = row.dataset.ciudad;
-        formDireccion.value = row.dataset.direccion;
         formEstado.value = row.dataset.estado;
 
-        formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-warning"></i>EDITAR CLIENTE`;
-        form.scrollIntoView({ behavior: 'smooth' });
-        formNombre.focus();
+        formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-white"></i>EDITAR CLIENTE`;
+        getModalCliente().show();
     }
 
     // Botones de editar en la tabla
@@ -495,33 +439,36 @@ Clientes
         controlsContainer.appendChild(nextLi);
     }
 
-    // Búsqueda en tiempo real integrada con paginación
-    document.getElementById("buscarCliente").addEventListener("input", function () {
-        const query = this.value.toLowerCase().trim();
+    // Función centralizada para aplicar filtros
+    function aplicarFiltros() {
+        const query = document.getElementById("buscarCliente").value.toLowerCase().trim();
+        const estadoFiltro = document.getElementById("filtroEstadoCliente").value;
 
-        if (query === "") {
-            filteredRows = [...allRows];
-        } else {
-            filteredRows = allRows.filter(row => {
-                const codigo = row.dataset.codigo.toLowerCase();
-                const nombres = row.dataset.nombres.toLowerCase();
-                const telefono = row.dataset.telefono.toLowerCase();
-                const email = row.dataset.email.toLowerCase();
-                const ciudad = row.dataset.ciudad.toLowerCase();
-                const direccion = row.dataset.direccion.toLowerCase();
+        filteredRows = allRows.filter(row => {
+            const codigo = row.dataset.codigo.toLowerCase();
+            const nombres = row.dataset.nombres.toLowerCase();
+            const telefono = row.dataset.telefono.toLowerCase();
+            const ciudad = row.dataset.ciudad.toLowerCase();
+            const estadoRow = row.dataset.estado; // "ACTIVO" o "INACTIVO"
 
-                return codigo.includes(query) ||
-                    nombres.includes(query) ||
-                    telefono.includes(query) ||
-                    email.includes(query) ||
-                    ciudad.includes(query) ||
-                    direccion.includes(query);
-            });
-        }
+            const coincideTexto = query === "" || 
+                codigo.includes(query) ||
+                nombres.includes(query) ||
+                telefono.includes(query) ||
+                ciudad.includes(query);
+
+            const coincideEstado = estadoFiltro === "TODOS" || estadoRow === estadoFiltro;
+
+            return coincideTexto && coincideEstado;
+        });
 
         currentPage = 1;
         renderTable();
-    });
+    }
+
+    // Búsqueda en tiempo real integrada con paginación
+    document.getElementById("buscarCliente").addEventListener("input", aplicarFiltros);
+    document.getElementById("filtroEstadoCliente").addEventListener("change", aplicarFiltros);
 
 
     let formToSubmit = null;

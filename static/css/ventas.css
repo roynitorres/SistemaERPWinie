@@ -1,11 +1,12 @@
-
 .text-blue {
     color: #003891 !important;
 }
-.btn-primary{
+
+.btn-primary {
     color: #fff;
     background-color: #003891;
 }
+
 .formulario-card,
 .card {
     border-radius: 6px;
@@ -72,6 +73,8 @@
 .text-xs {
     font-size: 0.72rem;
 }
-.bg-blue{
+
+.bg-blue {
     background: #0d3f9f;
 }
+

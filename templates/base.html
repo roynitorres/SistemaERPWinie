@@ -38,197 +38,131 @@
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 
 <body>
-
-    <!-- ===================================== -->
-    <!-- NAVBAR -->
-    <!-- ===================================== -->
     {% set rol_actual = current_user.rol.nombre.upper() if current_user.is_authenticated and current_user.rol else '' %}
-    <nav class="navbar navbar-expand-lg  navbar-custom py-2 shadow-sm">
-        <div class="container-fluid px-4">
-            <!-- LOGO -->
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{{ url_for('dashboard') }}">
-                <i class="bi bi-grid-fill text-info"></i>
-                <span class="logo-text">ERP<span class="text-info">Pro</span></span>
-            </a>
+    
+    <div id="app-container">
+        <!-- ===================================== -->
+        <!-- SIDEBAR -->
+        <!-- ===================================== -->
+        <aside id="sidebar" class="collapsed">
+            <!-- HEADER LOGO & TOGGLE -->
+            <div class="sidebar-header">
+                <a class="text-decoration-none d-flex align-items-center gap-2 logo-text" href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-grid-fill text-info"></i>
+                    <span class="text-white">Control <span class="text-info">Pagos</span></span>
+                </a>
+                <button class="btn-toggle" id="btnToggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
 
-            <!-- BOTÓN RESPONSIVE -->
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarContenido">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- MENÚ -->
-            <div class="collapse navbar-collapse" id="navbarContenido">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 ms-lg-4">
-                    <!-- CLIENTES -->
+            <!-- BODY LINKS -->
+            <div class="sidebar-body">
+                <ul class="nav flex-column mb-0">
                     {% if rol_actual == 'ADMIN' %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'clientes.clientes' %}active{% endif %}"
-                            href="{{ url_for('clientes.clientes') }}">
-                            <i class="bi bi-people me-1"></i> Clientes
+                        <a class="nav-link {% if request.endpoint == 'clientes.clientes' %}active{% endif %}" href="{{ url_for('clientes.clientes') }}">
+                            <div class="nav-link-content">
+                                <i class="bi bi-people icon-main"></i>
+                                <span class="text-nav">Clientes</span>
+                            </div>
                         </a>
                     </li>
-                    {% endif%}
-
-                    <!-- PRODUCTOS -->
-                    {% if rol_actual == 'ADMIN' %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}active{% endif %}"
-                            href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-box-seam me-1"></i> Productos
-                        </a>
-                        <ul class="dropdown-menu border-0 shadow-sm mt-2">
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('productos.productos') }}">
-                                    <i class="bi bi-list-task me-2 text-primary"></i> Lista de Productos
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('categorias.categorias') }}">
-                                    <i class="bi bi-tag me-2 text-success"></i> Categorías
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {% endif %}
-
-                    {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
-
-                    <!-- VENTAS -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.endpoint in ['ventas.ventas', 'ventas.historial_ventas'] %}active{% endif %}"
-                            href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-cart-check me-1"></i> Ventas
-                        </a>
-                        <ul class="dropdown-menu border-0 shadow-sm mt-2">
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('ventas.ventas') }}">
-                                    <i class="bi bi-plus-circle me-2 text-primary"></i> Nuevas Ventas
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('ventas.historial_ventas') }}">
-                                    <i class="bi bi-clock me-2 text-secondary"></i> Historial de Ventas
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-
-                    <!-- PAGOS -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'pagos.pagos' %}active{% endif %}"
-                            href="{{ url_for('pagos.pagos') }}">
-                            <i class="bi bi-cash-coin me-1"></i> Pagos
+                        <a class="nav-link {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}active{% endif %}" 
+                           data-bs-toggle="collapse" href="#menuProductos" role="button" aria-expanded="{% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}true{% else %}false{% endif %}" aria-controls="menuProductos">
+                            <div class="nav-link-content">
+                                <i class="bi bi-box-seam icon-main"></i>
+                                <span class="text-nav">Productos</span>
+                            </div>
+                            <i class="bi bi-chevron-right dropdown-indicator"></i>
                         </a>
-                    </li>
-
-
-                    <!-- REPORTES -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'reportes.financiero' %}active{% endif %}" href="{{ url_for('reportes.financiero') }}">
-                            <i class="bi bi-bar-chart-line me-1"></i> Reportes
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    {% if rol_actual == 'ADMIN' %}
-                    <!-- USUARIOS -->
-                    
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.endpoint in ['roles.roles'] %}active{% endif %}"
-                            href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-badge me-1"></i> Usuarios
-                        </a>
-                        <ul class="dropdown-menu border-0 shadow-sm mt-2">
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('usuarios.usuarios') }}">
-                                    <i class="bi bi-people me-2 text-primary"></i> Lista de Usuarios
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('roles.roles') }}">
-                                    <i class="bi bi-shield-lock me-2 text-warning"></i> Roles
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-
-
-                    <!-- MI CUENTA -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.endpoint in ['empresa.informacion_empresa'] %}active{% endif %}"
-                            href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person me-1"></i> Mi Cuenta
-                        </a>
-
-                        <ul class="dropdown-menu border-0 shadow-sm mt-2">
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ url_for('empresa.informacion_empresa') }}">
-                                    <i class="bi bi-building me-2 text-primary"></i> Información de la Empresa
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    {%endif%}
-
-                    <!-- MENÚ DERECHA (USUARIO Y FECHA) -->
-                    {% if current_user.is_authenticated %}
-                    <div class="d-flex align-items-center gap-3 ms-auto">
-                        <!-- Fecha Dinámica -->
-                        <span id="currentDate" class="text-white-50 small me-2 d-none d-lg-inline"></span>
-
-                        <!-- Icono Notificación -->
-                        <div class="position-relative cursor-pointer text-white-50 hover-white me-2">
-                            <i class="bi bi-bell fs-5"></i>
-                            <span
-                                class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                        </div>
-
-                        <!-- Perfil Dropdown -->
-                        <div class="dropdown">
-                            <a href="#"
-                                class="d-flex align-items-center text-white text-decoration-none dropdown-toggle gap-2"
-                                role="button" data-bs-toggle="dropdown">
-                                <div class="avatar bg-info text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold text-xs"
-                                    style="width: 32px; height: 32px; font-size: 13px;">
-                                    {{ current_user.username[:2].upper() }}
-                                </div>
-                                <span class="small d-none d-sm-inline">{{ current_user.username.title() }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2">
+                        <div class="collapse {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}show{% endif %}" id="menuProductos">
+                            <ul class="sidebar-submenu">
                                 <li>
-                                    <a class="dropdown-item py-2 text-danger" href="#" id="btnLogout">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                                    <a class="nav-link {% if request.endpoint == 'productos.productos' %}text-info fw-bold{% endif %}" href="{{ url_for('productos.productos') }}">
+                                        <i class="bi bi-list-task icon-main d-none"></i> Lista de Productos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link {% if request.endpoint == 'categorias.categorias' %}text-info fw-bold{% endif %}" href="{{ url_for('categorias.categorias') }}">
+                                        <i class="bi bi-tag icon-main d-none"></i> Categorías
                                     </a>
                                 </li>
                             </ul>
                         </div>
-                    </div>
+                    </li>
                     {% endif %}
+
+                    {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'ventas.ventas' %}active{% endif %}" href="{{ url_for('ventas.ventas') }}">
+                            <div class="nav-link-content">
+                                <i class="bi bi-cart-check icon-main"></i>
+                                <span class="text-nav">Ventas</span>
+                            </div>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and 'pagos.facturas' in request.endpoint %}active{% endif %}" 
+                           data-bs-toggle="collapse" href="#menuFacturas" role="button" aria-expanded="{% if request.endpoint and 'pagos.facturas' in request.endpoint %}true{% else %}false{% endif %}" aria-controls="menuFacturas">
+                            <div class="nav-link-content">
+                                <i class="bi bi-receipt icon-main"></i>
+                                <span class="text-nav">Facturas</span>
+                            </div>
+                            <i class="bi bi-chevron-right dropdown-indicator"></i>
+                        </a>
+                        <div class="collapse {% if request.endpoint and 'pagos.facturas' in request.endpoint %}show{% endif %}" id="menuFacturas">
+                            <ul class="sidebar-submenu">
+                                <li>
+                                    <a class="nav-link {% if request.endpoint and request.view_args.get('tipo') == 'contado' %}text-info fw-bold{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}">
+                                         Contado
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link {% if request.endpoint and request.view_args.get('tipo') == 'credito' %}text-info fw-bold{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}">
+                                         Crédito
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'reportes.financiero' %}active{% endif %}" href="{{ url_for('reportes.financiero') }}">
+                            <div class="nav-link-content">
+                                <i class="bi bi-bar-chart-line icon-main"></i>
+                                <span class="text-nav">Reportes</span>
+                            </div>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
-        </div>
-    </nav>
-    <script>
-        const d = new Date();
-        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        document.getElementById("currentDate").innerText = d.toLocaleDateString('es-ES', options);
-    </script>
 
-    <!-- ===================================== -->
-    <!-- CONTENIDO PRINCIPAL -->
-    <!-- ===================================== -->
-    <!-- JQUERY -->
+            <!-- FOOTER PROFILE -->
+            {% if current_user.is_authenticated %}
+            <div class="sidebar-footer">
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+                <button class="btn-logout mt-3" id="btnLogout">
+                    <i class="bi bi-box-arrow-right icon-main" style="font-size: 1.15rem; min-width: 30px; text-align: center;"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+            {% endif %}
+        </aside>
 
+        <!-- ===================================== -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ===================================== -->
+        <main id="main-content">
+            <div class="container-fluid px-4 py-4">
 
-    <main class="container-fluid px-4 ">
         <!-- ===================================== -->
         <!-- FLASH FLOAT -->
         <!-- ===================================== -->
@@ -264,21 +198,72 @@
 
         {% endblock %}
 
-    </main>
+                </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btnToggleSidebar');
+            
+            // El sidebar inicia colapsado por defecto para el efecto hover
+            sidebar.classList.add('collapsed');
 
-    <!-- ===================================== -->
-    <!-- FOOTER -->
-    <!-- ===================================== -->
+            // Expandir al pasar el cursor
+            sidebar.addEventListener('mouseenter', function() {
+                sidebar.classList.remove('collapsed');
+            });
 
-    <footer class="text-center mt-5 mb-3">
+            // Colapsar al retirar el cursor
+            sidebar.addEventListener('mouseleave', function() {
+                sidebar.classList.add('collapsed');
+                // Ocultar submenús al colapsar
+                document.querySelectorAll('.sidebar-submenu').forEach(el => {
+                    el.parentElement.classList.remove('show');
+                    const link = el.parentElement.previousElementSibling;
+                    if(link && link.hasAttribute('aria-expanded')){
+                        link.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
 
-        <small>
+            // Botón toggle para dispositivos móviles
+            btnToggle.addEventListener('click', function(e) {
+                sidebar.classList.toggle('collapsed');
+                if (sidebar.classList.contains('collapsed')) {
+                    document.querySelectorAll('.sidebar-submenu').forEach(el => {
+                        el.parentElement.classList.remove('show');
+                        const link = el.parentElement.previousElementSibling;
+                        if(link && link.hasAttribute('aria-expanded')){
+                            link.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                }
+            });
 
-            Sistema de Gestión Empresarial Integrado @copyright 2026 - Todos los derechos reservados
-
-        </small>
-
-    </footer>
+            // Expand sidebar if clicking a nav-link when collapsed
+            document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('collapsed')) {
+                        // If it's a dropdown toggle, expand sidebar
+                        if (this.hasAttribute('data-bs-toggle')) {
+                            sidebar.classList.remove('collapsed');
+                            localStorage.setItem('sidebarState', 'expanded');
+                        }
+                    }
+                });
+            });
+            
+            // Prevent default behavior for submenu toggles to prevent jumping
+            document.querySelectorAll('#sidebar .nav-link[data-bs-toggle="collapse"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Let Bootstrap handle the collapse, just prevent the default jump
+                });
+            });
+        });
+    </script>
 
     <!-- ===================================== -->
     <!-- BOOTSTRAP JS -->

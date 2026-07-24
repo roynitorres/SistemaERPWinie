@@ -48,7 +48,6 @@ Información de la Empresa
     .form-control, .form-select {
         border-radius: 8px;
         border: 1px solid #e2e8f0;
-        padding: 0.6rem 0.85rem;
     }
     .form-control:focus, .form-select:focus {
         border-color: #1f4fe0;
@@ -86,17 +85,36 @@ Información de la Empresa
 
 {% block content %}
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">ERPPro</a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Configuración</a></li>
-                <li class="breadcrumb-item active text-primary fw-semibold">Información de la Empresa</li>
-            </ol>
-        </nav>
-    </div>
+<div class="container-fluid pt-1 pb-2">
 
+    <!-- ===================================== -->
+    <!-- HEADER / TOP BAR -->
+    <!-- ===================================== -->
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
+        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
+            Información de la Empresa
+        </h4>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-bell fs-5 text-secondary"></i>
+            </button>
+            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-gear fs-5 text-secondary"></i>
+            </a>
+            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-moon fs-5 text-secondary"></i>
+            </button>
+                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
+                {% if current_user and current_user.foto_perfil %}
+                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
+                {% else %}
+                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
+                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
+                    </div>
+                {% endif %}
+            </a>
+        </div>
+    </div>
     <form method="POST" enctype="multipart/form-data" id="formEmpresa"
         data-tiene-empresa="{{ 'true' if empresa else 'false' }}">
         <div class="row g-4">
@@ -135,16 +153,11 @@ Información de la Empresa
             <!-- PANEL PRINCIPAL: FORMULARIO -->
             <div class="col-lg-9">
                 <div class="card empresa-card">
-                    <div class="card-header card-header-gradient d-flex align-items-center">
-                        <i class="bi bi-building-gear fs-5 me-2 text-white"></i>
-                        <h5 class="card-title fw-bold">Perfil Institucional</h5>
-                    </div>
-
                     <div class="card-body p-4">
                         <h6 class="section-title"><i class="bi bi-info-circle me-2"></i>Datos Generales</h6>
                         <div class="row g-4 mb-4">
                             <div class="col-md-5">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">RAZÓN SOCIAL *</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">RAZÓN SOCIAL *</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-buildings"></i>
                                     <input type="text" class="form-control fw-semibold" name="razon_social"
@@ -153,7 +166,7 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">RUC *</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">RUC *</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-upc-scan"></i>
                                     <input type="text" class="form-control fw-semibold" name="ruc"
@@ -162,7 +175,7 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">TIPO DE SOCIEDAD</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">TIPO DE SOCIEDAD</label>
                                 <select class="form-select fw-semibold" name="tipo_empresa">
                                     <option value="S.A." {% if empresa and empresa.tipo_empresa=='S.A.' %}selected{% endif %}>S.A.</option>
                                     <option value="S.A.C." {% if empresa and empresa.tipo_empresa=='S.A.C.' %}selected{% endif %}>S.A.C.</option>
@@ -170,7 +183,7 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">DIRECCIÓN FÍSICA</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">DIRECCIÓN FÍSICA</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-geo-alt"></i>
                                     <input type="text" class="form-control" name="direccion"
@@ -179,13 +192,13 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">CIUDAD</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">CIUDAD</label>
                                 <input type="text" class="form-control" name="ciudad"
                                     value="{{ empresa.ciudad if empresa else '' }}" placeholder="Ej. Managua">
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">TELÉFONO</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">TELÉFONO</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-telephone"></i>
                                     <input type="text" class="form-control" name="telefono"
@@ -194,7 +207,7 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">CORREO ELECTRÓNICO</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">CORREO ELECTRÓNICO</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-envelope"></i>
                                     <input type="email" class="form-control" name="email"
@@ -203,7 +216,7 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">SITIO WEB</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">SITIO WEB</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-globe"></i>
                                     <input type="url" class="form-control" name="sitio_web"
@@ -215,7 +228,7 @@ Información de la Empresa
                         <h6 class="section-title mt-2"><i class="bi bi-receipt me-2"></i>Configuración Tributaria y Facturación</h6>
                         <div class="row g-4 align-items-end">
                             <div class="col-md-4">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">RÉGIMEN FISCAL</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">RÉGIMEN FISCAL</label>
                                 <select class="form-select" name="regimen">
                                     <option value="Regimen General" {% if empresa and empresa.regimen=='Regimen General' %}selected{% endif %}>Régimen General</option>
                                     <option value="Regimen MiPYME Tributario" {% if empresa and empresa.regimen=='Regimen MiPYME Tributario' %}selected{% endif %}>Régimen MiPYME Tributario</option>
@@ -223,19 +236,19 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">SERIE FAC.</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">SERIE FAC.</label>
                                 <input type="text" class="form-control text-center fw-bold text-primary" name="serie_factura"
                                     value="{{ empresa.serie_factura if empresa else 'F001' }}">
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">CORRELATIVO</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">CORRELATIVO</label>
                                 <input type="text" class="form-control text-center fw-bold" name="correlativo"
                                     value="{{ empresa.correlativo if empresa else '00034' }}">
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">IVA (%)</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">IVA (%)</label>
                                 <div class="input-icon-wrapper">
                                     <i class="bi bi-percent"></i>
                                     <input type="number" class="form-control fw-bold" name="iva" step="0.01"
@@ -244,7 +257,7 @@ Información de la Empresa
                             </div>
 
                             <div class="col-md-2">
-                                <label class="form-label text-xs fw-bold text-muted mb-1">ESTADO</label>
+                                <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
                                 <select class="form-select fw-semibold" name="estado">
                                     <option value="ACTIVO" selected>Activo</option>
                                     <option value="INACTIVO">Inactivo</option>

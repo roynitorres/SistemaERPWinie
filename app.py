@@ -32,6 +32,7 @@ from routes.usuarios import usuarios_bp
 from routes.roles import roles_bp
 
 from routes.reportes import reportes_bp
+from routes.perfil import perfil_bp
 
 # APP
 
@@ -61,8 +62,9 @@ app.register_blueprint(ventas_bp)
 app.register_blueprint(pagos_bp)
 app.register_blueprint(portal_cliente_bp)
 app.register_blueprint(empresa_bp)
-app.register_blueprint(usuarios_bp)
-app.register_blueprint(roles_bp)
+app.register_blueprint(perfil_bp)
+# app.register_blueprint(usuarios_bp)
+# app.register_blueprint(roles_bp)
 app.register_blueprint(reportes_bp)
 # =========================
 # USER LOADER

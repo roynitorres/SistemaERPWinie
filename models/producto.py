@@ -43,18 +43,12 @@ class Producto(db.Model):
         db.String(100),
         nullable=False
     )
-     # UND
-    unidad = db.Column(
-        db.String(10),
-        nullable=False,
-        default="UND"
-    )
      # Estado
 
     estado = db.Column(
         db.String(20),
         nullable=False,
-        default="ACTIVO"
+        default="EN STOCK"
     )
 
     # =========================

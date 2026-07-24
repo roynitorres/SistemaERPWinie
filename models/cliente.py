@@ -51,11 +51,6 @@ class Cliente(db.Model):
         unique=True
     )
 
-    # Correo electrónico
-    email = db.Column(
-        db.String(100),
-        nullable=True
-    )
 
     # Ciudad
     ciudad = db.Column(

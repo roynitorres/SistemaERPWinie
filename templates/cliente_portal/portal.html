@@ -127,8 +127,8 @@ Portal Cliente
                                         <button class="btn btn-sm btn-outline-primary fw-semibold me-1" type="button" data-bs-toggle="collapse" data-bs-target="#detalleFac{{ venta.id }}">
                                             <i class="bi bi-chevron-down"></i>
                                         </button>
-                                        <a href="{{ url_for('ventas.factura', venta_id=venta.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
-                                            <i class="bi bi-printer"></i>
+                                        <a href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
+                                            <i class="bi bi-printer me-1"></i> Imprimir
                                         </a>
                                     </td>
                                 </tr>
