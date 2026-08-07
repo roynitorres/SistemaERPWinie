@@ -1,5 +1,4 @@
 
-
 from flask import Blueprint
 from flask import render_template
 from flask import request
@@ -7,6 +6,7 @@ from flask import jsonify
 from flask import redirect
 from flask import url_for
 from flask import flash
+from flask import abort
 
 from flask_login import login_required
 from flask_login import current_user
@@ -20,7 +20,10 @@ from models.cliente import Cliente
 from models.venta import Venta
 from models.pago import Pago
 from models.empresa import Empresa
+from models.enums import EstadoVenta, TipoVenta
 from utils.permisos import roles_required
+from services.venta_service import anular_venta_service
+from sqlalchemy.orm import joinedload
 
 # Fechas
 from datetime import datetime
@@ -44,15 +47,25 @@ pagos_bp = Blueprint("pagos",__name__)
 def facturas(tipo, estado):
     if tipo not in ["contado", "credito"]:
         flash("Tipo de factura inválido.", "error")
-        return redirect(url_for("dashboard.dashboard"))
+        return redirect(url_for("dashboard"))
         
     if estado not in ["todas", "pagadas", "pendientes"]:
         estado = "todas"
 
-    tipo_filtro = "CONTADO" if tipo == "contado" else "CREDITO"
+    tipo_filtro = TipoVenta.CONTADO if tipo == "contado" else TipoVenta.CREDITO
 
     clientes = Cliente.query.order_by(Cliente.nombres.asc()).all()
-    ventas = Venta.query.filter_by(tipo_venta=tipo_filtro).order_by(Venta.fecha_venta.desc()).all()
+
+    # Paginación
+    pagina = request.args.get("pagina", 1, type=int)
+    por_pagina = 20
+
+    ventas_paginadas = Venta.query.filter_by(tipo_venta=tipo_filtro).options(
+        joinedload(Venta.cliente),
+        joinedload(Venta.pagos)
+    ).order_by(Venta.fecha_venta.desc()).paginate(page=pagina, per_page=por_pagina, error_out=False)
+
+    ventas = ventas_paginadas.items
     
     total_facturado_pagado = 0
     total_facturas = 0
@@ -62,7 +75,7 @@ def facturas(tipo, estado):
     ventas_filtradas = []
     
     for venta in ventas:
-        if venta.estado != "ACTIVA":
+        if venta.estado != EstadoVenta.ACTIVA:
             continue
     
         total_facturas += 1
@@ -99,7 +112,7 @@ def facturas(tipo, estado):
     }
     
 
-    if tipo_filtro == "CONTADO":
+    if tipo_filtro == TipoVenta.CONTADO:
         plantilla = "pagos/pagos_contado.html"
     else:
         plantilla = "pagos/pagos_credito.html"
@@ -111,7 +124,9 @@ def facturas(tipo, estado):
         ventas_pendientes=ventas_pendientes,
         kpis=kpis,
         tipo_factura=tipo_filtro,
-        estado_factura=estado
+        estado_factura=estado,
+        paginacion=ventas_paginadas,
+        now=datetime.now()
     )
 
 
@@ -132,8 +147,8 @@ def buscar_facturas_cliente(cliente_id):
 
     ventas = Venta.query.filter(
         Venta.cliente_id == cliente_id,
-        Venta.estado == "ACTIVA"
-    ).all()
+        Venta.estado == EstadoVenta.ACTIVA
+    ).options(joinedload(Venta.pagos)).all()
 
     resultado = []
 
@@ -217,7 +232,7 @@ def guardar_pago():
         # ==========================================
         # BUSCAR VENTA
         # ==========================================
-        venta = Venta.query.get(venta_id)
+        venta = db.session.get(Venta, int(venta_id))
         if not venta:
             return jsonify({"success": False,"message": "Venta no encontrada"})
         
@@ -265,7 +280,7 @@ def guardar_pago():
 def anular_pago(pago_id):
     try:
         # BUSCAR PAGO
-        pago = Pago.query.get(pago_id)
+        pago = db.session.get(Pago, pago_id)
         data = request.get_json()
         motivo = data.get("motivo", "").strip()
         if not pago:
@@ -291,12 +306,18 @@ def anular_pago(pago_id):
 @pagos_bp.route("/factura/<int:venta_id>")
 @login_required
 def factura(venta_id):
-    
     # BUSCAR VENTA
-    venta = Venta.query.get_or_404(venta_id)
+    venta = db.session.get(Venta, venta_id)
+    if not venta:
+        abort(404)
+
+    # VALIDAR AUTORIZACIÓN: el cliente solo puede ver sus propias facturas
+    if current_user.rol and current_user.rol.nombre.upper() == "CLIENTE":
+        if venta.cliente_id != current_user.cliente_id:
+            abort(403)
+
     empresa = Empresa.query.first()
     # MOSTRAR FACTURA
-    
     return render_template(
         "ventas/factura.html",
         venta=venta,
@@ -312,26 +333,14 @@ def factura(venta_id):
 @roles_required("ADMIN")
 def anular_venta(venta_id):
     venta = Venta.query.get_or_404(venta_id)
+    tipo_venta_url = venta.tipo_venta.value.lower()
 
-    if venta.estado == "ANULADA":
-        flash("La factura ya está anulada", "warning")
-        return redirect(url_for("pagos.facturas", tipo=venta.tipo_venta.lower()))
+    exito, mensaje = anular_venta_service(venta_id)
 
-    total_abonado = sum(p.monto_pago for p in venta.pagos if p.estado == "ACTIVO")
-    saldo_pendiente = venta.total_venta - total_abonado
+    if exito:
+        flash(mensaje, "success")
+    else:
+        flash(mensaje, "danger")
 
-    if saldo_pendiente <= 0:
-        flash("No se puede anular una factura que ya está pagada.", "danger")
-        return redirect(url_for("pagos.facturas", tipo=venta.tipo_venta.lower()))
-
-    for detalle in venta.detalle_ventas:
-        detalle.producto.stock += detalle.cantidad
-        if detalle.producto.stock > 0:
-            detalle.producto.estado = "EN STOCK"
-
-    venta.estado = "ANULADA"
-    db.session.commit()
-
-    flash("Factura anulada correctamente", "success")
-    return redirect(url_for("pagos.facturas", tipo=venta.tipo_venta.lower()))
+    return redirect(url_for("pagos.facturas", tipo=tipo_venta_url))
 

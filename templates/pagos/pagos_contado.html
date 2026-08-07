@@ -1,406 +1,324 @@
 {% extends "base.html" %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/pagos.css') }}">
-{% endblock %}
 
+{% block title %}Facturas de Contado{% endblock %}
 
-{% block title %}
-Registrar Pagos
+{% block page_title %}
+<i class="bi bi-receipt"></i> Facturas de Contado
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid pt-1 pb-2">
-
     <!-- ===================================== -->
-    <!-- HEADER / TOP BAR -->
+    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Facturas de Contado
-        </h4>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-            </button>
-            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-gear fs-5 text-secondary"></i>
-            </a>
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-moon fs-5 text-secondary"></i>
-            </button>
-                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
-                {% if current_user and current_user.foto_perfil %}
-                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
-                {% else %}
-                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
-                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
-                    </div>
-                {% endif %}
-            </a>
-        </div>
-    </div>
+    <div class="filter-bar">
+        <!-- Buscador -->
+        <input type="text" class="form-input filter-bar__input" id="buscarClienteCxc" placeholder="🔍 Buscar cliente o factura...">
 
-    <!-- ===================================== -->
-    <!-- BARRA DE CONTROLES DE LA TABLA (FLOTANTES) -->
-    <!-- ===================================== -->
-    <div class="d-flex justify-content-start align-items-center mb-3">
-        <div class="d-flex flex-wrap align-items-center gap-3">
-            <!-- Buscador -->
-            <div class="position-relative">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                <input type="text" class="form-control ps-5 border-light-subtle rounded bg-white shadow-sm" id="buscarClienteCxc"
-                    placeholder="Buscar cliente o factura..." style="width: 250px; min-height: 42px;">
-            </div>
+        <!-- Filtro Mes -->
+        <select class="form-input filter-bar__select" id="filtro_mes_cxc">
+            <option value="TODOS">Todos los meses</option>
+        </select>
 
-            <!-- Filtro -->
-            <select class="form-select border-light-subtle rounded text-secondary bg-white shadow-sm" id="filtro_mes_cxc"
-                style="width: 150px; min-height: 42px;">
-                <option value="TODOS">Meses</option>
-            </select>
+        <!-- Exportar -->
+        <a href="{{ url_for('clientes.exportar_clientes') }}" class="btn btn--outline" style="margin-left: auto;">
+            <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+        </a>
 
-            <!-- Exportar -->
-            <a href="{{ url_for('clientes.exportar_clientes') }}"
-                class="btn btn-dark rounded d-flex align-items-center justify-content-center gap-2 fw-semibold px-4 shadow-sm" style="min-height: 42px;">
-                <i class="bi bi-download"></i> Exportación
-            </a>
-
-            <!-- Badges (manteniendo los ID para JS) -->
-            <div class="d-flex align-items-center ms-2">
-                <span id="badgeTotalFacturas" class="badge bg-primary rounded-pill px-3 py-2 shadow-sm fs-6">
-                    0
-                </span>
-                <span id="badgePendientes" class="badge bg-danger rounded-pill px-3 py-2 ms-2 shadow-sm fs-6 d-none">
-                    0
-                </span>
-            </div>
+        <!-- Badges (manteniendo los ID para JS) -->
+        <div style="display: flex; gap: var(--spacing-sm); margin-left: var(--spacing-md);">
+            <span id="badgeTotalFacturas" class="badge badge--success" style="font-size: 1rem; padding: 4px 12px;">0</span>
         </div>
     </div>
 
     <!-- ===================================== -->
     <!-- TABLA DE FACTURAS -->
     <!-- ===================================== -->
-    <div class="card border-0 shadow-sm d-flex flex-column"
-        style="border-radius: 12px; overflow: hidden; height: calc(100vh - 200px); min-height: 400px;">
-        <div class="card-body p-0 d-flex flex-column h-100">
-            <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
-                <table class="table align-middle table-hover border-light-subtle mb-0">
-                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom "
-                        style="position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 rgba(0,0,0,0.1);">
-                        <tr>
-                            <th class="px-3 py-3 border-bottom shadow-sm">FACTURA</th>
-                            <th class="px-3 py-3 border-bottom shadow-sm">CLIENTE</th>
-                            <th class="px-3 py-3 d-none d-lg-table-cell border-bottom shadow-sm">FECHA DE FACTURACIÓN
-                            </th>
-                            <th class="px-3 py-3 d-none d-sm-table-cell border-bottom shadow-sm">TOTAL</th>
-                            <th class="px-3 py-3 text-center border-bottom shadow-sm" ></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaPagos">
-                        {% for venta in ventas %}
-                        {% set total_abonado = namespace(valor=0) %}
-                        {% set pago_info = namespace(fecha='', forma='', ref='', obs='') %}
-                        {% for pago in venta.pagos %}
+    <div class="panel" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead class="data-table__head">
+                    <tr>
+                        <th style="width: 120px;">FACTURA</th>
+                        <th>CLIENTE</th>
+                        <th>FECHA DE FACTURACIÓN</th>
+                        <th style="text-align: right;">TOTAL</th>
+                        <th style="text-align: right;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPagos">
+                    {% for venta in ventas %}
+                    {% set total_abonado = namespace(valor=0) %}
+                    {% set pago_info = namespace(fecha='', forma='', ref='', obs='') %}
+                    {% for pago in venta.pagos %}
                         {% if pago.estado == "ACTIVO" %}
-                        {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
-                        {% set pago_info.fecha = pago.fecha_pago.strftime('%d/%m/%Y') if pago.fecha_pago else '' %}
-                        {% set pago_info.forma = pago.tipo_pago %}
-                        {% set pago_info.ref = pago.referencia or 'Ninguna' %}
-                        {% set pago_info.obs = pago.observaciones or 'Sin observaciones' %}
+                            {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
+                            {% set pago_info.fecha = pago.fecha_pago.strftime('%d/%m/%Y') if pago.fecha_pago else '' %}
+                            {% set pago_info.forma = pago.tipo_pago %}
+                            {% set pago_info.ref = pago.referencia or 'Ninguna' %}
+                            {% set pago_info.obs = pago.observaciones or 'Sin observaciones' %}
                         {% endif %}
-                        {% endfor %}
-                        {% set saldo_pendiente =
-                        venta.total_venta - total_abonado.valor %}
+                    {% endfor %}
+                    {% set saldo_pendiente = venta.total_venta - total_abonado.valor %}
 
-                        <!-- FILA PRINCIPAL -->
-                        <tr class="fila-factura"
-                            data-mes="{{ venta.fecha_venta.strftime('%Y-%m') if venta.fecha_venta else '' }}">
-                            <td>
-                                {{ venta.numero_factura }}
-                                {% if saldo_pendiente > 0 %}
-                                <span class="badge bg-danger ms-2"><i
-                                        class="bi bi-exclamation-circle me-1"></i></span>
-                                {% endif %}
-                            </td>
-                            <td>{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</td>
-                            <td class="d-none d-lg-table-cell">{{ venta.fecha_venta.strftime('%d/%m/%Y') if
-                                venta.fecha_venta else
-                                '-' }}
-                            </td>
-                            <td class="text-start text-dark fw-bold d-none d-sm-table-cell"> C$ {{
-                                "%.2f"|format(venta.total_venta) }}</td>
-                            <td>
-                                <div class="d-flex gap-1 justify-content-center">
-                                    <div class="dropdown">
-                                        <button class="btn btn-light btn-sm border" type="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                            <li>
-                                                <h6 class="dropdown-header text-white fw-bold d-flex align-items-center"
-                                                    style="background-color: #003891;">
-                                                    <i class="bi bi-gear-fill me-2"></i> Acciones
-                                                </h6>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item py-2 "
-                                                    href="{{ url_for('pagos.factura', venta_id=venta.id) }}"
-                                                    target="_blank">
-                                                    <i class="bi bi-printer me-2 "></i> Imprimir
-                                                </a>
-                                            </li>
-                                            {% if total_abonado.valor > 0 %}
-                                            <li>
-                                                <button type="button"
-                                                    class="dropdown-item py-2 btn-ver-pago"
-                                                    data-factura="{{ venta.numero_factura }}"
-                                                    data-fecha="{{ pago_info.fecha }}"
-                                                    data-forma="{{ pago_info.forma }}"
-                                                    data-referencia="{{ pago_info.ref }}"
-                                                    data-observaciones="{{ pago_info.obs }}"
-                                                    data-monto="{{ '%.2f'|format(total_abonado.valor) }}">
-                                                    <i class="bi bi-eye me-2 "></i> Detalle
-                                                </button>
-                                            </li>
-                                            {% endif %}
-                                            {% if saldo_pendiente > 0 and venta.estado == "ACTIVA" %}
-                                            <li>
-                                                <button type="button"
-                                                    class="dropdown-item py-2 btn-abonar"
-                                                    data-venta-id="{{ venta.id }}"
-                                                    data-factura="{{ venta.numero_factura }}"
-                                                    data-saldo="{{ saldo_pendiente }}">
-                                                    <i class="bi bi-cash-coin me-2"></i> Pagar
-                                                </button>
-                                            </li>
-                                            {% endif %}
-                                            {% if current_user.rol.nombre == "ADMIN" and venta.estado == "ACTIVA" and
-                                            saldo_pendiente > 0 %}
-                                            <li>
-                                                <form action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}"
-                                                    method="POST" class="d-inline form-anular-factura">
-                                                    <button type="button"
-                                                        class="dropdown-item py-2 btn-anular-factura-swal"
-                                                        title="Anular Factura">
-                                                        <i class="bi bi-trash me-2"></i> Anular 
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            {% endif %}
-                                        </ul>
-                                    </div>
+                    <!-- FILA PRINCIPAL -->
+                    <tr class="data-table__row fila-factura" data-mes="{{ venta.fecha_venta.strftime('%Y-%m') if venta.fecha_venta else '' }}">
+                        <td class="data-table__cell" style="font-family: monospace; font-weight: bold; color: var(--color-primary-dark);">
+                            #{{ venta.numero_factura }}
+                        </td>
+                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-text-main);">
+                            <div class="avatar-wrapper">
+                                <div class="avatar" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+                                    <i class="bi bi-person"></i>
                                 </div>
-                            </td>
-                        </tr>
+                                <div class="avatar-text">
+                                    <span class="avatar-text__title">{{ venta.cliente.nombres }}</span>
+                                    {% if saldo_pendiente > 0 %}
+                                    {% set dias_pendiente = ((now - venta.fecha_venta).days) if venta.fecha_venta else 0 %}
+                                    <span style="display:inline-block; margin-top: 3px; font-size: 0.7rem; font-weight: 600; color: var(--color-danger); background: rgba(220,53,69,0.1); border-radius: 20px; padding: 1px 8px; letter-spacing: 0.03em;">
+                                        <i class="bi bi-clock" style="margin-right:3px;"></i>Pendiente {{ dias_pendiente }} día{{ 's' if dias_pendiente != 1 else '' }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="data-table__cell text-muted">
+                            {{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}
+                        </td>
+                        <td class="data-table__cell" style="text-align: right; font-weight: bold;">
+                            C$ {{ "%.2f"|format(venta.total_venta) }}
+                        </td>
+                        <td class="data-table__cell data-table__cell--actions">
+                            <div class="dropdown">
+                                <button class="btn btn--secondary btn--small" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i> Opciones
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: var(--border-radius-md);">
+                                    <li>
+                                        <h6 class="dropdown-header text-white fw-bold d-flex align-items-center" style="background-color: var(--color-primary-dark);">
+                                            <i class="bi bi-gear-fill me-2"></i> Acciones
+                                        </h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank">
+                                            <i class="bi bi-printer me-2"></i> Imprimir
+                                        </a>
+                                    </li>
+                                    {% if total_abonado.valor > 0 %}
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2 btn-ver-pago"
+                                            data-factura="{{ venta.numero_factura }}"
+                                            data-fecha="{{ pago_info.fecha }}"
+                                            data-forma="{{ pago_info.forma }}"
+                                            data-referencia="{{ pago_info.ref }}"
+                                            data-observaciones="{{ pago_info.obs }}"
+                                            data-monto="{{ '%.2f'|format(total_abonado.valor) }}">
+                                            <i class="bi bi-eye me-2"></i> Ver Detalle
+                                        </button>
+                                    </li>
+                                    {% endif %}
+                                    {% if saldo_pendiente > 0 and venta.estado.value == "ACTIVA" %}
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2 btn-abonar"
+                                            data-venta-id="{{ venta.id }}"
+                                            data-factura="{{ venta.numero_factura }}"
+                                            data-saldo="{{ saldo_pendiente }}">
+                                            <i class="bi bi-cash-coin me-2"></i> Pagar
+                                        </button>
+                                    </li>
+                                    {% endif %}
+                                    {% if current_user.rol.nombre == "ADMIN" and venta.estado.value == "ACTIVA" and saldo_pendiente > 0 %}
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2 btn-anular-factura"
+                                            style="color: var(--color-danger);"
+                                            data-venta-id="{{ venta.id }}"
+                                            data-factura="{{ venta.numero_factura }}"
+                                            data-action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}">
+                                            <i class="bi bi-trash me-2"></i> Anular
+                                        </button>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Table Footer for Summary & Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md) var(--spacing-lg); border-top: 1px solid var(--color-border); background-color: var(--color-bg-stripe); position: sticky; bottom: 0; z-index: 10;">
+            <div id="paginationSummary" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
+                Mostrando 0 a 0 de 0 registros
             </div>
-            <!-- Table Footer for Summary & Pagination -->
-            <div
-                class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                <div class="text-muted text-xs" id="paginationSummary">
-                    Mostrando 0 a 0 de 0 registros
-                </div>
-                <nav aria-label="Navegación de tabla">
-                    <ul class="pagination pagination-sm mb-0" id="paginationControls">
-                        <!-- Generado dinámicamente -->
-                    </ul>
-                </nav>
+            <div id="paginationControls" style="display: flex; gap: var(--spacing-xs);">
+                <!-- Generado dinámicamente -->
             </div>
         </div>
     </div>
-</div>
 
 
-
-<!-- MODAL PAGAR FACTURA -->
-<div class="modal fade" id="modalPagarFactura" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
-                <h5 class="modal-title mb-0 fw-bold d-flex align-items-center">
-                    <i class="bi bi-wallet2 me-2 text-white"></i>PAGAR FACTURA | <span id="lblFacturaPagar"
-                        class="ms-2 text-warning"></span>
+    <!-- ===================================== -->
+    <!-- MODAL PAGAR FACTURA (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalPagarFactura">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-wallet2"></i> PAGAR FACTURA | <span id="lblFacturaPagar" style="color: var(--color-secondary); margin-left: 8px;"></span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalPagarFactura')">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
+            
             <div class="modal-body">
                 <form id="formPagarFactura">
                     <input type="hidden" name="venta_id" id="pagarVentaId">
 
-                    <!-- Campos en Columna Vertical -->
-                    <div class="row g-3">
+                    <div class="grid grid--2-cols">
                         <!-- MONTO A PAGAR -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">MONTO A PAGAR (C$)</label>
-                            <div class="input-group">
-                                
-                                <input type="number" class="form-control bg-light border-0 fw-bold fs-5 text-success"
-                                    name="monto_pago" id="pagarMonto" readonly>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label form-label--required">MONTO A PAGAR (C$)</label>
+                            <input type="number" class="form-input" name="monto_pago" id="pagarMonto" readonly style="font-size: 1.25rem; font-weight: bold; color: var(--color-success); background-color: var(--color-bg-stripe);">
                         </div>
 
                         <!-- FECHA -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA *</label>
-                            <div class="input-group">
-                               
-                                <input type="date" class="form-control" name="fecha_pago" id="pagarFecha" required>
-                            </div>
-                        </div>
-
-                        <!-- FORMA DE PAGO -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">FORMA DE PAGO *</label>
-                            <div class="input-group">
-                                
-                                <select class="form-select" name="tipo_pago" id="pagarForma" required>
-                                    <option value="">Seleccione</option>
-                                    <option value="EFECTIVO">Efectivo</option>
-                                    <option value="TRANSFERENCIA">Transferencia</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- REFERENCIA -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">REFERENCIA</label>
-                            <div class="input-group">
-                                
-                                <input type="text" class="form-control" name="referencia" id="pagarReferencia"
-                                    placeholder="Opcional">
-                            </div>
-                        </div>
-
-                        <!-- OBSERVACIONES -->
-                        <div class="col-12">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">OBSERVACIONES</label>
-                            <div class="input-group">
-                                
-                                <input type="text" class="form-control" name="observaciones" id="pagarObservaciones"
-                                    placeholder="Opcional">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label form-label--required">FECHA</label>
+                            <input type="date" class="form-input" name="fecha_pago" id="pagarFecha" required>
                         </div>
                     </div>
 
-                    <!-- Botones de Acción -->
-                    <div class="d-flex gap-2 mt-4 justify-content-end">
-                        <button type="button"
-                            class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
-                            data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle"></i> Cancelar
-                        </button>
-                        <button type="submit"
-                            class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2">
-                            <i class="bi bi-check-circle"></i> Confirmar Pago
+                    <!-- FORMA DE PAGO -->
+                    <div class="form-group">
+                        <label class="form-label form-label--required">FORMA DE PAGO</label>
+                        <select class="form-input" name="tipo_pago" id="pagarForma" required>
+                            <option value="">Seleccione</option>
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TRANSFERENCIA">Transferencia</option>
+                        </select>
+                    </div>
+
+                    <!-- REFERENCIA -->
+                    <div class="form-group">
+                        <label class="form-label">REFERENCIA</label>
+                        <input type="text" class="form-input" name="referencia" id="pagarReferencia" placeholder="Opcional">
+                    </div>
+
+                    <!-- OBSERVACIONES -->
+                    <div class="form-group">
+                        <label class="form-label">OBSERVACIONES</label>
+                        <input type="text" class="form-input" name="observaciones" id="pagarObservaciones" placeholder="Opcional">
+                    </div>
+
+                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
+                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalPagarFactura')">Cancelar</button>
+                        <button type="submit" class="btn btn--primary">
+                            <i class="bi bi-check-circle" style="margin-right: 8px;"></i> Confirmar Pago
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL VER DETALLE DE PAGO -->
-<div class="modal fade" id="modalDetallePago" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
-                <h5 class="modal-title mb-0 fw-bold d-flex align-items-center">
-                    <i class="bi bi-receipt me-2 text-white"></i> DETALLE DE PAGO
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 bg-light">
-                <div class="text-center mb-4">
-                    <h6 class="text-muted mb-1 text-uppercase text-xs fw-bold">Factura</h6>
-                    <h6 class="fw-bold text-dark mb-0" id="detFactura">---</h6>
-                </div>
-                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                    <span class="text-muted text-xs fw-semibold">MONTO PAGADO</span>
-                    <span class=" text-dark">C$ <span id="detMonto">0.00</span></span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                    <span class="text-muted text-xs fw-semibold">FECHA</span>
-                    <span class=" text-dark" id="detFecha">--/--/----</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                    <span class="text-muted text-xs fw-semibold">MÉTODO</span>
-                    <span class=" text-dark" id="detForma">---</span>
-                </div>
-                <div class="d-flex flex-column border-bottom pb-2 mb-2">
-                    <span class="text-muted text-xs fw-semibold mb-1">REFERENCIA</span>
-                    <span class=" text-dark text-sm" id="detReferencia">---</span>
-                </div>
-                <div class="d-flex flex-column pb-2 mb-2">
-                    <span class="text-muted text-xs fw-semibold mb-1">OBSERVACIONES</span>
-                    <span class=" text-dark text-sm" id="detObservaciones">---</span>
-                </div>
-            </div>
-            <div class="modal-footer border-0 bg-white justify-content-center">
-                <button type="button" class="btn btn-primary px-4 fw-semibold" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- MODAL ANULAR PAGO -->
-<div class="modal fade" id="modalAnularPago" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: #003891; color: white;">
+    <!-- ===================================== -->
+    <!-- MODAL VER DETALLE DE PAGO (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalDetallePago">
+        <div class="modal-window" style="max-width: 400px;">
+            <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Anular pago
+                    <i class="bi bi-receipt"></i> DETALLE DE PAGO
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalDetallePago')">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
-            <div class="modal-body text-center">
-                <i class="bi bi-exclamation-triangle text-danger mb-3" style="font-size: 3.5rem;"></i>
-                <p class="fs-5 mb-3">Indique el motivo para anular este pago.</p>
-                <div class="mb-3 text-start">
-                    <label for="motivoAnulacionPago" class="form-label">Motivo de anulación</label>
-                    <textarea class="form-control" id="motivoAnulacionPago" rows="3"
-                        placeholder="Indique el motivo..."></textarea>
-                    <div class="invalid-feedback">Debe indicar el motivo.</div>
+            <div class="modal-body" style="background-color: var(--color-bg-app);">
+                <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                    <h6 style="font-size: var(--font-size-sm); color: var(--color-text-muted); text-transform: uppercase; margin: 0;">Factura</h6>
+                    <h4 style="font-weight: bold; color: var(--color-primary-dark); margin: 0;" id="detFactura">---</h4>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-text-muted);">MONTO PAGADO</span>
+                    <span style="font-weight: bold; color: var(--color-success);">C$ <span id="detMonto">0.00</span></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-text-muted);">FECHA</span>
+                    <span style="font-weight: bold;" id="detFecha">--/--/----</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-text-muted);">MÉTODO</span>
+                    <span style="font-weight: bold;" id="detForma">---</span>
+                </div>
+                <div style="display: flex; flex-direction: column; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-text-muted); margin-bottom: 4px;">REFERENCIA</span>
+                    <span style="font-size: var(--font-size-sm);" id="detReferencia">---</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-text-muted); margin-bottom: 4px;">OBSERVACIONES</span>
+                    <span style="font-size: var(--font-size-sm);" id="detObservaciones">---</span>
                 </div>
             </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="btnConfirmarAnularPago"
-                    style="background-color: #dc3545;">Anular</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--primary" style="width: 100%;" onclick="cerrarModal('modalDetallePago')">Cerrar</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL ALERTA GENÉRICA -->
-<div class="modal fade" id="modalAlertaPago" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-4">
-                <i id="alertaPagoIcono" class="bi bi-exclamation-triangle text-warning mb-3"
-                    style="font-size: 4rem;"></i>
-                <h5 class="fw-bold mb-2" id="alertaPagoTitulo">Aviso</h5>
-                <p class="text-muted mb-4" id="alertaPagoMensaje">Mensaje de alerta.</p>
-                <button type="button" class="btn btn-primary px-4 fw-semibold"
-                    data-bs-dismiss="modal">Entendido</button>
+
+    <!-- ===================================== -->
+    <!-- MODAL CONFIRMAR ANULACIÓN (CUSTOM)    -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalAnularFactura">
+        <div class="modal-window" style="max-width: 420px;">
+            <div class="modal-header" style="background-color: var(--color-danger);">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill" style="margin-right: 8px;"></i> ANULAR FACTURA
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAnularFactura')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding-top: var(--spacing-xl);">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(220,53,69,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-md);">
+                    <i class="bi bi-trash3-fill" style="font-size: 1.8rem; color: var(--color-danger);"></i>
+                </div>
+                <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: var(--spacing-xs);">¿Anular la factura <span id="lblAnularFactura" style="color: var(--color-danger);"></span>?</h6>
+                <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">Esta acción anulará la factura y devolverá el stock. <strong>No podrás revertirlo.</strong></p>
+            </div>
+            <div class="modal-footer" style="justify-content: center; gap: var(--spacing-md);">
+                <button type="button" class="btn btn--outline" onclick="cerrarModal('modalAnularFactura')">Cancelar</button>
+                <form id="formAnularFactura" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn" style="background-color: var(--color-danger); color: #fff; border: none;">
+                        <i class="bi bi-trash3" style="margin-right: 6px;"></i> Sí, anular
+                    </button>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    const buscarClienteCxc = document.getElementById("buscarClienteCxc");
+    // ==========================================
+    // SISTEMA DE MODALES CUSTOM
+    // ==========================================
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('is-open');
+    }
 
-    let modalPagar = null;
-    let modalDetalle = null;
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+    }
+
+    // ==========================================
+    // LÓGICA DE PAGOS
+    // ==========================================
+    const buscarClienteCxc = document.getElementById("buscarClienteCxc");
 
     document.querySelectorAll(".btn-ver-pago").forEach(btn => {
         btn.addEventListener("click", function () {
@@ -411,10 +329,7 @@ Registrar Pagos
             document.getElementById("detReferencia").innerText = this.dataset.referencia;
             document.getElementById("detObservaciones").innerText = this.dataset.observaciones;
 
-            if (!modalDetalle) {
-                modalDetalle = new bootstrap.Modal(document.getElementById("modalDetallePago"));
-            }
-            modalDetalle.show();
+            abrirModal("modalDetallePago");
         });
     });
 
@@ -433,10 +348,7 @@ Registrar Pagos
             document.getElementById("pagarReferencia").value = "";
             document.getElementById("pagarObservaciones").value = "";
 
-            if (!modalPagar) {
-                modalPagar = new bootstrap.Modal(document.getElementById("modalPagarFactura"));
-            }
-            modalPagar.show();
+            abrirModal("modalPagarFactura");
         });
     });
 
@@ -453,93 +365,25 @@ Registrar Pagos
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            modalPagar.hide();
-            mostrarAlertaPago("Registrado", "El pago se procesó exitosamente.", "bi-check-circle", "text-success");
-            setTimeout(() => location.reload(), 1500);
+            cerrarModal("modalPagarFactura");
+            showToast('Pago registrado exitosamente.', 'success');
+            setTimeout(() => location.reload(), 1800);
         } else {
-            mostrarAlertaPago("Error", resultado.message, "bi-x-circle", "text-danger");
+            showToast(resultado.message, 'danger');
         }
     });
 
-
-    let modalAlertaPagoInstancia = null;
-    function mostrarAlertaPago(titulo, mensaje, icono = 'bi-exclamation-triangle', color = 'text-warning') {
-        document.getElementById('alertaPagoTitulo').innerText = titulo;
-        document.getElementById('alertaPagoMensaje').innerText = mensaje;
-
-        const iconoElement = document.getElementById('alertaPagoIcono');
-        iconoElement.className = `bi ${icono} ${color} mb-3`;
-
-        if (!modalAlertaPagoInstancia) {
-            modalAlertaPagoInstancia = new bootstrap.Modal(document.getElementById('modalAlertaPago'));
-        }
-        modalAlertaPagoInstancia.show();
-    }
-
-    let pagoIdToCancel = null;
-    let modalAnularPago = null;
-    const txtMotivoAnulacion = document.getElementById("motivoAnulacionPago");
-
-    document.querySelectorAll(".btn-anular-pago").forEach(btn => {
+    document.querySelectorAll(".btn-anular-factura").forEach(btn => {
         btn.addEventListener("click", function (e) {
             e.stopPropagation();
-            pagoIdToCancel = this.dataset.id;
-            txtMotivoAnulacion.value = "";
-            txtMotivoAnulacion.classList.remove("is-invalid");
-            if (!modalAnularPago) {
-                modalAnularPago = new bootstrap.Modal(document.getElementById("modalAnularPago"));
-            }
-            modalAnularPago.show();
+            const factura = this.dataset.factura;
+            const action = this.dataset.action;
+
+            document.getElementById("lblAnularFactura").innerText = `#${factura}`;
+            document.getElementById("formAnularFactura").action = action;
+
+            abrirModal("modalAnularFactura");
         });
-    });
-
-    document.querySelectorAll(".btn-anular-factura-swal").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const form = this.closest('form');
-            Swal.fire({
-                title: '¿Anular Factura?',
-                text: "Esta acción anulará la factura y devolverá el stock. ¡No podrás revertirlo!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, anular',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-    });
-
-    document.getElementById("btnConfirmarAnularPago").addEventListener("click", async function () {
-        const motivo = txtMotivoAnulacion.value.trim();
-        if (!motivo) {
-            txtMotivoAnulacion.classList.add("is-invalid");
-            return;
-        }
-
-        txtMotivoAnulacion.classList.remove("is-invalid");
-        modalAnularPago.hide();
-
-        const respuesta = await fetch(`/anular-pago/${pagoIdToCancel}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ motivo: motivo })
-        });
-
-        const resultado = await respuesta.json();
-
-        if (resultado.success) {
-            mostrarAlertaPago("Anulado", resultado.message, "bi-check-circle", "text-success");
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            mostrarAlertaPago("Error", resultado.message, "bi-x-circle", "text-danger");
-        }
     });
 
     // === PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE ===
@@ -547,7 +391,6 @@ Registrar Pagos
 
     let currentPage = 1;
     const itemsPerPage = 10;
-
     const allRows = Array.from(document.querySelectorAll("#tablaPagos .fila-factura"));
     let filteredRows = [...allRows];
 
@@ -590,25 +433,15 @@ Registrar Pagos
             totalMonto += monto;
         });
 
-        const badgePendientes = document.getElementById("badgePendientes");
-        if (badgePendientes) {
-            if (pendientesCount > 0) {
-                badgePendientes.innerHTML = `<i class="bi bi-bell-fill me-1"></i>${pendientesCount}`;
-                badgePendientes.classList.remove("d-none");
-            } else {
-                badgePendientes.classList.add("d-none");
-            }
-        }
-
         const badgeTotalFacturas = document.getElementById("badgeTotalFacturas");
         if (badgeTotalFacturas) {
-            badgeTotalFacturas.innerHTML = `<i class=" me-1"></i>${filteredRows.length} `;
+            badgeTotalFacturas.innerHTML = `<i class="bi bi-receipt" style="margin-right: 4px;"></i>${filteredRows.length}`;
         }
 
         const paginationSummary = document.getElementById("paginationSummary");
         if (paginationSummary) {
-            const currentText = paginationSummary.innerText.split(' | ')[0]; // Keep only the "Mostrando X a Y..." part
-            paginationSummary.innerHTML = `${currentText} | <strong class="text-black fw-bold ms-1 fs-6">Total: C$ ${totalMonto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
+            const currentText = paginationSummary.innerText.split(' | ')[0];
+            paginationSummary.innerHTML = `${currentText} | <strong style="margin-left: 10px; color: var(--color-primary-dark);">Total página: C$ ${totalMonto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
         }
     }
 
@@ -625,7 +458,7 @@ Registrar Pagos
             const option = document.createElement("option");
             option.value = mes;
             const [y, m] = mes.split('-');
-            const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             option.text = `${monthNames[parseInt(m) - 1]} ${y}`;
             filtroMesCxc.appendChild(option);
         });
@@ -648,7 +481,7 @@ Registrar Pagos
         });
 
         for (let i = startIndex; i < endIndex; i++) {
-            filteredRows[i].style.display = "";
+            if (filteredRows[i]) filteredRows[i].style.display = "";
         }
 
         document.getElementById("paginationSummary").innerText =
@@ -666,43 +499,43 @@ Registrar Pagos
 
         if (totalPages <= 1) return;
 
-        const prevLi = document.createElement("li");
-        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-        prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
-        prevLi.addEventListener("click", e => {
-            e.preventDefault();
-
-            if (currentPage > 1) {
+        // Botón Anterior
+        const btnPrev = document.createElement("button");
+        btnPrev.className = "btn btn--outline btn--small";
+        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
+        if (currentPage === 1) btnPrev.disabled = true;
+        else {
+            btnPrev.addEventListener("click", () => {
                 currentPage--;
                 renderTable();
-            }
-        });
-        controlsContainer.appendChild(prevLi);
+            });
+        }
+        controlsContainer.appendChild(btnPrev);
 
+        // Páginas numeradas
         for (let i = 1; i <= totalPages; i++) {
-            const pageLi = document.createElement("li");
-            pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
-            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            pageLi.addEventListener("click", e => {
-                e.preventDefault();
+            const btnPage = document.createElement("button");
+            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
+            btnPage.innerText = i;
+            btnPage.addEventListener("click", () => {
                 currentPage = i;
                 renderTable();
             });
-            controlsContainer.appendChild(pageLi);
+            controlsContainer.appendChild(btnPage);
         }
 
-        const nextLi = document.createElement("li");
-        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-        nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
-        nextLi.addEventListener("click", e => {
-            e.preventDefault();
-
-            if (currentPage < totalPages) {
+        // Botón Siguiente
+        const btnNext = document.createElement("button");
+        btnNext.className = "btn btn--outline btn--small";
+        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
+        if (currentPage === totalPages) btnNext.disabled = true;
+        else {
+            btnNext.addEventListener("click", () => {
                 currentPage++;
                 renderTable();
-            }
-        });
-        controlsContainer.appendChild(nextLi);
+            });
+        }
+        controlsContainer.appendChild(btnNext);
     }
 
     filtroMesCxc.addEventListener("change", filtrarCuentas);

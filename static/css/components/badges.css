@@ -1,0 +1,43 @@
+/* ==========================================================================
+   COMPONENTES: ETIQUETAS (Badges) / ESTADOS
+   ========================================================================== */
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--border-radius-md); /* Forma de píldora sutil */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* Estado: Éxito / Activo */
+.badge--success {
+    background-color: rgba(6, 241, 128, 0.342); /* Fondo verde translúcido */
+    color: var(--color-success);
+    border: 1px solid rgba(16, 230, 130, 0.2);
+}
+
+/* Estado: Peligro / Inactivo / Cancelado */
+.badge--danger {
+    background-color: rgba(220, 53, 69, 0.1); /* Fondo rojo translúcido */
+    color: var(--color-danger);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+/* Estado: Advertencia / Pendiente */
+.badge--warning {
+    background-color: rgba(255, 193, 7, 0.15); /* Fondo amarillo translúcido */
+    color: #cc9a06; /* Un amarillo más oscuro para contraste legibilidad */
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Estado: Neutro / Secundario */
+.badge--neutral {
+    background-color: var(--color-bg-stripe);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+}

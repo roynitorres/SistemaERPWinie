@@ -1,0 +1,68 @@
+/* ==========================================================================
+   COMPONENTES: BOTONES
+   ========================================================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    white-space: nowrap;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Botón Principal (Azul Moodle) */
+.btn--primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background-color: var(--color-primary-dark);
+    color: #ffffff;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Botón Secundario (Gris Claro) */
+.btn--secondary {
+    background-color: #e2e6ea;
+    color: var(--color-text-main);
+}
+
+.btn--secondary:hover {
+    background-color: #dae0e5;
+}
+
+/* Botón Outline */
+.btn--outline {
+    background-color: transparent;
+    border-color: var(--color-border);
+    color: var(--color-text-main);
+}
+
+.btn--outline:hover {
+    border-color: var(--color-text-muted);
+    background-color: var(--color-bg-stripe);
+}
+
+/* Tamaños */
+.btn--small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+}
+
+.btn--large {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-base);
+}

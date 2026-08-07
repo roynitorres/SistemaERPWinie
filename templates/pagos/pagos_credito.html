@@ -1,233 +1,208 @@
 {% extends "base.html" %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/pagos.css') }}">
-{% endblock %}
 
+{% block title %}Cuentas por Cobrar{% endblock %}
 
-{% block title %}
-Registrar Pagos
+{% block page_title %}
+<i class="bi bi-wallet2"></i> Cuentas por Cobrar
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid pt-1 pb-2">
+    <style>
+        .segmented-control {
+            display: flex;
+            background-color: var(--color-bg-stripe);
+            border-radius: var(--border-radius-md);
+            padding: 4px;
+            border: 1px solid var(--color-border);
+        }
+        .segmented-control__btn {
+            padding: 8px 16px;
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--color-text-muted);
+            transition: all 0.2s ease;
+        }
+        .segmented-control__btn.is-active {
+            background-color: var(--color-primary-dark);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 
     <!-- ===================================== -->
-    <!-- HEADER / TOP BAR -->
+    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Cuentas por Cobrar
-        </h4>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-            </button>
-            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-gear fs-5 text-secondary"></i>
-            </a>
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-moon fs-5 text-secondary"></i>
-            </button>
-                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
-                {% if current_user and current_user.foto_perfil %}
-                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
-                {% else %}
-                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
-                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
-                    </div>
-                {% endif %}
-            </a>
+    <div class="filter-bar">
+        <!-- BOTON ALTERNADOR DE ESTADO -->
+        <div class="segmented-control" id="estadoSwitcher">
+            <button class="segmented-control__btn is-active" data-value="PENDIENTES">PENDIENTES</button>
+            <button class="segmented-control__btn" data-value="PAGADAS">PAGADAS</button>
+        </div>
+        
+        <input type="hidden" class="filtro-estado-radio" value="PENDIENTES" id="estado_actual">
+
+        <!-- Buscador -->
+        <input type="text" class="form-input filter-bar__input" id="buscarClienteCxc" placeholder="🔍 Buscar cliente o factura...">
+
+        <!-- Filtro Mes -->
+        <select class="form-input filter-bar__select" id="filtro_mes_cxc">
+            <option value="TODOS">Todos los meses</option>
+        </select>
+
+        <!-- Exportar -->
+        <a href="{{ url_for('clientes.exportar_clientes') }}" class="btn btn--outline" style="margin-left: auto;">
+            <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+        </a>
+
+        <!-- Badge Cantidad Registros -->
+        <div style="display: flex; gap: var(--spacing-sm); margin-left: var(--spacing-md);">
+            <span id="badgeCantidadRegistros" class="badge badge--success" style="font-size: 1rem; padding: 4px 12px;">0</span>
         </div>
     </div>
 
     <!-- ===================================== -->
-    <!-- BARRA DE CONTROLES DE LA TABLA (FLOTANTES) -->
+    <!-- TABLAS DE CUENTAS POR COBRAR -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-start align-items-center mb-3">
-        <div class="d-flex flex-wrap align-items-center gap-3">
-            <!-- BOTON ALTERNADOR DE ESTADO -->
-            <div class="d-flex gap-2">
-                <input type="radio" class="btn-check filtro-estado-radio" name="filtro_estado" id="estado_pendientes"
-                    value="PENDIENTES" checked autocomplete="off">
-                <label
-                    class="btn btn-outline-primary px-3 text-xs fw-bold d-flex align-items-center shadow-sm rounded"
-                    for="estado_pendientes" style="min-height: 42px;">
-                    PENDIENTES
-                </label>
-
-                <input type="radio" class="btn-check filtro-estado-radio" name="filtro_estado" id="estado_pagadas"
-                    value="PAGADAS" autocomplete="off">
-                <label
-                    class="btn btn-outline-primary px-3 text-xs fw-bold d-flex align-items-center shadow-sm rounded"
-                    for="estado_pagadas" style="min-height: 42px;">
-                    PAGADAS
-                </label>
-            </div>
-
-            <!-- Buscador -->
-            <div class="position-relative">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                <input type="text" class="form-control ps-5 border-light-subtle rounded bg-white shadow-sm" id="buscarClienteCxc"
-                    placeholder="Buscar cliente o factura..." style="width: 250px; min-height: 42px;">
-            </div>
-
-            <!-- Filtro -->
-            <select class="form-select border-light-subtle rounded text-secondary bg-white shadow-sm" id="filtro_mes_cxc"
-                style="width: 150px; min-height: 42px;">
-                <option value="TODOS">Meses</option>
-            </select>
-
-            <!-- Exportar -->
-            <a href="{{ url_for('clientes.exportar_clientes') }}"
-                class="btn btn-dark rounded d-flex align-items-center justify-content-center gap-2 fw-semibold px-4 shadow-sm" style="min-height: 42px;">
-                <i class="bi bi-download"></i> Exportación
-            </a>
-
-            <!-- Badge Cantidad Registros -->
-            <div class="d-flex align-items-center ms-2">
-                <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm fs-6" id="badgeCantidadRegistros">
-                    0
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================================== -->
-    <!-- TABLA / LISTA DE CLIENTES -->
-    <!-- ===================================== -->
-    <div class="card border-0 shadow-sm d-flex flex-column"
-        style="border-radius: 12px; overflow: hidden; height: calc(100vh - 200px); min-height: 400px;">
-        <div class="card-body p-0 d-flex flex-column h-100">
-            <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
-                <!-- TABLA PENDIENTES -->
-                <table id="tablaContainerPendientes"
-                    class="table align-middle table-hover border-light-subtle tabla-activa">
-                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom"
-                        style="position: sticky; top: 0; z-index: 2; box-shadow: 0 1px 0 rgba(0,0,0,0.1);">
-                        <tr>
-                            <th class="px-3 py-3">FACTURA</th>
-                            <th class="px-3 py-3">CLIENTE</th>
-                            <th class="px-3 py-3 d-none d-lg-table-cell">FECHA VENCIMIENTO</th>
-                            <th class="px-3 py-3 d-none d-sm-table-cell">TOTAL</th>
-                            <th class="px-3 py-3 d-none d-md-table-cell">ABONOS</th>
-                            <th class="px-3 py-3">SALDOS</th>
-                            <th class="px-3 py-3 text-center" style="width: 100px;">ACC.</th>
-                        </tr>
-                    </thead>
+    <div class="panel" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+            
+            <!-- TABLA PENDIENTES -->
+            <table id="tablaContainerPendientes" class="data-table tabla-activa">
+                <thead class="data-table__head">
+                    <tr>
+                        <th style="width: 120px;">FACTURA</th>
+                        <th>CLIENTE</th>
+                        <th>VENCIMIENTO</th>
+                        <th style="text-align: right;">TOTAL</th>
+                        <th style="text-align: right;">ABONOS</th>
+                        <th style="text-align: right;">SALDOS</th>
+                        <th style="text-align: right;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPagosPendientes">
                     {% macro render_fila_venta(venta, saldo_pendiente, total_abonado, mostrar_saldos_abonos=True) %}
                     <!-- FILA PRINCIPAL -->
-                    <tr class="fila-factura">
-                        <td>{{ venta.numero_factura }}
+                    <tr class="data-table__row fila-factura">
+                        <td class="data-table__cell" style="font-family: monospace; font-weight: bold; color: var(--color-primary-dark);">
+                            #{{ venta.numero_factura }}
                             {% if saldo_pendiente > 0 %}
-                            <span class="badge bg-danger ms-2"><i
-                                    class="bi bi-exclamation-circle me-1"></i>Pendiente</span>
+                            <span class="badge badge--danger" style="margin-left: 8px;">Pendiente</span>
                             {% endif %}
                         </td>
-                        <td>{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</td>
-                        <td class="d-none d-lg-table-cell">{{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if
-                            venta.fecha_limite_credito else
-                            '-' }}
+                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-text-main);">
+                            <div class="avatar-wrapper">
+                                <div class="avatar" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div class="avatar-text">
+                                    <span class="avatar-text__title">{{ venta.cliente.nombres }}</span>
+                                </div>
+                            </div>
                         </td>
-                        <td class="text-end text-dark fw-bold d-none d-sm-table-cell"> C$ {{
-                            "%.2f"|format(venta.total_venta) }}</td>
+                        <td class="data-table__cell text-muted">
+                            {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}
+                        </td>
+                        <td class="data-table__cell" style="text-align: right; font-weight: bold;">
+                            C$ {{ "%.2f"|format(venta.total_venta) }}
+                        </td>
                         {% if mostrar_saldos_abonos %}
-                        <td class="text-start text-green fw-bold d-none d-md-table-cell">C$ {{
-                            "%.2f"|format(total_abonado.valor) }}</td>
-                        <td class="text-start text-secondary fw-bold">C$ {{ "%.2f"|format(saldo_pendiente) }}</td>
+                        <td class="data-table__cell" style="text-align: right; font-weight: bold; color: var(--color-success);">
+                            C$ {{ "%.2f"|format(total_abonado.valor) }}
+                        </td>
+                        <td class="data-table__cell" style="text-align: right; font-weight: bold; color: var(--color-danger);">
+                            C$ {{ "%.2f"|format(saldo_pendiente) }}
+                        </td>
                         {% endif %}
-                        <td>
+                        <td class="data-table__cell data-table__cell--actions">
                             <div class="dropdown">
-                                <button class="btn btn-link text-dark p-0 border-0 bg-transparent" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical fs-5"></i>
+                                <button class="btn btn--secondary btn--small" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i> Opciones
                                 </button>
-                                <ul class="dropdown-menu shadow-sm">
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: var(--border-radius-md);">
                                     <li>
-                                        <h6 class="dropdown-header text-white fw-bold d-flex align-items-center"
-                                            style="background-color: #003891;">
+                                        <h6 class="dropdown-header text-white fw-bold d-flex align-items-center" style="background-color: var(--color-primary-dark);">
                                             <i class="bi bi-gear-fill me-2"></i> Acciones
                                         </h6>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item py-2 fw-semibold text-secondary"
-                                            href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank">
-                                            <i class="bi bi-printer me-2 "></i> Imprimir
+                                        <a class="dropdown-item py-2" href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank">
+                                            <i class="bi bi-printer me-2"></i> Imprimir
                                         </a>
                                     </li>
                                     {% if total_abonado.valor > 0 %}
                                     <li>
-                                        <button type="button"
-                                            class="dropdown-item py-2 fw-semibold text-secondary btn-historial-abonos"
-                                            data-venta-id="{{ venta.id }}" data-factura="{{ venta.numero_factura }}">
-                                            <i class="bi bi-clock-history me-2 "></i> Historial
-                                            
+                                        <button type="button" class="dropdown-item py-2 btn-historial-abonos" data-venta-id="{{ venta.id }}" data-factura="{{ venta.numero_factura }}">
+                                            <i class="bi bi-clock-history me-2"></i> Historial
                                         </button>
                                     </li>
                                     {% endif %}
-                                    {% if saldo_pendiente > 0 and venta.estado == "ACTIVA" %}
+                                    {% if saldo_pendiente > 0 and venta.estado.value == "ACTIVA" %}
                                     <li>
-                                        <button type="button"
-                                            class="dropdown-item py-2 fw-semibold text-secondary btn-abonar"
-                                            data-venta-id="{{ venta.id }}" data-factura="{{ venta.numero_factura }}"
+                                        <button type="button" class="dropdown-item py-2 btn-abonar"
+                                            data-venta-id="{{ venta.id }}" 
+                                            data-factura="{{ venta.numero_factura }}"
                                             data-saldo="{{ saldo_pendiente }}">
-                                            <i class="bi bi-cash-coin me-2"></i>Pagar
+                                            <i class="bi bi-cash-coin me-2"></i> Pagar
                                         </button>
                                     </li>
                                     {% endif %}
-                                    {% if current_user.rol.nombre == "ADMIN" and venta.estado == "ACTIVA" %}
+                                    {% if current_user.rol.nombre == "ADMIN" and venta.estado.value == "ACTIVA" and saldo_pendiente > 0 %}
                                     <li>
-                                        <form action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}"
-                                            method="POST" class="d-inline form-anular-factura">
-                                            <button type="button"
-                                                class="dropdown-item py-2 fw-semibold text-secondary btn-anular-factura-swal"
-                                                title="Anular Factura">
-                                                <i class="bi bi-trash me-2"></i> Anular
-                                            </button>
-                                        </form>
+                                        <button type="button" class="dropdown-item py-2 btn-anular-factura"
+                                            style="color: var(--color-danger);"
+                                            data-venta-id="{{ venta.id }}"
+                                            data-factura="{{ venta.numero_factura }}"
+                                            data-action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}">
+                                            <i class="bi bi-trash me-2"></i> Anular
+                                        </button>
                                     </li>
                                     {% endif %}
                                 </ul>
                             </div>
+
                             {% if total_abonado.valor > 0 %}
                             <template id="historial-template-{{ venta.id }}">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-hover table-bordered mb-0">
-                                        <thead class="bg-light">
+                                <div class="table-responsive" style="padding: var(--spacing-sm);">
+                                    <table class="data-table" style="font-size: var(--font-size-sm);">
+                                        <thead class="data-table__head">
                                             <tr>
                                                 <th>#</th>
                                                 <th>Fecha</th>
-                                                <th>Monto</th>
+                                                <th style="text-align: right;">Monto</th>
                                                 <th>Forma</th>
                                                 <th>Referencia</th>
                                                 <th>Usuario</th>
                                                 <th>Estado</th>
                                                 <th>Motivo anulación</th>
-                                                <th>Acción</th>
+                                                <th style="text-align: center;">Acción</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for pago in venta.pagos %}
-                                            <tr>
-                                                <td>{{ loop.index }}</td>
-                                                <td>{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
-                                                <td class="fw-bold text-success">C$ {{
-                                                    "%.2f"|format(pago.monto_pago) }}</td>
-                                                <td>{{ pago.tipo_pago }}</td>
-                                                <td>{{ pago.referencia or '-' }}</td>
-                                                <td>{{ pago.usuario.username }}</td>
-                                                <td>
+                                            <tr class="data-table__row">
+                                                <td class="data-table__cell">{{ loop.index }}</td>
+                                                <td class="data-table__cell">{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
+                                                <td class="data-table__cell" style="text-align: right; font-weight: bold; color: var(--color-success);">
+                                                    C$ {{ "%.2f"|format(pago.monto_pago) }}
+                                                </td>
+                                                <td class="data-table__cell">{{ pago.tipo_pago }}</td>
+                                                <td class="data-table__cell">{{ pago.referencia or '-' }}</td>
+                                                <td class="data-table__cell">{{ pago.usuario.username }}</td>
+                                                <td class="data-table__cell">
                                                     {% if pago.estado == "ACTIVO" %}
-                                                    <span class="badge bg-success">ACTIVO</span>
+                                                    <span class="badge badge--success">ACTIVO</span>
                                                     {% else %}
-                                                    <span class="badge bg-danger">ANULADO</span>
+                                                    <span class="badge badge--danger">ANULADO</span>
                                                     {% endif %}
                                                 </td>
-                                                <td>{{ pago.motivo_anulacion or '-' }}</td>
-                                                <td>
+                                                <td class="data-table__cell">{{ pago.motivo_anulacion or '-' }}</td>
+                                                <td class="data-table__cell" style="text-align: center;">
                                                     {% if pago.estado == "ACTIVO" %}
-                                                    <button type="button"
-                                                        class="btn btn-outline-danger btn-sm btn-anular-pago"
-                                                        data-id="{{ pago.id }}" title="Anular Pago">
+                                                    <button type="button" class="btn btn--outline btn--small btn-anular-pago" data-id="{{ pago.id }}" title="Anular Pago" style="color: var(--color-danger); border-color: var(--color-danger);">
                                                         <i class="bi bi-x-lg"></i>
                                                     </button>
                                                     {% endif %}
@@ -242,240 +217,241 @@ Registrar Pagos
                         </td>
                     </tr>
                     {% endmacro %}
-                    <tbody id="tablaPagosPendientes">
-                        {% for venta in ventas %}
+                    
+                    {% for venta in ventas %}
                         {% set total_abonado = namespace(valor=0) %}
                         {% for pago in venta.pagos %}
-                        {% if pago.estado == "ACTIVO" %}
-                        {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
-                        {% endif %}
+                            {% if pago.estado == "ACTIVO" %}
+                                {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
+                            {% endif %}
                         {% endfor %}
                         {% set saldo_pendiente = venta.total_venta - total_abonado.valor %}
 
                         {% if saldo_pendiente > 0 %}
-                        {{ render_fila_venta(venta, saldo_pendiente, total_abonado, True) }}
+                            {{ render_fila_venta(venta, saldo_pendiente, total_abonado, True) }}
                         {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-                <!-- TABLA PAGADAS -->
-                <table id="tablaContainerPagadas" class="table align-middle table-hover border-light-subtle"
-                    style="display: none;">
-                    <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom"
-                        style="position: sticky; top: 0; z-index: 2; box-shadow: 0 1px 0 rgba(0,0,0,0.1);">
-                        <tr>
-                            <th class="px-3 py-3">FACTURA</th>
-                            <th class="px-3 py-3">CLIENTE</th>
-                            <th class="px-3 py-3 d-none d-lg-table-cell">FECHA VENCIMIENTO</th>
-                            <th class="px-3 py-3 d-none d-sm-table-cell">TOTAL</th>
-                            <th class="px-3 py-3 text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaPagosPagadas">
-                        {% for venta in ventas %}
+            <!-- TABLA PAGADAS -->
+            <table id="tablaContainerPagadas" class="data-table" style="display: none;">
+                <thead class="data-table__head">
+                    <tr>
+                        <th style="width: 120px;">FACTURA</th>
+                        <th>CLIENTE</th>
+                        <th>VENCIMIENTO</th>
+                        <th style="text-align: right;">TOTAL</th>
+                        <th style="text-align: right;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPagosPagadas">
+                    {% for venta in ventas %}
                         {% set total_abonado = namespace(valor=0) %}
                         {% for pago in venta.pagos %}
-                        {% if pago.estado == "ACTIVO" %}
-                        {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
-                        {% endif %}
+                            {% if pago.estado == "ACTIVO" %}
+                                {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
+                            {% endif %}
                         {% endfor %}
                         {% set saldo_pendiente = venta.total_venta - total_abonado.valor %}
 
-                        {% if saldo_pendiente <= 0 %} {{ render_fila_venta(venta, saldo_pendiente, total_abonado, False)
-                            }} {% endif %} {% endfor %} </tbody>
-                </table>
+                        {% if saldo_pendiente <= 0 %}
+                            {{ render_fila_venta(venta, saldo_pendiente, total_abonado, False) }}
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
 
+        </div>
+
+        <!-- Table Footer for Summary & Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md) var(--spacing-lg); border-top: 1px solid var(--color-border); background-color: var(--color-bg-stripe); position: sticky; bottom: 0; z-index: 10;">
+            <div id="paginationSummary" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
+                Mostrando 0 a 0 de 0 registros
             </div>
-            <!-- Table Footer for Summary & Pagination -->
-            <div
-                class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                <div class="text-muted text-xs" id="paginationSummary">
-                    Mostrando 0 a 0 de 0 registros
-                </div>
-                <nav aria-label="Navegación de tabla">
-                    <ul class="pagination pagination-sm mb-0" id="paginationControls">
-                        <!-- Generado dinámicamente -->
-                    </ul>
-                </nav>
+            <div id="paginationControls" style="display: flex; gap: var(--spacing-xs);">
+                <!-- Generado dinámicamente -->
             </div>
         </div>
     </div>
-</div>
 
 
-
-<!-- MODAL ABONAR FACTURA -->
-<div class="modal fade" id="modalAbonarFactura" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
-                <h5 class="modal-title mb-0 fw-bold d-flex align-items-center">
-                    <i class="bi bi-wallet2 me-2 text-white"></i>ABONAR FACTURA | <span id="lblFacturaAbonar"
-                        class="ms-2 text-warning"></span>
+    <!-- ===================================== -->
+    <!-- MODAL ABONAR FACTURA (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalAbonarFactura">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-wallet2"></i> ABONAR FACTURA | <span id="lblFacturaAbonar" style="color: var(--color-secondary); margin-left: 8px;"></span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAbonarFactura')">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
+            
             <div class="modal-body">
                 <form id="formAbonarFactura">
                     <input type="hidden" name="venta_id" id="abonarVentaId">
                     <input type="hidden" id="abonarSaldoPendiente">
 
-                    <div class="alert alert-info mb-3 py-2">
-                        <i class="bi bi-info-circle me-2"></i> Saldo pendiente: <strong id="lblSaldoPendiente"
-                            class="fs-5">C$ 0.00</strong>
+                    <div style="background-color: var(--color-bg-stripe); border-left: 4px solid var(--color-secondary); padding: 12px; margin-bottom: 24px; border-radius: 4px;">
+                        <i class="bi bi-info-circle" style="color: var(--color-secondary); margin-right: 8px;"></i>
+                        <span style="color: var(--color-text-main);">Saldo pendiente:</span>
+                        <strong id="lblSaldoPendiente" style="font-size: 1.2rem; color: var(--color-danger); margin-left: 8px;">C$ 0.00</strong>
                     </div>
 
-                    <!-- Campos en Columna Vertical -->
-                    <div class="row g-3">
-                        <!-- MONTO A PAGAR -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">MONTO ABONO (C$) *</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted border-0"><i
-                                        class="bi bi-currency-dollar"></i></span>
-                                <input type="number" class="form-control bg-light border-0 fw-bold fs-5 text-success"
-                                    name="monto_pago" id="abonarMonto" step="0.01" min="0.01" required>
-                            </div>
+                    <div class="grid grid--2-cols">
+                        <!-- MONTO ABONO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">MONTO ABONO (C$)</label>
+                            <input type="number" class="form-input" name="monto_pago" id="abonarMonto" step="0.01" min="0.01" required style="font-size: 1.25rem; font-weight: bold; color: var(--color-success);">
                         </div>
 
                         <!-- FECHA -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA *</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white text-muted"><i class="bi bi-calendar"></i></span>
-                                <input type="date" class="form-control" name="fecha_pago" id="abonarFecha" required>
-                            </div>
-                        </div>
-
-                        <!-- FORMA DE PAGO -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">FORMA DE PAGO *</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white text-muted"><i
-                                        class="bi bi-credit-card"></i></span>
-                                <select class="form-select" name="tipo_pago" id="abonarForma" required>
-                                    <option value="">Seleccione</option>
-                                    <option value="EFECTIVO">Efectivo</option>
-                                    <option value="TRANSFERENCIA">Transferencia</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- REFERENCIA -->
-                        <div class="col-md-6">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">REFERENCIA</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white text-muted"><i class="bi bi-receipt"></i></span>
-                                <input type="text" class="form-control" name="referencia" id="abonarReferencia"
-                                    placeholder="Opcional">
-                            </div>
-                        </div>
-
-                        <!-- OBSERVACIONES -->
-                        <div class="col-12">
-                            <label class="form-label text-xs fw-semibold text-blue mb-1">OBSERVACIONES</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white text-muted"><i
-                                        class="bi bi-chat-text"></i></span>
-                                <input type="text" class="form-control" name="observaciones" id="abonarObservaciones"
-                                    placeholder="Opcional">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label form-label--required">FECHA</label>
+                            <input type="date" class="form-input" name="fecha_pago" id="abonarFecha" required>
                         </div>
                     </div>
 
-                    <!-- Botones de Acción -->
-                    <div class="d-flex gap-2 mt-4 justify-content-end">
-                        <button type="button"
-                            class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
-                            data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle"></i> Cancelar
-                        </button>
-                        <button type="submit"
-                            class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2">
-                            <i class="bi bi-check-circle"></i> Registrar Abono
+                    <!-- FORMA DE PAGO -->
+                    <div class="form-group">
+                        <label class="form-label form-label--required">FORMA DE PAGO</label>
+                        <select class="form-input" name="tipo_pago" id="abonarForma" required>
+                            <option value="">Seleccione</option>
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TRANSFERENCIA">Transferencia</option>
+                        </select>
+                    </div>
+
+                    <!-- REFERENCIA -->
+                    <div class="form-group">
+                        <label class="form-label">REFERENCIA</label>
+                        <input type="text" class="form-input" name="referencia" id="abonarReferencia" placeholder="Opcional">
+                    </div>
+
+                    <!-- OBSERVACIONES -->
+                    <div class="form-group">
+                        <label class="form-label">OBSERVACIONES</label>
+                        <input type="text" class="form-input" name="observaciones" id="abonarObservaciones" placeholder="Opcional">
+                    </div>
+
+                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
+                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalAbonarFactura')">Cancelar</button>
+                        <button type="submit" class="btn btn--primary">
+                            <i class="bi bi-check-circle" style="margin-right: 8px;"></i> Registrar Abono
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL ANULAR PAGO -->
-<div class="modal fade" id="modalAnularPago" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: #003891; color: white;">
+
+    <!-- ===================================== -->
+    <!-- MODAL ANULAR PAGO (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalAnularPago">
+        <div class="modal-window" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="background-color: var(--color-danger);">
                 <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Anular pago
+                    <i class="bi bi-exclamation-triangle"></i> ANULAR PAGO
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAnularPago')">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
-            <div class="modal-body text-center">
-                <i class="bi bi-exclamation-triangle text-danger mb-3" style="font-size: 3.5rem;"></i>
-                <p class="fs-5 mb-3">Indique el motivo para anular este pago.</p>
-                <div class="mb-3 text-start">
-                    <label for="motivoAnulacionPago" class="form-label">Motivo de anulación</label>
-                    <textarea class="form-control" id="motivoAnulacionPago" rows="3"
-                        placeholder="Indique el motivo..."></textarea>
-                    <div class="invalid-feedback">Debe indicar el motivo.</div>
+            <div class="modal-body">
+                <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: var(--color-danger); margin-bottom: var(--spacing-md); display: block;"></i>
+                <p style="font-size: 1.1rem; margin-bottom: var(--spacing-lg);">Indique el motivo para anular este pago.</p>
+                
+                <div class="form-group" style="text-align: left;">
+                    <label class="form-label form-label--required">MOTIVO DE ANULACIÓN</label>
+                    <textarea class="form-input" id="motivoAnulacionPago" rows="3" placeholder="Indique el motivo..."></textarea>
                 </div>
             </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="btnConfirmarAnularPago"
-                    style="background-color: #dc3545;">Anular</button>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn btn--outline" onclick="cerrarModal('modalAnularPago')">Cancelar</button>
+                <button type="button" class="btn btn--primary" id="btnConfirmarAnularPago" style="background-color: var(--color-danger); border-color: var(--color-danger);">
+                    Anular Pago
+                </button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL HISTORIAL DE ABONOS -->
-<div class="modal fade" id="modalHistorialAbonos" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
-                <h5 class="modal-title mb-0 fw-bold d-flex align-items-center">
-                    <i class="bi bi-clock-history me-2 text-white"></i> HISTORIAL DE ABONOS | <span
-                        id="lblFacturaHistorial" class="ms-2 text-warning"></span>
+
+    <!-- ===================================== -->
+    <!-- MODAL HISTORIAL DE ABONOS (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalHistorialAbonos">
+        <div class="modal-window" style="max-width: 900px;">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-clock-history"></i> HISTORIAL DE ABONOS | <span id="lblFacturaHistorial" style="color: var(--color-secondary); margin-left: 8px;"></span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalHistorialAbonos')">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
-            <div class="modal-body p-0" id="historialAbonosBody">
+            <div class="modal-body" style="padding: 0; max-height: 60vh; overflow-y: auto;" id="historialAbonosBody">
                 <!-- Content will be injected here -->
             </div>
-            <div class="modal-footer border-0 bg-white justify-content-center">
-                <button type="button" class="btn btn-primary px-4 fw-semibold" data-bs-dismiss="modal">Cerrar</button>
+            <div class="modal-footer" style="border-top: 1px solid var(--color-border); padding: var(--spacing-md);">
+                <button type="button" class="btn btn--primary" style="margin-left: auto;" onclick="cerrarModal('modalHistorialAbonos')">Cerrar</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL ALERTA GENÉRICA -->
-<div class="modal fade" id="modalAlertaPago" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-4">
-                <i id="alertaPagoIcono" class="bi bi-exclamation-triangle text-warning mb-3"
-                    style="font-size: 4rem;"></i>
-                <h5 class="fw-bold mb-2" id="alertaPagoTitulo">Aviso</h5>
-                <p class="text-muted mb-4" id="alertaPagoMensaje">Mensaje de alerta.</p>
-                <button type="button" class="btn btn-primary px-4 fw-semibold"
-                    data-bs-dismiss="modal">Entendido</button>
+
+    <!-- ===================================== -->
+    <!-- MODAL CONFIRMAR ANULACIÓN (CUSTOM)    -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalAnularFactura">
+        <div class="modal-window" style="max-width: 420px;">
+            <div class="modal-header" style="background-color: var(--color-danger);">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill" style="margin-right: 8px;"></i> ANULAR FACTURA
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAnularFactura')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding-top: var(--spacing-xl);">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(220,53,69,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-md);">
+                    <i class="bi bi-trash3-fill" style="font-size: 1.8rem; color: var(--color-danger);"></i>
+                </div>
+                <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: var(--spacing-xs);">¿Anular la factura <span id="lblAnularFactura" style="color: var(--color-danger);"></span>?</h6>
+                <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">Esta acción anulará la factura y devolverá el stock. <strong>No podrás revertirlo.</strong></p>
+            </div>
+            <div class="modal-footer" style="justify-content: center; gap: var(--spacing-md);">
+                <button type="button" class="btn btn--outline" onclick="cerrarModal('modalAnularFactura')">Cancelar</button>
+                <form id="formAnularFactura" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn" style="background-color: var(--color-danger); color: #fff; border: none;">
+                        <i class="bi bi-trash3" style="margin-right: 6px;"></i> Sí, anular
+                    </button>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    const buscarClienteCxc = document.getElementById("buscarClienteCxc");
+    // ==========================================
+    // SISTEMA DE MODALES CUSTOM
+    // ==========================================
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('is-open');
+    }
 
-    let modalAbonar = null;
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+    }
+
+    // ==========================================
+    // LÓGICA DE ABONOS Y PAGOS
+    // ==========================================
+    const buscarClienteCxc = document.getElementById("buscarClienteCxc");
 
     document.querySelectorAll(".btn-abonar").forEach(btn => {
         btn.addEventListener("click", function (e) {
@@ -498,26 +474,9 @@ Registrar Pagos
             document.getElementById("abonarReferencia").value = "";
             document.getElementById("abonarObservaciones").value = "";
 
-            if (!modalAbonar) {
-                modalAbonar = new bootstrap.Modal(document.getElementById("modalAbonarFactura"));
-            }
-            modalAbonar.show();
+            abrirModal("modalAbonarFactura");
         });
     });
-
-    let modalAlertaPagoInstancia = null;
-    function mostrarAlertaPago(titulo, mensaje, icono = 'bi-exclamation-triangle', color = 'text-warning') {
-        document.getElementById('alertaPagoTitulo').innerText = titulo;
-        document.getElementById('alertaPagoMensaje').innerText = mensaje;
-
-        const iconoElement = document.getElementById('alertaPagoIcono');
-        iconoElement.className = `bi ${icono} ${color} mb-3`;
-
-        if (!modalAlertaPagoInstancia) {
-            modalAlertaPagoInstancia = new bootstrap.Modal(document.getElementById('modalAlertaPago'));
-        }
-        modalAlertaPagoInstancia.show();
-    }
 
     document.getElementById("formAbonarFactura").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -528,22 +487,17 @@ Registrar Pagos
         const fecha = document.getElementById("abonarFecha").value;
 
         if (monto <= 0) {
-            mostrarAlertaPago("Monto inválido", "Ingrese un monto de abono mayor a cero.", "bi-exclamation-circle", "text-warning");
+            showToast('Ingrese un monto de abono mayor a cero.', 'warning');
             return;
         }
 
         if (monto > saldo) {
-            mostrarAlertaPago("Monto inválido", "El abono no puede superar el saldo pendiente.", "bi-exclamation-circle", "text-warning");
+            showToast('El abono no puede superar el saldo pendiente.', 'warning');
             return;
         }
 
-        if (!forma) {
-            mostrarAlertaPago("Forma de pago", "Seleccione una forma de pago.", "bi-info-circle", "text-info");
-            return;
-        }
-
-        if (!fecha) {
-            mostrarAlertaPago("Fecha requerida", "Seleccione la fecha del abono.", "bi-calendar-x", "text-warning");
+        if (!forma || !fecha) {
+            showToast('Verifique forma de pago y fecha.', 'warning');
             return;
         }
 
@@ -557,17 +511,15 @@ Registrar Pagos
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            modalAbonar.hide();
-            mostrarAlertaPago("Registrado", resultado.message, "bi-check-circle", "text-success");
-            setTimeout(() => location.reload(), 1500);
+            cerrarModal("modalAbonarFactura");
+            showToast('Abono registrado exitosamente.', 'success');
+            setTimeout(() => location.reload(), 1800);
         } else {
-            mostrarAlertaPago("Error", resultado.message, "bi-x-circle", "text-danger");
+            showToast(resultado.message, 'danger');
         }
     });
 
-
     let pagoIdToCancel = null;
-    let modalAnularPago = null;
     const txtMotivoAnulacion = document.getElementById("motivoAnulacionPago");
 
     document.addEventListener("click", function (e) {
@@ -576,44 +528,31 @@ Registrar Pagos
             e.stopPropagation();
             pagoIdToCancel = btnAnular.dataset.id;
             txtMotivoAnulacion.value = "";
-            txtMotivoAnulacion.classList.remove("is-invalid");
-            if (!modalAnularPago) {
-                modalAnularPago = new bootstrap.Modal(document.getElementById("modalAnularPago"));
-            }
-            modalAnularPago.show();
+            abrirModal("modalAnularPago");
         }
     });
 
-    document.querySelectorAll(".btn-anular-factura-swal").forEach(btn => {
+    document.querySelectorAll(".btn-anular-factura").forEach(btn => {
         btn.addEventListener("click", function (e) {
             e.stopPropagation();
-            const form = this.closest('form');
-            Swal.fire({
-                title: '¿Anular Factura?',
-                text: "Esta acción anulará la factura y devolverá el stock. ¡No podrás revertirlo!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, anular',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+            const factura = this.dataset.factura;
+            const action = this.dataset.action;
+
+            document.getElementById("lblAnularFactura").innerText = `#${factura}`;
+            document.getElementById("formAnularFactura").action = action;
+
+            abrirModal("modalAnularFactura");
         });
     });
 
     document.getElementById("btnConfirmarAnularPago").addEventListener("click", async function () {
         const motivo = txtMotivoAnulacion.value.trim();
         if (!motivo) {
-            txtMotivoAnulacion.classList.add("is-invalid");
+            txtMotivoAnulacion.focus();
             return;
         }
 
-        txtMotivoAnulacion.classList.remove("is-invalid");
-        modalAnularPago.hide();
+        cerrarModal("modalAnularPago");
 
         const respuesta = await fetch(`/anular-pago/${pagoIdToCancel}`, {
             method: "POST",
@@ -626,14 +565,12 @@ Registrar Pagos
         const resultado = await respuesta.json();
 
         if (resultado.success) {
-            mostrarAlertaPago("Anulado", resultado.message, "bi-check-circle", "text-success");
-            setTimeout(() => location.reload(), 1500);
+            showToast('Pago anulado correctamente.', 'success');
+            setTimeout(() => location.reload(), 1800);
         } else {
-            mostrarAlertaPago("Error", resultado.message, "bi-x-circle", "text-danger");
+            showToast(resultado.message, 'danger');
         }
     });
-
-    let modalHistorial = null;
 
     document.querySelectorAll(".btn-historial-abonos").forEach(btn => {
         btn.addEventListener("click", function (e) {
@@ -647,31 +584,35 @@ Registrar Pagos
             if (template) {
                 document.getElementById("historialAbonosBody").innerHTML = template.innerHTML;
             } else {
-                document.getElementById("historialAbonosBody").innerHTML = "<div class='p-4 text-center text-muted'>No hay historial disponible.</div>";
+                document.getElementById("historialAbonosBody").innerHTML = "<div style='padding: var(--spacing-xl); text-align: center; color: var(--color-text-muted);'>No hay historial disponible.</div>";
             }
 
-            if (!modalHistorial) {
-                modalHistorial = new bootstrap.Modal(document.getElementById("modalHistorialAbonos"));
-            }
-            modalHistorial.show();
+            abrirModal("modalHistorialAbonos");
         });
     });
 
-
-    // === PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE ===
-    // === FILTRO Y PAGINACIÓN CUENTAS POR COBRAR ===
-    const radioEstados = document.querySelectorAll('.filtro-estado-radio');
+    // === SEGMENTED CONTROL & PAGINACIÓN ===
+    const estadoSwitcherBtns = document.querySelectorAll('#estadoSwitcher .segmented-control__btn');
     const filtroMesCxc = document.getElementById("filtro_mes_cxc");
     const badgeCantidadRegistros = document.getElementById("badgeCantidadRegistros");
+    const inputEstadoActual = document.getElementById("estado_actual");
 
     let currentPage = 1;
     const itemsPerPage = 10;
-
     let allRows = [];
     let filteredRows = [];
 
+    estadoSwitcherBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            estadoSwitcherBtns.forEach(b => b.classList.remove('is-active'));
+            this.classList.add('is-active');
+            inputEstadoActual.value = this.dataset.value;
+            actualizarTablaActiva();
+        });
+    });
+
     function actualizarTablaActiva() {
-        const estadoActual = document.querySelector('.filtro-estado-radio:checked').value;
+        const estadoActual = inputEstadoActual.value;
 
         const tablaPendientes = document.getElementById('tablaContainerPendientes');
         const tablaPagadas = document.getElementById('tablaContainerPagadas');
@@ -719,7 +660,7 @@ Registrar Pagos
 
         const nombreMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-        filtroMesCxc.innerHTML = '<option value="TODOS">Meses</option>';
+        filtroMesCxc.innerHTML = '<option value="TODOS">Todos los meses</option>';
 
         mesesArray.forEach(mesAnio => {
             const [m, y] = mesAnio.split('/');
@@ -779,7 +720,7 @@ Registrar Pagos
         });
 
         for (let i = startIndex; i < endIndex; i++) {
-            filteredRows[i].style.display = "";
+            if (filteredRows[i]) filteredRows[i].style.display = "";
         }
 
         filteredRows.forEach(row => {
@@ -792,7 +733,7 @@ Registrar Pagos
             (totalItems > 0
                 ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
                 : "Mostrando 0 a 0 de 0 registros") +
-            ` | <strong class="text-black fw-bold ms-1 fs-6">Total: C$ ${totalFacturado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
+            ` | <strong style="color: var(--color-primary-dark); font-weight: bold; margin-left: 10px;">Total página: C$ ${totalFacturado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
 
         renderControls(totalPages);
     }
@@ -803,55 +744,50 @@ Registrar Pagos
 
         if (totalPages <= 1) return;
 
-        const prevLi = document.createElement("li");
-        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-        prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
-        prevLi.addEventListener("click", e => {
-            e.preventDefault();
-
-            if (currentPage > 1) {
+        // Botón Anterior
+        const btnPrev = document.createElement("button");
+        btnPrev.className = "btn btn--outline btn--small";
+        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
+        if (currentPage === 1) btnPrev.disabled = true;
+        else {
+            btnPrev.addEventListener("click", () => {
                 currentPage--;
                 renderTable();
-            }
-        });
-        controlsContainer.appendChild(prevLi);
+            });
+        }
+        controlsContainer.appendChild(btnPrev);
 
+        // Páginas numeradas
         for (let i = 1; i <= totalPages; i++) {
-            const pageLi = document.createElement("li");
-            pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
-            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            pageLi.addEventListener("click", e => {
-                e.preventDefault();
+            const btnPage = document.createElement("button");
+            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
+            btnPage.innerText = i;
+            btnPage.addEventListener("click", () => {
                 currentPage = i;
                 renderTable();
             });
-            controlsContainer.appendChild(pageLi);
+            controlsContainer.appendChild(btnPage);
         }
 
-        const nextLi = document.createElement("li");
-        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-        nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
-        nextLi.addEventListener("click", e => {
-            e.preventDefault();
-
-            if (currentPage < totalPages) {
+        // Botón Siguiente
+        const btnNext = document.createElement("button");
+        btnNext.className = "btn btn--outline btn--small";
+        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
+        if (currentPage === totalPages) btnNext.disabled = true;
+        else {
+            btnNext.addEventListener("click", () => {
                 currentPage++;
                 renderTable();
-            }
-        });
-        controlsContainer.appendChild(nextLi);
+            });
+        }
+        controlsContainer.appendChild(btnNext);
     }
 
-    function initPagination() {
-        actualizarTablaActiva();
-    }
-
-    radioEstados.forEach(radio => {
-        radio.addEventListener('change', actualizarTablaActiva);
-    });
     filtroMesCxc.addEventListener("change", filtrarCuentas);
     buscarClienteCxc.addEventListener("input", filtrarCuentas);
 
-    window.addEventListener("load", initPagination);
+    window.addEventListener("load", () => {
+        actualizarTablaActiva();
+    });
 </script>
 {% endblock %}

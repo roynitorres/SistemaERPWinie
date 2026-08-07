@@ -1,0 +1,101 @@
+/* ==========================================================================
+   COMPONENTES: ALERTAS (Flash Messages)
+   ========================================================================== */
+
+/* Contenedor flotante para notificaciones (Esquina superior derecha) */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+/* Alerta base */
+.alert-toast {
+    min-width: 300px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    background-color: var(--color-bg-card);
+    border-left: 5px solid transparent;
+    
+    /* Animación de entrada */
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+/* Tipos de alertas */
+.alert-toast--success {
+    border-left-color: var(--color-success);
+}
+
+.alert-toast--success .alert-icon {
+    color: var(--color-success);
+}
+
+.alert-toast--danger {
+    border-left-color: var(--color-danger);
+}
+
+.alert-toast--danger .alert-icon {
+    color: var(--color-danger);
+}
+
+.alert-toast--warning {
+    border-left-color: var(--color-warning);
+}
+
+.alert-toast--warning .alert-icon {
+    color: var(--color-warning);
+}
+
+/* Contenido de la alerta */
+.alert-content {
+    flex-grow: 1;
+}
+
+.alert-title {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-main);
+}
+
+.alert-message {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+/* Animaciones Keyframes */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Clase para ocultar con animación al cerrar */
+.alert-toast.is-closing {
+    animation: fadeOutRight 0.3s ease-in forwards;
+}
+
+@keyframes fadeOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}

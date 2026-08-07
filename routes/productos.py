@@ -1,121 +1,107 @@
-from flask import Blueprint
-from flask import render_template
-from flask import request
-from flask import redirect
-from flask import url_for
-from flask import flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
+from sqlalchemy.orm import joinedload
+from utils.permisos import roles_required
+
 # Modelos
 from models.producto import Producto
 from models.categoria import Categoria
-from utils.permisos import roles_required
-# Base datos
-from database import db
+from models.proveedor import Proveedor
+from models.enums import EstadoProducto
+from services.producto_service import crear_o_actualizar_producto
+
 from datetime import datetime
 
 #=======BLUEPRINT PRODUCTOS=========
-productos_bp = Blueprint("productos",__name__)
+productos_bp = Blueprint("productos", __name__)
+
 # ==================================================
 # VISTA PRODUCTOS
 # ==================================================
-@productos_bp.route("/productos",methods=["GET", "POST"])
+@productos_bp.route("/productos", methods=["GET", "POST"])
 @login_required
 @roles_required("ADMIN")
 def productos():
-
     # GUARDAR / ACTUALIZAR
     if request.method == "POST":
-        # OBTENER ID
         producto_id = request.form.get("producto_id")
-        # OBTENER DATOS
-        codigo_producto = request.form.get("codigo_producto").strip().upper()
-        nombre = request.form.get("nombre").strip().title()
-        marca = request.form.get("marca").strip().title()
-        estado = request.form.get("estado","EN STOCK")
+        codigo_producto = request.form.get("codigo_producto", "").strip().upper()
+        nombre = request.form.get("nombre", "").strip().title()
+        marca = request.form.get("marca", "").strip().title()
+        estado_val = request.form.get("estado", "ACTIVO")
+        estado = EstadoProducto(estado_val)
         categoria_id = request.form.get("categoria_id")
-        precio_compra = float(request.form.get("precio_compra"))
-        precio_venta = float(request.form.get("precio_venta"))
-        cantidad_comprada = int(request.form.get("cantidad_comprada"))
-        stock = cantidad_comprada
-        fecha_compra = request.form.get("fecha_compra")
-        fecha_compra = datetime.strptime(fecha_compra,"%Y-%m-%d").date()
-
-        # VALIDACIONES
-        if not codigo_producto:
-            flash("El código producto es obligatorio","danger")
-            return redirect(url_for("productos.productos"))
-        if not nombre:
-            flash("El nombre es obligatorio","danger")
-            return redirect(url_for("productos.productos"))
-        if not marca:
-            flash("La marca es obligatoria","danger")
-            return redirect(url_for("productos.productos"))
-
-        # ACTUALIZAR
-        if producto_id:
-            producto = Producto.query.get(producto_id)
-            producto.codigo_producto = codigo_producto
-            producto.nombre = nombre
-            producto.marca = marca
-            producto.estado = estado
-            producto.categoria_id = categoria_id
-            producto.precio_compra = precio_compra
-            producto.precio_venta = precio_venta
-            producto.stock = stock
-            producto.cantidad_comprada = cantidad_comprada
-            producto.fecha_compra = fecha_compra
-            mensaje = "Producto actualizado correctamente"
-        # INSERTAR
-        else:
-            nuevo_producto = Producto(
-                codigo_producto=codigo_producto,
-                nombre=nombre,
-                marca=marca,
-                estado= estado,
-                categoria_id=categoria_id,
-                precio_compra=precio_compra,
-                precio_venta=precio_venta,
-                stock=stock,
-                cantidad_comprada=cantidad_comprada,    
-                fecha_compra=fecha_compra
-            )
-
-            db.session.add(nuevo_producto)
-            mensaje = "Producto guardado correctamente"
+        proveedor_id = request.form.get("proveedor_id")
         
-        # GUARDAR CAMBIO
-        db.session.commit()
-        flash(mensaje,"success")
+        try:
+            precio_compra = float(request.form.get("precio_compra", 0))
+            precio_venta = float(request.form.get("precio_venta", 0))
+            cantidad_comprada = int(request.form.get("cantidad_comprada", 0))
+            fecha_compra_str = request.form.get("fecha_compra")
+            fecha_compra = datetime.strptime(fecha_compra_str, "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            flash("Error en los formatos numéricos o de fecha", "danger")
+            return redirect(url_for("productos.productos"))
+
+        exito, mensaje = crear_o_actualizar_producto(
+            producto_id=producto_id,
+            codigo_producto=codigo_producto,
+            nombre=nombre,
+            marca=marca,
+            estado=estado,
+            categoria_id=categoria_id,
+            proveedor_id=proveedor_id,
+            precio_compra=precio_compra,
+            precio_venta=precio_venta,
+            cantidad_comprada=cantidad_comprada,
+            fecha_compra=fecha_compra
+        )
+
+        if exito:
+            flash(mensaje, "success")
+        else:
+            flash(mensaje, "danger")
+            
         return redirect(url_for("productos.productos"))
 
     # ==============================================
     # LISTAR PRODUCTOS
     # ==============================================
-    lista_productos = Producto.query.order_by(Producto.id.asc()).all()
-    # Calcular KPIs
-    total_productos = len(lista_productos)
-    stock_normal = sum(1 for p in lista_productos if p.stock > 5)
-    valor_total_inventario = sum(float(p.precio_venta) * p.stock for p in lista_productos)
-    valor_inventario_venta = sum(float(p.precio_venta) for p in lista_productos)
-    valor_inventario = sum(float(p.precio_compra) for p in lista_productos)
-    kpis={
-        "total": total_productos,
-        "stock_normal": stock_normal,
-        "valor_total_inventario": valor_total_inventario,
-        "valor_inventario_venta": valor_inventario_venta,
-        "valor_inventario": valor_inventario
-    }
-    #Calculamos el ultimo codigo de producto
-    ultimo_producto = Producto.query.order_by(Producto.id.desc()).first()
-    next_id = 1 if not ultimo_producto else (ultimo_producto.id + 1)
-    siguiente_codigo = f"P{next_id:03d}"
-    # LISTAR CATEGORÍAS
+    pagina = request.args.get("pagina", 1, type=int)
+    por_pagina = 20
+    paginacion = Producto.query.options(
+        joinedload(Producto.categoria),
+        joinedload(Producto.proveedor)
+    ).order_by(Producto.id.desc()).paginate(page=pagina, per_page=por_pagina, error_out=False)
+    lista_productos = paginacion.items
+
     categorias = Categoria.query.order_by(Categoria.nombre.asc()).all()
-    # MOSTRAR VISTA AL HTML
+    proveedores = Proveedor.query.order_by(Proveedor.nombre_proveedor.asc()).all()
+
     return render_template(
         "productos/productos.html",
         productos=lista_productos,
-        kpis=kpis,
         categorias=categorias,
-        siguiente_codigo=siguiente_codigo
+        proveedores=proveedores,
+        paginacion=paginacion
     )
+
+@productos_bp.route("/buscar/<codigo>", methods=["GET"])
+@login_required
+def buscar_producto(codigo):
+    from flask import jsonify
+    # Buscar el último producto con este código
+    producto = Producto.query.filter(Producto.codigo_producto.ilike(codigo)).order_by(Producto.fecha_compra.desc(), Producto.id.desc()).first()
+    
+    if not producto:
+        return jsonify({"encontrado": False})
+        
+    return jsonify({
+        "encontrado": True,
+        "nombre": producto.nombre,
+        "marca": producto.marca,
+        "categoria_id": producto.categoria_id,
+        "proveedor_id": producto.proveedor_id,
+        "precio_compra": float(producto.precio_compra),
+        "precio_venta": float(producto.precio_venta)
+    })

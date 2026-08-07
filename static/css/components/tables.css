@@ -1,0 +1,84 @@
+/* ==========================================================================
+   COMPONENTES: TABLAS
+   ========================================================================== */
+
+.panel {
+    background-color: var(--color-bg-card);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 200px); /* Altura fija dinámica para habilitar scroll */
+}
+
+/* Contenedor de la tabla (Scrollable) */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    flex-grow: 1; /* Ocupar todo el espacio restante del panel */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* La tabla principal */
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--color-bg-card);
+    text-align: left;
+}
+
+/* Encabezados de tabla */
+.data-table__head {
+    background-color: var(--color-bg-stripe);
+}
+
+.data-table__head th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--color-bg-stripe); /* Fondo sólido vital para el sticky */
+    padding: var(--spacing-md) var(--spacing-sm);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    text-transform: none; /* Mantener casing natural como en la imagen */
+    border-bottom: 2px solid var(--color-primary); /* Línea inferior azul o gris oscuro */
+}
+
+/* Celdas de datos */
+.data-table__cell {
+    padding: var(--spacing-md) var(--spacing-sm);
+    color: var(--color-text-main);
+    font-size: var(--font-size-sm);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-border); /* Separador sutil */
+}
+
+/* Filas alternas (Efecto Zebra como en la imagen) */
+.data-table__row:nth-child(even) {
+    background-color: var(--color-bg-stripe);
+}
+
+/* Hover en filas para interactividad */
+.data-table__row:hover {
+    background-color: var(--color-primary-light);
+    transition: background-color var(--transition-fast);
+}
+
+/* Modificadores de celdas */
+.data-table__cell--center {
+    text-align: center;
+}
+
+.data-table__cell--right {
+    text-align: right;
+}
+
+.data-table__cell--actions {
+    text-align: right;
+    white-space: nowrap;
+}

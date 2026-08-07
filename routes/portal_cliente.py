@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user, logout_user
 from models.venta import Venta
+from models.enums import EstadoVenta
 from database import db
+from sqlalchemy.orm import joinedload
 
 portal_cliente_bp = Blueprint("portal_cliente", __name__)
 
@@ -22,17 +24,15 @@ def portal():
     cliente = current_user.cliente
 
     ventas = Venta.query.filter_by(
-        cliente_id=cliente.id
-    ).order_by(
-        Venta.fecha_venta.desc()
-    ).all()
+        cliente_id=current_user.cliente_id
+    ).options(joinedload(Venta.pagos)).order_by(Venta.fecha_venta.desc()).all()
 
     total_facturado = 0
     total_pagado = 0
     saldo_pendiente = 0
 
     for venta in ventas:
-        if venta.estado != "ACTIVA":
+        if venta.estado != EstadoVenta.ACTIVA:
             continue
 
         total = float(venta.total_venta)
@@ -50,7 +50,7 @@ def portal():
         "total_facturado": total_facturado,
         "total_pagado": total_pagado,
         "saldo_pendiente": saldo_pendiente,
-        "facturas": len([v for v in ventas if v.estado == "ACTIVA"])
+        "facturas": len([v for v in ventas if v.estado == EstadoVenta.ACTIVA])
     }
 
     return render_template(

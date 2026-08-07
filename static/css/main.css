@@ -1,0 +1,24 @@
+/* ==========================================================================
+   MAIN.CSS - Importador Maestro
+   ========================================================================== */
+
+/* 1. Base / Design Tokens */
+@import url('base/variables.css');
+@import url('base/reset.css');
+
+/* 2. Layout (Grid y Estructura Principal) */
+@import url('layout/grid.css');
+@import url('layout/sidebar.css');
+@import url('layout/topbar.css');
+
+/* 3. Componentes (Clean Code Blocks) */
+@import url('components/tables.css');
+@import url('components/buttons.css');
+@import url('components/forms.css');
+@import url('components/avatars.css');
+@import url('components/badges.css');
+@import url('components/modals.css');
+@import url('components/alerts.css');
+
+/* Google Fonts (Inter) - Se importa aquí o en HTML directamente */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');

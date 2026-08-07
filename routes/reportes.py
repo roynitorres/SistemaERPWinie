@@ -6,6 +6,7 @@ from models.detalle_venta import DetalleVenta
 from models.producto import Producto
 from models.cliente import Cliente
 from models.pago import Pago
+from models.enums import EstadoVenta, TipoVenta
 from datetime import datetime, timedelta
 from sqlalchemy import extract, func
 
@@ -69,7 +70,7 @@ def api_datos():
     ).all()
     clientes_nuevos = len(clientes_nuevos_query)
     lista_clientes_nuevos = [{
-        "nombre": f"{c.nombres} {c.apellidos}",
+        "nombre": f"{c.nombres}",
         "telefono": c.telefono,
         "fecha": c.created_at.strftime('%d/%m/%Y') if c.created_at else ""
     } for c in clientes_nuevos_query]
@@ -104,7 +105,7 @@ def api_datos():
     
     lista_abonos = [{
         "factura": p.venta.numero_factura if p.venta else "-",
-        "cliente": f"{p.venta.cliente.nombres} {p.venta.cliente.apellidos}" if p.venta and p.venta.cliente else "-",
+        "cliente": f"{p.venta.cliente.nombres}" if p.venta and p.venta.cliente else "-",
         "monto": float(p.monto_pago),
         "fecha": p.fecha_pago.strftime('%d/%m/%Y') if p.fecha_pago else ""
     } for p in pagos_mes]
@@ -112,7 +113,7 @@ def api_datos():
     ventas_mes = Venta.query.filter(
         extract('year', Venta.fecha_venta) == anio,
         extract('month', Venta.fecha_venta) == mes,
-        Venta.estado == 'ACTIVA'
+        Venta.estado == EstadoVenta.ACTIVA
     ).all()
     
     total_facturado_mes = sum(float(v.total_venta) for v in ventas_mes)
@@ -126,20 +127,20 @@ def api_datos():
         if pendiente > 0:
             lista_pendientes.append({
                 "factura": v.numero_factura,
-                "cliente": f"{v.cliente.nombres} {v.cliente.apellidos}" if v.cliente else "-",
+                "cliente": f"{v.cliente.nombres}" if v.cliente else "-",
                 "total": float(v.total_venta),
                 "pendiente": pendiente,
                 "fecha": v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else ""
             })
         
     # 4. VENTAS
-    ventas_contado = sum(float(v.total_venta) for v in ventas_mes if v.tipo_venta == 'CONTADO')
-    ventas_credito = sum(float(v.total_venta) for v in ventas_mes if v.tipo_venta == 'CREDITO')
+    ventas_contado = sum(float(v.total_venta) for v in ventas_mes if v.tipo_venta == TipoVenta.CONTADO)
+    ventas_credito = sum(float(v.total_venta) for v in ventas_mes if v.tipo_venta == TipoVenta.CREDITO)
     
     lista_ventas = [{
         "factura": v.numero_factura,
-        "cliente": f"{v.cliente.nombres} {v.cliente.apellidos}",
-        "tipo": v.tipo_venta,
+        "cliente": f"{v.cliente.nombres}",
+        "tipo": v.tipo_venta.value,
         "total": float(v.total_venta),
         "fecha": v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else ""
     } for v in ventas_mes]
@@ -158,7 +159,7 @@ def api_datos():
                 }
             productos_vendidos_dict[prod_id]["cantidad"] += cantidad
             productos_vendidos_dict[prod_id]["detalles"].append({
-                "cliente": f"{venta.cliente.nombres} {venta.cliente.apellidos}" if venta.cliente else "-",
+                "cliente": f"{venta.cliente.nombres}" if venta.cliente else "-",
                 "factura": venta.numero_factura,
                 "fecha": venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else "",
                 "cantidad": cantidad

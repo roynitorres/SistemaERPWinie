@@ -4,6 +4,7 @@ from flask_login import login_required
 from database import db
 from models.usuario import Usuario
 from models.rol import Rol
+from sqlalchemy.orm import joinedload
 from models.cliente import Cliente
 from utils.permisos import roles_required
 
@@ -78,7 +79,7 @@ def usuarios():
         db.session.commit()
         return redirect(url_for("usuarios.usuarios"))
 
-    usuarios = Usuario.query.join(Rol).filter(Rol.nombre != "CLIENTE").order_by(Usuario.username.asc()).all()
+    usuarios = Usuario.query.join(Rol).filter(Rol.nombre != "CLIENTE").options(joinedload(Usuario.rol)).order_by(Usuario.username.asc()).all()
 
     return render_template(
         "usuarios/usuarios.html",

@@ -16,13 +16,13 @@ Portal Cliente
 
             <div>
                 <h4 class="mb-1 fw-bold text-white">
-                    {{ cliente.nombres }} {{ cliente.apellidos or '' }}
+                    {{ cliente.nombres }}
                 </h4>
                 <div class="text-white-75 small">
                     {{ cliente.email or 'Sin correo registrado' }}
                 </div>
                 <div class="text-white-75 small">
-                    {{ cliente.direccion or 'Sin direccion registrada' }}
+                    -
                 </div>
             </div>
         </div>
@@ -99,7 +99,7 @@ Portal Cliente
                                 {% set saldo = venta.total_venta - total_abonado.valor %}
                                 
                                 {% set estado_str = "ANULADA" %}
-                                {% if venta.estado != 'ACTIVA' %}
+                                {% if venta.estado.value != 'ACTIVA' %}
                                 {% set estado_str = "ANULADA" %}
                                 {% elif saldo <= 0 %}
                                 {% set estado_str = "PAGADAS" %}
@@ -115,7 +115,7 @@ Portal Cliente
                                     <td class="p-2 p-md-3 fw-bold text-success text-nowrap d-none d-md-table-cell">C$ {{ "%.2f"|format(total_abonado.valor) }}</td>
                                     <td class="p-2 p-md-3 fw-bold text-secondary text-nowrap">C$ {{ "%.2f"|format(saldo) }}</td>
                                     <td class="p-2 p-md-3">
-                                        {% if venta.estado != 'ACTIVA' %}
+                                        {% if venta.estado.value != 'ACTIVA' %}
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Anulada</span>
                                         {% elif saldo <= 0 %}
                                         <span class="badge bg-success-subtle text-success border border-success-subtle">Cancelada</span>
@@ -135,7 +135,7 @@ Portal Cliente
                                 <tr class="fila-detalle collapse" id="detalleFac{{ venta.id }}" data-estado="{{ estado_str }}">
                                     <td colspan="8" class="p-0 border-0">
                                         <div class="p-3 border rounded" style="background-color: #f0fdf4;"> <!-- similar to bg-light-green -->
-                                            {% if saldo > 0 and venta.estado == 'ACTIVA' %}
+                                            {% if saldo > 0 and venta.estado.value == 'ACTIVA' %}
                                             <div class="alert alert-warning py-2 px-3 d-flex align-items-center mb-3">
                                                 <i class="bi bi-bell-fill me-2 fs-5"></i>
                                                 <span class="fw-semibold">Recordatorio: Tienes un pago pendiente para esta factura.</span>
@@ -216,7 +216,7 @@ Portal Cliente
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label text-xs fw-semibold text-muted mb-1">Nombre / Razon social</label>
-                            <input type="text" class="form-control" value="{{ cliente.nombres }} {{ cliente.apellidos or '' }}" readonly>
+                            <input type="text" class="form-control" value="{{ cliente.nombres }}" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label text-xs fw-semibold text-muted mb-1">Telefono</label>
@@ -232,7 +232,7 @@ Portal Cliente
                         </div>
                         <div class="col-md-8">
                             <label class="form-label text-xs fw-semibold text-muted mb-1">Direccion</label>
-                            <input type="text" class="form-control" value="{{ cliente.direccion or '' }}" readonly>
+                            <input type="text" class="form-control" value="-" readonly>
                         </div>
                     </div>
                 </div>

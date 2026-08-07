@@ -1,179 +1,154 @@
 {% extends "base.html" %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/categorias.css') }}">
 
-{% endblock %}
+{% block title %}Categorías{% endblock %}
 
-{% block title %}
-Categorías
+{% block page_title %}
+<i class="bi bi-tags"></i> Categorías
 {% endblock %}
 
 {% block content %}
-
-<div class="container-fluid pt-1 pb-3">
     <!-- ===================================== -->
-    <!-- HEADER / TOP BAR -->
+    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Categorías
-        </h4>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-            </button>
-            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-gear fs-5 text-secondary"></i>
-            </a>
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-moon fs-5 text-secondary"></i>
-            </button>
-                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
-                {% if current_user and current_user.foto_perfil %}
-                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
-                {% else %}
-                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
-                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
-                    </div>
-                {% endif %}
-            </a>
-        </div>
-    </div>
-
-
-    <!-- ===================================== -->
-    <!-- MODAL FORMULARIO NUEVA CATEGORIA -->
-    <!-- ===================================== -->
-    <div class="modal fade" id="modalFormCategoria" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-md modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
-                    <h5 class="modal-title mb-0 fw-bold d-flex align-items-center" id="formTitle">
-                        <i class="bi bi-tag me-2 text-white"></i>NUEVA CATEGORIA
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-            <form method="POST" id="formCategorias">
-                <input type="hidden" id="categoria_id" name="categoria_id">
-
-                <!-- Campos en Columna Vertical -->
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">NOMBRE DE LA CATEGORIA
-                            *</label>
-                        <input type="text" class="form-control" name="nombre" placeholder="Ej. Electrónica"
-                            required id="form_nombre">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">DESCRIPCIÓN</label>
-                        <input type="text" class="form-control" name="descripcion"
-                            placeholder="Descripción de la categoría" id="form_descripcion">
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
-                        <select class="form-select fw-semibold" name="estado" id="form_estado">
-                            <option value="ACTIVO">Activo</option>
-                            <option value="INACTIVO">Inactivo</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Botones de Acción -->
-                <div class="d-flex gap-2 mt-4 justify-content-end">
-                    <button type="button"
-                        class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
-                        id="btnLimpiar">
-                        <i class="bi bi-arrow-counterclockwise"></i> Limpiar
-                    </button>
-                    <button type="submit"
-                        class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
-                        id="btnGuardar">
-                        <i class="bi bi-floppy"></i> Guardar
-                    </button>
-                </div>
-            </form>
-            </div>
-        </div>
-    </div>
-</div> <!-- FIN MODAL CATEGORIA -->
-
-<!-- ===================================== -->
-<!-- BARRA DE CONTROLES DE LA TABLA (FLOTANTES) -->
-<!-- ===================================== -->
-<div class="d-flex justify-content-start align-items-center mb-3">
-    <div class="d-flex flex-wrap align-items-center gap-3">
-        <!-- Nuevo -->
-        <button type="button" class="btn btn-info text-white rounded-pill d-flex align-items-center justify-content-center gap-2 fw-bold px-4 shadow-sm" id="btnIrForm"
-            style="min-height: 42px; background-color: #0dcaf0; border: none;">
-            <i class="bi bi-plus-lg fs-5"></i> Nueva categoría
+    <div class="filter-bar">
+        <!-- Nuevo (Enfocar formulario) -->
+        <button type="button" class="btn btn--primary" id="btnIrForm">
+            <i class="bi bi-plus-lg" style="margin-right: var(--spacing-xs);"></i> Nueva Categoría
         </button>
 
         <!-- Buscador -->
-        <div class="position-relative">
-            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-            <input type="text" class="form-control ps-5 border-light-subtle rounded-pill bg-white shadow-sm" id="buscarCategoria"
-                placeholder="Búsqueda" style="width: 250px; min-height: 42px;">
+        <input type="text" class="form-input filter-bar__input" id="buscarCategoria" placeholder="🔍 Buscar categoría...">
+
+        <!-- Filtro Estado -->
+        <select class="form-input filter-bar__select" id="filtroEstadoCategoria">
+            <option value="TODOS">Todos los estados</option>
+            <option value="ACTIVO">Activos</option>
+            <option value="INACTIVO">Inactivos</option>
+        </select>
+
+        <!-- Exportar y Contador -->
+        <div style="margin-left: auto; display: flex; align-items: center; gap: var(--spacing-md);">
+            <span id="badgeTotalItems" style="color: var(--color-text-main); font-size: 0.95rem;">
+                Categorías: <strong>0</strong>
+            </span>
+            <a href="#" class="btn btn--outline">
+                <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+            </a>
         </div>
-
-        <!-- Exportar -->
-        <a href="#"
-            class="btn btn-dark rounded-pill d-flex align-items-center justify-content-center gap-2 fw-semibold px-4 shadow-sm" style="min-height: 42px;">
-            <i class="bi bi-download"></i> Exportación
-        </a>
     </div>
-</div>
 
-<!-- ===================================== -->
-<!-- TABLA / LISTA DE CATEGORIAS-->
-<!-- ===================================== -->
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
+    <!-- ===================================== -->
+    <!-- MODAL FORMULARIO NUEVA CATEGORÍA (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalFormCategoria">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formTitle">
+                    <i class="bi bi-tag"></i> NUEVA CATEGORÍA
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalFormCategoria')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form method="POST" id="formCategorias">
+                    <input type="hidden" id="categoria_id" name="categoria_id">
+
+                    <div class="grid grid--2-cols">
+                        <!-- CÓDIGO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">CÓDIGO</label>
+                            <input type="text" class="form-input" name="codigo_categoria" id="form_codigo" value="{{ siguiente_codigo }}" readonly style="background-color: var(--color-bg-stripe);">
+                        </div>
+
+                        <!-- ESTADO -->
+                        <div class="form-group">
+                            <label class="form-label">ESTADO</label>
+                            <select class="form-input" name="estado" id="form_estado">
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- NOMBRE DE LA CATEGORÍA -->
+                    <div class="form-group">
+                        <label class="form-label form-label--required">NOMBRE DE LA CATEGORÍA</label>
+                        <input type="text" class="form-input" name="nombre" placeholder="EJ. ELECTRÓNICA" required minlength="3" id="form_nombre" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+
+                    <!-- DESCRIPCIÓN -->
+                    <div class="form-group">
+                        <label class="form-label">DESCRIPCIÓN</label>
+                        <input type="text" class="form-input" name="descripcion" placeholder="DESCRIPCIÓN DE LA CATEGORÍA" id="form_descripcion" oninput="this.value = this.value.toUpperCase()">
+                    </div>
+
+                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
+                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalFormCategoria')">Cancelar</button>
+                        <button type="button" class="btn btn--secondary" id="btnLimpiar">Limpiar</button>
+                        <button type="submit" class="btn btn--primary" id="btnGuardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> <!-- FIN MODAL CATEGORIA -->
+
+    <!-- ===================================== -->
+    <!-- TABLA / LISTA DE CATEGORIAS-->
+    <!-- ===================================== -->
+    <div class="panel" style="padding: 0; overflow: hidden;">
         <div class="table-responsive">
-            <table class="table align-middle table-hover border-light-subtle tabla-categoria">
-                <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
+            <table class="data-table">
+                <thead class="data-table__head">
                     <tr>
-                        <th class="px-3 py-3 text-center">CODIGO</th>
-                        <th class="px-3 py-3 text-center">CATEGORIA</th>
-                        <th class="px-3 py-3 text-center">DESCRIPCION</th>
-                        <th class="px-3 py-3 text-center">PRODUCTOS</th>
-                        <th class="px-3 py-3 text-center">ESTADO</th>
-                        <th class="px-3 py-3 text-center">ACC.</th>
+                        <th style="width: 100px;">CÓDIGO</th>
+                        <th>CATEGORÍA</th>
+                        <th>DESCRIPCIÓN</th>
+                        <th style="text-align: center;">CANT. PRODUCTOS</th>
+                        <th>FECHA CREACIÓN</th>
+                        <th style="text-align: right;">ACCIONES</th>
                     </tr>
                 </thead>
-
                 <tbody id="tablaCategorias">
                     {% for categoria in categorias %}
+                    <tr class="data-table__row" 
+                        data-id="{{ categoria.id }}" 
+                        data-codigo="{{ categoria.codigo or '' }}"
+                        data-nombre="{{ categoria.nombre }}" 
+                        data-descripcion="{{ categoria.descripcion or '' }}"
+                        data-estado="{{ categoria.estado.value }}">
 
-                    <tr data-id="{{ categoria.id }}" data-codigo="{{ categoria.codigo }}"
-                        data-nombre="{{ categoria.nombre }}" data-descripcion="{{  categoria.descripcion or ''}}"
-                        data-estado="{{ 'ACTIVO' if categoria.estado else 'INACTIVO' }}">
-                        <td class="px-3 py-3 text-center fw-semibold text-muted">
-                            {{ categoria.codigo }}
+                        <td class="data-table__cell" style="font-family: monospace;">
+                            {{ categoria.codigo or '-' }}
                         </td>
-                        <td class="px-3 py-3 text-center fw-semibold text-muted">
-                            {{ categoria.nombre }}
+                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-primary-dark);">
+                            <div class="avatar-wrapper">
+                                <div class="avatar" style="background-color: var(--color-primary-light); color: var(--color-primary);"><i class="bi bi-tag"></i></div>
+                                <div class="avatar-text" style="gap: var(--spacing-xs);">
+                                    <span class="avatar-text__title">{{ categoria.nombre }}</span>
+                                    <div>
+                                        <span class="badge {% if categoria.estado.value == 'ACTIVO' %}badge--success{% else %}badge--danger{% endif %}">
+                                            {{ categoria.estado.value }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-3 py-3 text-center fw-semibold text-muted d-none d-md-table-cell">
+                        <td class="data-table__cell text-muted">
                             {{ categoria.descripcion }}
                         </td>
-                        <td class="px-3 py-3 text-center fw-semibold text-muted">
-                            {{ categoria.productos|length }}
+                        <td class="data-table__cell" style="text-align: center; font-weight: bold;">
+                            <span style="background-color: var(--color-bg-stripe); padding: 4px 12px; border-radius: 12px; border: 1px solid var(--color-border);">
+                                {{ categoria.productos|length }}
+                            </span>
                         </td>
-                        <td class="px-3 py-3 text-center">
-                            {% if categoria.estado %}
-                            <span class="badge bg-success px-3 py-2 rounded-pill fw-semibold">Activo</span>
-                            {% else %}
-                            <span class="badge bg-secondary px-3 py-2 rounded-pill fw-semibold">Inactivo</span>
-                            {% endif %}
+                        <td class="data-table__cell text-muted">
+                            {{ categoria.created_at.strftime('%d/%m/%Y') if categoria.created_at else '-' }}
                         </td>
-
-                        <td class="px-3 py-3 text-center">
-                            <button type="button" class="btn btn-sm btn-icon-edit btn-editar-fila"
-                                title="Editar Producto">
-                                <i class="bi bi-pencil-fill"></i>
+                        <td class="data-table__cell data-table__cell--actions">
+                            <button type="button" class="btn btn--secondary btn--small btn-editar-fila" title="Editar Categoría">
+                                <i class="bi bi-pencil-fill"></i> Editar
                             </button>
                         </td>
                     </tr>
@@ -181,71 +156,78 @@ Categorías
                 </tbody>
             </table>
         </div>
+
         <!-- Table Footer for Summary & Pagination -->
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-            <div class="text-muted text-xs" id="paginationSummary">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md) var(--spacing-lg); border-top: 1px solid var(--color-border); background-color: var(--color-bg-stripe); position: sticky; bottom: 0; z-index: 10;">
+            <div id="paginationSummary" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
                 Mostrando 0 a 0 de 0 registros
             </div>
-
-            <nav aria-label="Navegacion de tabla">
-                <ul class="pagination pagination-sm mb-0" id="paginationControls">
-
-                </ul>
-            </nav>
+            <div id="paginationControls" style="display: flex; gap: var(--spacing-xs);">
+                <!-- Generado dinámicamente -->
+            </div>
         </div>
     </div>
-</div>
-
-<!-- ========================================= -->
-<!-- JAVASCRIPT -->
-<!-- ========================================= -->
 
 <script>
-    // Control de KPIs toggle eliminado
-
-    let modalFormCategoria = null;
-    function getModalCategoria() {
-        if (!modalFormCategoria) {
-            modalFormCategoria = new bootstrap.Modal(document.getElementById('modalFormCategoria'));
-        }
-        return modalFormCategoria;
+    // ==========================================
+    // SISTEMA DE MODALES CUSTOM
+    // ==========================================
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('is-open');
     }
 
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+    }
+
+    // ==========================================
+    // LÓGICA DEL FORMULARIO CATEGORIA
+    // ==========================================
     const formulario = document.getElementById("formCategorias");
     const formTitle = document.getElementById("formTitle");
-
     const categoriaId = document.getElementById("categoria_id");
+    const formCodigo = document.getElementById("form_codigo");
     const formNombre = document.getElementById("form_nombre");
     const formDescripcion = document.getElementById("form_descripcion");
     const formEstado = document.getElementById("form_estado");
 
     const btnLimpiar = document.getElementById("btnLimpiar");
     const btnIrform = document.getElementById("btnIrForm");
-    const buscarcategoria = document.getElementById("buscarCategoria");
+
+    // Prevenir el envío con la tecla Enter en los inputs
+    formulario.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
+            e.preventDefault();
+        }
+    });
+
+    const siguienteCodigo = "{{ siguiente_codigo }}";
 
     function resetForm() {
         formulario.reset();
         categoriaId.value = "";
+        formCodigo.value = siguienteCodigo;
         formEstado.value = "ACTIVO";
-        formTitle.innerHTML = `<i class="bi bi-tag me-2 text-white"></i>NUEVA CATEGORIA`;
+        formTitle.innerHTML = `<i class="bi bi-tag"></i> NUEVA CATEGORÍA`;
         formNombre.focus();
     }
 
     function cargarCategoria(row) {
         categoriaId.value = row.dataset.id;
+        formCodigo.value = row.dataset.codigo;
         formNombre.value = row.dataset.nombre;
         formDescripcion.value = row.dataset.descripcion;
         formEstado.value = row.dataset.estado;
 
-        formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-white"></i>EDITAR CATEGORIA`;
-        getModalCategoria().show();
+        formTitle.innerHTML = `<i class="bi bi-pencil"></i> EDITAR CATEGORÍA`;
+        abrirModal('modalFormCategoria');
     }
 
     btnLimpiar.addEventListener("click", resetForm);
 
     btnIrform.addEventListener("click", () => {
         resetForm();
-        getModalCategoria().show();
+        abrirModal('modalFormCategoria');
     });
 
     document.querySelectorAll(".btn-editar-fila").forEach(btn => {
@@ -260,11 +242,13 @@ Categorías
             cargarCategoria(this);
         });
     });
-    // === PAGINACIÓN Y BÚSQUEDA DEL LADO CATEGORIA ===
+
+    // ==========================================
+    // PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE
+    // ==========================================
     let currentPage = 1;
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     let filteredRows = [];
-    // Obtener todas las filas de la tabla
     const allRows = Array.from(document.querySelectorAll("#tablaCategorias tr"));
 
     function initPagination() {
@@ -275,24 +259,29 @@ Categorías
     function renderTable() {
         const totalItems = filteredRows.length;
         const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-        // Ajustar página actual si excede el total de páginas o es menor a 1
+
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
 
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-        // Ocultar todas las filas
+
         allRows.forEach(row => row.style.display = "none");
-        // Mostrar solo las de la página actual
+
         for (let i = startIndex; i < endIndex; i++) {
-            filteredRows[i].style.display = "";
+            if(filteredRows[i]) filteredRows[i].style.display = "";
         }
-        // Renderizar el resumen (Summary)
-        const summaryText = totalItems > 0 
+
+        const summaryText = totalItems > 0
             ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
             : "Mostrando 0 a 0 de 0 registros";
         document.getElementById("paginationSummary").innerText = summaryText;
-        // Renderizar controles de paginación
+
+        const badgeTotal = document.getElementById("badgeTotalItems");
+        if (badgeTotal) {
+            badgeTotal.innerHTML = `Categorías: <strong>${totalItems}</strong>`;
+        }
+
         renderControls(totalPages);
     }
 
@@ -301,64 +290,73 @@ Categorías
         controlsContainer.innerHTML = "";
 
         if (totalPages <= 1) return;
+
         // Botón Anterior
-        const prevLi = document.createElement("li");
-        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-        prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
-        prevLi.addEventListener("click", e => {
-            e.preventDefault();
-            if (currentPage > 1) {
+        const btnPrev = document.createElement("button");
+        btnPrev.className = "btn btn--outline btn--small";
+        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
+        if (currentPage === 1) btnPrev.disabled = true;
+        else {
+            btnPrev.addEventListener("click", () => {
                 currentPage--;
                 renderTable();
-            }
-        });
-        controlsContainer.appendChild(prevLi);
+            });
+        }
+        controlsContainer.appendChild(btnPrev);
+
         // Páginas numeradas
         for (let i = 1; i <= totalPages; i++) {
-            const pageLi = document.createElement("li");
-            pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
-            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            pageLi.addEventListener("click", e => {
-                e.preventDefault();
+            const btnPage = document.createElement("button");
+            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
+            btnPage.innerText = i;
+            btnPage.addEventListener("click", () => {
                 currentPage = i;
                 renderTable();
             });
-            controlsContainer.appendChild(pageLi);
+            controlsContainer.appendChild(btnPage);
         }
+
         // Botón Siguiente
-        const nextLi = document.createElement("li");
-        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-        nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
-        nextLi.addEventListener("click", e => {
-            e.preventDefault();
-            if (currentPage < totalPages) {
+        const btnNext = document.createElement("button");
+        btnNext.className = "btn btn--outline btn--small";
+        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
+        if (currentPage === totalPages) btnNext.disabled = true;
+        else {
+            btnNext.addEventListener("click", () => {
                 currentPage++;
                 renderTable();
-            }
-        });
-        controlsContainer.appendChild(nextLi);
+            });
+        }
+        controlsContainer.appendChild(btnNext);
     }
 
-    buscarcategoria.addEventListener("input", function () {
-        const query = this.value.toLowerCase().trim();
+    function aplicarFiltros() {
+        const query = document.getElementById("buscarCategoria").value.toLowerCase().trim();
+        const estadoFiltro = document.getElementById("filtroEstadoCategoria").value;
 
         filteredRows = allRows.filter(row => {
-            const codigo = row.dataset.codigo;
+            const codigo = row.dataset.codigo.toLowerCase();
             const nombre = row.dataset.nombre.toLowerCase();
             const descripcion = row.dataset.descripcion.toLowerCase();
+            const estadoRow = row.dataset.estado;
 
-            return codigo.includes(query) ||
+            const coincideTexto = query === "" || 
+                codigo.includes(query) ||
                 nombre.includes(query) ||
                 descripcion.includes(query);
+
+            const coincideEstado = estadoFiltro === "TODOS" || estadoRow === estadoFiltro;
+
+            return coincideTexto && coincideEstado;
         });
 
         currentPage = 1;
         renderTable();
-    });
+    }
+
+    document.getElementById("buscarCategoria").addEventListener("input", aplicarFiltros);
+    document.getElementById("filtroEstadoCategoria").addEventListener("change", aplicarFiltros);
 
     window.addEventListener("load", initPagination);
-
-
 </script>
-
 {% endblock %}

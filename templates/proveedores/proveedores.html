@@ -1,0 +1,513 @@
+{% extends "base.html" %}
+
+{% block title %}Proveedores{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-truck"></i> Proveedores
+{% endblock %}
+
+{% block content %}
+    <!-- ===================================== -->
+    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
+    <!-- ===================================== -->
+    <div class="filter-bar">
+        <!-- Nuevo (Enfocar formulario) -->
+        <button type="button" class="btn btn--primary" id="btnIrForm">
+            <i class="bi bi-plus-lg" style="margin-right: var(--spacing-xs);"></i> Nuevo Proveedor
+        </button>
+
+        <!-- Buscador -->
+        <input type="text" class="form-input filter-bar__input" id="buscarProveedor" placeholder="🔍 Buscar proveedor...">
+
+        <!-- Filtro Estado -->
+        <select class="form-input filter-bar__select" id="filtroEstadoProveedor">
+            <option value="TODOS">Todos los estados</option>
+            <option value="ACTIVO">Activos</option>
+            <option value="INACTIVO">Inactivos</option>
+        </select>
+
+        <!-- Exportar y Contador -->
+        <div style="margin-left: auto; display: flex; align-items: center; gap: var(--spacing-md);">
+            <span id="badgeTotalItems" style="color: var(--color-text-main); font-size: 0.95rem;">
+                Proveedores: <strong>0</strong>
+            </span>
+            <a href="{{ url_for('proveedores.exportar_proveedores') }}" class="btn btn--outline">
+                <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+            </a>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- MODAL FORMULARIO NUEVO PROVEEDOR (CUSTOM) -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalFormProveedor">
+        <div class="modal-window" style="max-width: 800px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formTitle">
+                    <i class="bi bi-truck"></i> NUEVO PROVEEDOR
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalFormProveedor')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form method="POST" id="formProveedores">
+                    <input type="hidden" id="proveedor_id" name="proveedor_id">
+
+                    <div class="grid grid--2-cols">
+                        <!-- CÓDIGO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">CÓDIGO</label>
+                            <input type="text" class="form-input" id="form_codigo" name="codigo" value="{{ siguiente_codigo }}" readonly style="background-color: var(--color-bg-stripe);">
+                        </div>
+
+                        <!-- ESTADO -->
+                        <div class="form-group">
+                            <label class="form-label">ESTADO</label>
+                            <select class="form-input" name="estado" id="form_estado">
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid--2-cols">
+                        <!-- NOMBRE DEL PROVEEDOR -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">NOMBRE DEL PROVEEDOR</label>
+                            <input type="text" class="form-input" name="nombre_proveedor" placeholder="EMPRESA S.A." required minlength="3" id="form_nombre_proveedor" oninput="this.value = this.value.toUpperCase()">
+                        </div>
+
+                        <!-- NOMBRE DEL CONTACTO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">NOMBRE DEL CONTACTO</label>
+                            <input type="text" class="form-input" name="nombre_contacto" placeholder="JUAN PÉREZ" required minlength="3" id="form_nombre_contacto" oninput="this.value = this.value.toUpperCase()">
+                        </div>
+                    </div>
+
+                    <div class="grid grid--2-cols">
+                        <!-- TELÉFONO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">TELÉFONO</label>
+                            <input type="text" class="form-input" id="form_telefono" name="telefono" maxlength="8" minlength="8" pattern="^[578][0-9]{7}$" title="El teléfono debe tener 8 dígitos y comenzar con 5, 7 u 8" inputmode="numeric" placeholder="81234567" required>
+                        </div>
+
+                        <!-- RUC -->
+                        <div class="form-group">
+                            <label class="form-label">RUC</label>
+                            <input type="text" class="form-input" name="ruc" id="form_ruc" placeholder="J0000000000000" oninput="this.value = this.value.toUpperCase()">
+                        </div>
+                    </div>
+
+                    <div class="grid grid--2-cols">
+                        <!-- DEPARTAMENTO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">DEPARTAMENTO</label>
+                            <select class="form-input" name="departamento" id="form_departamento" required>
+                                <option value="">Seleccione un departamento...</option>
+                                <option value="BOACO">BOACO</option>
+                                <option value="CARAZO">CARAZO</option>
+                                <option value="CHINANDEGA">CHINANDEGA</option>
+                                <option value="CHONTALES">CHONTALES</option>
+                                <option value="COSTA CARIBE NORTE">COSTA CARIBE NORTE</option>
+                                <option value="COSTA CARIBE SUR">COSTA CARIBE SUR</option>
+                                <option value="ESTELÍ">ESTELÍ</option>
+                                <option value="GRANADA">GRANADA</option>
+                                <option value="JINOTEGA">JINOTEGA</option>
+                                <option value="LEÓN">LEÓN</option>
+                                <option value="MADRIZ">MADRIZ</option>
+                                <option value="MANAGUA">MANAGUA</option>
+                                <option value="MASAYA">MASAYA</option>
+                                <option value="MATAGALPA">MATAGALPA</option>
+                                <option value="NUEVA SEGOVIA">NUEVA SEGOVIA</option>
+                                <option value="RÍO SAN JUAN">RÍO SAN JUAN</option>
+                                <option value="RIVAS">RIVAS</option>
+                            </select>
+                        </div>
+
+                        <!-- MUNICIPIO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">MUNICIPIO</label>
+                            <select class="form-input" name="municipio" id="form_municipio" required>
+                                <option value="">Seleccione un municipio...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- DIRECCIÓN -->
+                    <div class="form-group">
+                        <label class="form-label">DIRECCIÓN</label>
+                        <textarea class="form-input" name="direccion" id="form_direccion" rows="2" placeholder="DIRECCIÓN COMPLETA..." oninput="this.value = this.value.toUpperCase()"></textarea>
+                    </div>
+
+                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
+                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalFormProveedor')">Cancelar</button>
+                        <button type="button" class="btn btn--secondary" id="btnLimpiar">Limpiar</button>
+                        <button type="submit" class="btn btn--primary" id="btnGuardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> <!-- FIN MODAL PROVEEDOR -->
+
+    <!-- ===================================== -->
+    <!-- TABLA / LISTA DE PROVEEDORES-->
+    <!-- ===================================== -->
+    <div class="panel" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead class="data-table__head">
+                    <tr>
+                        <th>CÓDIGO</th>
+                        <th>PROVEEDOR</th>
+                        <th>CONTACTO</th>
+                        <th>TELÉFONO</th>
+                        <th>DEPARTAMENTO</th>
+                        <th>RUC</th>
+                        <th style="text-align: right;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProveedores">
+                    {% for proveedor in proveedores %}
+                    <tr class="data-table__row" 
+                        data-id="{{ proveedor.id }}"
+                        data-codigo="{{ proveedor.codigo or 'P' ~ '%03d'|format(proveedor.id) }}"
+                        data-nombre_proveedor="{{ proveedor.nombre_proveedor }}"
+                        data-nombre_contacto="{{ proveedor.nombre_contacto }}"
+                        data-telefono="{{ proveedor.telefono }}"
+                        data-departamento="{{ proveedor.departamento }}"
+                        data-municipio="{{ proveedor.municipio }}"
+                        data-ruc="{{ proveedor.ruc or '' }}"
+                        data-direccion="{{ proveedor.direccion or '' }}"
+                        data-estado="{{ proveedor.estado.value }}">
+
+                        <td class="data-table__cell">
+                            {{ proveedor.codigo or "P" ~ "%03d"|format(proveedor.id) }}
+                        </td>
+                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-primary-dark);">
+                            <div class="avatar-wrapper">
+                                <div class="avatar" style="background-color: var(--color-secondary); color: var(--color-text-main);">
+                                    {{ proveedor.nombre_proveedor[:2].upper() }}
+                                </div>
+                                <div class="avatar-text" style="gap: var(--spacing-xs);">
+                                    <span class="avatar-text__title">{{ proveedor.nombre_proveedor }}</span>
+                                    <div>
+                                        <span class="badge {% if proveedor.estado.value == 'ACTIVO' %}badge--success{% else %}badge--danger{% endif %}">
+                                            {{ proveedor.estado.value }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="data-table__cell">
+                            {{ proveedor.nombre_contacto }}
+                        </td>
+                        <td class="data-table__cell">
+                            {{ proveedor.telefono }}
+                        </td>
+                        <td class="data-table__cell">
+                            {{ proveedor.departamento }}<br>
+                            <small style="color: var(--color-text-muted);">{{ proveedor.municipio }}</small>
+                        </td>
+                        <td class="data-table__cell">
+                            {{ proveedor.ruc or '-' }}
+                        </td>
+                        <td class="data-table__cell data-table__cell--actions">
+                            <button type="button" class="btn btn--secondary btn--small btn-editar-fila" title="Editar Proveedor">
+                                <i class="bi bi-pencil-fill"></i> Editar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer for Summary & Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md) var(--spacing-lg); border-top: 1px solid var(--color-border); background-color: var(--color-bg-stripe); position: sticky; bottom: 0; z-index: 10;">
+            <div id="paginationSummary" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
+                Mostrando 0 a 0 de 0 registros
+            </div>
+            <div id="paginationControls" style="display: flex; gap: var(--spacing-xs);">
+                <!-- Generado dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ==========================================
+    // SISTEMA DE MODALES CUSTOM
+    // ==========================================
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('is-open');
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+    }
+
+    // ==========================================
+    // LÓGICA DEL FORMULARIO PROVEEDOR
+    // ==========================================
+    const form = document.getElementById("formProveedores");
+    const formTitle = document.getElementById("formTitle");
+    const formCodigo = document.getElementById("form_codigo");
+    const formNombreProveedor = document.getElementById("form_nombre_proveedor");
+    const formNombreContacto = document.getElementById("form_nombre_contacto");
+    const formTelefono = document.getElementById("form_telefono");
+    const formDepartamento = document.getElementById("form_departamento");
+    const formMunicipio = document.getElementById("form_municipio");
+    const formRuc = document.getElementById("form_ruc");
+    const formDireccion = document.getElementById("form_direccion");
+    const formEstado = document.getElementById("form_estado");
+    const proveedorIdInput = document.getElementById("proveedor_id");
+
+    const btnLimpiar = document.getElementById("btnLimpiar");
+    const btnIrForm = document.getElementById("btnIrForm");
+
+    // Prevenir el envío con la tecla Enter en los inputs
+    form.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== 'BUTTON') {
+            e.preventDefault();
+        }
+    });
+
+    const siguienteCodigo = "{{ siguiente_codigo }}";
+    
+    const departamentos_municipios = {
+        "BOACO": ["BOACO", "CAMOAPA", "SAN JOSÉ DE LOS REMATES", "SAN LORENZO", "SANTA LUCÍA", "TEUSTEPE"],
+        "CARAZO": ["DIRIAMBA", "DOLORES", "EL ROSARIO", "JINOTEPE", "LA CONQUISTA", "LA PAZ DE CARAZO", "SAN MARCOS", "SANTA TERESA"],
+        "CHINANDEGA": ["CHICHIGALPA", "CHINANDEGA", "CINCO PINOS", "CORINTO", "EL REALEJO", "EL VIEJO", "POSOLTEGA", "PUERTO MORAZÁN", "SAN FRANCISCO DEL NORTE", "SAN PEDRO DEL NORTE", "SANTO TOMÁS DEL NORTE", "SOMOTILLO", "VILLANUEVA"],
+        "CHONTALES": ["ACOYAPA", "COMALAPA", "EL CORAL", "JUIGALPA", "LA LIBERTAD", "MOYOGALPA", "SAN FRANCISCO DE CUAPA", "SAN PEDRO DE LÓVAGO", "SANTO DOMINGO", "SANTO TOMÁS", "VILLA SANDINO"],
+        "ESTELÍ": ["CONDEGA", "ESTELÍ", "LA TRINIDAD", "PUEBLO NUEVO", "SAN JUAN DE LIMAY", "SAN NICOLÁS"],
+        "GRANADA": ["DIRIÁ", "DIRIOMO", "GRANADA", "NANDAIME"],
+        "JINOTEGA": ["EL CUÁ", "JINOTEGA", "LA CONCORDIA", "SAN JOSÉ DE BOCAY", "SAN RAFAEL DEL NORTE", "SAN SEBASTIÁN DE YALÍ", "SANTA MARÍA DE PANTASMA", "WIWILÍ DE JINOTEGA"],
+        "LEÓN": ["ACHUAPA", "EL JICARAL", "EL SAUCE", "LA PAZ CENTRO", "LARREYNAGA", "LEÓN", "NAGAROTE", "QUEZALGUAQUE", "SANTA ROSA DEL PEÑÓN", "TELICA"],
+        "MADRIZ": ["LAS SABANAS", "PALACAGÜINA", "SAN JOSÉ DE CUSMAPA", "SAN JUAN DE RÍO COCO", "SAN LUCAS", "SOMOTO", "TELPANECA", "TOTOGALPA", "YALAGÜINA"],
+        "MANAGUA": ["CIUDAD SANDINO", "EL CRUCERO", "MANAGUA", "MATEARE", "SAN FRANCISCO LIBRE", "SAN RAFAEL DEL SUR", "TICUANTEPE", "TIPITAPA"],
+        "MASAYA": ["CATARINA", "LA CONCEPCIÓN", "MASAYA", "MASATEPE", "NANDASMO", "NINDIRÍ", "NIQUINOMO", "SAN JUAN DE ORIENTE", "TISMA"],
+        "MATAGALPA": ["CIUDAD DARÍO", "EL TUMA - LA DALIA", "ESQUIPULAS", "MATAGALPA", "MATIGUÁS", "MUY MUY", "RANCHO GRANDE", "RÍO BLANCO", "SAN DIONISIO", "SAN ISIDRO", "SAN RAMÓN", "SÉBACO", "TERRABONA"],
+        "NUEVA SEGOVIA": ["CIUDAD ANTIGUA", "DIPILTO", "EL JÍCARO", "JALAPA", "MACUELIZO", "MOZONTE", "MURRA", "QUILALÍ", "SAN FERNANDO", "SANTA MARÍA", "TECOTECUMAN", "TOTOGALPA", "WANI", "OCOTAL"],
+        "RÍO SAN JUAN": ["EL ALMENDRO", "EL CASTILLO", "MORRITO", "SAN CARLOS", "SAN JUAN DEL NORTE", "SAN MIGUELITO"],
+        "RIVAS": ["ALTAGRACIA", "BELÉN", "BUENOS AIRES", "CÁRDENAS", "MOYOGALPA", "POTOSÍ", "RIVAS", "SAN JORGE", "SAN JUAN DEL SUR"],
+        "COSTA CARIBE NORTE": ["BONANZA", "MULUKUKÚ", "PRINZAPOLKA", "PUERTO CABEZAS (BILWI)", "ROSITA", "SIUNA", "WASLALA", "WASPAM"],
+        "COSTA CARIBE SUR": ["BLUEFIELDS", "CORN ISLAND", "DESEMBOCADURA DE LA CRUZ DE RÍO GRANDE", "EL TORTUGUERO", "EL RAMA", "KUKRA HILL", "LA DESEMBOCADURA DE RÍO MAÍZ", "LA CRUZ DE RÍO GRANDE", "LAGUNA DE PERLAS", "MUELLE DE LOS BUEYES", "NUEVA GUINEA", "PAIWAS", "SAN JUAN DE NICARAGUA"]
+    };
+
+    function cargarMunicipios(departamento, municipioSeleccionado = "") {
+        formMunicipio.innerHTML = '<option value="">Seleccione un municipio...</option>';
+        if (departamento && departamentos_municipios[departamento]) {
+            departamentos_municipios[departamento].forEach(m => {
+                const option = document.createElement("option");
+                option.value = m;
+                option.textContent = m;
+                if (m === municipioSeleccionado) {
+                    option.selected = true;
+                }
+                formMunicipio.appendChild(option);
+            });
+        }
+    }
+
+    formDepartamento.addEventListener("change", function() {
+        cargarMunicipios(this.value);
+    });
+
+    function resetForm() {
+        form.reset();
+        proveedorIdInput.value = "";
+        formCodigo.value = siguienteCodigo;
+        cargarMunicipios("");
+        formTitle.innerHTML = `<i class="bi bi-truck"></i> NUEVO PROVEEDOR`;
+        formNombreProveedor.focus();
+    }
+
+    btnLimpiar.addEventListener("click", resetForm);
+
+    btnIrForm.addEventListener("click", () => {
+        resetForm();
+        abrirModal('modalFormProveedor');
+    });
+
+    function cargarProveedor(row) {
+        proveedorIdInput.value = row.dataset.id;
+        formCodigo.value = row.dataset.codigo;
+        formNombreProveedor.value = row.dataset.nombre_proveedor;
+        formNombreContacto.value = row.dataset.nombre_contacto;
+        formTelefono.value = row.dataset.telefono;
+        
+        // Búsqueda case-insensitive para Departamento
+        const deptoData = (row.dataset.departamento || "").trim().toUpperCase();
+        let deptoEncontrado = false;
+        for (let i = 0; i < formDepartamento.options.length; i++) {
+            if (formDepartamento.options[i].value.toUpperCase() === deptoData) {
+                formDepartamento.selectedIndex = i;
+                deptoEncontrado = true;
+                break;
+            }
+        }
+        if (!deptoEncontrado) formDepartamento.value = "";
+
+        // Cargar municipios del depto seleccionado
+        const muniData = (row.dataset.municipio || "").trim().toUpperCase();
+        cargarMunicipios(formDepartamento.value);
+
+        // Búsqueda case-insensitive para Municipio
+        let muniEncontrado = false;
+        for (let i = 0; i < formMunicipio.options.length; i++) {
+            if (formMunicipio.options[i].value.toUpperCase() === muniData) {
+                formMunicipio.selectedIndex = i;
+                muniEncontrado = true;
+                break;
+            }
+        }
+        if (!muniEncontrado) formMunicipio.value = "";
+
+        formRuc.value = row.dataset.ruc;
+        formDireccion.value = row.dataset.direccion;
+        formEstado.value = row.dataset.estado;
+
+        formTitle.innerHTML = `<i class="bi bi-pencil"></i> EDITAR PROVEEDOR`;
+        abrirModal('modalFormProveedor');
+    }
+
+    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const row = this.closest("tr");
+            cargarProveedor(row);
+        });
+    });
+
+    document.querySelectorAll("#tablaProveedores tr").forEach(row => {
+        row.addEventListener("dblclick", function () {
+            cargarProveedor(this);
+        });
+    });
+
+    // ==========================================
+    // PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE
+    // ==========================================
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredRows = [];
+    const allRows = Array.from(document.querySelectorAll("#tablaProveedores tr"));
+
+    function initPagination() {
+        filteredRows = [...allRows];
+        renderTable();
+    }
+
+    function renderTable() {
+        const totalItems = filteredRows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+        allRows.forEach(row => row.style.display = "none");
+
+        for (let i = startIndex; i < endIndex; i++) {
+            if(filteredRows[i]) filteredRows[i].style.display = "";
+        }
+
+        const summaryText = totalItems > 0
+            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+            : "Mostrando 0 a 0 de 0 registros";
+        document.getElementById("paginationSummary").innerText = summaryText;
+
+        const badgeTotal = document.getElementById("badgeTotalItems");
+        if (badgeTotal) {
+            badgeTotal.innerHTML = `Proveedores: <strong>${totalItems}</strong>`;
+        }
+
+        renderControls(totalPages);
+    }
+
+    function renderControls(totalPages) {
+        const controlsContainer = document.getElementById("paginationControls");
+        controlsContainer.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        // Botón Anterior
+        const btnPrev = document.createElement("button");
+        btnPrev.className = "btn btn--outline btn--small";
+        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
+        if (currentPage === 1) btnPrev.disabled = true;
+        else {
+            btnPrev.addEventListener("click", () => {
+                currentPage--;
+                renderTable();
+            });
+        }
+        controlsContainer.appendChild(btnPrev);
+
+        // Páginas numeradas
+        for (let i = 1; i <= totalPages; i++) {
+            const btnPage = document.createElement("button");
+            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
+            btnPage.innerText = i;
+            btnPage.addEventListener("click", () => {
+                currentPage = i;
+                renderTable();
+            });
+            controlsContainer.appendChild(btnPage);
+        }
+
+        // Botón Siguiente
+        const btnNext = document.createElement("button");
+        btnNext.className = "btn btn--outline btn--small";
+        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
+        if (currentPage === totalPages) btnNext.disabled = true;
+        else {
+            btnNext.addEventListener("click", () => {
+                currentPage++;
+                renderTable();
+            });
+        }
+        controlsContainer.appendChild(btnNext);
+    }
+
+    function aplicarFiltros() {
+        const query = document.getElementById("buscarProveedor").value.toLowerCase().trim();
+        const estadoFiltro = document.getElementById("filtroEstadoProveedor").value;
+
+        filteredRows = allRows.filter(row => {
+            const codigo = row.dataset.codigo.toLowerCase();
+            const nombre_proveedor = row.dataset.nombre_proveedor.toLowerCase();
+            const nombre_contacto = row.dataset.nombre_contacto.toLowerCase();
+            const telefono = row.dataset.telefono.toLowerCase();
+            const departamento = row.dataset.departamento.toLowerCase();
+            const municipio = row.dataset.municipio.toLowerCase();
+            const ruc = row.dataset.ruc.toLowerCase();
+            const estadoRow = row.dataset.estado;
+
+            const coincideTexto = query === "" || 
+                codigo.includes(query) ||
+                nombre_proveedor.includes(query) ||
+                nombre_contacto.includes(query) ||
+                telefono.includes(query) ||
+                departamento.includes(query) ||
+                municipio.includes(query) ||
+                ruc.includes(query);
+
+            const coincideEstado = estadoFiltro === "TODOS" || estadoRow === estadoFiltro;
+
+            return coincideTexto && coincideEstado;
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    document.getElementById("buscarProveedor").addEventListener("input", aplicarFiltros);
+    document.getElementById("filtroEstadoProveedor").addEventListener("change", aplicarFiltros);
+
+    window.addEventListener("load", initPagination);
+</script>
+{% endblock %}

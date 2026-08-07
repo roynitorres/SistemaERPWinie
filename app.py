@@ -17,6 +17,9 @@ from models.venta import Venta
 from models.detalle_venta import DetalleVenta
 from models.pago import Pago
 from models.empresa import Empresa
+from models.proveedor import Proveedor
+from models.enums import EstadoVenta, TipoVenta, EstadoProducto, EstadoCliente
+from sqlalchemy.orm import joinedload
        
 # BLUEPRINTS
 
@@ -28,6 +31,7 @@ from routes.ventas import ventas_bp
 from routes.pagos import pagos_bp
 from routes.portal_cliente import portal_cliente_bp
 from routes.empresa import empresa_bp
+from routes.proveedores import proveedores_bp
 from routes.usuarios import usuarios_bp
 from routes.roles import roles_bp
 
@@ -62,6 +66,7 @@ app.register_blueprint(ventas_bp)
 app.register_blueprint(pagos_bp)
 app.register_blueprint(portal_cliente_bp)
 app.register_blueprint(empresa_bp)
+app.register_blueprint(proveedores_bp)
 app.register_blueprint(perfil_bp)
 # app.register_blueprint(usuarios_bp)
 # app.register_blueprint(roles_bp)
@@ -103,26 +108,29 @@ def dashboard():
         saludo = "Buenas noches"
 
     clientes_total = Cliente.query.count()
-    clientes_activos = Cliente.query.filter_by(estado=True).count()
-    clientes_inactivos = Cliente.query.filter_by(estado=False).count()
+    clientes_activos = Cliente.query.filter_by(estado=EstadoCliente.ACTIVO).count()
+    clientes_inactivos = Cliente.query.filter_by(estado=EstadoCliente.INACTIVO).count()
     clientes_pct = round((clientes_activos / clientes_total) * 100) if clientes_total else 0
 
-    productos_total = Producto.query.filter_by(estado="ACTIVO").count()
+    productos_total = Producto.query.filter_by(estado=EstadoProducto.ACTIVO).count()
     productos_stock_normal = Producto.query.filter(
-        Producto.estado == "ACTIVO",
+        Producto.estado == EstadoProducto.ACTIVO,
         Producto.stock > 5
     ).count()
     productos_stock_critico = Producto.query.filter(
-        Producto.estado == "ACTIVO",
+        Producto.estado == EstadoProducto.ACTIVO,
         Producto.stock > 0,
         Producto.stock <= 5
     ).count()
     productos_pct = round((productos_stock_normal / productos_total) * 100) if productos_total else 0
 
-    ventas_activas = Venta.query.filter_by(estado="ACTIVA").all()
+    ventas_activas = Venta.query.filter_by(estado=EstadoVenta.ACTIVA).options(
+        joinedload(Venta.pagos),
+        joinedload(Venta.cliente)
+    ).all()
     facturas_total = len(ventas_activas)
-    facturas_contado = len([v for v in ventas_activas if v.tipo_venta == "CONTADO"])
-    facturas_credito = len([v for v in ventas_activas if v.tipo_venta == "CREDITO"])
+    facturas_contado = len([v for v in ventas_activas if v.tipo_venta == TipoVenta.CONTADO])
+    facturas_credito = len([v for v in ventas_activas if v.tipo_venta == TipoVenta.CREDITO])
     ventas_pct = round((facturas_contado / facturas_total) * 100) if facturas_total else 0
 
     pagos_total_monto = 0
@@ -151,7 +159,7 @@ def dashboard():
 
         facturas_pendientes += 1
 
-        if venta.tipo_venta == "CONTADO":
+        if venta.tipo_venta == TipoVenta.CONTADO:
             fecha_cobro = venta.fecha_venta.date()
         else:
             fecha_cobro = venta.fecha_limite_credito or venta.fecha_venta.date()
@@ -159,7 +167,7 @@ def dashboard():
         if fecha_cobro <= hoy:
             dias_mora = (hoy - fecha_cobro).days
             clientes_a_cobrar.append({
-                "cliente": f"{venta.cliente.nombres} {venta.cliente.apellidos or ''}".strip(),
+                "cliente": f"{venta.cliente.nombres}".strip(),
                 "estado": "Moroso" if dias_mora > 0 else "Cobrar hoy",
                 "dias": dias_mora,
             })
@@ -191,7 +199,7 @@ def dashboard():
         Venta,
         Venta.id == DetalleVenta.venta_id
     ).filter(
-        Venta.estado == "ACTIVA"
+        Venta.estado == EstadoVenta.ACTIVA
     ).group_by(
         Producto.id
     ).order_by(

@@ -1,0 +1,145 @@
+/* ==========================================================================
+   LAYOUT: SIDEBAR (Menú Lateral Azul Institucional)
+   ========================================================================== */
+
+.sidebar {
+    width: 250px;
+    background-color: var(--color-bg-sidebar);
+    color: var(--color-text-sidebar);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width var(--transition-base);
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar__header {
+    padding: var(--spacing-lg);
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar.collapsed .sidebar__header {
+    justify-content: center;
+    padding: var(--spacing-lg) var(--spacing-sm);
+}
+
+.sidebar__logo {
+    max-width: 150px;
+    margin: 0 auto;
+}
+
+.sidebar__nav {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md) 0;
+}
+
+.sidebar__menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar__link {
+    justify-content: center;
+    padding: var(--spacing-md);
+}
+
+.sidebar__text {
+    transition: opacity var(--transition-fast);
+}
+
+.sidebar.collapsed .sidebar__text {
+    opacity: 0;
+    width: 0;
+    display: none;
+}
+
+.sidebar__link:hover {
+    background-color: var(--color-primary-dark);
+    color: #ffffff;
+    border-left: 4px solid var(--color-secondary); /* Acento visual izquierdo */
+}
+
+.sidebar__link--active {
+    background-color: var(--color-primary-dark);
+    color: #ffffff;
+    border-left: 4px solid var(--color-secondary);
+}
+
+/* ==========================================
+   SUBMENÚS
+   ========================================================================== */
+.sidebar__submenu {
+    display: none; /* Por defecto cerrado */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.15); /* Fondo ligeramente más oscuro */
+}
+
+.sidebar__submenu.is-open {
+    display: block;
+}
+
+.sidebar__submenu-link {
+    display: flex;
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) calc(var(--spacing-lg) + 2rem);
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.sidebar__submenu-link:hover, 
+.sidebar__submenu-link--active {
+    color: #ffffff;
+    background-color: var(--color-primary-dark);
+}
+
+/* Ocultar elementos del submenú cuando el sidebar está colapsado */
+.sidebar.collapsed .sidebar__submenu {
+    display: none !important;
+}
+
+.sidebar.collapsed .sidebar__chevron {
+    display: none;
+}
+
+
+.sidebar__icon {
+    margin-right: var(--spacing-sm);
+    font-size: 1.25rem;
+}
+
+.sidebar.collapsed .sidebar__icon {
+    margin-right: 0;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0;
+        overflow: hidden;
+    }
+}

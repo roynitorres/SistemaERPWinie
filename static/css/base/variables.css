@@ -1,0 +1,75 @@
+/* ==========================================================================
+   VARIABLES GLOBALES (Design Tokens)
+   ========================================================================== */
+:root {
+    /* ----------------------------------------------------------------------
+       COLORES PRINCIPALES (Tema Clásico/Institucional)
+       ---------------------------------------------------------------------- */
+    --color-primary: #0f4c81;        /* Azul clásico de Moodle / Institucional */
+    --color-primary-dark: #003366;   /* Azul profundo para hover o header */
+    --color-primary-light: #e6f0fa;  /* Azul muy suave para fondos activos o alertas */
+    
+    --color-secondary: #f4b400;      /* Color secundario / Acento (opcional) */
+    
+    /* ----------------------------------------------------------------------
+       FONDOS Y SUPERFICIES
+       ---------------------------------------------------------------------- */
+    --color-bg-app: #f4f6f9;         /* Fondo general de la aplicación (Gris muy claro) */
+    --color-bg-card: #ffffff;        /* Fondo blanco para las áreas de contenido/tablas */
+    --color-bg-stripe: #f9f9f9;      /* Gris súper sutil para filas de tablas (cebreadas) */
+    --color-bg-sidebar: #003366;     /* Azul oscuro para el menú lateral */
+    
+    /* ----------------------------------------------------------------------
+       TEXTOS
+       ---------------------------------------------------------------------- */
+    --color-text-main: #212529;      /* Texto principal oscuro, casi negro */
+    --color-text-muted: #6c757d;     /* Texto secundario grisáceo */
+    --color-text-sidebar: #ffffff;   /* Texto blanco para el sidebar */
+    
+    /* ----------------------------------------------------------------------
+       ESTADOS Y ALERTAS
+       ---------------------------------------------------------------------- */
+    --color-success: #198754;
+    --color-warning: #ffc107;
+    --color-danger: #dc3545;
+    
+    /* ----------------------------------------------------------------------
+       BORDES Y LÍNEAS
+       ---------------------------------------------------------------------- */
+    --color-border: #dee2e6;         /* Gris claro para divisores y bordes sutiles */
+    --color-border-dark: #ced4da;    /* Gris medio para bordes de inputs enfocados */
+    
+    /* ----------------------------------------------------------------------
+       TIPOGRAFÍA
+       ---------------------------------------------------------------------- */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-size-base: 1rem;          /* 16px */
+    --font-size-sm: 0.875rem;        /* 14px */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
+    
+    /* ----------------------------------------------------------------------
+       ESPACIADOS (Sistema Base 8)
+       ---------------------------------------------------------------------- */
+    --spacing-xs: 0.25rem;           /* 4px */
+    --spacing-sm: 0.5rem;            /* 8px */
+    --spacing-md: 1rem;              /* 16px */
+    --spacing-lg: 1.5rem;            /* 24px */
+    --spacing-xl: 2rem;              /* 32px */
+    
+    /* ----------------------------------------------------------------------
+       SOMBRAS Y BORDES (Premium UI)
+       ---------------------------------------------------------------------- */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --border-radius-sm: 4px;
+    --border-radius-md: 6px;
+    --border-radius-lg: 8px;
+    
+    /* ----------------------------------------------------------------------
+       TRANSICIONES
+       ---------------------------------------------------------------------- */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-base: 0.25s ease-in-out;
+}

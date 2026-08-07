@@ -1,222 +1,234 @@
 {% extends "base.html" %}
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/ventas.css') }}">
-
 {% endblock %}
 
-{% block title %}
-Nueva Venta
+{% block title %}Nueva Venta{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-receipt"></i> Nueva Venta
 {% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column p-3" style="height: calc(100vh - 60px);">
-    <!-- SECCIÓN FORMULARIO (DATOS DEL CLIENTE) -->
-    <div class="card border-0 shadow-sm mb-3 flex-shrink-0">
-        <div class="card-header bg-white border-0 pt-3 pb-0">
-            <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center">
-                <i class="bi bi-person-vcard me-2 text-primary"></i>DATOS DEL CLIENTE
-            </h5>
+<style>
+    .ventas-tabs {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--color-border);
+    }
+    .ventas-tab-btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        background: none;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all var(--transition-fast);
+        margin-bottom: -2px;
+    }
+    .ventas-tab-btn:hover {
+        color: var(--color-primary);
+    }
+    .ventas-tab-btn.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+    .tab-content {
+        display: none;
+        flex-direction: column;
+        flex-grow: 1;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    .tab-content.active {
+        display: flex;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="ventas-tabs">
+    <button class="ventas-tab-btn active" id="btnTabCliente" onclick="cambiarTab('cliente')">
+        <i class="bi bi-person-lines-fill"></i> 1. Datos del Cliente
+    </button>
+    <button class="ventas-tab-btn" id="btnTabDetalle" onclick="cambiarTab('detalle')">
+        <i class="bi bi-list-check"></i> 2. Detalle de Factura
+    </button>
+</div>
+
+<!-- ===================================== -->
+<!-- TAB 1: DATOS DEL CLIENTE -->
+<!-- ===================================== -->
+<div id="tabCliente" class="tab-content active panel">
+    <h5 style="margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-sm);">
+        <i class="bi bi-person-lines-fill"></i> Información Inicial de la Venta
+    </h5>
+    
+    <form id="formVenta" class="grid grid--2-cols" style="max-width: 800px;">
+        <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label form-label--required">Cliente</label>
+            <input type="text" class="form-input" id="cliente_nombre"
+                list="clientesList" placeholder="Escriba o seleccione un cliente" required autocomplete="off">
+            <datalist id="clientesList">
+                {% for cliente in clientes %}
+                <option value="{{ cliente.nombres }}"
+                    data-id="{{ cliente.id }}"
+                    data-telefono="{{ cliente.telefono or '' }}"></option>
+                {% endfor %}
+            </datalist>
+            <input type="hidden" id="cliente_id" name="cliente_id" required>
         </div>
-        <div class="card-body">
-            <form id="formVenta">
-                <div class="row g-3">
-                    <div class="col-lg-4 col-md-6">
-                        <label class="form-label text-xs fw-bold text-blue mb-1">CLIENTE *</label>
-                        <input type="text" class="form-control border-light-subtle" id="cliente_nombre" 
-                               list="clientesList" placeholder="Escriba o seleccione un cliente..." required autocomplete="off">
-                        <datalist id="clientesList">
-                            {% for cliente in clientes %}
-                            <option value="{{ cliente.nombres }}{% if cliente.apellidos %} {{ cliente.apellidos }}{% endif %}" 
-                                data-id="{{ cliente.id }}" 
-                                data-direccion="{{ cliente.direccion or '' }}" 
-                                data-telefono="{{ cliente.telefono or '' }}"></option>
-                            {% endfor %}
-                        </datalist>
-                        <input type="hidden" id="cliente_id" name="cliente_id" required>
-                    </div>
 
-                    <div class="col-lg-2 col-md-3">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">TIPO DE VENTA</label>
-                        <select class="form-select border-light-subtle" id="tipo_venta" name="tipo_venta">
-                            <option value="CONTADO">Contado</option>
-                            <option value="CREDITO">Crédito</option>
-                        </select>
-                    </div>
-
-                    <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
-
-                    <div class="col-lg-2 col-md-3">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">N° FACTURA</label>
-                        <input type="text" class="form-control border-light-subtle bg-light text-primary fw-bold" id="numero_factura" name="numero_factura"
-                            value="{{ numero_factura }}" readonly>
-                    </div>
-
-                    <div class="col-lg-2 col-md-6">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA VENTA</label>
-                        <input type="date" class="form-control border-light-subtle" id="fecha_venta" name="fecha_venta"
-                            value="{{ fecha_actual }}">
-                    </div>
-
-                    <div class="col-lg-2 col-md-6">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA LÍMITE</label>
-                        <input type="date" class="form-control border-light-subtle" id="fecha_limite"
-                            name="fecha_limite_credito">
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SECCIÓN TABLA DE PRODUCTOS (SCROLLABLE & FOOTER FIJO) -->
-    <div class="card border-0 shadow-sm flex-grow-1 d-flex flex-column" style="min-height: 0;">
-        <div class="card-header bg-blue border-0 pt-3 pb-2 d-flex justify-content-between align-items-center flex-shrink-0">
-            <h5 class="card-title mb-0 fw-bold text-light text-uppercase">
-                DETALLE DE PRODUCTOS
-            </h5>
-            <button type="button" class="btn btn-primary fw-semibold d-flex align-items-center gap-2"
-                id="btnAgregarProducto" data-bs-toggle="modal" data-bs-target="#modalProductos">
-                <i class="bi bi-plus-lg"></i> Agregar Producto
-            </button>
+        <div class="form-group">
+            <label class="form-label">Tipo de venta</label>
+            <select class="form-input" id="tipo_venta" name="tipo_venta">
+                <option value="CONTADO">Contado</option>
+                <option value="CREDITO">Crédito</option>
+            </select>
         </div>
 
-        <div class="card-body p-0 d-flex flex-column h-100" style="min-height: 0;">
-            <div class="table-responsive flex-grow-1" style="overflow-y: auto;">
-                <table class="table align-middle table-hover tabla-detalle-ventas mb-0">
-                    <thead class="bg-secondary text-muted text-xs fw-bold sticky-top z-1" style="top: 0;">
-                        <tr>
-                            <th>CÓDIGO</th>
-                            <th>DESCRIPCIÓN</th>
-                            <th class="text-center">CANTIDAD</th>
-                            <th class="text-end">P. UNITARIO (C$)</th>
-                            <th class="text-end">DESCUENTO (%)</th>
-                            <th class="text-end">SUBTOTAL (C$)</th>
-                            <th class="text-center">ACC.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="detalleVentaBody"></tbody>
-                </table>
-            </div>
+        <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
 
-            <div class="bg-light p-3 border-top mt-auto flex-shrink-0 z-2">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-5">
-                        <label class="form-label text-xs fw-semibold text-blue mb-1">OBSERVACIONES</label>
-                        <input type="text" id="observaciones" class="form-control border-light-subtle"
-                            placeholder="Notas internas...">
-                    </div>
-
-                    <div class="col-md-3 ms-auto">
-                        <div class="d-flex justify-content-between text-muted mb-1">
-                            <span>Subtotal</span>
-                            <span id="subtotalVenta">C$ 0.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between text-muted mb-2">
-                            <span>IVA</span>
-                            <span id="ivaVenta">C$ 0.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between fw-bold fs-5 text-blue">
-                            <span>TOTAL</span>
-                            <span id="totalVenta">C$ 0.00</span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="d-flex justify-content-end gap-2 flex-wrap">
-                            <button type="button" class="btn btn-light border fw-semibold" id="btnLimpiarVenta">
-                                <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
-                            </button>
-                            <button type="button" class="btn btn-warning text-white fw-semibold" id="btnVistaPrevia">
-                                <i class="bi bi-printer me-1"></i> Vista Previa
-                            </button>
-                            <button type="button" class="btn btn-success fw-semibold" id="btnGuardar">
-                                <i class="bi bi-floppy me-1"></i> Guardar Factura
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="form-group">
+            <label class="form-label">N° factura</label>
+            <input type="text" class="form-input" id="numero_factura" name="numero_factura"
+                value="{{ numero_factura }}" readonly style="background-color: var(--color-bg-stripe);">
         </div>
+
+        <div class="form-group">
+            <label class="form-label">Fecha venta</label>
+            <input type="date" class="form-input" id="fecha_venta" name="fecha_venta" value="{{ fecha_actual }}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Fecha límite</label>
+            <input type="date" class="form-input" id="fecha_limite" name="fecha_limite_credito">
+        </div>
+    </form>
+    
+    <div style="margin-top: var(--spacing-xl); text-align: right;">
+        <button type="button" class="btn btn--primary" onclick="cambiarTab('detalle')">
+            Siguiente: Detalle de Factura <i class="bi bi-arrow-right"></i>
+        </button>
     </div>
 </div>
+
+<!-- ===================================== -->
+<!-- TAB 2: DETALLE DE LA FACTURA -->
+<!-- ===================================== -->
+<div id="tabDetalle" class="tab-content">
+    
+<!-- Panel Principal (Detalle de Productos) -->
+<div class="panel" style="padding: 0; display: flex; flex-direction: column; flex-grow: 1; position: relative; height: auto !important;">
+    <div style="padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); background-color: white;">
+        <h5 style="margin: 0;">
+            <i class="bi bi-list-check"></i> Detalle de productos
+        </h5>
+        <button type="button" class="btn btn--primary btn--small" id="btnAgregarProducto" onclick="abrirModal('modalProductos')">
+            <i class="bi bi-plus-lg"></i> Agregar Producto
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table" style="margin-bottom: 0;">
+            <thead class="data-table__head">
+                <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th style="text-align: center;">Cantidad</th>
+                    <th style="text-align: right;">P. Unitario (C$)</th>
+                    <th style="text-align: right;">Descuento (C$)</th>
+                    <th style="text-align: right;">Subtotal (C$)</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="detalleVentaBody"></tbody>
+        </table>
+    </div>
+
+    <!-- PIE DE FACTURA -->
+    <div style="z-index: 10; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); margin-top: auto;">
+        <div class="grid grid--2-cols" style="padding: var(--spacing-lg); background-color: var(--color-bg-stripe); border-top: 1px solid var(--color-border);">
+            <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                <label class="form-label">Observaciones</label>
+                <input type="text" id="observaciones" class="form-input" placeholder="Notas internas...">
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
+                    <span style="color: var(--color-text-muted);">Subtotal</span>
+                    <strong id="subtotalVenta">C$ 0.00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
+                    <span style="color: var(--color-text-muted);">IVA</span>
+                    <strong id="ivaVenta">C$ 0.00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); font-size: 1.35rem;">
+                    <span style="font-weight: 800; color: var(--color-primary-dark);">Total</span>
+                    <strong id="totalVenta" style="color: var(--color-primary-dark); font-weight: 800;">C$ 0.00</strong>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: flex-end; gap: var(--spacing-sm); border-top: 1px solid var(--color-border); background-color: white;">
+            <button type="button" class="btn btn--outline" id="btnLimpiarVenta">
+                <i class="bi bi-arrow-clockwise"></i> Limpiar
+            </button>
+            <button type="button" class="btn btn--primary" id="btnGuardar">
+                <i class="bi bi-floppy"></i> Guardar Factura
+            </button>
+        </div>
+    </div>
+</div> <!-- Cierra tabDetalle -->
 
 
 <!-- ===================================== -->
 <!-- MODAL PRODUCTOS -->
 <!-- ===================================== -->
-<div class="modal fade" id="modalProductos" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0">
-            <div class="modal-header modal-erp-header text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-box-seam me-2"></i>Agregar Producto
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<div class="modal-overlay" id="modalProductos">
+    <div class="modal-window" style="max-width: 900px;">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="bi bi-box-seam"></i> Agregar Producto
+            </h5>
+            <button type="button" class="modal-close-btn" onclick="cerrarModal('modalProductos')">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group" style="margin-bottom: var(--spacing-md);">
+                <label class="form-label">Buscar producto</label>
+                <input type="text" class="form-input" id="buscarProducto" placeholder="Buscar por código, nombre o marca">
             </div>
 
-            <div class="modal-body">
-                <div class="position-relative mb-3">
-                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" class="form-control ps-5 border-light-subtle" id="buscarProducto"
-                        placeholder="Buscar por código, nombre o marca">
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="bg-light text-muted text-xs fw-bold">
-                            <tr>
-                                <th>NOMBRE</th>
-                                <th class="text-end">PRECIO</th>
-                                <th class="text-center">STOCK</th>
-                                <th class="text-center">SELECCIONAR</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyBusquedaProductos"></tbody>
-                    </table>
-                </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm);">
+                <table class="data-table" style="margin-bottom: 0;">
+                    <thead class="data-table__head" style="position: sticky; top: 0; z-index: 1;">
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="selectAllProducts" onchange="toggleAllProducts(this)">
+                            </th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Marca</th>
+                            <th style="text-align: right;">Precio</th>
+                            <th style="text-align: center;">Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyBusquedaProductos"></tbody>
+                </table>
             </div>
+        </div>
 
-            <div class="modal-footer modal-producto-footer d-block">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label text-xs fw-semibold text-muted mb-1">PRODUCTO SELECCIONADO</label>
-                        <input type="text" class="form-control bg-light border-0 text-dark fw-bold"
-                            id="modalProductoNombre" readonly>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-muted mb-1">CANTIDAD</label>
-                        <input type="number" class="form-control" id="modalCantidad" min="1" value="1">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-muted mb-1">PRECIO UNITARIO</label>
-                        <input type="number" class="form-control" id="modalPrecio" min="0" step="0.01" disabled>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-muted mb-1">DESCUENTO</label>
-                        <select class="form-select" id="modalDescuento">
-                            <option value="0">0%</option>
-                            <option value="5">5%</option>
-                            <option value="10">10%</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label text-xs fw-semibold text-muted mb-1">SUBTOTAL</label>
-                        <input type="text" class="form-control bg-light border-0 fw-bold" id="modalSubtotal" readonly>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 mt-3">
-                    <button type="button" class="btn btn-light border fw-semibold" id="btnLimpiarModal">
-                        Limpiar
-                    </button>
-                    <button type="button" class="btn btn-success fw-semibold" id="btnAgregarDetalle">
-                        <i class="bi bi-check-lg me-1"></i> Agregar al Detalle
-                    </button>
-                </div>
-            </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn--outline" id="btnLimpiarModal">Limpiar</button>
+            <button type="button" class="btn btn--primary" id="btnAgregarDetalleMultiple">
+                <i class="bi bi-check-lg"></i> Agregar al Detalle
+            </button>
         </div>
     </div>
 </div>
@@ -227,19 +239,113 @@ Nueva Venta
 <!-- JAVASCRIPT -->
 <!-- ===================================== -->
 
+<!-- ===================================== -->
+<!-- MODAL CONFIRMACION VENTA -->
+<!-- ===================================== -->
+<div class="modal-overlay" id="modalConfirmarVenta">
+    <div class="modal-window" style="max-width: 500px;">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="bi bi-question-circle"></i> Confirmar Venta
+            </h5>
+            <button type="button" class="modal-close-btn" onclick="cerrarModal('modalConfirmarVenta')">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="modal-summary-panel">
+                <div style="margin-bottom: var(--spacing-sm); display: flex; justify-content: space-between;">
+                    <span style="color: var(--color-text-muted);">Cliente:</span>
+                    <strong id="confirmCliente"></strong>
+                </div>
+                <div style="margin-bottom: var(--spacing-sm); display: flex; justify-content: space-between;">
+                    <span style="color: var(--color-text-muted);">Tipo de Venta:</span>
+                    <strong id="confirmTipoVenta"></strong>
+                </div>
+                <div style="margin-bottom: var(--spacing-sm); display: flex; justify-content: space-between;">
+                    <span style="color: var(--color-text-muted);">N° Factura:</span>
+                    <strong id="confirmNumFactura"></strong>
+                </div>
+                <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; font-size: 1.25rem;">
+                    <span style="color: var(--color-primary-dark); font-weight: 700;">Monto Total:</span>
+                    <strong id="confirmTotal" style="color: var(--color-primary-dark); font-weight: 800;"></strong>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: var(--spacing-md); color: var(--color-text-muted);">¿Está seguro que desea procesar esta factura?</p>
+        </div>
+
+        <div class="modal-footer" style="justify-content: center; gap: var(--spacing-md);">
+            <button type="button" class="btn btn--outline" onclick="cerrarModal('modalConfirmarVenta')">
+                Cancelar
+            </button>
+            <button type="button" class="btn btn--primary" id="btnConfirmarGuardar">
+                <i class="bi bi-check-lg"></i> Confirmar y Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Logica de Pestañas
+    function cambiarTab(tabName) {
+        document.getElementById('tabCliente').classList.remove('active');
+        document.getElementById('tabDetalle').classList.remove('active');
+        document.getElementById('btnTabCliente').classList.remove('active');
+        document.getElementById('btnTabDetalle').classList.remove('active');
+        
+        if (tabName === 'cliente') {
+            document.getElementById('tabCliente').classList.add('active');
+            document.getElementById('btnTabCliente').classList.add('active');
+        } else {
+            document.getElementById('tabDetalle').classList.add('active');
+            document.getElementById('btnTabDetalle').classList.add('active');
+        }
+    }
+
+    function abrirModal(id) {
+        document.getElementById(id).classList.add("is-open");
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove("is-open");
+    }
+
     function mostrarMensaje(tipo, mensaje) {
-        const container = document.querySelector(".flash-container") || document.body;
+        const container = document.getElementById("toastContainer") || document.body;
         const div = document.createElement("div");
 
-        div.className = `flash-message flash-${tipo}`;
-        div.innerText = mensaje;
+        div.className = `alert-toast alert-toast--${tipo}`;
+        
+        let iconClass = "bi-exclamation-triangle-fill";
+        let title = "Atención";
+        
+        if (tipo === "success") {
+            iconClass = "bi-check-circle-fill";
+            title = "¡Éxito!";
+        } else if (tipo === "danger") {
+            iconClass = "bi-x-circle-fill";
+            title = "Error";
+        }
+        
+        div.innerHTML = `
+            <div class="alert-icon">
+                <i class="bi ${iconClass} fs-5"></i>
+            </div>
+            <div class="alert-content">
+                <p class="alert-title">${title}</p>
+                <p class="alert-message">${mensaje}</p>
+            </div>
+        `;
 
         container.appendChild(div);
 
         setTimeout(() => {
-            div.remove();
-        }, 5000);
+            div.classList.add('is-closing');
+            setTimeout(() => {
+                div.remove();
+            }, 300);
+        }, 4000);
     }
 
     let detalleVenta = [];
@@ -264,17 +370,9 @@ Nueva Venta
     const tbodyBusqueda = document.getElementById("tbodyBusquedaProductos");
     const buscarProducto = document.getElementById("buscarProducto");
 
-    const modalProductoNombre = document.getElementById("modalProductoNombre");
-    const modalCantidad = document.getElementById("modalCantidad");
-    const modalPrecio = document.getElementById("modalPrecio");
-    const modalDescuento = document.getElementById("modalDescuento");
-    const modalSubtotal = document.getElementById("modalSubtotal");
-
-    const btnAgregarDetalle = document.getElementById("btnAgregarDetalle");
-    const btnLimpiarModal = document.getElementById("btnLimpiarModal");
     const btnLimpiarVenta = document.getElementById("btnLimpiarVenta");
-    const btnVistaPrevia = document.getElementById("btnVistaPrevia");
     const btnGuardar = document.getElementById("btnGuardar");
+    const btnConfirmarGuardar = document.getElementById("btnConfirmarGuardar");
 
     const tipoVentaSelect = document.getElementById("tipo_venta");
     const fechaLimite = document.getElementById("fecha_limite");
@@ -295,8 +393,8 @@ Nueva Venta
         if (selectedOption) {
             inputClienteId.value = selectedOption.dataset.id;
             clienteSeleccionado = {
-                nombre: val,
-                direccion: selectedOption.dataset.direccion || "-",
+                nombre: selectedOption.value,
+                direccion: "-",
                 telefono: selectedOption.dataset.telefono || "-"
             };
         } else {
@@ -320,6 +418,9 @@ Nueva Venta
     tipoVentaSelect.addEventListener("change", actualizarFechaLimite);
     actualizarFechaLimite();
 
+    // Nueva función para actualizar el resumen visual del header
+    // Removed actualizarResumen since we no longer have a summary panel on tab 2
+
     buscarProducto.addEventListener("input", async function () {
         const texto = this.value.trim();
 
@@ -331,11 +432,11 @@ Nueva Venta
         await buscarProductos(texto);
     });
 
+    const btnAgregarDetalle = document.getElementById("btnAgregarDetalle");
     async function buscarProductos(textoBusqueda) {
         tbodyBusqueda.innerHTML = `
-            <tr>
-                <td colspan="4" class="text-center text-muted py-3">
-                    Buscando...
+            <tr class="data-table__row">
+                <td colspan="4" class="data-table__cell data-table__cell--center">
                 </td>
             </tr>
         `;
@@ -348,8 +449,8 @@ Nueva Venta
 
             if (productos.length === 0) {
                 tbodyBusqueda.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="text-center text-danger py-3">
+                    <tr class="data-table__row">
+                        <td colspan="4" class="data-table__cell data-table__cell--center" style="color: var(--color-danger);">
                             No se encontraron productos
                         </td>
                     </tr>
@@ -358,17 +459,18 @@ Nueva Venta
             }
 
             productos.forEach(producto => {
+                // Escapar comillas en JSON
+                const prodJson = JSON.stringify(producto).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
                 tbodyBusqueda.innerHTML += `
-                    <tr>
-                        <td>${producto.nombre}</td>
-                        <td class="text-end">C$ ${producto.precio.toFixed(2)}</td>
-                        <td class="text-center">${producto.stock}</td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-success btn-sm"
-                                onclick='seleccionarProducto(${JSON.stringify(producto)})'>
-                                <i class="bi bi-check-lg"></i>
-                            </button>
+                    <tr class="data-table__row">
+                        <td class="data-table__cell data-table__cell--center">
+                            <input type="checkbox" class="producto-checkbox" value="${prodJson}">
                         </td>
+                        <td class="data-table__cell">${producto.codigo}</td>
+                        <td class="data-table__cell">${producto.nombre}</td>
+                        <td class="data-table__cell">${producto.marca || '-'}</td>
+                        <td class="data-table__cell data-table__cell--right">C$ ${producto.precio.toFixed(2)}</td>
+                        <td class="data-table__cell data-table__cell--center">${producto.stock}</td>
                     </tr>
                 `;
             });
@@ -377,8 +479,8 @@ Nueva Venta
             console.error(error);
 
             tbodyBusqueda.innerHTML = `
-                <tr>
-                    <td colspan="4" class="text-center text-danger py-3">
+                <tr class="data-table__row">
+                    <td colspan="4" class="data-table__cell data-table__cell--center" style="color: var(--color-danger);">
                         Error al buscar productos
                     </td>
                 </tr>
@@ -386,99 +488,74 @@ Nueva Venta
         }
     }
 
-    function seleccionarProducto(producto) {
-        productoSeleccionado = producto;
-
-        modalProductoNombre.value = producto.nombre;
-        modalCantidad.value = 1;
-        modalPrecio.value = producto.precio.toFixed(2);
-        modalDescuento.value = "0.00";
-
-        calcularSubtotalModal();
+    function toggleAllProducts(checkbox) {
+        const checkboxes = document.querySelectorAll('.producto-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = checkbox.checked;
+        });
     }
 
-    function calcularSubtotalModal() {
-        const cantidad = parseInt(modalCantidad.value) || 0;
-        const precio = parseFloat(modalPrecio.value) || 0;
-        let descuento = parseFloat(modalDescuento.value) || 0;
-        if (descuento > DESCUENTO_MAXIMO_USUARIO) {
-            descuento = DESCUENTO_MAXIMO_USUARIO;
-            modalDescuento.value = DESCUENTO_MAXIMO_USUARIO;
-            mostrarMensaje("warning", `Su rol permite máximo ${DESCUENTO_MAXIMO_USUARIO}% de descuento`);
-        }
-
-        const bruto = cantidad * precio;
-        const descuentoMonto = bruto * (descuento / 100);
-        const subtotal = Math.max(bruto - descuentoMonto, 0);
-
-        modalSubtotal.value = "C$ " + subtotal.toFixed(2);
-    }
-
-    [modalCantidad, modalPrecio, modalDescuento].forEach(input => {
-        input.addEventListener("input", calcularSubtotalModal);
-    });
-
-    btnAgregarDetalle.addEventListener("click", function () {
-        if (!productoSeleccionado) {
-            mostrarMensaje("warning", "Seleccione un producto");
+    document.getElementById("btnAgregarDetalleMultiple").addEventListener("click", function () {
+        const checkboxes = document.querySelectorAll('.producto-checkbox:checked');
+        
+        if (checkboxes.length === 0) {
+            mostrarMensaje("warning", "Seleccione al menos un producto");
             return;
         }
 
-        const cantidad = parseInt(modalCantidad.value) || 0;
-        const precio = parseFloat(modalPrecio.value) || 0;
-        const descuento = parseFloat(modalDescuento.value) || 0;
+        let agregados = 0;
+        let erroresStock = 0;
+        let repetidos = 0;
 
-        if (cantidad <= 0) {
-            mostrarMensaje("warning", "Cantidad inválida");
-            return;
-        }
+        checkboxes.forEach(cb => {
+            const producto = JSON.parse(cb.value);
 
-        if (cantidad > productoSeleccionado.stock) {
-            mostrarMensaje("danger", "Stock insuficiente");
-            return;
-        }
+            if (producto.stock <= 0) {
+                erroresStock++;
+                return;
+            }
 
-        const existe = detalleVenta.find(p => p.producto_id === productoSeleccionado.id);
+            const existe = detalleVenta.find(p => p.producto_id === producto.id);
+            if (existe) {
+                repetidos++;
+                return;
+            }
 
-        if (existe) {
-            mostrarMensaje("warning", "El producto ya fue agregado");
-            return;
-        }
-
-        const bruto = cantidad * precio;
-        const descuentoMonto = bruto * (descuento / 100);
-        const subtotal = Math.max(bruto - descuentoMonto, 0);
-
-        detalleVenta.push({
-            producto_id: productoSeleccionado.id,
-            codigo: productoSeleccionado.codigo,
-            nombre: productoSeleccionado.nombre,
-            precio: precio,
-            descuento_porcentaje: descuento,
-            descuento_monto: descuentoMonto,
-            cantidad: cantidad,
-            stock: productoSeleccionado.stock,
-            subtotal: subtotal
+            detalleVenta.push({
+                producto_id: producto.id,
+                codigo: producto.codigo,
+                nombre: producto.nombre,
+                precio: producto.precio,
+                descuento_monto: 0,
+                cantidad: 1,
+                stock: producto.stock,
+                subtotal: producto.precio
+            });
+            agregados++;
         });
 
-        renderizarTabla();
-        limpiarModalProducto();
+        if (agregados > 0) {
+            renderizarTabla();
+        }
+        
+        if (erroresStock > 0 || repetidos > 0) {
+            let msg = [];
+            if (erroresStock > 0) msg.push(`${erroresStock} sin stock`);
+            if (repetidos > 0) msg.push(`${repetidos} ya estaban en la lista`);
+            mostrarMensaje("warning", "No se agregaron: " + msg.join(", "));
+        }
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById("modalProductos"));
-        modal.hide();
+        cerrarModal("modalProductos");
+        limpiarModalProducto();
     });
 
-    btnLimpiarModal.addEventListener("click", limpiarModalProducto);
+    document.getElementById("btnLimpiarModal").addEventListener("click", limpiarModalProducto);
 
     function limpiarModalProducto() {
-        productoSeleccionado = null;
-        modalProductoNombre.value = "";
-        modalCantidad.value = 1;
-        modalPrecio.value = "";
-        modalDescuento.value = "0.00";
-        modalSubtotal.value = "";
-        buscarProducto.value = "";
-        tbodyBusqueda.innerHTML = "";
+        document.getElementById("buscarProducto").value = "";
+        document.getElementById("tbodyBusquedaProductos").innerHTML = "";
+        const checkAll = document.getElementById("selectAllProducts");
+        if (checkAll) checkAll.checked = false;
     }
 
     function renderizarTabla() {
@@ -488,8 +565,8 @@ Nueva Venta
 
         if (detalleVenta.length === 0) {
             tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4 text-muted">
+                <tr class="data-table__row">
+                    <td colspan="7" class="data-table__cell data-table__cell--center" style="padding: var(--spacing-xl); color: var(--color-text-muted);">
                         <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem;"></i>
                         Sin productos agregados
                     </td>
@@ -504,21 +581,25 @@ Nueva Venta
             subtotalGeneral += producto.subtotal;
 
             tbody.innerHTML += `
-                <tr>
-                    <td>${producto.codigo}</td>
-                    <td>${producto.nombre}</td>
-                    <td class="text-center">
+                <tr class="data-table__row">
+                    <td class="data-table__cell">${producto.codigo}</td>
+                    <td class="data-table__cell">${producto.nombre}</td>
+                    <td class="data-table__cell data-table__cell--center">
                         <div class="cantidad-control">
                             <button type="button" onclick="disminuirCantidad(${index})">-</button>
                             <span>${producto.cantidad}</span>
                             <button type="button" onclick="aumentarCantidad(${index})">+</button>
                         </div>
                     </td>
-                    <td class="text-end">C$ ${producto.precio.toFixed(2)}</td>
-                    <td class="text-end">${producto.descuento_porcentaje.toFixed(2)}%</td>
-                    <td class="text-end fw-semibold">C$ ${producto.subtotal.toFixed(2)}</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${index})">
+                    <td class="data-table__cell data-table__cell--right">C$ ${producto.precio.toFixed(2)}</td>
+                    <td class="data-table__cell data-table__cell--center">
+                        <input type="number" class="form-input text-end" style="width: 80px;" 
+                        value="${producto.descuento_monto}" min="0" 
+                        onchange="actualizarLinea(${index}, 'descuento_monto', this.value)">
+                    </td>
+                    <td class="data-table__cell data-table__cell--right" style="font-weight: var(--font-weight-bold);">C$ ${producto.subtotal.toFixed(2)}</td>
+                    <td class="data-table__cell data-table__cell--actions">
+                        <button type="button" class="btn btn--outline btn--small" onclick="eliminarProducto(${index})" style="color: var(--color-danger); border-color: var(--color-danger);">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </td>
@@ -538,10 +619,23 @@ Nueva Venta
         document.getElementById("totalVenta").textContent = "C$ " + total.toFixed(2);
     }
 
+    function actualizarLinea(index, campo, valor) {
+        const p = detalleVenta[index];
+        const val = parseFloat(valor) || 0;
+        
+        if (campo === 'descuento_monto') {
+            const bruto = p.cantidad * p.precio;
+            const descuentoMonto = Math.min(val, bruto); 
+            p.descuento_monto = descuentoMonto;
+            p.subtotal = bruto - descuentoMonto;
+        }
+        renderizarTabla();
+    }
+
     function recalcularItem(producto) {
         const bruto = producto.cantidad * producto.precio;
-        producto.descuento_monto = bruto * (producto.descuento_porcentaje / 100);
-        producto.subtotal = Math.max(bruto - producto.descuento_monto, 0);
+        const descuentoMonto = parseFloat(producto.descuento_monto) || 0;
+        producto.subtotal = Math.max(bruto - descuentoMonto, 0);
     }
 
     function eliminarProducto(index) {
@@ -581,256 +675,26 @@ Nueva Venta
         renderizarTabla();
     });
 
-    btnVistaPrevia.addEventListener("click", function () {
-        if (detalleVenta.length === 0) {
-            mostrarMensaje("warning", "Agregue productos antes de generar vista previa");
-            return;
-        }
-
-        if (!document.getElementById("cliente_id").value) {
-            mostrarMensaje("warning", "Seleccione un cliente válido de la lista");
-            return;
-        }
-
-        const clienteNombre = clienteSeleccionado.nombre;
-        const clienteDireccion = clienteSeleccionado.direccion;
-        const clienteTelefono = clienteSeleccionado.telefono;
-        const tipoVenta = document.getElementById("tipo_venta").value;
-        const fechaVenta = document.getElementById("fecha_venta").value;
-        const observaciones = document.getElementById("observaciones").value;
-
-        let subtotal = detalleVenta.reduce((acc, item) => acc + item.subtotal, 0);
-        let iva = subtotal * IVA_RATE;
-        let total = subtotal + iva;
-
-        let filas = detalleVenta.map(item => `
-        <tr>
-            <td>${item.nombre}</td>
-            <td style="text-align: center;">${item.cantidad}</td>
-            <td style="text-align: right;">C$ ${item.precio.toFixed(2)}</td>
-            <td style="text-align: right;">${item.descuento_porcentaje.toFixed(2)}%</td>
-            <td style="text-align: right;">C$ ${item.subtotal.toFixed(2)}</td>
-        </tr>
-    `).join("");
-
-        const ventana = window.open("", "_blank");
-
-        ventana.document.write(`
-        <html>
-        <head>
-            <title>Vista previa factura</title>
-            <style>
-                body {
-                    font-family: 'Inter', Arial, sans-serif;
-                    color: #333;
-                    padding: 40px;
-                    max-width: 800px;
-                    margin: 0 auto;
-                }
-                .header-container {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    border-bottom: 2px solid #e5e7eb;
-                    padding-bottom: 20px;
-                    margin-bottom: 30px;
-                }
-                .empresa-logo-info {
-                    display: flex;
-                    flex-direction: column;
-                }
-                .empresa-nombre {
-                    font-size: 24px;
-                    font-weight: 800;
-                    color: #1e3a8a;
-                    margin: 0 0 10px 0;
-                    text-transform: uppercase;
-                }
-                .info-text {
-                    font-size: 13px;
-                    color: #4b5563;
-                    margin: 3px 0;
-                }
-                .factura-badge {
-                    background-color: #f8fafc;
-                    padding: 15px 25px;
-                    border-radius: 8px;
-                    text-align: right;
-                    border: 1px solid #e2e8f0;
-                }
-                .factura-title {
-                    font-size: 16px;
-                    font-weight: 700;
-                    color: #64748b;
-                    margin: 0 0 5px 0;
-                    text-transform: uppercase;
-                }
-                .factura-numero {
-                    font-size: 22px;
-                    font-weight: 800;
-                    color: #1e40af;
-                    margin: 5px 0 10px 0;
-                }
-                .factura-fecha {
-                    font-size: 13px;
-                    color: #64748b;
-                    margin: 0;
-                }
-                .cliente-section {
-                    background-color: #f8fafc;
-                    border: 1px solid #e2e8f0;
-                    border-left: 4px solid #3b82f6;
-                    border-radius: 6px;
-                    padding: 15px 20px;
-                    margin-bottom: 30px;
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 10px;
-                }
-                .cliente-item {
-                    font-size: 13px;
-                    color: #334155;
-                    margin: 0;
-                }
-                .cliente-item strong {
-                    color: #0f172a;
-                    display: inline-block;
-                    width: 100px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 30px;
-                }
-                th {
-                    background-color: #1e3a8a;
-                    color: white;
-                    font-size: 12px;
-                    text-align: left;
-                    padding: 12px;
-                    text-transform: uppercase;
-                }
-                td {
-                    border-bottom: 1px solid #e5e7eb;
-                    padding: 12px;
-                    font-size: 13px;
-                    color: #374151;
-                }
-                .totales-container {
-                    display: flex;
-                    justify-content: flex-end;
-                }
-                .totales-box {
-                    width: 300px;
-                    background-color: #f8fafc;
-                    padding: 20px;
-                    border-radius: 8px;
-                    border: 1px solid #e2e8f0;
-                }
-                .total-row {
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 8px 0;
-                    font-size: 14px;
-                    color: #475569;
-                }
-                .total-final {
-                    display: flex;
-                    justify-content: space-between;
-                    padding-top: 12px;
-                    margin-top: 12px;
-                    border-top: 2px solid #cbd5e1;
-                    font-size: 18px;
-                    font-weight: 800;
-                    color: #1e3a8a;
-                }
-                @media print {
-                    body { padding: 0; max-width: 100%; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header-container">
-                <div class="empresa-logo-info">
-                   <h2 class="empresa-nombre">${empresaInfo.razon_social || "Nombre de la Empresa"}</h2>
-                    <p class="info-text"><strong>RUC:</strong> ${empresaInfo.ruc || "-"}</p>
-                    <p class="info-text"><strong>Dirección:</strong> ${empresaInfo.direccion || "-"}</p>
-                    <p class="info-text"><strong>Correo:</strong> ${empresaInfo.email || "-"}</p>
-                    <p class="info-text"><strong>Teléfono:</strong> ${empresaInfo.telefono || "-"}</p>
-                </div>
-                <div class="factura-badge">
-                    <h3 class="factura-title">Factura Electrónica</h3>
-                    <div class="factura-numero">${document.getElementById("numero_factura").value || (empresaInfo.serie_factura + "-00000")}</div>
-                    <p class="factura-fecha"><strong>Fecha:</strong> ${fechaVenta}</p>
-                </div>
-            </div>
-
-            <div class="cliente-section">
-                <p class="cliente-item"><strong>Cliente:</strong> ${clienteNombre}</p>
-                <p class="cliente-item"><strong>Forma pago:</strong> ${tipoVenta}</p>
-                <p class="cliente-item"><strong>Dirección:</strong> ${clienteDireccion}</p>
-                <p class="cliente-item"><strong>Teléfono:</strong> ${clienteTelefono}</p>
-                <p class="cliente-item" style="grid-column: span 2;"><strong>Observaciones:</strong> ${observaciones || "Ninguna"}</p>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th style="text-align: center;">Cant</th>
-                        <th style="text-align: right;">P. Unit.</th>
-                        <th style="text-align: right;">Desc.</th>
-                        <th style="text-align: right;">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filas}
-                </tbody>
-            </table>
-
-            <div class="totales-container">
-                <div class="totales-box">
-                    <div class="total-row">
-                        <span>Subtotal:</span>
-                        <strong>C$ ${subtotal.toFixed(2)}</strong>
-                    </div>
-                    <div class="total-row">
-                        <span>IVA:</span>
-                        <strong>C$ ${iva.toFixed(2)}</strong>
-                    </div>
-                    <div class="total-final">
-                        <span>TOTAL:</span>
-                        <span>C$ ${total.toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>
-    `);
-
-        ventana.document.close();
-    });
-
-    btnGuardar.addEventListener("click", guardarVenta);
-
-    async function guardarVenta() {
+    btnGuardar.addEventListener("click", function () {
         const clienteId = document.getElementById("cliente_id").value;
         const tipoVenta = document.getElementById("tipo_venta").value;
         const fechaVenta = document.getElementById("fecha_venta").value;
         const fechaLimiteCredito = document.getElementById("fecha_limite").value;
-        const observaciones = document.getElementById("observaciones").value;
-
+        
         if (!clienteId) {
-            mostrarMensaje("warning", "Seleccione un cliente");
+            cambiarTab('cliente');
+            mostrarMensaje("warning", "Seleccione un cliente para la venta");
             return;
         }
 
         if (!fechaVenta) {
+            cambiarTab('cliente');
             mostrarMensaje("warning", "Seleccione la fecha de venta");
             return;
         }
 
         if (tipoVenta === "CREDITO" && !fechaLimiteCredito) {
+            cambiarTab('cliente');
             mostrarMensaje("warning", "Seleccione la fecha límite del crédito");
             return;
         }
@@ -840,8 +704,32 @@ Nueva Venta
             return;
         }
 
-        btnGuardar.disabled = true;
-        btnGuardar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Emitiendo...`;
+        // Poblar datos del modal
+        const clienteNombre = document.getElementById("cliente_nombre").value;
+        const numFactura = document.getElementById("numero_factura").value;
+        const total = document.getElementById("totalVenta").textContent;
+
+        document.getElementById("confirmCliente").textContent = clienteNombre;
+        document.getElementById("confirmTipoVenta").textContent = tipoVenta;
+        document.getElementById("confirmNumFactura").textContent = numFactura;
+        document.getElementById("confirmTotal").textContent = total;
+
+        abrirModal("modalConfirmarVenta");
+    });
+
+    btnConfirmarGuardar.addEventListener("click", guardarVentaFinal);
+
+    async function guardarVentaFinal() {
+        const clienteId = document.getElementById("cliente_id").value;
+        const tipoVenta = document.getElementById("tipo_venta").value;
+        const fechaVenta = document.getElementById("fecha_venta").value;
+        const fechaLimiteCredito = document.getElementById("fecha_limite").value;
+        const observaciones = document.getElementById("observaciones").value;
+
+        // Las validaciones ahora ocurren al presionar el botón "Guardar" principal antes del modal
+
+        btnConfirmarGuardar.disabled = true;
+        btnConfirmarGuardar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Procesando...`;
 
         const datos = {
             cliente_id: clienteId,
@@ -865,8 +753,8 @@ Nueva Venta
 
             if (!resultado.success) {
                 mostrarMensaje("danger", resultado.message);
-                btnGuardar.disabled = false;
-                btnGuardar.innerHTML = `<i class="bi bi-floppy me-1"></i> Emitir Comprobante`;
+                btnConfirmarGuardar.disabled = false;
+                btnConfirmarGuardar.innerHTML = `<i class="bi bi-check-lg"></i> Confirmar y Guardar`;
                 return;
             }
 
@@ -877,8 +765,8 @@ Nueva Venta
             console.error(error);
             mostrarMensaje("danger", "Error al emitir el comprobante");
 
-            btnGuardar.disabled = false;
-            btnGuardar.innerHTML = `<i class="bi bi-floppy me-1"></i> Emitir Comprobante`;
+            btnConfirmarGuardar.disabled = false;
+            btnConfirmarGuardar.innerHTML = `<i class="bi bi-check-lg"></i> Confirmar y Guardar`;
         }
     }
 

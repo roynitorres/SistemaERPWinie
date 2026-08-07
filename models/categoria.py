@@ -1,90 +1,27 @@
-# Importamos instancia db
 from database import db
-
-# Importamos datetime
 from datetime import datetime, UTC
+from models.enums import EstadoCategoria
 
 
 # Modelo Categoria
 class Categoria(db.Model):
-
-    # Nombre tabla
     __tablename__ = "categorias"
 
-    # =========================
-    # CLAVE PRIMARIA
-    # =========================
+    id = db.Column(db.Integer,primary_key=True)
+    
+    codigo = db.Column(db.String(20),unique=True,nullable=True)
+    nombre = db.Column(db.String(100),nullable=False,unique=True)
+    descripcion = db.Column(db.Text,nullable=True)
+    estado = db.Column(db.Enum(EstadoCategoria), default=EstadoCategoria.ACTIVO)
 
-    # ID único categoría
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-    # Código del cliente
-    codigo = db.Column(
-        db.String(20),
-        unique=True,
-        nullable=True
-    )
+    created_at = db.Column(db.DateTime,default=lambda: datetime.now(UTC))
+    updated_at = db.Column(db.DateTime,default=lambda: datetime.now(UTC),onupdate=lambda: datetime.now(UTC))
 
-    # =========================
-    # INFORMACIÓN CATEGORÍA
-    # =========================
-
-    # Nombre categoría
-    nombre = db.Column(
-        db.String(100),
-        nullable=False,
-        unique=True
-    )
-
-    # Descripción categoría
-    descripcion = db.Column(
-        db.Text,
-        nullable=True
-    )
-    # Estado lógico
-    # True = Activo
-    # False = Inactivo
-    estado = db.Column(
-        db.Boolean,
-        default=True
-    )
-
-    # =========================
-    # CONTROL SISTEMA
-    # =========================
-
-
-    # Fecha creación
-    created_at = db.Column(
-        db.DateTime,
-        default=lambda: datetime.now(UTC)
-    )
-
-    # Fecha actualización
-    updated_at = db.Column(
-        db.DateTime,
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC)
-    )
-
-    # =========================
+    
     # RELACIONES
-    # =========================
+    productos = db.relationship("Producto",back_populates="categoria",lazy=True)
 
-    # Una categoría puede tener muchos productos
-    productos = db.relationship(
-        "Producto",
-        back_populates="categoria",
-        lazy=True
-    )
-
-    # =========================
     # REPRESENTACIÓN OBJETO
-    # =========================
-
     # Representación amigable consola
     def __repr__(self):
-
         return f"<Categoria {self.nombre}>"

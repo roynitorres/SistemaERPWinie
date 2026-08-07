@@ -111,7 +111,7 @@
         <div class="text-bold">TICKET: {{ venta.numero_factura }}</div>
         <div>FECHA: {{ venta.fecha_venta.strftime('%d/%m/%Y %H:%M') }}</div>
         <div>VENDEDOR: {{ venta.usuario.nombres if venta.usuario and venta.usuario.nombres else 'Admin' }}</div>
-        <div>CLIENTE: {{ venta.cliente.nombres }} {{ venta.cliente.apellidos or '' }}</div>
+        <div>CLIENTE: {{ venta.cliente.nombres }}</div>
     </div>
 
     <div class="line"></div>

@@ -1,679 +1,518 @@
 {% extends "base.html" %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/productos.css') }}">
+{% block title %}Productos{% endblock %}
 
-{% endblock %}
-
-{% block title %}
-Productos
+{% block page_title %}
+<i class="bi bi-box-seam"></i> Productos
 {% endblock %}
 
 {% block content %}
+    <!-- ===================================== -->
+    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
+    <!-- ===================================== -->
+    <div class="filter-bar">
+        <!-- Nuevo (Enfocar formulario) -->
+        <button type="button" class="btn btn--primary" id="btnIrForm">
+            <i class="bi bi-plus-lg" style="margin-right: var(--spacing-xs);"></i> Nuevo Producto
+        </button>
 
-<div class="container-fluid pt-1 pb-2">
-    <!-- ===================================== -->
-    <!-- HEADER / TOP BAR -->
-    <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Productos
-        </h4>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-            </button>
-            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-gear fs-5 text-secondary"></i>
-            </a>
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-moon fs-5 text-secondary"></i>
-            </button>
-                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
-                {% if current_user and current_user.foto_perfil %}
-                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
-                {% else %}
-                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
-                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
-                    </div>
-                {% endif %}
+        <!-- Buscador -->
+        <input type="text" class="form-input filter-bar__input" id="buscarProducto" placeholder="🔍 Buscar por código, nombre o marca...">
+
+        <!-- Filtro Mes -->
+        <select class="form-input filter-bar__select" id="filtroMes">
+            <option value="">Todos los meses</option>
+        </select>
+
+        <!-- Filtro Proveedor -->
+        <select class="form-input filter-bar__select" id="filtroProveedor">
+            <option value="">Todos los proveedores</option>
+            {% for proveedor in proveedores %}
+            <option value="{{ proveedor.id }}">{{ proveedor.nombre_proveedor }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Exportar y Contador -->
+        <div style="margin-left: auto; display: flex; align-items: center; gap: var(--spacing-md);">
+            <span id="badgeTotalItems" style="color: var(--color-text-main); font-size: 0.95rem;">
+                Productos: <strong>0</strong>
+            </span>
+            <a href="#" class="btn btn--outline">
+                <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
             </a>
         </div>
     </div>
 
-
-
     <!-- ===================================== -->
-    <!-- BARRA DE CONTROLES DE LA TABLA (FLOTANTES) -->
+    <!-- MODAL FORMULARIO NUEVO PRODUCTO (CUSTOM) -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-start align-items-center mb-3">
-        <div class="d-flex flex-wrap align-items-center gap-3">
-            <!-- Nuevo -->
-            <button type="button" class="btn btn-info text-white rounded-pill d-flex align-items-center justify-content-center gap-2 fw-bold px-4 shadow-sm" id="btnIrForm"
-                style="min-height: 42px; background-color: #0dcaf0; border: none;">
-                <i class="bi bi-plus-lg fs-5"></i> Nuevo producto
-            </button>
-
-            <!-- Buscador -->
-            <div class="position-relative">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                <input type="text" class="form-control ps-5 border-light-subtle rounded-pill bg-white shadow-sm" id="buscarProducto"
-                    placeholder="Búsqueda" style="width: 250px; min-height: 42px;">
+    <div class="modal-overlay" id="modalFormProducto">
+        <div class="modal-window" style="max-width: 800px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formTitle">
+                    <i class="bi bi-box-seam"></i> NUEVO PRODUCTO
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalFormProducto')">
+                    <i class="bi bi-x"></i>
+                </button>
             </div>
+            
+            <div class="modal-body">
+                <form method="POST" id="formProductos">
+                    <input type="hidden" id="producto_id" name="producto_id">
 
-            <!-- Filtro Mes -->
-            <select class="form-select border-light-subtle rounded-pill text-secondary bg-white shadow-sm" id="filtroMes" style="width: 150px; min-height: 42px;">
-                <option value="">Filtrar Mes</option>
-            </select>
-
-            <!-- Filtro Estado -->
-            <select class="form-select border-light-subtle rounded-pill text-secondary bg-white shadow-sm" id="filtroEstadoProducto" style="width: 150px; min-height: 42px;">
-                <option value="TODOS">Todos</option>
-                <option value="EN STOCK">En Stock</option>
-                <option value="VENDIDO">Vendidos</option>
-            </select>
-
-            <!-- Exportar -->
-            <a href="#" class="btn btn-dark rounded-pill d-flex align-items-center justify-content-center gap-2 fw-semibold px-4 shadow-sm"
-                style="min-height: 42px;">
-                <i class="bi bi-download"></i> Exportación
-            </a>
-        </div>
-    </div>
-
-    <!-- ===================================== -->
-    <!-- MODAL FORMULARIO NUEVO PRODUCTO -->
-    <!-- ===================================== -->
-    <div class="modal fade" id="modalFormProducto" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-0 pt-3 pb-3" style="background-color: #003891; color: white;">
-                    <h5 class="modal-title mb-0 fw-bold d-flex align-items-center" id="formTitle">
-                        <i class="bi bi-box-seam me-2 text-white"></i>NUEVO PRODUCTO
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" id="formProductos">
-                        <input type="hidden" id="producto_id" name="producto_id">
-
-                        <!-- Campos en Columna Vertical -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">CODIGO *</label>
-                                <div class="input-group">
-                                    
-                                    <input type="text" class="form-control bg-light border-0 fw-semibold"
-                                        id="form_codigo" name="codigo_producto" value="{{ siguiente_codigo }}" readonly>
-                                </div>
-                            </div>
-
-
-
-                            <div class="col-12">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">NOMBRE DEL PRODUCTO
-                                    *</label>
-                                <div class="input-group">
-                                    
-                                    <input type="text" class="form-control " id="form_nombre" name="nombre"
-                                        placeholder="Nombre producto" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">MARCA *</label>
-                                <div class="input-group">
-                                    
-                                    <input type="text" class="form-control " id="form_marca" name="marca"
-                                        placeholder="Marca producto" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">CATEGORIA *</label>
-                                <div class="input-group">
-                                    
-                                    <select class="form-select " id="form_categoria" name="categoria_id" required>
-                                        <option value="">Seleccionar</option>
-                                        {% for categoria in categorias %}
-                                        <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">P. COSTO(C$)</label>
-                                <div class="input-group">
-                                    
-                                    <input type="number" step="0.01" min="0" class="form-control"
-                                        id="form_precio_compra" name="precio_compra" placeholder="0.00" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">P. VENTA(C$)</label>
-                                <div class="input-group">
-                                    
-                                    <input type="number" step="0.01" min="0" class="form-control "
-                                        id="form_precio_venta" name="precio_venta" placeholder="0.00" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">CANTIDAD</label>
-                                <div class="input-group">
-                                    
-                                    <input type="number" min="0" class="form-control " id="form_cantidad_comprada"
-                                        name="cantidad_comprada" placeholder="0" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">FECHA *</label>
-                                <div class="input-group">
-                                    
-                                    <input type="date" class="form-control " id="form_fecha_compra" name="fecha_compra"
-                                        required>
-                                </div>
-                            </div>
+                    <div class="grid grid--2-cols">
+                        <!-- CÓDIGO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">CÓDIGO</label>
+                            <input type="text" class="form-input" id="form_codigo" name="codigo_producto" placeholder="Ej. P001" required oninput="this.value = this.value.toUpperCase()">
                         </div>
 
-                        <!-- Botones de Acción -->
-                        <div class="d-flex gap-2 mt-4 justify-content-end">
-                            <button type="button"
-                                class="btn btn-light border px-4 py-2 fw-semibold text-secondary d-flex align-items-center gap-2"
-                                id="btnLimpiar">
-                                <i class="bi bi-arrow-counterclockwise"></i> Limpiar
-                            </button>
-                            <button type="submit"
-                                class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2"
-                                id="btnGuardar">
-                                <i class="bi bi-floppy"></i> Guardar
-                            </button>
+                        <!-- FECHA -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">FECHA DE COMPRA</label>
+                            <input type="date" class="form-input" id="form_fecha_compra" name="fecha_compra" required>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- NOMBRE DEL PRODUCTO -->
+                    <div class="form-group">
+                        <label class="form-label form-label--required">NOMBRE DEL PRODUCTO</label>
+                        <input type="text" class="form-input" id="form_nombre" name="nombre" placeholder="Nombre completo del producto" required oninput="this.value = this.value.toUpperCase()">
+                    </div>
+
+                    <div class="grid grid--2-cols">
+                        <!-- MARCA -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">MARCA</label>
+                            <input type="text" class="form-input" id="form_marca" name="marca" placeholder="Marca del producto" required oninput="this.value = this.value.toUpperCase()">
+                        </div>
+
+                        <!-- CANTIDAD -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">CANTIDAD COMPRADA</label>
+                            <input type="number" min="1" class="form-input" id="form_cantidad_comprada" name="cantidad_comprada" placeholder="0" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid--2-cols">
+                        <!-- CATEGORÍA -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">CATEGORÍA</label>
+                            <select class="form-input" id="form_categoria" name="categoria_id" required>
+                                <option value="">Seleccione una categoría...</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- PROVEEDOR -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">PROVEEDOR</label>
+                            <select class="form-input" id="form_proveedor" name="proveedor_id" required>
+                                <option value="">Seleccione un proveedor...</option>
+                                {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}">{{ proveedor.nombre_proveedor }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid--2-cols">
+                        <!-- PRECIO COSTO -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">PRECIO COSTO (C$)</label>
+                            <input type="number" step="0.01" min="0.01" class="form-input" id="form_precio_compra" name="precio_compra" placeholder="0.00" required>
+                        </div>
+
+                        <!-- PRECIO VENTA -->
+                        <div class="form-group">
+                            <label class="form-label form-label--required">PRECIO VENTA (C$)</label>
+                            <input type="number" step="0.01" min="0.01" class="form-input" id="form_precio_venta" name="precio_venta" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
+                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalFormProducto')">Cancelar</button>
+                        <button type="button" class="btn btn--secondary" id="btnLimpiar">Limpiar</button>
+                        <button type="submit" class="btn btn--primary" id="btnGuardar">Guardar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div> <!-- FIN MODAL PRODUCTO -->
 
     <!-- ===================================== -->
-    <!-- MODAL PRECIO DE COMPRA -->
-    <!-- ===================================== -->
-    <div class="modal fade" id="modalPrecioCompra" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-0 pt-3 pb-3" style="background-color: #f8f9fa;">
-                    <h6 class="modal-title mb-0 fw-bold text-dark">
-                        <i class="bi bi-tag-fill me-2 text-info"></i>Precio de Compra
-                    </h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center py-4">
-                    <p class="text-muted small mb-1" id="modalPrecioNombre"></p>
-                    <h3 class="fw-bold text-danger mb-0" id="modalPrecioValor"></h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================================== -->
     <!-- TABLA / LISTA DE PRODUCTOS -->
     <!-- ===================================== -->
-    <div class="card border-0 shadow-sm d-flex flex-column" style="border-radius: 12px; overflow: hidden; height: calc(100vh - 200px); min-height: 400px;">
-        <div class="card-body p-0 d-flex flex-column h-100">
-            <div class="table-responsive flex-grow-1" style="overflow-y: auto; overflow-x: auto;">
-                <table class="table align-middle table-hover border-light-subtle tabla-productos">
-                    <thead class="position-sticky top-0" style="z-index: 5;">
-                        <tr>
-                            <th class="px-3 py-3 text-center bg-light text-nowrap" >CODIGO</th>
-                            <th class="px-3 py-3 bg-light text-nowrap">NOMBRE DEL PRODUCTO</th>
-                            <th class="px-3 py-3 bg-light text-nowrap">MARCA</th>
-                            <th class="px-3 py-3 bg-light text-nowrap">CATEGORÍA</th>
-                            <th class="px-3 py-3 text-center bg-light text-nowrap">FECHA</th>
-                            <th class="px-3 py-3 text-center bg-light text-nowrap">CANT. COMPRADA</th>
-                            <th class="px-3 py-3 text-end bg-light text-nowrap">P.VENTA</th>
-                            <th class="px-3 py-3 text-center bg-light text-nowrap">STOCK</th>
-                            <th class="px-3 py-3 text-center bg-light" style="width: 120px;"></th>
-                        </tr>
-                    </thead>
+    <div class="panel" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead class="data-table__head">
+                    <tr>
+                        <th style="width: 100px;">CÓDIGO</th>
+                        <th>PRODUCTO</th>
+                        <th>CATEGORÍA</th>
+                        <th>FECHA COMPRA</th>
+                        <th style="text-align: right;">P. VENTA</th>
+                        <th style="text-align: center;">STOCK</th>
+                        <th>ESTADO</th>
+                        <th style="text-align: right;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProductos">
+                    {% for producto in productos %}
+                    <tr class="data-table__row" 
+                        data-id="{{ producto.id }}" 
+                        data-codigo="{{ producto.codigo_producto }}"
+                        data-fecha-compra="{{ producto.fecha_compra }}" 
+                        data-nombre="{{ producto.nombre }}"
+                        data-marca="{{ producto.marca }}"
+                        data-estado="{{ producto.estado.value }}" 
+                        data-categoria="{{ producto.categoria_id }}"
+                        data-proveedor="{{ producto.proveedor_id }}"
+                        data-categoria-nombre="{{ producto.categoria.nombre }}"
+                        data-precio-compra="{{ producto.precio_compra }}"
+                        data-precio-venta="{{ producto.precio_venta }}"
+                        data-cantidad-comprada="{{ producto.cantidad_comprada }}" 
+                        data-stock="{{ producto.stock }}">
 
-                    <tbody id="tablaProductos">
-                        {% for producto in productos %}
-                        <tr data-id="{{ producto.id }}" data-codigo="{{ producto.codigo_producto }}"
-                            data-fecha-compra="{{ producto.fecha_compra }}" data-nombre="{{ producto.nombre }}"
-                            data-marca="{{ producto.marca }}" data-unidad="{{ producto.unidad }}"
-                            data-estado="{{ producto.estado }}" data-categoria="{{ producto.categoria_id }}"
-                            data-categoria-nombre="{{ producto.categoria.nombre }}"
-                            data-precio-compra="{{ producto.precio_compra }}"
-                            data-precio-venta="{{ producto.precio_venta }}"
-                            data-cantidad-comprada="{{ producto.cantidad_comprada }}" data-stock="{{ producto.stock }}">
-
-                            <td class="px-3 py-3 text-center fw-bold text-muted text-nowrap">
-                                <i class=" text-bold me-1"></i>{{ producto.codigo_producto }}
-                            </td>
-
-                            <td class="px-3 py-3 fw-bold text-muted text-nowrap">
-                                <i class="bi bi-box-seam text-secondary me-1"></i>{{ producto.nombre }}
-                            </td>
-
-                            <td class="px-3 py-3 text-bold fw-muted text-nowrap">
-                                <i class="bi bi-bookmark text-secondary me-1"></i>{{ producto.marca }}
-                            </td>
-                            
-                            <td class="px-3 py-3 fw-semibold text-muted text-nowrap">
-                                {{ producto.categoria.nombre }}
-                            </td>                            <td class="px-3 py-3 text-center fw-semibold text-muted text-nowrap">
-                                {% if producto.fecha_compra %}
-                                    {{ producto.fecha_compra.strftime('%d/%m/%Y') }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-
-                            <td class="px-3 py-3 text-center fw-semibold text-muted text-nowrap">
-                                {{ producto.cantidad_comprada }}
-                            </td>
-
-                            <td class="px-3 py-3 text-end fw-semibold text-muted text-nowrap">
-                                C$ {{ "%.2f"|format(producto.precio_venta) }}
-                            </td>
-
-                            <td class="px-3 py-3 text-center fw-semibold text-nowrap">
-                                {{ producto.stock }}
-                            </td>
-
-                            <td class="px-3 py-3 text-center">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-icon-view" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 p-0 overflow-hidden">
-                                        <li>
-                                            <h6 class="dropdown-header text-white fw-bold d-flex align-items-center py-2"
-                                                style="background-color: #003891;">
-                                                <i class="bi bi-gear-fill me-2"></i> Acciones
-                                            </h6>
-                                        </li>
-                                        <li><a class="dropdown-item btn-editar-fila py-2" href="#"><i class="bi bi-pencil me-2 "></i> Editar</a></li>
-                                        <li><a class="dropdown-item btn-ver-precio py-2" href="#"><i class="bi bi-eye me-2 "></i> Ver más</a></li>
-                                    </ul>
+                        <td class="data-table__cell" style="font-family: monospace; font-weight: bold;">
+                            {{ producto.codigo_producto }}
+                        </td>
+                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-primary-dark);">
+                            <div class="avatar-wrapper">
+                                <div class="avatar" style="background-color: var(--color-secondary); color: var(--color-text-main);">
+                                    <i class="bi bi-box-seam"></i>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <div class="avatar-text">
+                                    <span class="avatar-text__title">{{ producto.nombre }}</span>
+                                    <small style="color: var(--color-text-muted); font-weight: normal;"><i class="bi bi-bookmark" style="margin-right: 4px;"></i>{{ producto.marca }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="data-table__cell">
+                            {{ producto.categoria.nombre }}
+                        </td>
+                        <td class="data-table__cell text-muted">
+                            {{ producto.fecha_compra.strftime('%d/%m/%Y') if producto.fecha_compra else '' }}
+                        </td>
+                        <td class="data-table__cell" style="text-align: right; font-weight: bold; color: var(--color-success);">
+                            C$ {{ "%.2f"|format(producto.precio_venta) }}
+                        </td>
+                        <td class="data-table__cell" style="text-align: center; font-weight: bold;">
+                            {{ producto.stock }}
+                        </td>
+                        <td class="data-table__cell">
+                            {% if producto.stock > 0 %}
+                            <span class="badge badge--success">En Stock</span>
+                            {% else %}
+                            <span class="badge badge--danger">Agotado</span>
+                            {% endif %}
+                        </td>
+                        <td class="data-table__cell data-table__cell--actions">
+                            <button type="button" class="btn btn--secondary btn--small btn-editar-fila" title="Editar Producto">
+                                <i class="bi bi-pencil-fill"></i> Editar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer for Summary & Pagination -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md) var(--spacing-lg); border-top: 1px solid var(--color-border); background-color: var(--color-bg-stripe); position: sticky; bottom: 0; z-index: 10;">
+            <div id="paginationSummary" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">
+                Mostrando 0 a 0 de 0 registros
             </div>
-
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center p-3 bg-light border-top gap-2 mt-auto" style="position: sticky; bottom: 0; z-index: 10;">
-                <div class="text-muted text-xs fw-semibold" id="paginationSummary">
-                    Mostrando 0 a 0 de 0 registros
-                </div>
-
-                <nav aria-label="Navegacion de tabla">
-                    <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
-                </nav>
+            <div id="paginationControls" style="display: flex; gap: var(--spacing-xs);">
+                <!-- Generado dinámicamente -->
             </div>
         </div>
     </div>
 
+<script>
+    // ==========================================
+    // SISTEMA DE MODALES CUSTOM
+    // ==========================================
+    function abrirModal(id) {
+        document.getElementById(id).classList.add('is-open');
+    }
 
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+    }
 
+    // ==========================================
+    // LÓGICA DEL FORMULARIO PRODUCTO
+    // ==========================================
+    const formulario = document.getElementById("formProductos");
+    const formTitle = document.getElementById("formTitle");
 
+    formulario.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
+            e.preventDefault();
+        }
+    });
 
+    const productoId = document.getElementById("producto_id");
+    const formCodigo = document.getElementById("form_codigo");
+    const formNombre = document.getElementById("form_nombre");
+    const formCategoria = document.getElementById("form_categoria");
+    const formProveedor = document.getElementById("form_proveedor");
+    const formPrecioCompra = document.getElementById("form_precio_compra");
+    const formPrecioVenta = document.getElementById("form_precio_venta");
+    const formFechaCompra = document.getElementById("form_fecha_compra");
+    const formCantidad = document.getElementById("form_cantidad_comprada");
+    const formMarca = document.getElementById("form_marca");
 
-    <!-- ===================================== -->
-    <!-- OFFCANVAS VER MÁS DETALLES -->
-    <!-- ===================================== -->
-    <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="offcanvasProducto" aria-labelledby="offcanvasProductoLabel" style="width: 360px; height: auto; max-height: 75vh; top: 12.5vh; border-radius: 16px 0 0 16px; box-shadow: -5px 0 25px rgba(0,0,0,0.15);">
-        <div class="offcanvas-header" style="background-color: #003891; color: white; border-top-left-radius: 16px;">
-            <h5 class="offcanvas-title d-flex align-items-center" id="offcanvasProductoLabel">
-                <i class="bi bi-info-circle me-2"></i> Detalles del Producto
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
-                aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body bg-light">
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body">
-                    <h6 class="text-muted text-uppercase text-xs fw-bold mb-1">Nombre del Producto</h6>
-                    <p class="fw-bold text-dark fs-5 mb-0" id="offcanvasNombre"></p>
-                </div>
-            </div>
+    const btnLimpiar = document.getElementById("btnLimpiar");
+    const btnIrForm = document.getElementById("btnIrForm");
+    const buscarProducto = document.getElementById("buscarProducto");
 
-            <div class="card border-0 shadow-sm mb-3">
-                <ul class="list-group list-group-flush rounded">
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted fw-semibold"><i class="bi bi-hash me-2"></i>Código</span>
-                        <span class="fw-bold" id="offcanvasCodigo"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted fw-semibold"><i class="bi bi-tag me-2"></i>Categoría</span>
-                        <span class="fw-bold" id="offcanvasCategoria"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted fw-semibold"><i class="bi bi-currency-dollar me-2"></i>Precio de
-                            Compra</span>
-                        <span class="fw-bold text-danger" id="offcanvasPrecioCompra"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted fw-semibold"><i class="bi bi-calendar-date me-2"></i>Fecha de
-                            Compra</span>
-                        <span class="fw-bold" id="offcanvasFecha"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted fw-semibold"><i class="bi bi-123 me-2"></i>Cant. Comprada</span>
-                        <span class="fw-bold" id="offcanvasCantidad"></span>
-                    </li>
-                </ul>
-            </div>
-            
-            <div class="d-grid mt-4">
-                <button type="button" class="btn btn-primary fw-bold py-2 rounded-pill shadow-sm" id="btnEditarOffcanvas">
-                    <i class="bi bi-pencil-fill me-2"></i> Editar Producto
-                </button>
-            </div>
-        </div>
-    </div>
+    // AUTOCOMPLETADO
+    formCodigo.addEventListener("blur", async function() {
+        const codigo = this.value.trim();
+        if (codigo && !productoId.value) {
+            try {
+                const response = await fetch(`/buscar/${codigo}`);
+                const data = await response.json();
+                
+                if (data.encontrado) {
+                    formNombre.value = data.nombre;
+                    formMarca.value = data.marca;
+                    formCategoria.value = data.categoria_id;
+                    formProveedor.value = data.proveedor_id;
+                    formPrecioCompra.value = data.precio_compra;
+                    formPrecioVenta.value = data.precio_venta;
+                    
+                    const btnGuardar = document.getElementById("btnGuardar");
+                    const iconHtml = btnGuardar.innerHTML;
+                    btnGuardar.innerHTML = `<i class="bi bi-magic"></i> ¡Autocompletado!`;
+                    btnGuardar.classList.remove("btn--primary");
+                    btnGuardar.classList.add("btn--success");
+                    btnGuardar.style.backgroundColor = "var(--color-success)";
+                    btnGuardar.style.color = "white";
 
-    <script>
-        // Control de KPIs toggle eliminado
-        
-        let modalFormProducto = null;
-        function getModalProducto() {
-            if (!modalFormProducto) {
-                modalFormProducto = new bootstrap.Modal(document.getElementById('modalFormProducto'));
+                    setTimeout(() => {
+                        btnGuardar.innerHTML = iconHtml;
+                        btnGuardar.classList.remove("btn--success");
+                        btnGuardar.classList.add("btn--primary");
+                        btnGuardar.style.backgroundColor = "";
+                        btnGuardar.style.color = "";
+                    }, 2500);
+                    
+                    formCantidad.focus();
+                }
+            } catch (error) {
+                console.error("Error autocompletando:", error);
             }
-            return modalFormProducto;
         }
+    });
 
-        const formulario = document.getElementById("formProductos");
-        const formTitle = document.getElementById("formTitle");
+    function resetForm() {
+        formulario.reset();
+        productoId.value = "";
+        formCodigo.value = "";
+        formTitle.innerHTML = `<i class="bi bi-box-seam"></i> NUEVO PRODUCTO`;
+        formNombre.focus();
+    }
 
-        const productoId = document.getElementById("producto_id");
-        const formCodigo = document.getElementById("form_codigo");
-        const formNombre = document.getElementById("form_nombre");
-        const formCategoria = document.getElementById("form_categoria");
-        const formPrecioCompra = document.getElementById("form_precio_compra");
-        const formPrecioVenta = document.getElementById("form_precio_venta");
+    function cargarProducto(row) {
+        productoId.value = row.dataset.id;
+        formCodigo.value = row.dataset.codigo;
+        formNombre.value = row.dataset.nombre;
+        formCategoria.value = row.dataset.categoria;
+        formProveedor.value = row.dataset.proveedor;
 
-        const formFechaCompra = document.getElementById("form_fecha_compra");
-        const formCantidad = document.getElementById("form_cantidad_comprada");
-        const formMarca = document.getElementById("form_marca");
+        formPrecioCompra.value = row.dataset.precioCompra;
+        formPrecioVenta.value = row.dataset.precioVenta;
+        formFechaCompra.value = row.dataset.fechaCompra;
+        formCantidad.value = row.dataset.cantidadComprada;
+        formMarca.value = row.dataset.marca;
 
-        const btnLimpiar = document.getElementById("btnLimpiar");
-        const btnIrForm = document.getElementById("btnIrForm");
-        const buscarProducto = document.getElementById("buscarProducto");
+        formTitle.innerHTML = `<i class="bi bi-pencil"></i> EDITAR PRODUCTO`;
+        abrirModal('modalFormProducto');
+    }
 
-        const siguienteCodigo = "{{ siguiente_codigo }}";
+    btnLimpiar.addEventListener("click", resetForm);
 
-        function resetForm() {
-            formulario.reset();
-            productoId.value = "";
-            formCodigo.value = siguienteCodigo;
+    btnIrForm.addEventListener("click", () => {
+        resetForm();
+        abrirModal('modalFormProducto');
+    });
 
-            formTitle.innerHTML = `<i class="bi bi-box-seam me-2 text-white"></i>NUEVO PRODUCTO`;
-            
-            formNombre.focus();
-        }
-
-        function cargarProducto(row) {
-            productoId.value = row.dataset.id;
-            formCodigo.value = row.dataset.codigo;
-            formNombre.value = row.dataset.nombre;
-            formCategoria.value = row.dataset.categoria;
-
-            formPrecioCompra.value = row.dataset.precioCompra;
-            formPrecioVenta.value = row.dataset.precioVenta;
-            formFechaCompra.value = row.dataset.fechaCompra;
-            formCantidad.value = row.dataset.cantidadComprada;
-            formMarca.value = row.dataset.marca;
-
-            formTitle.innerHTML = `<i class="bi bi-pencil me-2 text-white"></i>EDITAR PRODUCTO`;
-            getModalProducto().show();
-        }
-
-        btnLimpiar.addEventListener("click", resetForm);
-
-        btnIrForm.addEventListener("click", () => {
-            resetForm();
-            getModalProducto().show();
+    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            cargarProducto(this.closest("tr"));
         });
+    });
 
-        const offcanvasElement = document.getElementById('offcanvasProducto');
-        let currentRowForEdit = null;
+    document.querySelectorAll("#tablaProductos tr").forEach(row => {
+        row.addEventListener("dblclick", function () {
+            cargarProducto(this);
+        });
+    });
 
-        const btnEditarOffcanvas = document.getElementById("btnEditarOffcanvas");
-        if (btnEditarOffcanvas) {
-            btnEditarOffcanvas.addEventListener("click", function () {
-                if (currentRowForEdit) {
-                    const offcanvasProducto = bootstrap.Offcanvas.getInstance(offcanvasElement);
-                    if (offcanvasProducto) {
-                        offcanvasProducto.hide();
-                    }
-                    cargarProducto(currentRowForEdit);
+    // ==========================================
+    // PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE
+    // ==========================================
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredRows = [];
+    const allRows = Array.from(document.querySelectorAll("#tablaProductos tr"));
+
+    function initPagination() {
+        filteredRows = [...allRows];
+
+        const filtroMes = document.getElementById("filtroMes");
+        if (filtroMes) {
+            const mesesSet = new Set();
+            allRows.forEach(row => {
+                const fecha = row.dataset.fechaCompra;
+                if (fecha && fecha !== "None") {
+                    mesesSet.add(fecha.substring(0, 7));
                 }
             });
+            
+            const mesesArray = Array.from(mesesSet).sort().reverse();
+            mesesArray.forEach(mes => {
+                const option = document.createElement("option");
+                option.value = mes;
+                const [y, m] = mes.split('-');
+                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                option.text = `${monthNames[parseInt(m) - 1]} ${y}`;
+                filtroMes.appendChild(option);
+            });
         }
 
-        document.getElementById("tablaProductos").addEventListener("click", function (e) {
-            // Manejar botón editar
-            const btnEditar = e.target.closest(".btn-editar-fila");
-            if (btnEditar) {
-                e.stopPropagation();
-                cargarProducto(btnEditar.closest("tr"));
-                return;
-            }
+        renderTable();
+    }
 
-            // Manejar botón ver precio
-            const btnVerPrecio = e.target.closest(".btn-ver-precio");
-            if (btnVerPrecio) {
-                e.stopPropagation();
-                const row = btnVerPrecio.closest("tr");
-                const precio = parseFloat(row.dataset.precioCompra);
-                document.getElementById("modalPrecioNombre").innerText = row.dataset.nombre || "";
-                document.getElementById("modalPrecioValor").innerText = "C$ " + (!isNaN(precio) ? precio.toFixed(2) : "0.00");
-                const modalPrecio = new bootstrap.Modal(document.getElementById('modalPrecioCompra'));
-                modalPrecio.show();
-                return;
-            }
-        });
+    function renderTable() {
+        const totalItems = filteredRows.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
-        document.querySelectorAll("#tablaProductos tr").forEach(row => {
-            row.addEventListener("dblclick", function () {
-                cargarProducto(this);
-            });
-        });
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
 
-        let currentPage = 1;
-        const itemsPerPage = 10;
-        let filteredRows = [];
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-        const allRows = Array.from(document.querySelectorAll("#tablaProductos tr"));
+        allRows.forEach(row => row.style.display = "none");
 
-        function initPagination() {
-            filteredRows = [...allRows];
-
-            const filtroMes = document.getElementById("filtroMes");
-            if (filtroMes) {
-                const mesesSet = new Set();
-                allRows.forEach(row => {
-                    const fecha = row.dataset.fechaCompra;
-                    if (fecha && fecha !== "None") {
-                        mesesSet.add(fecha.substring(0, 7));
-                    }
-                });
-                
-                const mesesArray = Array.from(mesesSet).sort().reverse();
-                mesesArray.forEach(mes => {
-                    const option = document.createElement("option");
-                    option.value = mes;
-                    const [y, m] = mes.split('-');
-                    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-                    option.text = `${monthNames[parseInt(m) - 1]} ${y}`;
-                    filtroMes.appendChild(option);
-                });
-            }
-
-            renderTable();
-            updateKPIs(filteredRows);
-        }
-
-        function updateKPIs(rows) {
-            let total = rows.length;
-            let stockNormal = 0;
-            let valorTotalInventario = 0;
-            let valorInventarioVenta = 0;
-            let valorInventario = 0;
-
-            rows.forEach(row => {
-                const stock = parseInt(row.dataset.stock) || 0;
-                const pCompra = parseFloat(row.dataset.precioCompra) || 0;
-                const pVenta = parseFloat(row.dataset.precioVenta) || 0;
-
-                if (stock > 5) stockNormal++;
-
-                valorTotalInventario += (stock * pVenta);
-                valorInventarioVenta += pVenta;
-                valorInventario += pCompra;
-            });
-
-            if (document.getElementById("kpi-total-val")) {
-                document.getElementById("kpi-total-val").innerText = total;
-                document.getElementById("kpi-stock-normal-val").innerText = stockNormal;
-                document.getElementById("kpi-valor-total-val").innerText = "C$ " + valorTotalInventario.toFixed(2);
-                document.getElementById("kpi-valor-venta-val").innerText = "C$ " + valorInventarioVenta.toFixed(2);
-                document.getElementById("kpi-valor-inventario-val").innerText = "C$ " + valorInventario.toFixed(2);
-            }
-        }
-
-        function renderTable() {
-            const totalItems = filteredRows.length;
-            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
-
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-            allRows.forEach(row => row.style.display = "none");
-
-            let totalPrecioCompra = 0;
-            filteredRows.forEach(row => {
-                const pCompra = parseFloat(row.dataset.precioCompra) || 0;
-                totalPrecioCompra += pCompra;
-            });
-
-            for (let i = startIndex; i < endIndex; i++) {
+        let totalPrecioCompra = 0;
+        for (let i = startIndex; i < endIndex; i++) {
+            if(filteredRows[i]){
                 filteredRows[i].style.display = "";
+                const pCompra = parseFloat(filteredRows[i].dataset.precioCompra) || 0;
+                totalPrecioCompra += pCompra;
+            }
+        }
+
+        const paginationText = totalItems > 0
+            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+            : "Mostrando 0 a 0 de 0 registros";
+            
+        const paginationSummary = document.getElementById("paginationSummary");
+        if (paginationSummary) {
+            paginationSummary.innerHTML = `${paginationText} | <strong style="margin-left: 10px; color: var(--color-primary-dark);">Total P. Costo de página: C$ ${totalPrecioCompra.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
+        }
+
+        const badgeTotal = document.getElementById("badgeTotalItems");
+        if (badgeTotal) {
+            badgeTotal.innerHTML = `Productos: <strong>${totalItems}</strong>`;
+        }
+
+        renderControls(totalPages);
+    }
+
+    function renderControls(totalPages) {
+        const controlsContainer = document.getElementById("paginationControls");
+        controlsContainer.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        // Botón Anterior
+        const btnPrev = document.createElement("button");
+        btnPrev.className = "btn btn--outline btn--small";
+        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
+        if (currentPage === 1) btnPrev.disabled = true;
+        else {
+            btnPrev.addEventListener("click", () => {
+                currentPage--;
+                renderTable();
+            });
+        }
+        controlsContainer.appendChild(btnPrev);
+
+        // Páginas numeradas
+        for (let i = 1; i <= totalPages; i++) {
+            const btnPage = document.createElement("button");
+            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
+            btnPage.innerText = i;
+            btnPage.addEventListener("click", () => {
+                currentPage = i;
+                renderTable();
+            });
+            controlsContainer.appendChild(btnPage);
+        }
+
+        // Botón Siguiente
+        const btnNext = document.createElement("button");
+        btnNext.className = "btn btn--outline btn--small";
+        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
+        if (currentPage === totalPages) btnNext.disabled = true;
+        else {
+            btnNext.addEventListener("click", () => {
+                currentPage++;
+                renderTable();
+            });
+        }
+        controlsContainer.appendChild(btnNext);
+    }
+
+    function filterTable() {
+        const query = buscarProducto.value.toLowerCase().trim();
+        const mes = document.getElementById("filtroMes") ? document.getElementById("filtroMes").value : "";
+        const proveedor = document.getElementById("filtroProveedor") ? document.getElementById("filtroProveedor").value : "";
+
+        filteredRows = allRows.filter(row => {
+            const codigo = row.dataset.codigo.toLowerCase();
+            const nombre = row.dataset.nombre.toLowerCase();
+            const marca = row.dataset.marca.toLowerCase();
+            const fecha = row.dataset.fechaCompra; // format YYYY-MM-DD
+            const rowProveedor = row.dataset.proveedor;
+
+            let matchesSearch = codigo.includes(query) || nombre.includes(query) || marca.includes(query);
+
+            let matchesMonth = true;
+            if (mes && fecha && fecha !== "None") {
+                const monthPart = fecha.substring(0, 7);
+                matchesMonth = (monthPart === mes);
+            } else if (mes) {
+                matchesMonth = false;
             }
 
-            const paginationText = totalItems > 0
-                ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
-                : "Mostrando 0 a 0 de 0 registros";
-                
-            const paginationSummary = document.getElementById("paginationSummary");
-            if (paginationSummary) {
-                paginationSummary.innerHTML = `${paginationText} | <strong class="text-black fw-bold ms-1 fs-6">Total: C$ ${totalPrecioCompra.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
+            let matchesProveedor = true;
+            if (proveedor) {
+                matchesProveedor = (rowProveedor === proveedor);
             }
 
-            renderControls(totalPages);
-        }
+            return matchesSearch && matchesMonth && matchesProveedor;
+        });
 
-        function renderControls(totalPages) {
-            const controlsContainer = document.getElementById("paginationControls");
-            controlsContainer.innerHTML = "";
+        currentPage = 1;
+        renderTable();
+    }
 
-            if (totalPages <= 1) return;
+    buscarProducto.addEventListener("input", filterTable);
+    if (document.getElementById("filtroMes")) document.getElementById("filtroMes").addEventListener("change", filterTable);
+    if (document.getElementById("filtroProveedor")) document.getElementById("filtroProveedor").addEventListener("change", filterTable);
 
-            const prevLi = document.createElement("li");
-            prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-            prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
-            prevLi.addEventListener("click", e => {
-                e.preventDefault();
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderTable();
-                }
-            });
-            controlsContainer.appendChild(prevLi);
-
-            for (let i = 1; i <= totalPages; i++) {
-                const pageLi = document.createElement("li");
-                pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
-                pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                pageLi.addEventListener("click", e => {
-                    e.preventDefault();
-                    currentPage = i;
-                    renderTable();
-                });
-                controlsContainer.appendChild(pageLi);
-            }
-
-            const nextLi = document.createElement("li");
-            nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-            nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
-            nextLi.addEventListener("click", e => {
-                e.preventDefault();
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTable();
-                }
-            });
-            controlsContainer.appendChild(nextLi);
-        }
-
-        function filterTable() {
-            const query = buscarProducto.value.toLowerCase().trim();
-            const mes = document.getElementById("filtroMes") ? document.getElementById("filtroMes").value : "";
-            const estado = document.getElementById("filtroEstadoProducto") ? document.getElementById("filtroEstadoProducto").value : "TODOS";
-
-            filteredRows = allRows.filter(row => {
-                const codigo = row.dataset.codigo.toLowerCase();
-                const nombre = row.dataset.nombre.toLowerCase();
-                const marca = row.dataset.marca.toLowerCase();
-                const fecha = row.dataset.fechaCompra; // format YYYY-MM-DD
-                const rowEstado = row.dataset.estado;
-
-                let matchesSearch = codigo.includes(query) || nombre.includes(query) || marca.includes(query);
-
-                let matchesMonth = true;
-                if (mes && fecha && fecha !== "None") {
-                    const monthPart = fecha.substring(0, 7);
-                    matchesMonth = (monthPart === mes);
-                } else if (mes) {
-                    matchesMonth = false;
-                }
-
-                const rowStock = parseInt(row.dataset.stock, 10) || 0;
-                let matchesEstado = true;
-                if (estado === "EN STOCK") {
-                    matchesEstado = rowStock > 0;
-                } else if (estado === "VENDIDO") {
-                    matchesEstado = rowStock <= 0;
-                }
-
-                return matchesSearch && matchesMonth && matchesEstado;
-            });
-
-            currentPage = 1;
-            renderTable();
-            updateKPIs(filteredRows);
-        }
-
-        buscarProducto.addEventListener("input", filterTable);
-        if (document.getElementById("filtroMes")) {
-            document.getElementById("filtroMes").addEventListener("change", filterTable);
-        }
-        if (document.getElementById("filtroEstadoProducto")) {
-            document.getElementById("filtroEstadoProducto").addEventListener("change", filterTable);
-        }
-
-        window.addEventListener("load", initPagination);
-    </script>
-
-    {% endblock %}
+    window.addEventListener("load", initPagination);
+</script>
+{% endblock %}

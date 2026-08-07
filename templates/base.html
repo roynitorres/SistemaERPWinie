@@ -21,11 +21,9 @@
 
 
     <!-- ===================================== -->
-    <!-- CSS PERSONALIZADO -->
+    <!-- CSS PERSONALIZADO (Módulo Premium) -->
     <!-- ===================================== -->
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
     <!-- CSS ESPECÍFICO DEL MÓDULO -->
 
@@ -44,114 +42,103 @@
 <body>
     {% set rol_actual = current_user.rol.nombre.upper() if current_user.is_authenticated and current_user.rol else '' %}
     
-    <div id="app-container">
+    <div id="app-container" class="app-container">
         <!-- ===================================== -->
         <!-- SIDEBAR -->
         <!-- ===================================== -->
-        <aside id="sidebar" class="collapsed">
+        <aside id="sidebar" class="sidebar collapsed">
             <!-- HEADER LOGO & TOGGLE -->
-            <div class="sidebar-header">
-                <a class="text-decoration-none d-flex align-items-center gap-2 logo-text" href="{{ url_for('dashboard') }}">
-                    <i class="bi bi-grid-fill text-info"></i>
-                    <span class="text-white">Control <span class="text-info">Pagos</span></span>
+            <div class="sidebar__header">
+                <a class="text-decoration-none d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}" style="color: white; font-weight: bold; font-size: 1.2rem;">
+                    <i class="bi bi-grid-fill" style="color: var(--color-secondary);"></i>
+                    <span class="sidebar__text">C<span style="color: var(--color-secondary);">Pagos</span></span>
                 </a>
-                <button class="btn-toggle" id="btnToggleSidebar">
+                <button id="btnToggleSidebar" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">
                     <i class="bi bi-list"></i>
                 </button>
             </div>
 
             <!-- BODY LINKS -->
-            <div class="sidebar-body">
-                <ul class="nav flex-column mb-0">
+            <nav class="sidebar__nav">
+                <ul class="sidebar__menu">
                     {% if rol_actual == 'ADMIN' %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'clientes.clientes' %}active{% endif %}" href="{{ url_for('clientes.clientes') }}">
-                            <div class="nav-link-content">
-                                <i class="bi bi-people icon-main"></i>
-                                <span class="text-nav">Clientes</span>
-                            </div>
+                    <li>
+                        <a class="sidebar__link {% if request.endpoint == 'clientes.clientes' %}sidebar__link--active{% endif %}" href="{{ url_for('clientes.clientes') }}">
+                            <i class="bi bi-people sidebar__icon"></i>
+                            <span class="sidebar__text">Clientes</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}active{% endif %}" 
-                           data-bs-toggle="collapse" href="#menuProductos" role="button" aria-expanded="{% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}true{% else %}false{% endif %}" aria-controls="menuProductos">
-                            <div class="nav-link-content">
-                                <i class="bi bi-box-seam icon-main"></i>
-                                <span class="text-nav">Productos</span>
-                            </div>
-                            <i class="bi bi-chevron-right dropdown-indicator"></i>
+                    <li>
+                        <a class="sidebar__link {% if request.endpoint == 'proveedores.proveedores' %}sidebar__link--active{% endif %}" href="{{ url_for('proveedores.proveedores') }}">
+                            <i class="bi bi-truck sidebar__icon"></i>
+                            <span class="sidebar__text">Proveedores</span>
                         </a>
-                        <div class="collapse {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}show{% endif %}" id="menuProductos">
-                            <ul class="sidebar-submenu">
-                                <li>
-                                    <a class="nav-link {% if request.endpoint == 'productos.productos' %}text-info fw-bold{% endif %}" href="{{ url_for('productos.productos') }}">
-                                        <i class="bi bi-list-task icon-main d-none"></i> Lista de Productos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-link {% if request.endpoint == 'categorias.categorias' %}text-info fw-bold{% endif %}" href="{{ url_for('categorias.categorias') }}">
-                                        <i class="bi bi-tag icon-main d-none"></i> Categorías
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link" onclick="this.nextElementSibling.classList.toggle('is-open'); return false;">
+                            <i class="bi bi-box-seam sidebar__icon"></i>
+                            <span class="sidebar__text">Productos</span>
+                            <i class="bi bi-chevron-down sidebar__chevron" style="margin-left: auto;"></i>
+                        </a>
+                        <ul class="sidebar__submenu {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}is-open{% endif %}">
+                            <li>
+                                <a class="sidebar__submenu-link {% if request.endpoint == 'productos.productos' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('productos.productos') }}">
+                                    Lista de Productos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="sidebar__submenu-link {% if request.endpoint == 'categorias.categorias' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('categorias.categorias') }}">
+                                    Categorías
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     {% endif %}
 
                     {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'ventas.ventas' %}active{% endif %}" href="{{ url_for('ventas.ventas') }}">
-                            <div class="nav-link-content">
-                                <i class="bi bi-cart-check icon-main"></i>
-                                <span class="text-nav">Ventas</span>
-                            </div>
+                    <li>
+                        <a class="sidebar__link {% if request.endpoint == 'ventas.ventas' %}sidebar__link--active{% endif %}" href="{{ url_for('ventas.ventas') }}">
+                            <i class="bi bi-cart-check sidebar__icon"></i>
+                            <span class="sidebar__text">Ventas</span>
                         </a>
                     </li>
                     
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint and 'pagos.facturas' in request.endpoint %}active{% endif %}" 
-                           data-bs-toggle="collapse" href="#menuFacturas" role="button" aria-expanded="{% if request.endpoint and 'pagos.facturas' in request.endpoint %}true{% else %}false{% endif %}" aria-controls="menuFacturas">
-                            <div class="nav-link-content">
-                                <i class="bi bi-receipt icon-main"></i>
-                                <span class="text-nav">Facturas</span>
-                            </div>
-                            <i class="bi bi-chevron-right dropdown-indicator"></i>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link" onclick="this.nextElementSibling.classList.toggle('is-open'); return false;">
+                            <i class="bi bi-receipt sidebar__icon"></i>
+                            <span class="sidebar__text">Facturas</span>
+                            <i class="bi bi-chevron-down sidebar__chevron" style="margin-left: auto;"></i>
                         </a>
-                        <div class="collapse {% if request.endpoint and 'pagos.facturas' in request.endpoint %}show{% endif %}" id="menuFacturas">
-                            <ul class="sidebar-submenu">
-                                <li>
-                                    <a class="nav-link {% if request.endpoint and request.view_args.get('tipo') == 'contado' %}text-info fw-bold{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}">
-                                         Contado
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-link {% if request.endpoint and request.view_args.get('tipo') == 'credito' %}text-info fw-bold{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}">
-                                         Crédito
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                        <ul class="sidebar__submenu {% if request.endpoint and 'pagos.facturas' in request.endpoint %}is-open{% endif %}">
+                            <li>
+                                <a class="sidebar__submenu-link {% if request.endpoint and request.view_args.get('tipo') == 'contado' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}">
+                                    Contado
+                                </a>
+                            </li>
+                            <li>
+                                <a class="sidebar__submenu-link {% if request.endpoint and request.view_args.get('tipo') == 'credito' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}">
+                                    Crédito
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'reportes.financiero' %}active{% endif %}" href="{{ url_for('reportes.financiero') }}">
-                            <div class="nav-link-content">
-                                <i class="bi bi-bar-chart-line icon-main"></i>
-                                <span class="text-nav">Reportes</span>
-                            </div>
+                    <li>
+                        <a class="sidebar__link {% if request.endpoint == 'reportes.financiero' %}sidebar__link--active{% endif %}" href="{{ url_for('reportes.financiero') }}">
+                            <i class="bi bi-bar-chart-line sidebar__icon"></i>
+                            <span class="sidebar__text">Reportes</span>
                         </a>
                     </li>
                     {% endif %}
                 </ul>
-            </div>
+            </nav>
 
             <!-- FOOTER PROFILE -->
             {% if current_user.is_authenticated %}
-            <div class="sidebar-footer">
-
-                <button class="btn-logout mt-3" id="btnLogout">
-                    <i class="bi bi-box-arrow-right icon-main" style="font-size: 1.15rem; min-width: 30px; text-align: center;"></i>
-                    <span>Cerrar Sesión</span>
+            <div style="padding: var(--spacing-lg); text-align: center;">
+                <button id="btnLogout" class="btn btn--outline" style="width: 100%; color: white; border-color: rgba(255,255,255,0.2);">
+                    <i class="bi bi-box-arrow-right sidebar__icon"></i>
+                    <span class="sidebar__text">Cerrar Sesión</span>
                 </button>
             </div>
             {% endif %}
@@ -160,38 +147,63 @@
         <!-- ===================================== -->
         <!-- CONTENIDO PRINCIPAL -->
         <!-- ===================================== -->
-        <main id="main-content">
-            <div class="container-fluid px-4 py-4">
+        <main id="main-content" class="main-content">
+            <!-- ===================================== -->
+            <!-- TOPBAR GLOBAL -->
+            <!-- ===================================== -->
+            <header class="topbar">
+                <div class="topbar__title">
+                    {% block page_title %}{% endblock %}
+                </div>
+                <div class="topbar__actions">
+                    <button class="topbar__btn" title="Notificaciones">
+                        <i class="bi bi-bell"></i>
+                    </button>
+                    <a href="{{ url_for('empresa.informacion_empresa') }}" class="topbar__btn" title="Configuración de Empresa">
+                        <i class="bi bi-gear"></i>
+                    </a>
+                    <button class="topbar__btn" title="Modo Oscuro">
+                        <i class="bi bi-moon"></i>
+                    </button>
+                    <a href="{{ url_for('perfil.editar_perfil') }}" title="Mi Perfil">
+                        {% if current_user.is_authenticated and current_user.foto_perfil %}
+                            <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="topbar__profile">
+                        {% else %}
+                            <div class="topbar__profile-fallback">
+                                {{ current_user.username[:2].upper() if current_user.is_authenticated else 'AD' }}
+                            </div>
+                        {% endif %}
+                    </a>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
 
         <!-- ===================================== -->
-        <!-- FLASH FLOAT -->
+        <!-- TOASTS NOTIFICACIONES (ALERTS) -->
         <!-- ===================================== -->
-
-        <div class="flash-container">
-
+        <div class="toast-container" id="toastContainer">
             {% with messages = get_flashed_messages(with_categories=true) %}
-
             {% if messages %}
-
-            {% for category, message in messages %}
-
-            <div class="flash-message flash-{{ category }} d-flex align-items-center gap-2">
-                {% if category == 'success' %}
-                <i class="bi bi-check-circle-fill fs-5"></i>
-                {% elif category == 'danger' %}
-                <i class="bi bi-x-circle-fill fs-5"></i>
-                {% else %}
-                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                {% endif %}
-                <div>{{ message }}</div>
-            </div>
-
-            {% endfor %}
-
+                {% for category, message in messages %}
+                <div class="alert-toast alert-toast--{{ category }}">
+                    <div class="alert-icon">
+                        {% if category == 'success' %}
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                        {% elif category == 'danger' %}
+                        <i class="bi bi-x-circle-fill fs-5"></i>
+                        {% else %}
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        {% endif %}
+                    </div>
+                    <div class="alert-content">
+                        <p class="alert-title">{% if category == 'success' %}¡Éxito!{% elif category == 'danger' %}Error{% else %}Atención{% endif %}</p>
+                        <p class="alert-message">{{ message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
             {% endif %}
-
             {% endwith %}
-
         </div>
 
         {% block content %}
@@ -261,6 +273,17 @@
                     e.preventDefault();
                     // Let Bootstrap handle the collapse, just prevent the default jump
                 });
+            });
+
+            // Auto-hide Toasts
+            const toasts = document.querySelectorAll('.alert-toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.add('is-closing');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300); // Wait for animation
+                }, 4000);
             });
         });
     </script>
@@ -356,8 +379,44 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js">
     </script>
 
+    <!-- ===================================== -->
+    <!-- TOAST / NOTIFICACIONES GLOBALES       -->
+    <!-- ===================================== -->
+    <div id="toast-container" class="toast-container" style="z-index: 99999;"></div>
+    <script>
+        function showToast(mensaje, tipo = 'success', duracion = 3500) {
+            const container = document.getElementById('toast-container');
 
+            const iconos = {
+                success: 'bi-check-circle-fill',
+                danger:  'bi-x-circle-fill',
+                warning: 'bi-exclamation-triangle-fill'
+            };
 
+            const titulos = {
+                success: 'Éxito',
+                danger:  'Error',
+                warning: 'Advertencia'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `alert-toast alert-toast--${tipo}`;
+            toast.innerHTML = `
+                <i class="bi ${iconos[tipo] || iconos.success} alert-icon" style="font-size: 1.4rem; flex-shrink:0;"></i>
+                <div class="alert-content">
+                    <p class="alert-title">${titulos[tipo] || titulos.success}</p>
+                    <p class="alert-message">${mensaje}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('is-closing');
+                setTimeout(() => toast.remove(), 350);
+            }, duracion);
+        }
+    </script>
 
 
 
