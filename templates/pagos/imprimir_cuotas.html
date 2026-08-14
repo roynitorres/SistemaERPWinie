@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Plan de Cuotas Factura #{{ venta.numero_factura }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 13px;
+            color: #111111;
+            background: #ffffff;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #222222;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .header h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #444444;
+            margin-bottom: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+        }
+
+        .info-item {
+            font-size: 12px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            color: #555555;
+            text-transform: uppercase;
+            font-size: 10px;
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .data-table th {
+            background-color: #1a252f;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 8px 10px;
+            text-align: left;
+            border: 1px solid #1a252f;
+        }
+
+        .data-table td {
+            padding: 8px 10px;
+            font-size: 12px;
+            border: 1px solid #dee2e6;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .text-center { text-align: center; }
+        .text-end { text-align: right; }
+        .text-bold { font-weight: bold; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .badge-pagada { background: #d4edda; color: #155724; }
+        .badge-pendiente { background: #cce5ff; color: #004085; }
+        .badge-gracia { background: #fff3cd; color: #856404; }
+        .badge-vencida { background: #f8d7da; color: #721c24; }
+
+        .footer-notes {
+            margin-top: 24px;
+            font-size: 11px;
+            color: #666666;
+            border-top: 1px dashed #ccc;
+            padding-top: 12px;
+            text-align: center;
+        }
+
+        .no-print {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-print {
+            background: #00e676;
+            color: #090a0f;
+            font-weight: bold;
+            border: none;
+            padding: 10px 20px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-back {
+            background: #6c757d;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            padding: 10px 20px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{ empresa.razon_social if empresa else 'SISTEMA DE COBRO' }}</h1>
+        <h2>PLAN DE AMORTIZACIÓN Y CALENDARIO DE CUOTAS</h2>
+        <div style="font-size: 11px; color: #555;">RUC: {{ empresa.ruc if empresa else '-' }} | TEL: {{ empresa.telefono if empresa else '-' }}</div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <label>N° Factura</label>
+            <strong>#{{ venta.numero_factura }}</strong>
+        </div>
+        <div class="info-item">
+            <label>Cliente</label>
+            <strong>{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</strong>
+        </div>
+        <div class="info-item">
+            <label>Fecha de Emisión</label>
+            {{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}
+        </div>
+        <div class="info-item">
+            <label>Tipo de Venta</label>
+            CRÉDITO
+        </div>
+        <div class="info-item">
+            <label>Monto Total Factura</label>
+            <strong>C$ {{ "%.2f"|format(venta.total_venta) }}</strong>
+        </div>
+        <div class="info-item">
+            <label>Vendedor</label>
+            {{ venta.usuario.nombres if venta.usuario else 'Sistema' }}
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="text-center" style="width: 60px;">Cuota</th>
+                <th>Fecha Vencimiento</th>
+                <th>Límite con Gracia (+2d)</th>
+                <th class="text-end">Monto Cuota (C$)</th>
+                <th class="text-center">Estado</th>
+                <th class="text-center">Método Pago</th>
+                <th class="text-center">Referencia</th>
+                <th class="text-center">Banco</th>
+                <th>Comentario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuota in venta.cuotas %}
+            {% set saldo_cuota = (cuota.monto_cuota | float) - (cuota.monto_abonado | float) %}
+            {% set es_cuota_pagada = saldo_cuota <= 0.01 %}
+            {% set ultimo_pago = (cuota.pagos | selectattr('estado', 'equalto', 'ACTIVO') | list | last) if cuota.pagos else None %}
+            <tr>
+                <td class="text-center text-bold">Cuota #{{ cuota.numero_cuota }}</td>
+                <td>{{ cuota.fecha_vencimiento.strftime('%d/%m/%Y') if cuota.fecha_vencimiento else '-' }}</td>
+                <td style="color: #856404; font-weight: 600;">
+                    {{ cuota.fecha_vencimiento_gracia.strftime('%d/%m/%Y') if cuota.fecha_vencimiento_gracia else '-' }}
+                </td>
+                <td class="text-end text-bold">C$ {{ "%.2f"|format(cuota.monto_cuota) }}</td>
+                <td class="text-center">
+                    {% if es_cuota_pagada %}
+                    <span class="badge badge-pagada">PAGADA</span>
+                    {% elif cuota.fecha_vencimiento_gracia and now.date() > cuota.fecha_vencimiento_gracia %}
+                    <span class="badge badge-vencida">VENCIDA</span>
+                    {% elif cuota.fecha_vencimiento and now.date() > cuota.fecha_vencimiento %}
+                    <span class="badge badge-gracia">EN GRACIA</span>
+                    {% else %}
+                    <span class="badge badge-pendiente">PENDIENTE</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ ultimo_pago.tipo_pago if (ultimo_pago and ultimo_pago.tipo_pago) else '-' }}</td>
+                <td class="text-center">{{ ultimo_pago.referencia if (ultimo_pago and ultimo_pago.referencia) else '-' }}</td>
+                <td class="text-center">{{ ultimo_pago.banco.nombre if (ultimo_pago and ultimo_pago.banco) else '-' }}</td>
+                <td>{{ ultimo_pago.observaciones if (ultimo_pago and ultimo_pago.observaciones) else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer-notes">
+        Documento generado el {{ now.strftime('%d/%m/%Y %H:%M') }}. Este plan de amortización incluye 2 días de tolerancia por cuota.
+    </div>
+
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">Imprimir / Guardar como PDF</button>
+        <button class="btn-back" onclick="window.close()">Cerrar</button>
+    </div>
+
+    <script>
+        window.onload = function () {
+            window.print();
+        };
+    </script>
+</body>
+
+</html>

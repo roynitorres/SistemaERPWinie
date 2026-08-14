@@ -72,6 +72,12 @@ class Usuario(UserMixin, db.Model):
         nullable=True
     )
     
+    email = db.Column(
+        db.String(120),
+        unique=True,
+        nullable=True
+    )
+
     foto_perfil = db.Column(
         db.String(255),
         nullable=True
@@ -109,6 +115,12 @@ class Usuario(UserMixin, db.Model):
         db.Boolean,
         nullable=False,
         default=False
+    )
+
+    # Guarda la contraseña temporal mientras no haya sido cambiada por el cliente
+    password_temporal_plana = db.Column(
+        db.String(100),
+        nullable=True
     )
 
     # Fecha creación registro

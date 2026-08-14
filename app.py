@@ -4,7 +4,7 @@ from flask_login import login_required
 from config import Config
 from database import db, migrate
 from datetime import datetime, date, timedelta
-from sqlalchemy import func
+from sqlalchemy import func, extract
 
 # MODELOS
 
@@ -16,6 +16,8 @@ from models.producto import Producto
 from models.venta import Venta
 from models.detalle_venta import DetalleVenta
 from models.pago import Pago
+from models.banco import Banco
+from models.cuota_venta import CuotaVenta
 from models.empresa import Empresa
 from models.proveedor import Proveedor
 from models.enums import EstadoVenta, TipoVenta, EstadoProducto, EstadoCliente
@@ -47,6 +49,59 @@ app.config.from_object(Config)
 
 # Inicializar base de datos
 db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+    try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(db.engine)
+        columns_usuarios = [c['name'] for c in inspector.get_columns('usuarios')]
+        if 'password_temporal_plana' not in columns_usuarios:
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE usuarios ADD COLUMN password_temporal_plana VARCHAR(100)"))
+                conn.commit()
+
+        # Migración de columnas en la tabla pagos
+        columns_pagos = [c['name'] for c in inspector.get_columns('pagos')]
+        with db.engine.connect() as conn:
+            if 'banco_id' not in columns_pagos:
+                conn.execute(text("ALTER TABLE pagos ADD COLUMN banco_id INTEGER"))
+            if 'cuota_id' not in columns_pagos:
+                conn.execute(text("ALTER TABLE pagos ADD COLUMN cuota_id INTEGER"))
+            if 'monto_efectivo' not in columns_pagos:
+                conn.execute(text("ALTER TABLE pagos ADD COLUMN monto_efectivo NUMERIC(10,2) DEFAULT 0.00"))
+            if 'monto_transferencia' not in columns_pagos:
+                conn.execute(text("ALTER TABLE pagos ADD COLUMN monto_transferencia NUMERIC(10,2) DEFAULT 0.00"))
+            conn.commit()
+
+        # Asignar clave temporal limpia a usuarios existentes que requieran cambio y no tengan clave almacenada
+        sin_pass = Usuario.query.filter(
+            Usuario.debe_cambiar_password == True,
+            (Usuario.password_temporal_plana == None) | (Usuario.password_temporal_plana == '')
+        ).all()
+        if sin_pass:
+            import random
+            for u in sin_pass:
+                nueva_temp = f"Cliente{random.randint(1000, 9999)}"
+                u.set_password(nueva_temp)
+        # Asignar fecha de creación a categorías existentes que tengan created_at nulo
+        from models.categoria import Categoria
+        from datetime import datetime, UTC
+        cats_sin_fecha = Categoria.query.filter(Categoria.created_at == None).all()
+        if cats_sin_fecha:
+            for cat in cats_sin_fecha:
+                cat.created_at = datetime.now(UTC)
+            db.session.commit()
+
+        # Sembrar Bancos por defecto si no existen
+        bancos_defecto = ["BAC Credomatic", "Banco Lafise Bancentro", "Banpro Grupo Promerica", "BDF (Banco de Finanzas)", "Ficohsa"]
+        for b_nom in bancos_defecto:
+            b_exist = Banco.query.filter_by(nombre=b_nom).first()
+            if not b_exist:
+                db.session.add(Banco(nombre=b_nom, estado="ACTIVO"))
+        db.session.commit()
+    except Exception as e:
+        print("Migración interna usuarios e inicialización bancos info:", e)
 
 # Inicializar migraciones
 migrate.init_app(app, db)
@@ -112,7 +167,7 @@ def dashboard():
     clientes_inactivos = Cliente.query.filter_by(estado=EstadoCliente.INACTIVO).count()
     clientes_pct = round((clientes_activos / clientes_total) * 100) if clientes_total else 0
 
-    productos_total = Producto.query.filter_by(estado=EstadoProducto.ACTIVO).count()
+    productos_total = Producto.query.count()
     productos_stock_normal = Producto.query.filter(
         Producto.estado == EstadoProducto.ACTIVO,
         Producto.stock > 5
@@ -129,8 +184,8 @@ def dashboard():
         joinedload(Venta.cliente)
     ).all()
     facturas_total = len(ventas_activas)
-    facturas_contado = len([v for v in ventas_activas if v.tipo_venta == TipoVenta.CONTADO])
-    facturas_credito = len([v for v in ventas_activas if v.tipo_venta == TipoVenta.CREDITO])
+    facturas_contado = len([v for v in ventas_activas if (v.tipo_venta == TipoVenta.CONTADO or (hasattr(v.tipo_venta, 'value') and v.tipo_venta.value == 'CONTADO') or str(v.tipo_venta) == 'CONTADO')])
+    facturas_credito = len([v for v in ventas_activas if (v.tipo_venta == TipoVenta.CREDITO or (hasattr(v.tipo_venta, 'value') and v.tipo_venta.value == 'CREDITO') or str(v.tipo_venta) == 'CREDITO')])
     ventas_pct = round((facturas_contado / facturas_total) * 100) if facturas_total else 0
 
     pagos_total_monto = 0
@@ -241,6 +296,22 @@ def dashboard():
         },
     }
 
+    anio_actual = hoy.year
+    meses_nombres_es = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    ventas_por_mes = []
+
+    for mes_num in range(1, 13):
+        total_mes = db.session.query(func.coalesce(func.sum(Venta.total_venta), 0)).filter(
+            extract('year', Venta.fecha_venta) == anio_actual,
+            extract('month', Venta.fecha_venta) == mes_num,
+            Venta.estado == EstadoVenta.ACTIVA
+        ).scalar()
+        
+        ventas_por_mes.append({
+            "mes": meses_nombres_es[mes_num - 1],
+            "total": float(total_mes or 0.0)
+        })
+
     chart_data = {
         "facturas_tipo": {
             "labels": ["Contado", "Credito"],
@@ -258,7 +329,45 @@ def dashboard():
             "labels": [p.nombre for p in productos_mas_vendidos],
             "values": [int(p.cantidad or 0) for p in productos_mas_vendidos],
         },
+        "crecimiento_anual": {
+            "anio": anio_actual,
+            "labels": [m["mes"] for m in ventas_por_mes],
+            "values": [m["total"] for m in ventas_por_mes],
+        }
     }
+
+    # Cálculo de Clientes Principales con Facturas a Crédito PENDIENTES (Saldo > 0)
+    ventas_credito_pendientes = []
+    for v in ventas_activas:
+        es_credito = (v.tipo_venta == TipoVenta.CREDITO or (hasattr(v.tipo_venta, 'value') and v.tipo_venta.value == 'CREDITO') or str(v.tipo_venta) == 'CREDITO')
+        if es_credito:
+            total_v = float(v.total_venta)
+            pagado_v = sum(float(pago.monto_pago) for pago in v.pagos if pago.estado == "ACTIVO")
+            saldo_v = max(total_v - pagado_v, 0)
+            if saldo_v > 0:
+                ventas_credito_pendientes.append((v, saldo_v))
+
+    total_facturas_credito_cant = len(ventas_credito_pendientes)
+
+    clientes_credito_dict = {}
+    for v, saldo_v in ventas_credito_pendientes:
+        c_id = v.cliente_id
+        c_nombre = f"{v.cliente.nombres}".strip() if (v.cliente and v.cliente.nombres) else f"Cliente #{c_id}"
+        if c_id not in clientes_credito_dict:
+            clientes_credito_dict[c_id] = {
+                "nombre": c_nombre,
+                "facturas_cant": 0,
+                "monto_total": 0.0
+            }
+        clientes_credito_dict[c_id]["facturas_cant"] += 1
+        clientes_credito_dict[c_id]["monto_total"] += saldo_v
+
+    top_clientes_credito = list(clientes_credito_dict.values())
+    top_clientes_credito.sort(key=lambda x: (x["facturas_cant"], x["monto_total"]), reverse=True)
+    top_clientes_credito = top_clientes_credito[:5]
+
+    for c in top_clientes_credito:
+        c["porcentaje"] = round((c["facturas_cant"] / total_facturas_credito_cant) * 100) if total_facturas_credito_cant > 0 else 0
 
     return render_template(
         "dashboard.html",
@@ -266,11 +375,23 @@ def dashboard():
         ahora=ahora,
         fecha_larga=ahora.strftime("%d/%m/%Y"),
         clientes_a_cobrar=clientes_a_cobrar,
+        top_clientes_credito=top_clientes_credito,
         kpis=kpis,
         chart_data=chart_data
     )
 
 
+
+
+# MANEJADORES DE ERRORES PERSONALIZADOS (APEX DARK)
+
+@app.errorhandler(404)
+def pagina_no_encontrada(e):
+    return render_template("errors/404.html"), 404
+
+@app.errorhandler(500)
+def error_interno_servidor(e):
+    return render_template("errors/500.html"), 500
 
 
 if __name__ == "__main__":

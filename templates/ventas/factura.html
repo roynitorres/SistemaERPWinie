@@ -112,6 +112,7 @@
         <div>FECHA: {{ venta.fecha_venta.strftime('%d/%m/%Y %H:%M') }}</div>
         <div>VENDEDOR: {{ venta.usuario.nombres if venta.usuario and venta.usuario.nombres else 'Admin' }}</div>
         <div>CLIENTE: {{ venta.cliente.nombres }}</div>
+        <div>TIPO: {{ venta.tipo_venta.value }}{% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %} ({{ venta.cuotas|length }} CUOTAS){% endif %}</div>
     </div>
 
     <div class="line"></div>
@@ -150,6 +151,17 @@
         <span>TOTAL:</span>
         <span>C$ {{ "%.2f"|format(venta.total_venta) }}</span>
     </div>
+
+    {% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %}
+    <div class="line"></div>
+    <div class="text-bold text-center mb-1">PLAN DE PAGOS ({{ venta.cuotas|length }} CUOTAS)</div>
+    {% for cuota in venta.cuotas %}
+    <div class="item-details" style="font-size: 11px; margin-bottom: 2px;">
+        <span>Cuota #{{ cuota.numero_cuota }} ({{ cuota.fecha_vencimiento.strftime('%d/%m/%Y') }})</span>
+        <span>C$ {{ "%.2f"|format(cuota.monto_cuota) }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
 
     <div class="line"></div>
 

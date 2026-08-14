@@ -1,405 +1,563 @@
 {% extends "cliente_portal/portal_base.html" %}
 
-{% block title %}
-Portal Cliente
-{% endblock %}
+{% block title %}Portal del Cliente | SistemaERP Winie{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/portal_cliente.css') }}">
 
 <div class="cliente-portal">
-    <div class="cliente-header shadow-sm">
-        <div class="d-flex align-items-center gap-3">
-            <div class="cliente-avatar">
-                {{ cliente.nombres[:2].upper() if cliente and cliente.nombres else 'CL' }}
+
+    <!-- ===================================== -->
+    <!-- BANNER DE PORTADA Y CABECERA DE PERFIL -->
+    <!-- ===================================== -->
+    <div class="portal-hero-card">
+        <div class="portal-cover-banner"></div>
+        <div class="portal-hero-body">
+            
+            <div class="portal-hero-header">
+                <div>
+                    <div class="portal-avatar-wrapper">
+                        <div class="portal-avatar-img">
+                            {{ cliente.nombres[:2].upper() if cliente and cliente.nombres else 'CL' }}
+                        </div>
+                    </div>
+
+                    <div class="portal-hero-name">
+                        {{ cliente.nombres if cliente else 'Cliente Registrado' }}
+                    </div>
+
+                    <div class="portal-hero-badges">
+                        <span class="badge-pill-apex badge-pill-apex--active" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 700;">
+                            <i class="bi bi-person-badge-fill me-1"></i> CLIENTE REGISTRADO
+                        </span>
+                        <span class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff; padding: 4px 12px; font-size: 0.78rem; font-weight: 700;">
+                            <i class="bi bi-check-circle-fill me-1"></i> ESTADO ACTIVO
+                        </span>
+                    </div>
+                </div>
+
+                <!-- BOTÓN CERRAR SESIÓN NEÓN ROJO -->
+                <div>
+                    <button type="button" class="btn-logout-portal" onclick="abrirModalLogoutPortal()">
+                        <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                    </button>
+                </div>
             </div>
 
+            <!-- FILA DE METADATOS DE CONTACTO -->
+            <div class="portal-meta-row">
+                <div class="portal-meta-item">
+                    <i class="bi bi-envelope-fill text-success"></i>
+                    <span>{{ cliente.email or 'Sin correo registrado' if cliente else 'N/A' }}</span>
+                </div>
+                <div class="portal-meta-item">
+                    <i class="bi bi-telephone-fill text-info"></i>
+                    <span>{{ cliente.telefono or 'Sin teléfono' if cliente else 'N/A' }}</span>
+                </div>
+                <div class="portal-meta-item">
+                    <i class="bi bi-geo-alt-fill text-warning"></i>
+                    <span>{{ cliente.ciudad or 'Nicaragua' if cliente else 'N/A' }}</span>
+                </div>
+                <div class="portal-meta-item">
+                    <i class="bi bi-shield-check text-primary"></i>
+                    <span>Portal Cliente Seguro SSL</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ALERTAS DEL SISTEMA -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert-apex alert-apex-{{ category if category in ['success', 'warning', 'danger', 'info'] else 'danger' }}">
+            <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'warning' %}exclamation-triangle-fill{% else %}exclamation-circle-fill{% endif %} fs-5"></i>
+            <div>{{ message }}</div>
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- ===================================== -->
+    <!-- TARJETAS MÉTRICAS DE CANTIDADES (KPIs APEX) -->
+    <!-- ===================================== -->
+    <div class="portal-kpi-grid">
+        
+        <!-- KPI 1: TOTAL FACTURAS -->
+        <div class="portal-kpi-card">
+            <div class="portal-kpi-icon" style="background: rgba(168, 85, 247, 0.12); color: #a855f7;">
+                <i class="bi bi-receipt"></i>
+            </div>
             <div>
-                <h4 class="mb-1 fw-bold text-white">
-                    {{ cliente.nombres }}
-                </h4>
-                <div class="text-white-75 small">
-                    {{ cliente.email or 'Sin correo registrado' }}
-                </div>
-                <div class="text-white-75 small">
-                    -
-                </div>
+                <div class="portal-kpi-val">{{ kpis.total_facturas }}</div>
+                <div class="portal-kpi-lbl">Total Facturas</div>
             </div>
         </div>
 
-        <button type="button" class="btn btn-light btn-sm fw-semibold" id="btnCerrarSesionPortal">
-            <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesion
+        <!-- KPI 2: FACTURAS AL CONTADO -->
+        <div class="portal-kpi-card">
+            <div class="portal-kpi-icon" style="background: rgba(0, 230, 118, 0.12); color: #00e676;">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div>
+                <div class="portal-kpi-val" style="color: #00e676;">{{ kpis.facturas_contado }}</div>
+                <div class="portal-kpi-lbl">Facturas Contado</div>
+            </div>
+        </div>
+
+        <!-- KPI 3: FACTURAS A CRÉDITO -->
+        <div class="portal-kpi-card">
+            <div class="portal-kpi-icon" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff;">
+                <i class="bi bi-calendar-range-fill"></i>
+            </div>
+            <div>
+                <div class="portal-kpi-val" style="color: #00b0ff;">{{ kpis.facturas_credito }}</div>
+                <div class="portal-kpi-lbl">Facturas Crédito</div>
+            </div>
+        </div>
+
+        <!-- KPI 4: FACTURAS PENDIENTES -->
+        <div class="portal-kpi-card">
+            <div class="portal-kpi-icon" style="background: rgba(255, 82, 82, 0.12); color: #ff5252;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+                <div class="portal-kpi-val" style="color: #ff5252;">{{ kpis.facturas_pendientes }}</div>
+                <div class="portal-kpi-lbl">Facturas Pendientes</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- NAVEGACIÓN PESTAÑAS (TABS APEX) -->
+    <!-- ===================================== -->
+    <div class="portal-tabs-bar">
+        <button type="button" id="tab-btn-facturas" class="portal-tab-btn {% if active_tab != 'seguridad' %}active{% endif %}" onclick="switchPortalTab('facturas')">
+            <i class="bi bi-journal-check"></i> Mis Facturas e Historial de Pagos
+        </button>
+        <button type="button" id="tab-btn-seguridad" class="portal-tab-btn {% if active_tab == 'seguridad' %}active{% endif %}" onclick="switchPortalTab('seguridad')">
+            <i class="bi bi-shield-lock-fill"></i> Cambio de Contraseña
         </button>
     </div>
 
-
-
-    <ul class="nav nav-pills portal-tabs shadow-sm mb-3 flex-column flex-sm-row" id="portalTabs" role="tablist">
-        <li class="nav-item flex-fill mb-2 mb-sm-0 me-sm-2" role="presentation">
-            <button class="nav-link active w-100" id="facturas-tab" data-bs-toggle="pill" data-bs-target="#facturas" type="button" role="tab">
-                <i class="bi bi-receipt me-1"></i> Mis facturas
-            </button>
-        </li>
-        <li class="nav-item flex-fill mb-2 mb-sm-0 me-sm-2" role="presentation">
-            <button class="nav-link w-100" id="perfil-tab" data-bs-toggle="pill" data-bs-target="#perfil" type="button" role="tab">
-                <i class="bi bi-person me-1"></i> Mi perfil
-            </button>
-        </li>
-        <li class="nav-item flex-fill" role="presentation">
-            <a class="nav-link w-100" href="{{ url_for('portal_cliente.cambiar_password_cliente') }}">
-                <i class="bi bi-lock me-1"></i> Contraseña
-            </a>
-        </li>
-    </ul>
-
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="facturas" role="tabpanel">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 pb-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                    <h5 class="card-title mb-0 fw-bold text-dark text-uppercase">
-                        <i class="bi bi-wallet2 me-2 text-primary"></i>Historial de pagos
-                    </h5>
-                    <div>
-                        <div class="input-group shadow-sm" style="min-width: 240px;">
-                            <span class="input-group-text bg-primary text-white border-primary">
-                                <i class="bi bi-funnel-fill"></i>
-                            </span>
-                            <select class="form-select border-primary fw-bold text-primary" id="filtroFacturasPortal">
-                                <option value="TODAS">Todas las facturas</option>
-                                <option value="PAGADAS">Solo Pagadas</option>
-                                <option value="PENDIENTES">Solo Pendientes</option>
-                            </select>
-                        </div>
-                    </div>
+    <!-- ===================================== -->
+    <!-- PESTAÑA 1: HISTORIAL DE FACTURAS (IGUAL A HISTORIAL DE CLIENTES) -->
+    <!-- ===================================== -->
+    <div id="panel-portal-facturas" class="portal-panel-card {% if active_tab == 'seguridad' %}d-none{% endif %}">
+        
+        <!-- BARRA DE HERRAMIENTAS Y PILLS DE FILTRADO -->
+        <div class="toolbar-apex mb-3">
+            <div class="toolbar-left-group">
+                <!-- BUSCADOR POR N° FACTURA -->
+                <div class="toolbar-search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="buscarFactura" class="toolbar-input" placeholder="Buscar por N° Factura...">
                 </div>
 
-                <div class="card-body pt-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle table-hover border-light-subtle" id="tablaFacturasPortal">
-                            <thead class="bg-light text-muted uppercase text-xs fw-bold border-bottom">
-                                <tr>
-                                    <th class="p-2 p-md-3">Factura</th>
-                                    <th class="p-2 p-md-3 d-none d-lg-table-cell">Emisión</th>
-                                    <th class="p-2 p-md-3 d-none d-lg-table-cell">Vencimiento</th>
-                                    <th class="p-2 p-md-3">Total</th>
-                                    <th class="p-2 p-md-3 d-none d-md-table-cell">Abonos</th>
-                                    <th class="p-2 p-md-3">Saldo</th>
-                                    <th class="p-2 p-md-3">Estado</th>
-                                    <th class="p-2 p-md-3 text-center">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for venta in ventas %}
-                                {% set total_abonado = namespace(valor=0) %}
-                                {% for pago in venta.pagos %}
-                                {% if pago.estado == "ACTIVO" %}
-                                {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
-                                {% endif %}
-                                {% endfor %}
-                                {% set saldo = venta.total_venta - total_abonado.valor %}
-                                
-                                {% set estado_str = "ANULADA" %}
-                                {% if venta.estado.value != 'ACTIVA' %}
-                                {% set estado_str = "ANULADA" %}
-                                {% elif saldo <= 0 %}
-                                {% set estado_str = "PAGADAS" %}
-                                {% else %}
-                                {% set estado_str = "PENDIENTES" %}
-                                {% endif %}
+                <!-- TABS PILLS DE FILTRO -->
+                <div class="state-pills-bar">
+                    <button type="button" class="state-pill state-pill--active active" data-filtro="TODOS">Todos</button>
+                    <button type="button" class="state-pill" data-filtro="CONTADO">Contado</button>
+                    <button type="button" class="state-pill" data-filtro="CREDITO">Crédito</button>
+                    <button type="button" class="state-pill" data-filtro="PENDIENTE">Pendientes</button>
+                </div>
+            </div>
 
-                                <tr class="fila-factura-portal" data-estado="{{ estado_str }}">
-                                    <td class="p-2 p-md-3 fw-bold">{{ venta.numero_factura }}</td>
-                                    <td class="p-2 p-md-3 text-muted d-none d-lg-table-cell">{{ venta.fecha_venta.strftime('%d/%m/%Y') }}</td>
-                                    <td class="p-2 p-md-3 text-muted d-none d-lg-table-cell">{{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}</td>
-                                    <td class="p-2 p-md-3 fw-bold text-dark text-nowrap">C$ {{ "%.2f"|format(venta.total_venta) }}</td>
-                                    <td class="p-2 p-md-3 fw-bold text-success text-nowrap d-none d-md-table-cell">C$ {{ "%.2f"|format(total_abonado.valor) }}</td>
-                                    <td class="p-2 p-md-3 fw-bold text-secondary text-nowrap">C$ {{ "%.2f"|format(saldo) }}</td>
-                                    <td class="p-2 p-md-3">
-                                        {% if venta.estado.value != 'ACTIVA' %}
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Anulada</span>
-                                        {% elif saldo <= 0 %}
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Cancelada</span>
-                                        {% else %}
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendiente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="p-2 p-md-3 text-center text-nowrap">
-                                        <button class="btn btn-sm btn-outline-primary fw-semibold me-1" type="button" data-bs-toggle="collapse" data-bs-target="#detalleFac{{ venta.id }}">
-                                            <i class="bi bi-chevron-down"></i>
-                                        </button>
-                                        <a href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
-                                            <i class="bi bi-printer me-1"></i> Imprimir
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr class="fila-detalle collapse" id="detalleFac{{ venta.id }}" data-estado="{{ estado_str }}">
-                                    <td colspan="8" class="p-0 border-0">
-                                        <div class="p-3 border rounded" style="background-color: #f0fdf4;"> <!-- similar to bg-light-green -->
-                                            {% if saldo > 0 and venta.estado.value == 'ACTIVA' %}
-                                            <div class="alert alert-warning py-2 px-3 d-flex align-items-center mb-3">
-                                                <i class="bi bi-bell-fill me-2 fs-5"></i>
-                                                <span class="fw-semibold">Recordatorio: Tienes un pago pendiente para esta factura.</span>
+            <!-- CONTADOR DE REGISTROS -->
+            <div class="toolbar-actions-right">
+                <span id="badgeTotalVentas" class="count-badge-apex" title="Total de registros">{{ kpis.total_facturas if kpis else 0 }}</span>
+            </div>
+        </div>
+
+        <!-- TABLA HISTORIAL DE FACTURAS -->
+        <div class="portal-table-container">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-border); background-color: #0f1016;">
+                <h5 style="margin: 0; color: #ffffff; font-weight: 700; font-size: 1.05rem;">
+                    <i class="bi bi-receipt-cutoff text-success me-2"></i> Historial de Facturas
+                </h5>
+                <small style="color: var(--color-text-muted);">Listado detallado de todas las ventas y pagos de este cliente.</small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="portal-table-apex">
+                    <thead>
+                        <tr>
+                            <th>Factura #</th>
+                            <th>Fecha</th>
+                            <th>Tipo Venta</th>
+                            <th class="text-end">Total (C$)</th>
+                            <th class="text-end">Abonado (C$)</th>
+                            <th class="text-end">Saldo (C$)</th>
+                            <th>Estado Pago</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorial">
+                        {% for item in ventas_procesadas %}
+                        {% set v = item.venta %}
+                        {% set tipo_val = v.tipo_venta.value if v.tipo_venta.value is defined else v.tipo_venta %}
+                        <tr class="fila-historial" 
+                            data-factura="{{ v.numero_factura|lower }}"
+                            data-tipo="{{ tipo_val }}"
+                            data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}">
+
+                            <td class="fw-bold text-success">
+                                #{{ v.numero_factura }}
+                            </td>
+                            <td style="color: var(--color-text-muted);">
+                                {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
+                            </td>
+                            <td>
+                                <span class="badge-pill-apex" style="background: rgba(255,255,255,0.06); color: #ffffff; border: 1px solid var(--color-border);">
+                                    {{ tipo_val }}
+                                </span>
+                            </td>
+                            <td class="text-end fw-bold text-white">
+                                C$ {{ "%.2f"|format(v.total_venta) }}
+                            </td>
+                            <td class="text-end fw-bold text-success">
+                                C$ {{ "%.2f"|format(item.total_abonado) }}
+                            </td>
+                            <td class="text-end fw-bold">
+                                {% if item.saldo_pendiente > 0.01 %}
+                                <span style="color: #ff5252;">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</span>
+                                {% else %}
+                                <span style="color: #a1a1aa;">C$ 0.00</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.es_pagada %}
+                                <span class="badge-pill-apex badge-pill-apex--active">PAGADA</span>
+                                {% else %}
+                                <span class="badge-pill-apex" style="background: rgba(255,183,77,0.15); color: #ffb74d; border: 1px solid rgba(255,183,77,0.3);">PENDIENTE</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
+                                        <li>
+                                            <div class="dropdown-header-apex">
+                                                <i class="bi bi-lightning-charge-fill" style="color: #00e676; font-size: 0.8rem;"></i> ACCIONES
                                             </div>
-                                            {% endif %}
-                                            
-                                            <div class="fw-bold text-dark mb-2">Historial de Abonos</div>
-                                            {% if venta.pagos %}
-                                            <table class="table table-sm table-bordered bg-white mb-0">
-                                                <thead class="table-dark">
-                                                    <tr>
-                                                        <th class="px-2">Fecha</th>
-                                                        <th class="px-2 text-end">Monto abono</th>
-                                                        <th class="px-2 d-none d-md-table-cell">Forma</th>
-                                                        <th class="px-2 d-none d-md-table-cell">Referencia</th>
-                                                        <th class="px-2 text-center">Estado</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for pago in venta.pagos %}
-                                                    <tr>
-                                                        <td class="px-2 text-nowrap">{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
-                                                        <td class="px-2 text-end fw-bold text-success text-nowrap">C$ {{ "%.2f"|format(pago.monto_pago) }}</td>
-                                                        <td class="px-2 d-none d-md-table-cell">{{ pago.tipo_pago }}</td>
-                                                        <td class="px-2 d-none d-md-table-cell">{{ pago.referencia or '-' }}</td>
-                                                        <td class="px-2 text-center">
-                                                            {% if pago.estado == "ACTIVO" %}
-                                                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i> ACTIVO</span>
-                                                            {% else %}
-                                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-x-circle me-1"></i> ANULADO</span>
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                            {% else %}
-                                            <div class="text-muted text-sm"><i class="bi bi-info-circle me-1"></i>No hay abonos registrados para esta factura.</div>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">
-                                        No hay facturas registradas.
-                                    </td>
-                                </tr>
-                                                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Table Footer for Summary & Pagination -->
-                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-3 pt-3 border-top gap-2">
-                        <div class="text-muted text-xs" id="paginationSummaryPortal">
-                            Mostrando 0 a 0 de 0 registros
-                        </div>
-                        <nav aria-label="Navegación de tabla">
-                            <ul class="pagination pagination-sm mb-0" id="paginationControlsPortal">
-                                <!-- Generado dinámicamente -->
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('pagos.factura', venta_id=v.id) }}" target="_blank">
+                                                <i class="bi bi-printer me-2 text-info"></i> Imprimir Factura
+                                            </a>
+                                        </li>
+                                        {% if tipo_val == 'CONTADO' %}
+                                        <li>
+                                            <button type="button" class="dropdown-item btn-ver-pago-contado-trigger" data-venta-id="{{ v.id }}">
+                                                <i class="bi bi-eye me-2 text-info"></i> Ver Comprobante de Pago
+                                            </button>
+                                        </li>
+                                        {% else %}
+                                        <li>
+                                            <button type="button" class="dropdown-item btn-ver-plan-credito-trigger" data-venta-id="{{ v.id }}">
+                                                <i class="bi bi-calendar-check me-2 text-primary"></i> Ver Plan de Cuotas
+                                            </button>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+
+                                <!-- JSON DE LA VENTA PARA LOS MODALES DE CONSULTA -->
+                                <script id="venta-json-{{ v.id }}" type="application/json">
+                                {
+                                    "id": {{ v.id }},
+                                    "factura": "#{{ v.numero_factura }}",
+                                    "cliente": "{{ cliente.nombres }}",
+                                    "tipo": "{{ tipo_val }}",
+                                    "total": "C$ {{ "%.2f"|format(v.total_venta) }}",
+                                    "abonado": "C$ {{ "%.2f"|format(item.total_abonado) }}",
+                                    "saldo": "C$ {{ "%.2f"|format(item.saldo_pendiente) }}",
+                                    "imprimir_url": "{{ url_for('pagos.imprimir_cuotas', venta_id=v.id) }}",
+                                    "pagos": [
+                                        {% for p in v.pagos if p.estado == 'ACTIVO' %}
+                                        {
+                                            "fecha": "{{ p.fecha_pago.strftime('%d/%m/%Y %H:%M') if p.fecha_pago else '-' }}",
+                                            "monto": "C$ {{ "%.2f"|format(p.monto_pago) }}",
+                                            "metodo": "{{ p.tipo_pago if p.tipo_pago else '-' }}",
+                                            "banco": "{{ p.banco.nombre if p.banco else '-' }}",
+                                            "referencia": "{{ p.referencia if p.referencia else '-' }}",
+                                            "observaciones": "{{ p.observaciones if p.observaciones else '-' }}"
+                                        }{% if not loop.last %},{% endif %}
+                                        {% endfor %}
+                                    ],
+                                    "cuotas": [
+                                        {% for cuota in v.cuotas %}
+                                        {% set saldo_cuota = (cuota.monto_cuota | float) - (cuota.monto_abonado | float) %}
+                                        {% set es_cuota_pagada = saldo_cuota <= 0.01 %}
+                                        {% set ultimo_pago = (cuota.pagos | selectattr('estado', 'equalto', 'ACTIVO') | list | last) if cuota.pagos else None %}
+                                        {
+                                            "numero": "{{ cuota.numero_cuota }}",
+                                            "vencimiento": "{{ cuota.fecha_vencimiento.strftime('%d/%m/%Y') if cuota.fecha_vencimiento else '-' }}",
+                                            "gracia": "{{ cuota.fecha_vencimiento_gracia.strftime('%d/%m/%Y') if cuota.fecha_vencimiento_gracia else '-' }} (+{{ cuota.dias_gracia }}d)",
+                                            "monto": "C$ {{ "%.2f"|format(cuota.monto_cuota) }}",
+                                            "estado": "{% if es_cuota_pagada %}PAGADA{% elif cuota.fecha_vencimiento_gracia and now.date() > cuota.fecha_vencimiento_gracia %}VENCIDA{% elif cuota.fecha_vencimiento and now.date() > cuota.fecha_vencimiento %}EN GRACIA{% else %}PENDIENTE{% endif %}",
+                                            "metodo_pago": "{{ ultimo_pago.tipo_pago if (ultimo_pago and ultimo_pago.tipo_pago) else '-' }}",
+                                            "referencia": "{{ ultimo_pago.referencia if (ultimo_pago and ultimo_pago.referencia) else '-' }}",
+                                            "banco": "{{ ultimo_pago.banco.nombre if (ultimo_pago and ultimo_pago.banco) else '-' }}",
+                                            "comentarios": "{{ ultimo_pago.observaciones if (ultimo_pago and ultimo_pago.observaciones) else '-' }}"
+                                        }{% if not loop.last %},{% endif %}
+                                        {% endfor %}
+                                    ]
+                                }
+                                </script>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i> No tienes facturas ni compras registradas aún.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="tab-pane fade" id="perfil" role="tabpanel">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3 pb-2">
-                    <h5 class="card-title mb-0 fw-bold text-dark text-uppercase">
-                        <i class="bi bi-person me-2 text-primary"></i>Mi perfil
-                    </h5>
-                </div>
-
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label text-xs fw-semibold text-muted mb-1">Nombre / Razon social</label>
-                            <input type="text" class="form-control" value="{{ cliente.nombres }}" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-xs fw-semibold text-muted mb-1">Telefono</label>
-                            <input type="text" class="form-control" value="{{ cliente.telefono or '' }}" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-xs fw-semibold text-muted mb-1">Correo</label>
-                            <input type="text" class="form-control" value="{{ cliente.email or '' }}" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-xs fw-semibold text-muted mb-1">Ciudad</label>
-                            <input type="text" class="form-control" value="{{ cliente.ciudad or '' }}" readonly>
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label text-xs fw-semibold text-muted mb-1">Direccion</label>
-                            <input type="text" class="form-control" value="-" readonly>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+
+    <!-- ===================================== -->
+    <!-- PESTAÑA 2: CAMBIO DE CONTRASEÑA -->
+    <!-- ===================================== -->
+    <div id="panel-portal-seguridad" class="portal-panel-card {% if active_tab != 'seguridad' %}d-none{% endif %}">
+        
+        <div class="border-bottom border-secondary pb-3 mb-4" style="border-color: rgba(255,255,255,0.08) !important;">
+            <h5 class="fw-bold text-warning m-0">
+                <i class="bi bi-shield-lock-fill me-2 fs-4"></i> Cambiar Mi Contraseña
+            </h5>
+            <span class="text-muted small">Actualiza tus credenciales de acceso al portal de clientes.</span>
+        </div>
+
+        <div class="alert alert-info d-flex align-items-center gap-2 mb-4" style="background: rgba(255,183,77,0.08); border: 1px solid rgba(255,183,77,0.2); color: #ffb74d; border-radius: 12px; padding: 12px 18px; font-size: 0.85rem;">
+            <i class="bi bi-info-circle-fill fs-4 flex-shrink-0"></i>
+            <div>Para cambiar tu clave debes ingresar tu <strong>Contraseña Actual</strong> y especificar una <strong>Nueva Contraseña</strong> de al menos 6 caracteres.</div>
+        </div>
+
+        <form id="formCambiarPassPortal" action="{{ url_for('portal_cliente.portal') }}" method="POST" novalidate>
+            <input type="hidden" name="action" value="cambiar_password">
+
+            <div class="row g-3 mb-4">
+                <!-- CONTRASEÑA ACTUAL -->
+                <div class="col-12">
+                    <label class="login-label">CONTRASEÑA ACTUAL <span class="text-danger">*</span></label>
+                    <div class="position-relative">
+                        <input type="password" id="passActPortal" name="password_actual" class="portal-input-dark" placeholder="Ingresa tu contraseña actual" style="padding-right: 44px;" data-error-id="err-pass-act">
+                        <button type="button" class="login-eye-btn" data-toggle-password title="Mostrar/Ocultar contraseña">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback-apex" id="err-pass-act" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 5px;">Por favor ingresa tu contraseña actual.</div>
+                </div>
+
+                <!-- NUEVA CONTRASEÑA -->
+                <div class="col-md-6">
+                    <label class="login-label">NUEVA CONTRASEÑA <span class="text-danger">*</span></label>
+                    <div class="position-relative">
+                        <input type="password" id="passNuePortal" name="nueva_password" class="portal-input-dark" placeholder="Mínimo 6 caracteres" style="padding-right: 44px;" data-error-id="err-pass-nue">
+                        <button type="button" class="login-eye-btn" data-toggle-password title="Mostrar/Ocultar contraseña">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback-apex" id="err-pass-nue" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 5px;">Mínimo 6 caracteres requeridos.</div>
+                </div>
+
+                <!-- CONFIRMAR CONTRASEÑA -->
+                <div class="col-md-6">
+                    <label class="login-label">CONFIRMAR NUEVA CONTRASEÑA <span class="text-danger">*</span></label>
+                    <div class="position-relative">
+                        <input type="password" id="passConPortal" name="confirmar_password" class="portal-input-dark" placeholder="Repite la nueva contraseña" style="padding-right: 44px;" data-error-id="err-pass-con">
+                        <button type="button" class="login-eye-btn" data-toggle-password title="Mostrar/Ocultar contraseña">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback-apex" id="err-pass-con" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 5px;">Las contraseñas no coinciden o está vacía.</div>
+                </div>
+            </div>
+
+            <div class="border-top border-secondary pt-3 d-flex justify-content-end gap-2" style="border-color: rgba(255,255,255,0.08) !important;">
+                <button type="button" class="btn-apex-outline" onclick="switchPortalTab('facturas')" style="padding: 10px 20px; font-weight: 700;">
+                    <i class="bi bi-arrow-left me-1"></i> Volver a Facturas
+                </button>
+                <button type="submit" class="btn-neon-amber">
+                    <i class="bi bi-shield-check me-1 fs-5"></i> Actualizar Contraseña
+                </button>
+            </div>
+        </form>
+
+    </div>
+
 </div>
 
-<!-- MODAL CERRAR SESIÓN -->
-<div class="modal fade" id="modalLogoutPortal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: #003891; color: white;">
-                <h5 class="modal-title">
-                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+<!-- ===================================== -->
+<!-- MODAL DETALLE PAGO CONTADO -->
+<!-- ===================================== -->
+<div class="modal fade" id="modalDetallePagoContado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; color: #ffffff;">
+            <div class="modal-header border-bottom border-secondary py-3 px-4" style="border-color: rgba(255,255,255,0.08) !important;">
+                <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                    <i class="bi bi-receipt text-success fs-5"></i> Detalle de Pago Contado
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center">
-                <i class="bi bi-door-open text-primary mb-3" style="font-size: 3.5rem;"></i>
-                <p class="fs-5 mb-0">¿Estás seguro de que deseas salir del sistema?</p>
+            <div class="modal-body p-4">
+                <div style="background: #181922; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; font-size: 0.9rem;">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">N° Factura</span><br>
+                            <strong id="detContadoFactura" style="color: #00e676; font-size: 1.05rem;"></strong>
+                        </div>
+                        <div class="col-6">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">Cliente</span><br>
+                            <strong id="detContadoCliente" style="color: #ffffff;"></strong>
+                        </div>
+                        <div class="col-6">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">Monto Pagado</span><br>
+                            <strong id="detContadoTotal" style="color: #00e676; font-size: 1.1rem;"></strong>
+                        </div>
+                        <div class="col-6">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">Fecha de Pago</span><br>
+                            <strong id="detContadoFecha" style="color: #ffffff;"></strong>
+                        </div>
+                        <div class="col-6">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">Método de Pago</span><br>
+                            <span id="detContadoMetodo" class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff; padding: 3px 8px; font-size: 0.78rem;"></span>
+                        </div>
+                        <div class="col-6">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">Banco</span><br>
+                            <strong id="detContadoBanco" style="color: #ffffff;"></strong>
+                        </div>
+                        <div class="col-12">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">N° Referencia</span><br>
+                            <strong id="detContadoReferencia" style="color: #ffffff;"></strong>
+                        </div>
+                        <div class="col-12">
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">Observaciones</span><br>
+                            <span id="detContadoObs" style="color: var(--color-text-muted);"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-primary" style="background-color: #003891; border-color: #003891;">Sí, salir</a>
+            <div class="modal-footer border-top border-secondary justify-content-center py-3" style="border-color: rgba(255,255,255,0.08) !important;">
+                <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="padding: 8px 24px;">Cerrar</button>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const filtroFacturasPortal = document.getElementById("filtroFacturasPortal");
-        
-        // Paginación y filtro variables
-        let currentPage = 1;
-        const itemsPerPage = 5; // Mostrar de 5 en 5
-        const allRows = Array.from(document.querySelectorAll("#tablaFacturasPortal .fila-factura-portal"));
-        let filteredRows = [...allRows];
+<!-- ===================================== -->
+<!-- MODAL DETALLE PLAN DE CUOTAS (CRÉDITO) -->
+<!-- ===================================== -->
+<div class="modal fade" id="modalDetallePlanCredito" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 900px;">
+        <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; color: #ffffff;">
+            <div class="modal-header border-bottom border-secondary py-3 px-4 d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.08) !important;">
+                <h5 class="modal-title fw-bold text-white m-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar-range text-success fs-5"></i> Plan de Cuotas - <span id="creditoTitleFactura" style="color: #00e676;"></span>
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a id="btnImprimirPlanPdf" href="#" target="_blank" class="btn-apex-outline btn--small">
+                        <i class="bi bi-printer me-1 text-info"></i> Imprimir Plan PDF
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
 
-        function getDetalleRow(row) {
-            return row.nextElementSibling;
-        }
+            <div class="modal-body p-4">
+                <!-- TARJETAS DE RESUMEN DEL CRÉDITO -->
+                <div class="row g-3 mb-3">
+                    <div class="col-4">
+                        <div class="p-3" style="background: #181922; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
+                            <span style="color: var(--color-text-muted); font-size: 0.78rem;">Total Venta</span>
+                            <h4 id="creditoMontoTotal" style="color: #ffffff; margin: 4px 0 0 0; font-weight: 800; font-size: 1.25rem;"></h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3" style="background: #181922; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
+                            <span style="color: var(--color-text-muted); font-size: 0.78rem;">Total Abonado</span>
+                            <h4 id="creditoMontoAbonado" style="color: #00e676; margin: 4px 0 0 0; font-weight: 800; font-size: 1.25rem;"></h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3" style="background: #181922; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;">
+                            <span style="color: var(--color-text-muted); font-size: 0.78rem;">Saldo Pendiente</span>
+                            <h4 id="creditoSaldoPendiente" style="color: #ff5252; margin: 4px 0 0 0; font-weight: 800; font-size: 1.25rem;"></h4>
+                        </div>
+                    </div>
+                </div>
 
-        function filtrarFacturas() {
-            const estado = filtroFacturasPortal ? filtroFacturasPortal.value : "TODAS";
+                <!-- TABLA DE CUOTAS Y PAGOS -->
+                <div class="portal-table-container">
+                    <div class="table-responsive">
+                        <table class="portal-table-apex">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Cuota</th>
+                                    <th>Fecha Vencimiento</th>
+                                    <th class="text-end">Monto (C$)</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Método Pago</th>
+                                    <th class="text-center">Referencia</th>
+                                    <th class="text-center">Banco</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCuotasCreditoBody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-            filteredRows = allRows.filter(row => {
-                const coincideEstado = (estado === "TODAS" || row.dataset.estado === estado);
-                return coincideEstado;
-            });
+            <div class="modal-footer border-top border-secondary justify-content-center py-3" style="border-color: rgba(255,255,255,0.08) !important;">
+                <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="padding: 8px 24px;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-            currentPage = 1;
-            renderTable();
-        }
+<!-- ===================================== -->
+<!-- MODAL CONFIRMACIÓN CERRAR SESIÓN PORTAL (APEX DARK GLASSMORPHISM) -->
+<!-- ===================================== -->
+<div class="modal fade" id="modalLogoutPortal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 390px;">
+        <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 22px; color: #ffffff; box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 35px rgba(255, 82, 82, 0.18); backdrop-filter: blur(16px);">
+            <div class="modal-body text-center p-4">
+                
+                <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; border-radius: 50%; background: rgba(255, 82, 82, 0.12); border: 2px solid rgba(255, 82, 82, 0.3); color: #ff5252; box-shadow: 0 0 25px rgba(255, 82, 82, 0.25);">
+                    <i class="bi bi-box-arrow-right" style="font-size: 2.2rem;"></i>
+                </div>
 
-        function initPagination() {
-            filteredRows = [...allRows];
-            renderTable();
-        }
+                <h4 class="fw-bold text-white mb-2" style="font-size: 1.3rem;">¿Cerrar Sesión?</h4>
+                <p style="color: #cbd5e1; font-size: 0.92rem; margin-bottom: 16px; line-height: 1.4;">
+                    ¿Estás seguro de que deseas salir del Portal del Cliente?
+                </p>
 
-        function renderTable() {
-            const totalItems = filteredRows.length;
-            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+                <div class="p-2.5 rounded-3 mb-4" style="background: rgba(255, 82, 82, 0.08); border: 1px dashed rgba(255, 82, 82, 0.25); color: #ff8a8a; font-size: 0.8rem; text-align: center;">
+                    <i class="bi bi-shield-exclamation me-1"></i> Se cerrará tu acceso actual y deberás autenticarte nuevamente.
+                </div>
 
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="flex: 1; padding: 10px 14px; font-weight: 700;">
+                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
+                    <a href="{{ url_for('auth.logout') }}" class="btn-logout-confirm" style="flex: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-box-arrow-right me-1"></i> Sí, Salir
+                    </a>
+                </div>
 
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-            // Ocultar todas las filas primero
-            allRows.forEach(row => {
-                row.style.display = "none";
-                const detalle = getDetalleRow(row);
-                if (detalle && detalle.classList.contains("fila-detalle")) {
-                    detalle.style.display = "none";
-                    // Forzar que se cierre si estaba abierto
-                    const bsCollapse = bootstrap.Collapse.getInstance(detalle);
-                    if (bsCollapse) {
-                        bsCollapse.hide();
-                    } else {
-                        detalle.classList.remove("show");
-                    }
-                }
-            });
-
-            // Mostrar solo las filas de la página actual
-            for (let i = startIndex; i < endIndex; i++) {
-                if (filteredRows[i]) {
-                    filteredRows[i].style.display = "";
-                    const detalle = getDetalleRow(filteredRows[i]);
-                    if (detalle && detalle.classList.contains("fila-detalle")) {
-                        detalle.style.display = "";
-                    }
-                }
-            }
-
-            document.getElementById("paginationSummaryPortal").innerText =
-                totalItems > 0
-                    ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
-                    : "Mostrando 0 a 0 de 0 registros";
-
-            renderControls(totalPages);
-        }
-
-        function renderControls(totalPages) {
-            const controlsContainer = document.getElementById("paginationControlsPortal");
-            if (!controlsContainer) return;
-            controlsContainer.innerHTML = "";
-
-            if (totalPages <= 1) return;
-
-            const prevLi = document.createElement("li");
-            prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-            prevLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
-            prevLi.addEventListener("click", e => {
-                e.preventDefault();
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderTable();
-                }
-            });
-            controlsContainer.appendChild(prevLi);
-
-            for (let i = 1; i <= totalPages; i++) {
-                const pageLi = document.createElement("li");
-                pageLi.className = `page-item ${currentPage === i ? "active" : ""}`;
-                pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                pageLi.addEventListener("click", e => {
-                    e.preventDefault();
-                    currentPage = i;
-                    renderTable();
-                });
-                controlsContainer.appendChild(pageLi);
-            }
-
-            const nextLi = document.createElement("li");
-            nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-            nextLi.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
-            nextLi.addEventListener("click", e => {
-                e.preventDefault();
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTable();
-                }
-            });
-            controlsContainer.appendChild(nextLi);
-        }
-
-        if (filtroFacturasPortal) {
-            filtroFacturasPortal.addEventListener("change", filtrarFacturas);
-        }
-
-        // Inicializar
-        initPagination();
-
-        // Modal de Logout
-        const btnLogoutPortal = document.getElementById("btnCerrarSesionPortal");
-        if (btnLogoutPortal) {
-            const modalLogoutPortal = new bootstrap.Modal(document.getElementById("modalLogoutPortal"));
-            btnLogoutPortal.addEventListener("click", function(e) {
-                e.preventDefault();
-                modalLogoutPortal.show();
-            });
-        }
-    });
-</script>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

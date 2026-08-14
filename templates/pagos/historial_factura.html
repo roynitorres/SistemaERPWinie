@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}Historial Factura #{{ venta.numero_factura }}{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-clock-history"></i> Historial de Pago de Factura
+{% endblock %}
+
+{% block content %}
+    <!-- ===================================== -->
+    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
+    <!-- ===================================== -->
+    <div class="page-header-apex" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div class="breadcrumbs-apex">
+                Salpicadero &gt; <a href="{{ url_for('pagos.facturas', tipo=venta.tipo_venta.value.lower()) }}" style="color: var(--color-text-muted); text-decoration: none;">Pagos {{ venta.tipo_venta.value|capitalize }}</a> &gt; <span>Factura #{{ venta.numero_factura }}</span>
+            </div>
+            <h1 class="page-title-apex">Factura #{{ venta.numero_factura }}</h1>
+            <p class="page-subtitle-apex">
+                Cliente: <strong style="color: #ffffff;">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</strong> | 
+                Tipo: <strong style="color: var(--color-primary);">{{ venta.tipo_venta.value }}</strong> | 
+                Fecha: <strong style="color: #ffffff;">{{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}</strong>
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="javascript:history.back()" class="btn-apex-outline">
+                <i class="bi bi-arrow-left me-1"></i> Volver a Pagos
+            </a>
+            {% if not kpis.es_pagada %}
+            <button type="button" class="btn-neon-primary" id="btnAbonarFacturaModal">
+                <i class="bi bi-plus-circle me-1"></i> Registrar Abono / Pago
+            </button>
+            {% endif %}
+            <a href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank" class="btn-apex-outline">
+                <i class="bi bi-printer me-1"></i> Imprimir Factura
+            </a>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- TARJETAS KPI DE RESUMEN APEX DARK -->
+    <!-- ===================================== -->
+    <div class="grid grid--4-cols" style="margin-bottom: 24px;">
+        <!-- KPI 1: Total Factura -->
+        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Total Factura</span>
+                <h2 style="color: #ffffff; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.total_facturado) }}</h2>
+            </div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.12); color: #00e676; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="bi bi-receipt"></i>
+            </div>
+        </div>
+
+        <!-- KPI 2: Total Abonado / Recaudado -->
+        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Total Abonado</span>
+                <h2 style="color: #00e676; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.total_abonado) }}</h2>
+            </div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 176, 255, 0.12); color: #00b0ff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+        </div>
+
+        <!-- KPI 3: Saldo Pendiente -->
+        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Saldo Pendiente</span>
+                {% if kpis.saldo_pendiente > 0 %}
+                <h2 style="color: #ff5252; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.saldo_pendiente) }}</h2>
+                {% else %}
+                <h2 style="color: #00e676; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ 0.00</h2>
+                {% endif %}
+            </div>
+            {% if kpis.saldo_pendiente > 0 %}
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 82, 82, 0.12); color: #ff5252; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            {% else %}
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.12); color: #00e676; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- KPI 4: Estado Pago -->
+        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Estado Pago</span>
+                <div style="margin-top: 4px;">
+                    {% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %}
+                    {% set total_cuotas_count = venta.cuotas|length %}
+                    {% set cuotas_pagadas_count = venta.cuotas | selectattr('estado', 'equalto', 'PAGADA') | list | length %}
+                    <div style="font-size: 0.92rem; font-weight: 800; color: #00e676; margin-bottom: 4px;">
+                        Cuotas: {{ cuotas_pagadas_count }}/{{ total_cuotas_count }}
+                    </div>
+                    {% endif %}
+                    {% if kpis.es_pagada %}
+                    <span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.9rem; padding: 4px 12px;">PAGADA</span>
+                    {% else %}
+                    <span class="badge-pill-apex badge-pill-apex--inactive" style="font-size: 0.9rem; padding: 4px 12px;">PENDIENTE</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 183, 77, 0.12); color: #ffb74d; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- TABLA DE PLAN DE CUOTAS Y AMORTIZACIÓN -->
+    <!-- ===================================== -->
+    {% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %}
+    <div class="panel mb-4" style="padding: 0; overflow: hidden; background-color: #121318; border: 1px solid var(--color-border); border-radius: 16px;">
+        <div style="padding: 16px 24px; border-bottom: 1px solid var(--color-border); background-color: #0f1016; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h5 style="margin: 0; color: #ffffff; font-weight: 700;">
+                    <i class="bi bi-calendar-range-fill text-warning me-2"></i> Calendario de Cuotas y Amortización
+                </h5>
+                <small style="color: var(--color-text-muted);">Seguimiento de las cuotas programadas con sus 2 días de gracia por vencimiento.</small>
+            </div>
+            <div>
+                <a href="{{ url_for('pagos.imprimir_cuotas', venta_id=venta.id) }}" target="_blank" class="btn-apex-outline btn--small" style="font-size: 0.84rem; padding: 6px 14px; border-color: rgba(255, 82, 82, 0.4); color: #ff5252;">
+                    <i class="bi bi-file-earmark-pdf-fill me-1" style="color: #ff5252;"></i> Imprimir Plan PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table" style="margin-bottom: 0;">
+                <thead class="data-table__head">
+                    <tr>
+                        <th style="text-align: center;">Cuota</th>
+                        <th>Fecha Vencimiento</th>
+                        <th style="text-align: right;">Monto Cuota (C$)</th>
+                        <th style="text-align: center;">Estado</th>
+                        <th style="text-align: center;">Método Pago</th>
+                        <th style="text-align: center;">Referencia</th>
+                        <th style="text-align: center;">Banco</th>
+                        <th>Comentarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cuota in venta.cuotas %}
+                    {% set saldo_cuota = (cuota.monto_cuota | float) - (cuota.monto_abonado | float) %}
+                    {% set es_cuota_pagada = saldo_cuota <= 0.01 %}
+                    {% set ultimo_pago = (cuota.pagos | selectattr('estado', 'equalto', 'ACTIVO') | list | last) if cuota.pagos else None %}
+                    <tr class="data-table__row">
+                        <td class="data-table__cell text-center" style="font-weight: 800; color: var(--color-primary);">Cuota {{ cuota.numero_cuota }}</td>
+                        <td class="data-table__cell">
+                            <span style="color: #ffffff; font-weight: 600;">{{ cuota.fecha_vencimiento.strftime('%d/%m/%Y') if cuota.fecha_vencimiento else '-' }}</span><br>
+                            <small style="color: #ffb74d; font-size: 0.78rem;">Gracia: {{ cuota.fecha_vencimiento_gracia.strftime('%d/%m/%Y') if cuota.fecha_vencimiento_gracia else '-' }} (+{{ cuota.dias_gracia }}d)</small>
+                        </td>
+                        <td class="data-table__cell text-end" style="font-weight: 700; color: #ffffff;">C$ {{ "%.2f"|format(cuota.monto_cuota) }}</td>
+                        <td class="data-table__cell text-center">
+                            {% if es_cuota_pagada %}
+                            <span class="badge-pill-apex badge-pill-apex--active">PAGADA</span>
+                            {% elif cuota.fecha_vencimiento_gracia and now.date() > cuota.fecha_vencimiento_gracia %}
+                            <span class="badge-pill-apex badge-pill-apex--inactive" style="background: rgba(255,82,82,0.15); color: #ff5252;">VENCIDA</span>
+                            {% elif cuota.fecha_vencimiento and now.date() > cuota.fecha_vencimiento %}
+                            <span class="badge-pill-apex" style="background: rgba(255,183,77,0.15); color: #ffb74d; border: 1px solid rgba(255,183,77,0.3);">EN GRACIA</span>
+                            {% else %}
+                            <span class="badge-pill-apex" style="background: rgba(0,176,255,0.12); color: #00b0ff; border: 1px solid rgba(0,176,255,0.2);">PENDIENTE</span>
+                            {% endif %}
+                        </td>
+                        <td class="data-table__cell text-center " style="font-size: 0.88rem;">
+                            {% if ultimo_pago and ultimo_pago.tipo_pago %}
+                            <span class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff; border: 1px solid rgba(0, 176, 255, 0.2);">
+                                {{ ultimo_pago.tipo_pago }}
+                            </span>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td class="data-table__cell text-center " style="font-size: 0.88rem;">
+                            {{ ultimo_pago.referencia if (ultimo_pago and ultimo_pago.referencia) else '-' }}
+                        </td>
+                        <td class="data-table__cell text-center " style="font-size: 0.88rem;">
+                            {{ ultimo_pago.banco.nombre if (ultimo_pago and ultimo_pago.banco) else '-' }}
+                        </td>
+                        <td class="data-table__cell" style="font-size: 0.85rem;">
+                            {{ ultimo_pago.observaciones if (ultimo_pago and ultimo_pago.observaciones) else '-' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===================================== -->
+    <!-- MODAL REGISTRAR ABONO / PAGO APEX DARK -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalRegistrarAbono">
+        <div class="modal-window" style="max-width: 580px;">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color: #ffffff;">
+                    <i class="bi bi-cash-stack text-success me-2"></i> Registrar Abono a Factura #{{ venta.numero_factura }}
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalRegistrarAbono')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form id="formRegistrarAbono">
+                <input type="hidden" name="venta_id" value="{{ venta.id }}">
+
+                <div class="modal-body py-3 d-flex flex-column gap-3">
+                    
+                    <!-- FILA 1: SELECCIONAR CUOTA Y MONTO -->
+                    <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px;">
+                        {% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %}
+                        <div class="form-group" id="grupoSeleccionCuota">
+                            <label class="form-label form-label--required">Cuota a Abonar</label>
+                            <select class="form-input" id="abono_select_cuota" name="cuota_id" style="font-weight: 700; color: var(--color-primary);">
+                                <option value="">-- Seleccionar cuota --</option>
+                                {% for cuota in venta.cuotas %}
+                                {% set saldo_c = (cuota.monto_cuota | float) - (cuota.monto_abonado | float) %}
+                                {% if saldo_c > 0.01 %}
+                                <option value="{{ cuota.id }}" data-saldo="{{ "%.2f"|format(saldo_c) }}" data-numero="{{ cuota.numero_cuota }}">
+                                    Cuota #{{ cuota.numero_cuota }} - Pendiente: C$ {{ "%.2f"|format(saldo_c) }}
+                                </option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% else %}
+                        <input type="hidden" name="cuota_id" id="abono_cuota_id" value="">
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label class="form-label form-label--required">Monto a Abonar (C$)</label>
+                            <input type="number" step="0.01" class="form-input" id="abono_monto_pago" name="monto_pago" 
+                                max="{{ "%.2f"|format(kpis.saldo_pendiente) }}" value="{{ "%.2f"|format(kpis.saldo_pendiente) }}" required style="font-weight: 800; color: #00e676; font-size: 1.1rem;">
+                        </div>
+                    </div>
+
+                    <!-- FILA 2: MÉTODO PAGO Y FECHA PAGO -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label">Método de Pago</label>
+                            <select class="form-input" id="abono_tipo_pago" name="tipo_pago">
+                                <option value="EFECTIVO" selected>Efectivo</option>
+                                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                                <option value="MIXTO">Mixto (Efectivo + Transferencia)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fecha del Pago</label>
+                            <input type="date" class="form-input" id="abono_fecha_pago" name="fecha_pago" value="{{ now.strftime('%Y-%m-%d') }}">
+                        </div>
+                    </div>
+
+                    <!-- SUB-CAMPOS PAGO MIXTO -->
+                    <div id="cajaPagoMixto" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; background: #181922; border-radius: 10px; border: 1px solid var(--color-border);">
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.78rem;">Monto Efectivo (C$)</label>
+                            <input type="number" step="0.01" class="form-input" id="abono_monto_efectivo" name="monto_efectivo" value="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.78rem;">Monto Transferencia (C$)</label>
+                            <input type="number" step="0.01" class="form-input" id="abono_monto_transferencia" name="monto_transferencia" value="0.00">
+                        </div>
+                    </div>
+
+                    <!-- FILA 3: BANCO Y REFERENCIA (TRANSFERENCIA / MIXTO) -->
+                    <div id="cajaCamposBancoRef" style="display: none; grid-template-columns: 1.2fr 1fr; gap: 14px;">
+                        <div class="form-group" id="grupoBanco">
+                            <label class="form-label">Banco</label>
+                            <div style="display: flex; gap: 8px;">
+                                <select class="form-input" id="abono_banco_id" name="banco_id" style="flex-grow: 1;">
+                                    <option value="">Cargando bancos...</option>
+                                </select>
+                                <button type="button" class="btn-apex-outline" id="btnAbrirNuevoBancoModal" title="Agregar Banco" style="white-space: nowrap; padding: 8px 10px;">
+                                    <i class="bi bi-plus-lg"></i> Banco
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="grupoReferencia">
+                            <label class="form-label">N° de Referencia</label>
+                            <input type="text" class="form-input" id="abono_referencia" name="referencia" placeholder="Ej. TR-99882211">
+                        </div>
+                    </div>
+
+                    <!-- FILA 4: OBSERVACIONES -->
+                    <div class="form-group">
+                        <label class="form-label">Observaciones / Comentario</label>
+                        <textarea class="form-input" id="abono_observaciones" name="observaciones" rows="2" placeholder="Notas internas del abono..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalRegistrarAbono')">Cancelar</button>
+                    <button type="submit" class="btn-neon-primary" id="btnGuardarAbonoSubmit">
+                        <i class="bi bi-check-lg me-1"></i> Confirmar Abono
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AGREGAR NUEVO BANCO -->
+    <div class="modal-overlay" id="modalNuevoBanco" style="z-index: 1200;">
+        <div class="modal-window" style="max-width: 400px;">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color: #ffffff;">
+                    <i class="bi bi-bank text-primary me-2"></i> Nuevo Banco
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalNuevoBanco')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body py-3">
+                <div class="form-group">
+                    <label class="form-label form-label--required">Nombre del Banco</label>
+                    <input type="text" class="form-input" id="nuevo_banco_nombre" placeholder="Ej. BAC Credomatic / Banpro" required>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalNuevoBanco')">Cancelar</button>
+                <button type="button" class="btn-neon-primary" id="btnGuardarNuevoBanco">
+                    <i class="bi bi-check-lg me-1"></i> Guardar Banco
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANULAR PAGO DIRECTO -->
+    <div class="modal-overlay" id="modalAnularPago">
+        <div class="modal-window" style="max-width: 450px;">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> Anular Abono
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAnularPago')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body py-3">
+                <p style="color: var(--color-text-muted); font-size: 0.9rem;">Indique la razón por la cual está anulando este pago:</p>
+                <div class="form-group">
+                    <label class="form-label form-label--required">Motivo de Anulación</label>
+                    <textarea class="form-input" id="motivoAnulacionPago" rows="3" placeholder="Escriba el motivo..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalAnularPago')">Cancelar</button>
+                <button type="button" class="btn-neon-primary" id="btnConfirmarAnularPago" style="background: #ff5252; border-color: #ff5252; color: #ffffff;">
+                    Confirmar Anulación
+                </button>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,153 +1,284 @@
-/* static/css/reporte_financiero.css */
+/* ==========================================================================
+   REPORTE FINANCIERO — Apex Shadcn Dashboard Style
+   ========================================================================== */
 
-.report-table-card {
-    background: #ffffff;
+/* ─── BARRA DE NAVEGACIÓN Y FILTROS ────── */
+.rpt-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    background: #121318;
+    border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+}
+
+.rpt-month-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: #181922;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.rpt-month-picker i {
+    color: #00e676;
+    font-size: 1.1rem;
+}
+
+.rpt-month-picker select {
     border: none;
-    height: 100%;
+    outline: none;
+    background: transparent;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.rpt-nav-sep {
+    width: 1px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+}
+
+.rpt-nav .btn {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    gap: 8px;
+}
+
+.rpt-nav .btn.active {
+    background: #00e676;
+    color: #000000;
+    border-color: #00e676;
+    font-weight: 700;
+}
+
+/* ─── SECCIONES Y ANIMACIÓN ────── */
+.seccion-reporte {
+    display: block;
+    animation: rptFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.seccion-reporte.oculto {
+    display: none;
+}
+
+@keyframes rptFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── TARJETAS KPI ESTILO APEX SHADCN ────── */
+.rpt-kpi-grid-apex {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 1200px) { .rpt-kpi-grid-apex { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 650px)  { .rpt-kpi-grid-apex { grid-template-columns: 1fr; } }
+
+.rpt-kpi-apex {
+    background: #13141c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px 24px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    transition: all 0.3s;
+    justify-content: space-between;
+    min-height: 130px;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.report-table-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+.rpt-kpi-apex:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.report-table-header {
-    background: #f8fafc;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
+.rpt-kpi-apex__head {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.report-table-title {
+.rpt-kpi-apex__label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #9496a1;
+    letter-spacing: 0.01em;
+}
+
+.rpt-kpi-apex__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.rpt-kpi-apex__icon--teal { background: rgba(0, 176, 255, 0.12); color: #00b0ff; }
+.rpt-kpi-apex__icon--green { background: rgba(0, 230, 118, 0.12); color: #00e676; }
+.rpt-kpi-apex__icon--purple { background: rgba(124, 58, 237, 0.12); color: #a78bfa; }
+.rpt-kpi-apex__icon--amber { background: rgba(255, 183, 77, 0.12); color: #ffb74d; }
+.rpt-kpi-apex__icon--red { background: rgba(255, 82, 82, 0.12); color: #ff5252; }
+
+.rpt-kpi-apex__value {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    margin: 8px 0 4px 0;
+    line-height: 1.1;
+}
+
+.rpt-kpi-apex__trend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.rpt-kpi-apex__trend--up { color: #00e676; }
+.rpt-kpi-apex__trend--down { color: #ff5252; }
+.rpt-kpi-apex__trend--neutral { color: #9496a1; }
+
+/* ─── PANELES ESTILO APEX SHADCN ────── */
+.rpt-panel-apex {
+    background: #13141c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+}
+
+.rpt-panel-apex__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    background: #0f1016;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rpt-panel-apex__title {
     margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.data-table__head th {
+    color: #cbd5e1 !important;
+    background-color: #0f1016 !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+}
+
+.rpt-panel-apex__body {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 380px;
+}
+
+.rpt-panel-apex__footer {
+    padding: 16px 24px;
+    background: #0f1016;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rpt-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.rpt-footer-row + .rpt-footer-row {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.rpt-total-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #9496a1;
+    text-transform: uppercase;
+}
+
+.rpt-total-value {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1e293b;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.report-table-body {
-    flex: 1;
-    overflow-x: auto;
-    padding: 0;
-}
-
-.report-table {
-    width: 100%;
-    margin: 0;
-    border-collapse: collapse;
-}
-
-.report-table th {
-    background-color: #f1f5f9;
-    color: #475569;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    padding: 0.75rem 1rem;
-    white-space: nowrap;
-    border-bottom: 2px solid #e2e8f0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.report-table td {
-    padding: 0.75rem 1rem;
-    color: #334155;
-    font-size: 0.875rem;
-    vertical-align: middle;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.report-table tbody tr:hover td {
-    background-color: #f8fafc;
-}
-
-.report-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.report-table-footer {
-    background: #f8fafc;
-    padding: 1rem 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.subtotal-label {
-    color: #64748b;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.subtotal-value {
-    color: #0f172a;
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.subtotal-value.text-success { color: #059669 !important; }
-.subtotal-value.text-danger { color: #dc2626 !important; }
-.subtotal-value.text-primary { color: #2563eb !important; }
-.subtotal-value.text-warning { color: #d97706 !important; }
-
-/* Styles for lists (like Table 1 and 2) */
-.list-group-flush .list-group-item {
-    border-color: #f1f5f9;
-    padding: 1rem 1.5rem;
-    color: #334155;
-}
-
-.list-group-flush .list-group-item:last-child {
-    border-bottom: none;
-}
-
-/* Empty states */
-.empty-state {
-    padding: 3rem 1rem;
-    text-align: center;
-    color: #94a3b8;
-}
-
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: #cbd5e1;
-}
-
-/* Filter buttons */
-.filter-btn-group .btn {
-    border-radius: 20px;
-    padding: 0.375rem 1rem;
-    font-weight: 600;
-    font-size: 0.875rem;
-    border: 1px solid #e2e8f0;
-    background: #ffffff;
-    color: #64748b;
-}
-
-.filter-btn-group .btn.active {
-    background: #2563eb;
     color: #ffffff;
-    border-color: #2563eb;
 }
 
-.badge-soft-primary { background-color: #dbeafe; color: #1d4ed8; }
-.badge-soft-success { background-color: #d1fae5; color: #047857; }
-.badge-soft-warning { background-color: #fef3c7; color: #b45309; }
-.badge-soft-danger { background-color: #fee2e2; color: #b91c1c; }
+.rpt-total-value--primary { color: #00b0ff; }
+.rpt-total-value--success { color: #00e676; }
+.rpt-total-value--danger  { color: #ff5252; }
+.rpt-total-value--warning { color: #ffb74d; }
+
+/* FILA MAYOR COMPRADOR */
+.top-buyer td {
+    background-color: rgba(0, 230, 118, 0.06) !important;
+}
+
+.top-buyer-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 183, 77, 0.15);
+    color: #ffb74d;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-left: 8px;
+    border: 1px solid rgba(255, 183, 77, 0.25);
+    vertical-align: middle;
+}
+
+/* EMPTY STATE */
+.rpt-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: #9496a1;
+}
+
+.rpt-empty i {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.rpt-empty p {
+    margin: 0;
+    font-size: 0.88rem;
+}
+
+.cell-truncate {
+    max-width: 180px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

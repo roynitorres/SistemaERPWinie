@@ -67,13 +67,10 @@ def productos():
     # ==============================================
     # LISTAR PRODUCTOS
     # ==============================================
-    pagina = request.args.get("pagina", 1, type=int)
-    por_pagina = 20
-    paginacion = Producto.query.options(
+    lista_productos = Producto.query.options(
         joinedload(Producto.categoria),
         joinedload(Producto.proveedor)
-    ).order_by(Producto.id.desc()).paginate(page=pagina, per_page=por_pagina, error_out=False)
-    lista_productos = paginacion.items
+    ).order_by(Producto.id.desc()).all()
 
     categorias = Categoria.query.order_by(Categoria.nombre.asc()).all()
     proveedores = Proveedor.query.order_by(Proveedor.nombre_proveedor.asc()).all()
@@ -82,8 +79,7 @@ def productos():
         "productos/productos.html",
         productos=lista_productos,
         categorias=categorias,
-        proveedores=proveedores,
-        paginacion=paginacion
+        proveedores=proveedores
     )
 
 @productos_bp.route("/buscar/<codigo>", methods=["GET"])

@@ -9,21 +9,25 @@
     background-color: var(--color-bg-app);
 }
 
-/* Área de contenido principal (a la derecha del sidebar) */
+/* Área de contenido principal (a la derecha del carril de íconos de 64px) */
 .main-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Previene desbordamiento en Flexbox */
+    min-width: 0;
+    padding-left: 76px !important;
+    padding-right: 28px !important;
+    padding-top: 16px !important;
+    padding-bottom: 40px !important;
+    box-sizing: border-box !important;
 }
 
 /* Contenedor central con ancho máximo y padding */
 .content-wrapper {
     flex-grow: 1;
-    padding: var(--spacing-lg);
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: 0;
     width: 100%;
+    max-width: 100%;
 }
 
 /* Tarjetas contenedoras blancas */

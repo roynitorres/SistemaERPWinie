@@ -1,69 +1,277 @@
 /* ==========================================================================
-   COMPONENTES: FORMULARIOS Y FILTROS
+   COMPONENTES: FORMULARIOS, PILLS Y TOOLBAR APEX DARK
    ========================================================================== */
 
-/* Grupo de formulario */
+/* Header & Breadcrumbs Apex */
+.page-header-apex {
+    margin-bottom: 20px;
+}
+
+.breadcrumbs-apex {
+    font-size: 0.85rem;
+    color: var(--color-text-subtle);
+    margin-bottom: 4px;
+}
+
+.breadcrumbs-apex span {
+    color: var(--color-text-muted);
+}
+
+.page-title-apex {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+}
+
+.page-subtitle-apex {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Form Groups & Inputs Apex Dark */
 .form-group {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 18px;
 }
 
 .form-label {
     display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-main);
+    margin-bottom: 6px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Indicador de campo obligatorio */
 .form-label--required::after {
     content: " *";
     color: var(--color-danger);
-    font-weight: var(--font-weight-bold);
+    font-weight: 800;
 }
 
-/* Inputs, Selects, Textareas */
 .form-input {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
-    line-height: 1.5;
-    color: var(--color-text-main);
-    background-color: #ffffff;
+    background-color: var(--color-bg-input);
     border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-sm);
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
-/* Estado Focus (Anillo azul) */
+.form-input option {
+    background-color: #16171e;
+    color: #ffffff;
+}
+
 .form-input:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 0.2rem rgba(15, 76, 129, 0.25); /* Anillo translúcido */
-    outline: 0;
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
-/* Disabled */
-.form-input:disabled {
-    background-color: #e9ecef;
-    opacity: 1;
+.form-input[readonly] {
+    background-color: #0c0d12 !important;
+    color: var(--color-primary) !important;
+    font-weight: 800;
+    border-color: var(--color-border) !important;
+    letter-spacing: 0.04em;
 }
 
-/* ----------------------------------------------------------------------
-   FILTROS (Como en la imagen de participantes)
-   ---------------------------------------------------------------------- */
-.filter-bar {
+.grid--2-cols {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 600px) {
+    .grid--2-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* State Filter Pills Tabs (Todos, Activo, Inactivo) */
+.toolbar-left-group {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    background-color: var(--color-bg-stripe); /* Gris muy tenue */
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-md);
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.filter-bar__select,
-.filter-bar__input {
-    min-width: 340px;
-    max-width: 340px;
-    width: auto;
+.state-pills-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+}
+
+.state-pill {
+    background-color: #121318;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    padding: 7px 16px;
+    border-radius: var(--border-radius-pill);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.state-pill:hover {
+    color: #ffffff;
+    background-color: #181922;
+}
+
+.state-pill--active {
+    background-color: #1e202c !important;
+    color: #ffffff !important;
+    border-color: #2e3144 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Toolbar (Search Box & Action Controls) */
+.toolbar-apex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.toolbar-search-box {
+    position: relative;
+    width: 280px;
+}
+
+.toolbar-search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-subtle);
+    font-size: 0.95rem;
+}
+
+.toolbar-input {
+    width: 100%;
+    background-color: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+    padding: 9px 14px 9px 38px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.toolbar-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.toolbar-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+}
+
+/* Dynamic Record Count Badge (Número Puro) */
+.count-badge-apex {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-primary);
+    font-weight: 800;
+    font-size: 0.92rem;
+    padding: 6px 14px;
+    border-radius: 10px;
+}
+
+.btn-apex-outline {
+    background-color: var(--color-bg-card);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.86rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-apex-outline:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--color-bg-card-hover);
+}
+
+/* APEX DARK INLINE FORM VALIDATION STYLES */
+.form-input.is-invalid-apex {
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.25) !important;
+    background-color: rgba(255, 82, 82, 0.05) !important;
+}
+
+.invalid-feedback-apex {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #ff5252;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 5px;
+    animation: rptFadeIn 0.15s ease-in-out;
+}
+
+/* COMBOS DE ESTADO (ACTIVO / INACTIVO) CUSTOM APEX DARK */
+.select-estado-apex {
+    font-weight: 700 !important;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.25s ease !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 12px !important;
+    padding-right: 38px !important;
+}
+
+.select-estado-apex[data-estado="ACTIVO"] {
+    color: #00e676 !important;
+    border-color: rgba(0, 230, 118, 0.4) !important;
+    background-color: rgba(0, 230, 118, 0.08) !important;
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.15) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300e676' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
+}
+
+.select-estado-apex[data-estado="INACTIVO"] {
+    color: #ff5252 !important;
+    border-color: rgba(255, 82, 82, 0.4) !important;
+    background-color: rgba(255, 82, 82, 0.08) !important;
+    box-shadow: 0 0 12px rgba(255, 82, 82, 0.15) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff5252' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") !important;
+}
+
+.select-estado-apex option {
+    background-color: #13141c !important;
+    padding: 10px !important;
+    font-weight: 700;
+}
+
+.select-estado-apex option[value="ACTIVO"] {
+    color: #00e676 !important;
+}
+
+.select-estado-apex option[value="INACTIVO"] {
+    color: #ff5252 !important;
 }

@@ -16,8 +16,9 @@ def generar_siguiente_codigo_cliente():
     return f"C{next_id:03d}"
 
 def generar_password_temporal():
-    """Genera una contraseña temporal aleatoria y segura para nuevos usuarios."""
-    return secrets.token_urlsafe(10)
+    """Genera una contraseña temporal limpia y fácil de compartir para el cliente."""
+    import random
+    return f"Cliente{random.randint(1000, 9999)}"
 
 def crear_o_actualizar_cliente(cliente_id, nombre, telefono, ciudad, estado):
     """
@@ -51,6 +52,20 @@ def crear_o_actualizar_cliente(cliente_id, nombre, telefono, ciudad, estado):
         if not cliente:
             return False, "Cliente no encontrado"
             
+        # Validar que no se puede inactivar si tiene facturas pendientes
+        es_inactivo_target = (estado == EstadoCliente.INACTIVO) or (hasattr(estado, 'value') and estado.value == "INACTIVO")
+        if es_inactivo_target:
+            for venta in cliente.ventas:
+                if venta.estado.value == "ACTIVA":
+                    total_abonado = sum(
+                        float(pago.monto_pago)
+                        for pago in venta.pagos
+                        if pago.estado == "ACTIVO"
+                    )
+                    saldo_pendiente = float(venta.total_venta) - total_abonado
+                    if saldo_pendiente > 0.01:
+                        return False, f"No se puede inactivar al cliente porque tiene facturas pendientes de pago (Factura #{venta.numero_factura} con saldo de C$ {saldo_pendiente:.2f})."
+
         cliente.nombres = nombre
         cliente.telefono = telefono
         if cliente.usuario:
@@ -84,7 +99,8 @@ def crear_o_actualizar_cliente(cliente_id, nombre, telefono, ciudad, estado):
                     rol_id=rol_cliente.id,
                     cliente_id=nuevo_cliente.id,
                     estado=True,
-                    debe_cambiar_password=True
+                    debe_cambiar_password=True,
+                    password_temporal_plana=password_temporal
                 )
                 usuario_cliente.set_password(password_temporal)
                 db.session.add(usuario_cliente)
@@ -97,7 +113,7 @@ def crear_o_actualizar_cliente(cliente_id, nombre, telefono, ciudad, estado):
 def exportar_clientes_csv():
     """
     Genera un archivo CSV con la lista de clientes.
-    Retorna el contenido en formato string, incluyendo un BOM de UTF-8 (\\ufeff) para compatibilidad con Excel.
+    Retorna el contenido en formato string, incluyendo un BOM de UTF-8 (\ufeff) para compatibilidad con Excel.
     """
     clientes = Cliente.query.order_by(Cliente.id.asc()).all()
     si = StringIO()
@@ -132,11 +148,12 @@ def restaurar_password_cliente_service(cliente_id):
         return False, "Este cliente no tiene usuario asociado", None
 
     if cliente.usuario.debe_cambiar_password:
-        return False, "Las credenciales están intactas (el cliente ya tiene una contraseña temporal sin usar)", None
+        return False, f"El cliente aún no ha utilizado su contraseña temporal activa ('{cliente.usuario.password_temporal_plana or 'Temporal'}'). Puedes entregarle sus credenciales en 'Ver credenciales'.", None
 
     password_temporal = generar_password_temporal()
     cliente.usuario.set_password(password_temporal)
     cliente.usuario.debe_cambiar_password = True
+    cliente.usuario.password_temporal_plana = password_temporal
     db.session.commit()
     
     return True, f"Contraseña restaurada. Credenciales — Usuario: {cliente.usuario.username} | Nueva contraseña temporal: {password_temporal}", cliente.usuario.username

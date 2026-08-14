@@ -39,6 +39,20 @@ class Pago(db.Model):
         nullable=False
     )
 
+    # Banco asociado (si aplica)
+    banco_id = db.Column(
+        db.Integer,
+        db.ForeignKey("bancos.id"),
+        nullable=True
+    )
+
+    # Cuota asociada (si aplica)
+    cuota_id = db.Column(
+        db.Integer,
+        db.ForeignKey("cuotas_venta.id"),
+        nullable=True
+    )
+
     # ==================================================
     # INFORMACIÓN PAGO
     # ==================================================
@@ -55,10 +69,20 @@ class Pago(db.Model):
         db.Numeric(10, 2),
         nullable=False
     )
+
+    # Desglose para Pago Mixto
+    monto_efectivo = db.Column(
+        db.Numeric(10, 2),
+        nullable=True,
+        default=0.00
+    )
+    monto_transferencia = db.Column(
+        db.Numeric(10, 2),
+        nullable=True,
+        default=0.00
+    )
     
-    # Tipo pago
-    # EFECTIVO
-    # TRANSFERENCIA
+    # Tipo pago (EFECTIVO, TRANSFERENCIA, MIXTO)
     tipo_pago = db.Column(
         db.String(20),
         nullable=False
@@ -118,6 +142,19 @@ class Pago(db.Model):
     usuario = db.relationship(
         "Usuario",
         back_populates="pagos"
+    )
+
+    # Banco asociado
+    banco = db.relationship(
+        "Banco",
+        lazy=True
+    )
+
+    # Cuota asociada
+    cuota = db.relationship(
+        "CuotaVenta",
+        back_populates="pagos",
+        lazy=True
     )
 
     # ==================================================

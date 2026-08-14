@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}
-Reportes Financieros
+{% block title %}Reportes Financieros{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-bar-chart-line-fill"></i> Resumen Financiero
 {% endblock %}
 
 {% block extra_css %}
@@ -9,473 +11,384 @@ Reportes Financieros
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-0">
+
     <!-- ===================================== -->
-    <!-- HEADER / TOP BAR -->
+    <!-- BARRA DE NAVEGACIÓN Y FILTROS APEX DARK -->
     <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-0 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Resumen Financiero
-        </h4>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-            </button>
-            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-gear fs-5 text-secondary"></i>
-            </a>
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-moon fs-5 text-secondary"></i>
-            </button>
-                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
-                {% if current_user and current_user.foto_perfil %}
-                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
-                {% else %}
-                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
-                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
+    <div class="rpt-nav" id="botones-secciones">
+        <!-- Selector de mes -->
+        <div class="rpt-month-picker">
+            <i class="bi bi-calendar-event"></i>
+            <select id="filtroMes">
+                {% for m in meses %}
+                <option value="{{ m.valor }}">{{ m.texto }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="rpt-nav-sep"></div>
+
+        <!-- Botones de sección Apex -->
+        <button class="btn active" id="btn-nav-resumen" onclick="mostrarSeccion('resumen',     this)"><i class="bi bi-speedometer2 me-1"></i> Resumen</button>
+        <button class="btn btn--outline" id="btn-nav-ventas" onclick="mostrarSeccion('ventas',      this)"><i class="bi bi-receipt me-1"></i> Ventas</button>
+        <button class="btn btn--outline" id="btn-nav-clientes" onclick="mostrarSeccion('clientes',    this)"><i class="bi bi-people me-1"></i> Clientes</button>
+        <button class="btn btn--outline" id="btn-nav-productos" onclick="mostrarSeccion('productos',   this)"><i class="bi bi-box-seam me-1"></i> Productos</button>
+        <button class="btn btn--outline" id="btn-nav-pagos" onclick="mostrarSeccion('pagos',       this)"><i class="bi bi-cash-stack me-1"></i> Pagos</button>
+        <button class="btn btn--outline" id="btn-nav-estancados" onclick="mostrarSeccion('estancados',  this)"><i class="bi bi-archive me-1"></i> Sin mov.</button>
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- SECCIÓN: RESUMEN FINANCIERO (SÓLO KPIS) -->
+    <!-- ===================================== -->
+    <div id="seccion-resumen" class="seccion-reporte">
+
+        <!-- TARJETAS KPI ESTILO APEX SHADCN DASHBOARD (FILA 1) -->
+        <div class="rpt-kpi-grid-apex">
+            <!-- KPI 1: Inversión en Compras -->
+            <div class="rpt-kpi-apex">
+                <div class="rpt-kpi-apex__head">
+                    <span class="rpt-kpi-apex__label">Inversión del Mes</span>
+                    <div class="rpt-kpi-apex__icon rpt-kpi-apex__icon--teal">
+                        <i class="bi bi-cart-plus-fill"></i>
                     </div>
-                {% endif %}
-            </a>
-        </div>
-    </div>
-
-    <!-- ===================================== -->
-    <!-- CONTROLES FLOTANTES -->
-    <!-- ===================================== -->
-    <div class="d-flex justify-content-start align-items-center mb-4">
-        <div class="d-flex flex-wrap align-items-center gap-2" id="botones-secciones">
-            <!-- Filtro de mes con estilo píldora -->
-            <div class="d-flex align-items-center bg-white border border-light-subtle rounded-pill shadow-sm px-3 me-2" style="min-height: 42px;">
-                <i class="bi bi-calendar3 text-muted me-2"></i>
-                <select id="filtroMes" class="form-select border-0 fw-semibold bg-transparent" style="min-width: 150px; box-shadow: none; cursor: pointer;">
-                    {% for m in meses %}
-                    <option value="{{ m.valor }}">{{ m.texto }}</option>
-                    {% endfor %}
-                </select>
+                </div>
+                <div class="rpt-kpi-apex__value" id="kpi-inversion">C$ 0.00</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #ffb74d; margin-top: 4px;" id="kpi-inversion-proy">
+                    Proyección Venta: C$ 0.00
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: productos</span>
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('productos', document.getElementById('btn-nav-productos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+                </div>
             </div>
-            
-            <!-- Botones de Tablas Flotantes -->
-            <button type="button" class="btn btn-outline-primary active rounded-pill px-4 fw-bold shadow-sm" style="min-height: 42px;" onclick="mostrarSeccion('ventas', this)">Ventas del mes</button>
-            <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm" style="min-height: 42px;" onclick="mostrarSeccion('cliente', this)">Cliente</button>
-            <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm" style="min-height: 42px;" onclick="mostrarSeccion('compras', this)">Compras</button>
-            <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm" style="min-height: 42px;" onclick="mostrarSeccion('abonos', this)">Abonos</button>
-            <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm" style="min-height: 42px;" onclick="mostrarSeccion('pendientes', this)">Saldo pendiente</button>
-            <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm" style="min-height: 42px;" onclick="mostrarSeccion('estancados', this)">Sin movimientos</button>
-        </div>
-    </div>
 
+            <!-- KPI 2: Total Ventas -->
+            <div class="rpt-kpi-apex">
+                <div class="rpt-kpi-apex__head">
+                    <span class="rpt-kpi-apex__label">Facturación Total</span>
+                    <div class="rpt-kpi-apex__icon rpt-kpi-apex__icon--green">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                </div>
+                <div class="rpt-kpi-apex__value" id="kpi-ventas">C$ 0.00</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: ventas</span>
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('ventas', document.getElementById('btn-nav-ventas'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- KPI 3: Total Cobrado -->
+            <div class="rpt-kpi-apex">
+                <div class="rpt-kpi-apex__head">
+                    <span class="rpt-kpi-apex__label">Total Recaudado</span>
+                    <div class="rpt-kpi-apex__icon rpt-kpi-apex__icon--amber">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                </div>
+                <div class="rpt-kpi-apex__value" id="kpi-cobrado">C$ 0.00</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: pagos</span>
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('pagos', document.getElementById('btn-nav-pagos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- KPI 4: Por Cobrar -->
+            <div class="rpt-kpi-apex">
+                <div class="rpt-kpi-apex__head">
+                    <span class="rpt-kpi-apex__label">Por Cobrar</span>
+                    <div class="rpt-kpi-apex__icon rpt-kpi-apex__icon--red">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+                <div class="rpt-kpi-apex__value" id="kpi-por-cobrar">C$ 0.00</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: ventas</span>
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('pagos', document.getElementById('btn-nav-pagos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARJETAS GANANCIA (FILA 2) -->
+        <div class="grid grid--2-cols" style="margin-bottom: 24px;">
+            <div class="rpt-kpi-apex">
+                <div class="rpt-kpi-apex__head">
+                    <span class="rpt-kpi-apex__label">Ganancia Real</span>
+                    <div class="rpt-kpi-apex__icon rpt-kpi-apex__icon--purple">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                </div>
+                <div class="rpt-kpi-apex__value" style="color: #00e676;" id="kpi-ganancia-real">C$ 0.00</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <span style="color: var(--color-text-muted);"><i class="bi bi-calculator me-1"></i> Cálculo: pagos − productos</span>
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('pagos', document.getElementById('btn-nav-pagos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <div class="rpt-kpi-apex">
+                <div class="rpt-kpi-apex__head">
+                    <span class="rpt-kpi-apex__label">Ganancia Proyectada</span>
+                    <div class="rpt-kpi-apex__icon rpt-kpi-apex__icon--amber">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                </div>
+                <div class="rpt-kpi-apex__value" style="color: #ffb74d;" id="kpi-ganancia-proy">C$ 0.00</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <span style="color: var(--color-text-muted);"><i class="bi bi-calculator me-1"></i> Cálculo: ventas − productos</span>
+                    <a href="javascript:void(0)" onclick="mostrarSeccion('ventas', document.getElementById('btn-nav-ventas'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /resumen -->
+
+
+    <!-- ===================================== -->
     <!-- SECCIÓN: VENTAS DEL MES -->
-    <div id="seccion-ventas" class="seccion-reporte">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="report-table-card border-primary border-top border-3" style="border-top-style: solid;">
-                    <div class="report-table-header flex-column flex-sm-row gap-3">
-                        <h5 class="report-table-title"><i class="bi bi-cart-check text-primary"></i> Ventas del Mes</h5>
-                        <div class="filter-btn-group" role="group">
-                            <button type="button" class="btn active" id="btn-ventas-todas" onclick="filtrarVentas('TODAS')">Todas</button>
-                            <button type="button" class="btn" id="btn-ventas-contado" onclick="filtrarVentas('CONTADO')">Contado</button>
-                            <button type="button" class="btn" id="btn-ventas-credito" onclick="filtrarVentas('CREDITO')">Crédito</button>
-                        </div>
-                    </div>
-                    <div class="report-table-body" style="max-height: 280px; overflow-y: auto;">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Factura</th>
-                                    <th>Cliente</th>
-                                    <th>Fecha</th>
-                                    <th>Tipo</th>
-                                    <th class="text-end">Monto Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-ventas-body"></tbody>
+    <!-- ===================================== -->
+    <div id="seccion-ventas" class="seccion-reporte oculto">
+        <div class="rpt-panel-apex">
+            <div class="rpt-panel-apex__header">
+                <h5 class="rpt-panel-apex__title"><i class="bi bi-cart-check text-success"></i> Ventas del Mes</h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn--small active" id="btn-v-todas"   onclick="filtrarVentas('TODAS')">Todas</button>
+                    <button class="btn btn--outline btn--small" id="btn-v-contado" onclick="filtrarVentas('CONTADO')">Contado</button>
+                    <button class="btn btn--outline btn--small" id="btn-v-credito" onclick="filtrarVentas('CREDITO')">Crédito</button>
+                </div>
+            </div>
+            <div class="rpt-panel-apex__body" style="max-height: 440px;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead class="data-table__head"><tr>
+                            <th style="color: #cbd5e1 !important; font-weight: 700;">Factura</th>
+                            <th style="color: #cbd5e1 !important; font-weight: 700;">Cliente</th>
+                            <th style="color: #cbd5e1 !important; font-weight: 700;">Fecha</th>
+                            <th style="text-align:center; color: #cbd5e1 !important; font-weight: 700;">Tipo</th>
+                            <th style="text-align:center; color: #cbd5e1 !important; font-weight: 700;">Cantidad</th>
+                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">Total</th>
+                        </tr></thead>
+                        <tbody id="tabla-ventas-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rpt-panel-apex__footer">
+                <div class="rpt-footer-row">
+                    <span class="rpt-total-label">Total Unidades: <span id="subtotal-ventas-cant" style="color:#00b0ff; font-weight:700;">0</span></span>
+                    <span class="rpt-total-label">Total Ventas Filtradas: <span id="subtotal-ventas" style="color:#00e676; font-weight:700;">C$ 0.00</span></span>
+                </div>
+                <div class="rpt-footer-row">
+                    <span class="rpt-total-label">Contado: <span id="subtotal-ventas-contado" style="color:#ffffff;">C$ 0.00</span></span>
+                    <span class="rpt-total-label">Crédito: <span id="subtotal-ventas-credito" style="color:#ffb74d;">C$ 0.00</span></span>
+                </div>
+            </div>
+        </div>
+    </div><!-- /ventas -->
+
+
+    <!-- ===================================== -->
+    <!-- SECCIÓN: CLIENTES (SÓLO TABLAS) -->
+    <!-- ===================================== -->
+    <div id="seccion-clientes" class="seccion-reporte oculto">
+        <div class="grid grid--2-cols">
+            <!-- Mejores clientes -->
+            <div class="rpt-panel-apex">
+                <div class="rpt-panel-apex__header">
+                    <h5 class="rpt-panel-apex__title"><i class="bi bi-star-fill text-warning"></i> Quien Compró Más (Top Clientes)</h5>
+                    <span class="badge-pill-apex" style="background: rgba(255,183,77,0.12); color:#ffb74d;" id="badge-mejores-clientes">0</span>
+                </div>
+                <div class="rpt-panel-apex__body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead class="data-table__head"><tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>Teléfono</th>
+                                <th style="text-align:center;">Compras</th>
+                                <th style="text-align:right;">Total Comprado</th>
+                            </tr></thead>
+                            <tbody id="tabla-mejores-clientes-body"></tbody>
                         </table>
                     </div>
-                    <div class="report-table-footer">
-                        <span class="subtotal-label">Total Ventas:</span>
-                        <span class="subtotal-value text-primary" id="subtotal-ventas">C$ 0.00</span>
+                </div>
+                <div class="rpt-panel-apex__footer">
+                    <div class="rpt-footer-row">
+                        <span class="rpt-total-label">Total Vendido a Clientes</span>
+                        <span class="rpt-total-value rpt-total-value--warning" id="subtotal-mejores-clientes">C$ 0.00</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- SECCIÓN: INFORME DE CLIENTE -->
-    <div id="seccion-cliente" class="seccion-reporte d-none">
-        <div class="row g-4 mb-4">
-            <!-- Tabla 1: Clientes Nuevos -->
-            <div class="col-md-6">
-                <div class="report-table-card border-primary border-top border-3" style="border-top-style: solid;">
-                    <div class="report-table-header">
-                        <h5 class="report-table-title"><i class="bi bi-people text-primary"></i> Clientes Nuevos</h5>
-                        <span class="badge bg-primary rounded-pill" id="badge-clientes-nuevos">0</span>
-                    </div>
-                    <div class="report-table-body p-0" style="max-height: 280px; overflow-y: auto;">
-                        <ul class="list-group list-group-flush" id="lista-clientes-nuevos">
-                            <!-- JS poblara esto -->
-                        </ul>
-                    </div>
+            <!-- Clientes nuevos -->
+            <div class="rpt-panel-apex">
+                <div class="rpt-panel-apex__header">
+                    <h5 class="rpt-panel-apex__title"><i class="bi bi-person-plus-fill text-success"></i> Clientes Nuevos del Mes</h5>
+                    <span class="badge-pill-apex badge-pill-apex--active" id="badge-clientes-nuevos">0</span>
                 </div>
-            </div>
-            
-            <!-- Tabla 2: Producto Más Vendido (KPI) -->
-            <div class="col-md-6">
-                <div class="report-table-card border-success border-top border-3 d-flex flex-column justify-content-center align-items-center p-4" style="border-top-style: solid; padding-top: 3rem !important; padding-bottom: 3rem !important;">
-                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
-                        <i class="bi bi-trophy-fill text-success" style="font-size: 2rem;"></i>
-                    </div>
-                    <h6 class="text-muted text-uppercase fw-bold mb-2">Producto Más Vendido</h6>
-                    <h3 class="fw-bold text-dark mb-2 text-center" id="kpi-mas-vendido">-</h3>
-                    <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm" id="kpi-mas-vendido-cant">0 unidades</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN: COMPRAS -->
-    <div id="seccion-compras" class="seccion-reporte d-none">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="report-table-card border-warning border-top border-3" style="border-top-style: solid;">
-                    <div class="report-table-header">
-                        <h5 class="report-table-title"><i class="bi bi-box-seam text-warning"></i> Compras</h5>
-                    </div>
-                    <div class="report-table-body" style="max-height: 280px; overflow-y: auto;">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Producto</th>
-                                    <th class="text-end">Cant.</th>
-                                    <th class="text-end">P. Compra</th>
-                                    <th class="text-end">P. Venta</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-compras-body"></tbody>
+                <div class="rpt-panel-apex__body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead class="data-table__head"><tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th style="text-align:right;">Fecha Registro</th>
+                            </tr></thead>
+                            <tbody id="tabla-clientes-nuevos-body"></tbody>
                         </table>
                     </div>
-                    <div class="report-table-footer flex-column align-items-end gap-1">
-                        <div class="d-flex justify-content-between w-100">
-                            <span class="subtotal-label">Inversión:</span>
-                            <span class="subtotal-value text-danger" id="subtotal-inversion">C$ 0.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between w-100">
-                            <span class="subtotal-label">Proyección Venta:</span>
-                            <span class="subtotal-value text-success" id="subtotal-proyeccion">C$ 0.00</span>
-                        </div>
+                </div>
+                <div class="rpt-panel-apex__footer">
+                    <div class="rpt-footer-row">
+                        <span class="rpt-total-label">Total Clientes Nuevos</span>
+                        <span class="rpt-total-value rpt-total-value--success" id="subtotal-clientes-nuevos">0</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div><!-- /clientes -->
 
-    <!-- SECCIÓN: ABONOS -->
-    <div id="seccion-abonos" class="seccion-reporte d-none">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="report-table-card border-success border-top border-3" style="border-top-style: solid;">
-                    <div class="report-table-header">
-                        <h5 class="report-table-title"><i class="bi bi-cash-stack text-success"></i> Abonos Recibidos</h5>
-                    </div>
-                    <div class="report-table-body" style="max-height: 280px; overflow-y: auto;">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>Fecha</th>
-                                    <th class="text-end">Monto Abonado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-abonos-body"></tbody>
-                        </table>
-                    </div>
-                    <div class="report-table-footer">
-                        <span class="subtotal-label">Total Abonos:</span>
-                        <span class="subtotal-value text-success" id="subtotal-abonos">C$ 0.00</span>
-                    </div>
-                </div>
+
+    <!-- ===================================== -->
+    <!-- SECCIÓN: PRODUCTOS COMPRADOS (SÓLO TABLA, CON PROVEEDOR Y PRECIO COMPRA) -->
+    <!-- ===================================== -->
+    <div id="seccion-productos" class="seccion-reporte oculto">
+        <div class="rpt-panel-apex">
+            <div class="rpt-panel-apex__header">
+                <h5 class="rpt-panel-apex__title"><i class="bi bi-box-seam text-success"></i> Lista de Productos Comprados del Mes</h5>
+                <span class="badge-pill-apex badge-pill-apex--active" id="badge-cant-items-compras">0 items</span>
             </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN: PENDIENTES -->
-    <div id="seccion-pendientes" class="seccion-reporte d-none">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="report-table-card border-danger border-top border-3" style="border-top-style: solid;">
-                    <div class="report-table-header">
-                        <h5 class="report-table-title"><i class="bi bi-exclamation-circle text-danger"></i> Saldos Pendientes</h5>
-                    </div>
-                    <div class="report-table-body" style="max-height: 280px; overflow-y: auto;">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>Fecha</th>
-                                    <th class="text-end">Saldo Pendiente</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-pendientes-body"></tbody>
-                        </table>
-                    </div>
-                    <div class="report-table-footer">
-                        <span class="subtotal-label">Total Pendiente:</span>
-                        <span class="subtotal-value text-danger" id="subtotal-pendientes">C$ 0.00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN: ESTANCADOS -->
-    <div id="seccion-estancados" class="seccion-reporte d-none">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="report-table-card border-danger border-top border-3" style="border-top-style: solid;">
-                    <div class="report-table-header">
-                        <h5 class="report-table-title"><i class="bi bi-exclamation-triangle text-danger"></i> Productos sin movimiento (>30 días)</h5>
-                    </div>
-                    <div class="report-table-body" style="max-height: 280px; overflow-y: auto;">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th class="text-center">Fecha de Compra</th>
-                                    <th class="text-center">Días sin movimiento</th>
-                                    <th class="text-end">Cantidad</th>
-                                    <th class="text-end">Precio Compra</th>
-                                    <th class="text-end">Total Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-estancados-body"></tbody>
-                        </table>
-                    </div>
-                    <div class="report-table-footer">
-                        <span class="subtotal-label">Valor Total Estancado:</span>
-                        <span class="subtotal-value text-danger" id="subtotal-estancados">C$ 0.00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<script>
-    let todasLasVentas = [];
-    
-    // Función para formatear moneda
-    const formatMoney = (amount) => {
-        return "C$ " + parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    // Mostrar Sección (Botones Superiores)
-    const mostrarSeccion = (seccionId, btnElement) => {
-        // Remover clase active de todos los botones en el grupo
-        document.querySelectorAll('#botones-secciones .btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        // Agregar clase active al botón actual
-        if (btnElement) btnElement.classList.add('active');
-
-        // Ocultar todas las secciones
-        document.querySelectorAll('.seccion-reporte').forEach(sec => {
-            sec.classList.add('d-none');
-        });
-
-        // Mostrar la sección seleccionada
-        const secToShow = document.getElementById('seccion-' + seccionId);
-        if (secToShow) secToShow.classList.remove('d-none');
-    };
-
-    // Filtro de ventas
-    const filtrarVentas = (tipo) => {
-        // Actualizar botones
-        document.getElementById('btn-ventas-todas').classList.remove('active');
-        document.getElementById('btn-ventas-contado').classList.remove('active');
-        document.getElementById('btn-ventas-credito').classList.remove('active');
-        
-        if(tipo === 'TODAS') document.getElementById('btn-ventas-todas').classList.add('active');
-        else if(tipo === 'CONTADO') document.getElementById('btn-ventas-contado').classList.add('active');
-        else if(tipo === 'CREDITO') document.getElementById('btn-ventas-credito').classList.add('active');
-
-        // Filtrar datos
-        const ventasFiltradas = tipo === 'TODAS' ? todasLasVentas : todasLasVentas.filter(v => v.tipo === tipo);
-        
-        // Renderizar tabla
-        const tbodyVentas = document.getElementById("tabla-ventas-body");
-        tbodyVentas.innerHTML = "";
-        let subtotal = 0;
-
-        if (ventasFiltradas.length === 0) {
-            tbodyVentas.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="bi bi-inbox"></i><p>No hay ventas para este filtro.</p></div></td></tr>`;
-        } else {
-            ventasFiltradas.forEach(v => {
-                subtotal += parseFloat(v.total);
-                let badgeClass = v.tipo === 'CONTADO' ? 'badge-soft-primary' : 'badge-soft-warning';
-                tbodyVentas.innerHTML += `
-                    <tr>
-                        <td class="fw-bold">${v.factura}</td>
-                        <td>${v.cliente}</td>
-                        <td>${v.fecha}</td>
-                        <td><span class="badge rounded-pill ${badgeClass}">${v.tipo}</span></td>
-                        <td class="text-end fw-bold">${formatMoney(v.total)}</td>
-                    </tr>
-                `;
-            });
-        }
-        
-        document.getElementById("subtotal-ventas").innerText = formatMoney(subtotal);
-    };
-
-    const cargarDatos = (mesStr) => {
-        fetch(`/reportes/api/datos?mes=${mesStr}`)
-            .then(res => res.json())
-            .then(data => {
-                // 1. Clientes Nuevos
-                document.getElementById("badge-clientes-nuevos").innerText = data.clientes_nuevos;
-                const ulClientes = document.getElementById("lista-clientes-nuevos");
-                ulClientes.innerHTML = "";
-                if(data.lista_clientes_nuevos && data.lista_clientes_nuevos.length > 0) {
-                    data.lista_clientes_nuevos.forEach((c, index) => {
-                        ulClientes.innerHTML += `<li class="list-group-item d-flex align-items-center gap-3">
-                            <span class="text-muted fw-bold">${index + 1}.</span> 
-                            <div class="d-flex flex-column">
-                                <span class="fw-semibold">${c.nombre}</span>
-                            </div>
-                        </li>`;
-                    });
-                } else {
-                    ulClientes.innerHTML = `<li class="list-group-item text-center text-muted py-4">No hay clientes nuevos registrados</li>`;
-                }
-
-                // 2. Producto Más Vendido
-                document.getElementById("kpi-mas-vendido").innerText = data.rendimiento.mas_vendido.nombre;
-                document.getElementById("kpi-mas-vendido-cant").innerText = data.rendimiento.mas_vendido.cantidad + " unidades";
-
-                // 3. Ventas del Mes
-                todasLasVentas = data.ventas.lista || [];
-                // Se mantiene el filtro actual activo, pero si es carga inicial asume TODAS.
-                let activeBtn = document.querySelector('.filter-btn-group .btn.active');
-                let tipoFiltro = 'TODAS';
-                if(activeBtn && activeBtn.id === 'btn-ventas-contado') tipoFiltro = 'CONTADO';
-                if(activeBtn && activeBtn.id === 'btn-ventas-credito') tipoFiltro = 'CREDITO';
-                filtrarVentas(tipoFiltro);
-
-                // 4. Compras
-                const tbodyCompras = document.getElementById("tabla-compras-body");
-                tbodyCompras.innerHTML = "";
-                if(data.compras.lista && data.compras.lista.length > 0) {
-                    data.compras.lista.forEach(c => {
-                        tbodyCompras.innerHTML += `
+            <div class="rpt-panel-apex__body" style="max-height: 440px;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead class="data-table__head"><tr>
+                            <th style="color: #cbd5e1 !important; font-weight: 700;">#</th>
+                            <th style="color: #cbd5e1 !important; font-weight: 700;">Código / Producto</th>
+                            <th style="color: #cbd5e1 !important; font-weight: 700;">Proveedor</th>
+                            <th style="text-align:center; color: #cbd5e1 !important; font-weight: 700;">Cant. Comprada</th>
+                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">P. Compra</th>
+                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">P. Venta</th>
+                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">Inversión Total</th>
+                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">Proyección Venta</th>
+                        </tr></thead>
+                        <tbody id="tabla-productos-comprados-body"></tbody>
+                        <tfoot class="data-table__foot" style="background: rgba(255,255,255,0.03); font-weight: 800; border-top: 2px solid var(--color-border); color: var(--color-text-main);">
                             <tr>
-                                <td class="fw-semibold text-truncate" style="max-width: 150px;" title="${c.nombre}">${c.nombre}</td>
-                                <td class="text-end">${c.cantidad}</td>
-                                <td class="text-end">${formatMoney(c.precio_compra)}</td>
-                                <td class="text-end">${formatMoney(c.precio_venta)}</td>
+                                <td colspan="3" class="data-table__cell text-end" style="color: var(--color-text-muted); font-size: 0.85rem; letter-spacing: 0.05em;">TOTALES</td>
+                                <td class="data-table__cell text-center" style="color: var(--color-primary); font-size: 0.95rem;" id="foot-total-cant">0</td>
+                                <td class="data-table__cell" style="color: var(--color-text-muted);"></td>
+                                <td class="data-table__cell" style="color: var(--color-text-muted);"></td>
+                                <td class="data-table__cell text-end" style="color: #00e676; font-size: 0.95rem;" id="foot-total-inversion">C$ 0.00</td>
+                                <td class="data-table__cell text-end" style="color: #00b0ff; font-size: 0.95rem;" id="foot-total-proyeccion">C$ 0.00</td>
                             </tr>
-                        `;
-                    });
-                } else {
-                    tbodyCompras.innerHTML = `<tr><td colspan="4"><div class="empty-state p-3"><i class="bi bi-inbox fs-4 mb-0"></i><p class="mb-0">Sin compras</p></div></td></tr>`;
-                }
-                document.getElementById("subtotal-inversion").innerText = formatMoney(data.compras.inversion);
-                document.getElementById("subtotal-proyeccion").innerText = formatMoney(data.compras.proyeccion_venta);
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="rpt-panel-apex__footer">
+                <div class="rpt-footer-row">
+                    <span class="rpt-total-label">Total Unidades Compradas</span>
+                    <span class="rpt-total-value rpt-total-value--primary" id="subtotal-unidades-compradas">0</span>
+                </div>
+                <div class="rpt-footer-row">
+                    <span class="rpt-total-label">Total Inversión: <span id="subtotal-inversion-compras" style="color:#00e676;">C$ 0.00</span></span>
+                    <span class="rpt-total-label">Proyección Venta: <span id="subtotal-proyeccion-ventas" style="color:#ffb74d;">C$ 0.00</span></span>
+                </div>
+            </div>
+        </div>
+    </div><!-- /productos -->
 
-                // 5. Abonos
-                const tbodyAbonos = document.getElementById("tabla-abonos-body");
-                tbodyAbonos.innerHTML = "";
-                if(data.pagos.lista_abonos && data.pagos.lista_abonos.length > 0) {
-                    const abonosSorted = [...data.pagos.lista_abonos].sort((a,b) => {
-                        let partsA = a.fecha.split('/');
-                        let partsB = b.fecha.split('/');
-                        if(partsA.length === 3 && partsB.length === 3) {
-                            return new Date(partsA[2], partsA[1]-1, partsA[0]) - new Date(partsB[2], partsB[1]-1, partsB[0]);
-                        }
-                        return 0;
-                    });
-                    
-                    abonosSorted.forEach(a => {
-                        tbodyAbonos.innerHTML += `
-                            <tr>
-                                <td class="fw-semibold text-truncate" style="max-width: 150px;" title="${a.cliente}">${a.cliente}</td>
-                                <td>${a.fecha}</td>
-                                <td class="text-end fw-bold text-success">${formatMoney(a.monto)}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbodyAbonos.innerHTML = `<tr><td colspan="3"><div class="empty-state p-3"><i class="bi bi-inbox fs-4 mb-0"></i><p class="mb-0">Sin abonos</p></div></td></tr>`;
-                }
-                document.getElementById("subtotal-abonos").innerText = formatMoney(data.pagos.abonos);
 
-                // 6. Pendientes
-                const tbodyPendientes = document.getElementById("tabla-pendientes-body");
-                tbodyPendientes.innerHTML = "";
-                if(data.pagos.lista_pendientes && data.pagos.lista_pendientes.length > 0) {
-                    const pendientesSorted = [...data.pagos.lista_pendientes].sort((a,b) => {
-                        let partsA = a.fecha.split('/');
-                        let partsB = b.fecha.split('/');
-                        if(partsA.length === 3 && partsB.length === 3) {
-                            return new Date(partsA[2], partsA[1]-1, partsA[0]) - new Date(partsB[2], partsB[1]-1, partsB[0]);
-                        }
-                        return 0;
-                    });
+    <!-- ===================================== -->
+    <!-- SECCIÓN: PAGOS (SÓLO TABLAS DE ABONO Y PAGOS DE CONTADO) -->
+    <!-- ===================================== -->
+    <div id="seccion-pagos" class="seccion-reporte oculto">
+        <div class="grid grid--2-cols">
+            <!-- Pagos Contado -->
+            <div class="rpt-panel-apex">
+                <div class="rpt-panel-apex__header">
+                    <h5 class="rpt-panel-apex__title"><i class="bi bi-cash text-success"></i> Pagos de Contado</h5>
+                    <span class="badge-pill-apex badge-pill-apex--active" id="badge-pagos-contado">0</span>
+                </div>
+                <div class="rpt-panel-apex__body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead class="data-table__head"><tr>
+                                <th>Factura</th><th>Cliente</th><th>Fecha</th><th style="text-align:right;">Monto</th>
+                            </tr></thead>
+                            <tbody id="tabla-pagos-contado-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="rpt-panel-apex__footer">
+                    <div class="rpt-footer-row">
+                        <span class="rpt-total-label">Total Cobrado Contado</span>
+                        <span class="rpt-total-value rpt-total-value--success" id="subtotal-pagos-contado">C$ 0.00</span>
+                    </div>
+                </div>
+            </div>
 
-                    pendientesSorted.forEach(p => {
-                        tbodyPendientes.innerHTML += `
-                            <tr>
-                                <td class="fw-semibold text-truncate" style="max-width: 150px;" title="${p.cliente}">${p.cliente}</td>
-                                <td>${p.fecha}</td>
-                                <td class="text-end fw-bold text-danger">${formatMoney(p.pendiente)}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbodyPendientes.innerHTML = `<tr><td colspan="3"><div class="empty-state p-3"><i class="bi bi-check-circle fs-4 mb-0 text-success"></i><p class="mb-0">Todo al día</p></div></td></tr>`;
-                }
-                document.getElementById("subtotal-pendientes").innerText = formatMoney(data.pagos.pendiente);
+            <!-- Abonos a Crédito -->
+            <div class="rpt-panel-apex">
+                <div class="rpt-panel-apex__header">
+                    <h5 class="rpt-panel-apex__title"><i class="bi bi-cash-stack text-teal"></i> Abonos a Crédito</h5>
+                    <span class="badge-pill-apex" style="background:rgba(0,176,255,0.12); color:#00b0ff;" id="badge-pagos-credito">0</span>
+                </div>
+                <div class="rpt-panel-apex__body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead class="data-table__head"><tr>
+                                <th>Factura</th><th>Cliente</th><th>Fecha</th><th style="text-align:right;">Monto</th>
+                            </tr></thead>
+                            <tbody id="tabla-pagos-credito-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="rpt-panel-apex__footer">
+                    <div class="rpt-footer-row">
+                        <span class="rpt-total-label">Total Abonos Crédito</span>
+                        <span class="rpt-total-value rpt-total-value--primary" id="subtotal-pagos-credito">C$ 0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /pagos -->
 
-                // 7. Productos sin movimiento
-                const tbodyEstancados = document.getElementById("tabla-estancados-body");
-                tbodyEstancados.innerHTML = "";
-                if(data.inventario_estancado.lista && data.inventario_estancado.lista.length > 0) {
-                    data.inventario_estancado.lista.forEach(p => {
-                        let totalRow = p.cantidad * p.precio;
-                        tbodyEstancados.innerHTML += `
-                            <tr>
-                                <td class="fw-semibold">${p.nombre}</td>
-                                <td class="text-center">${p.fecha_compra}</td>
-                                <td class="text-center"><span class="badge badge-soft-danger rounded-pill">${p.dias} días</span></td>
-                                <td class="text-end">${p.cantidad}</td>
-                                <td class="text-end">${formatMoney(p.precio)}</td>
-                                <td class="text-end fw-bold">${formatMoney(totalRow)}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbodyEstancados.innerHTML = `<tr><td colspan="6"><div class="empty-state p-3"><i class="bi bi-check-circle fs-4 mb-0 text-success"></i><p class="mb-0">Inventario sano</p></div></td></tr>`;
-                }
-                document.getElementById("subtotal-estancados").innerText = formatMoney(data.inventario_estancado.totales.valor);
 
-            })
-            .catch(err => {
-                console.error("Error cargando datos:", err);
-                alert("Ocurrió un error al cargar los datos del reporte.");
-            });
-    };
+    <!-- ===================================== -->
+    <!-- SECCIÓN: SIN MOVIMIENTO (ESTANCADOS) -->
+    <!-- ===================================== -->
+    <div id="seccion-estancados" class="seccion-reporte oculto">
+        <div class="rpt-panel-apex">
+            <div class="rpt-panel-apex__header">
+                <h5 class="rpt-panel-apex__title"><i class="bi bi-archive-fill text-danger"></i> Productos sin Movimiento (&gt;30 días)</h5>
+                <span class="badge-pill-apex badge-pill-apex--inactive" id="badge-estancados">0</span>
+            </div>
+            <div class="rpt-panel-apex__body" style="max-height:400px;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead class="data-table__head"><tr>
+                            <th>Nombre</th>
+                            <th style="text-align:center;">Fecha Compra</th>
+                            <th style="text-align:center;">Días Sin Mov.</th>
+                            <th style="text-align:right;">Stock</th>
+                            <th style="text-align:right;">P. Compra</th>
+                            <th style="text-align:right;">Valor Congelado</th>
+                        </tr></thead>
+                        <tbody id="tabla-estancados-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="rpt-panel-apex__footer">
+                <div class="rpt-footer-row">
+                    <span class="rpt-total-label">Unidades Estancadas</span>
+                    <span class="rpt-total-value rpt-total-value--danger" id="subtotal-estancados-cant">0</span>
+                </div>
+                <div class="rpt-footer-row">
+                    <span class="rpt-total-label">Valor Total Congelado en Inventario</span>
+                    <span class="rpt-total-value rpt-total-value--danger" id="subtotal-estancados">C$ 0.00</span>
+                </div>
+            </div>
+        </div>
+    </div><!-- /estancados -->
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const filtroMes = document.getElementById("filtroMes");
-        
-        if(filtroMes && filtroMes.value) {
-            cargarDatos(filtroMes.value);
-        }
-
-        if(filtroMes) {
-            filtroMes.addEventListener("change", function() {
-                cargarDatos(this.value);
-            });
-        }
-    });
-</script>
 {% endblock %}

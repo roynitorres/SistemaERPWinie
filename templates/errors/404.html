@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Página no encontrada (404) — Sistema ERP Winie{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-compass text-warning"></i> Error 404
+{% endblock %}
+
+{% block content %}
+<div class="page-header-apex" style="margin-bottom: 24px;">
+    <div class="breadcrumbs-apex">
+        Inicio &gt; <span>Página no encontrada</span>
+    </div>
+    <h1 class="page-title-apex">Página no encontrada (404)</h1>
+    <p class="page-subtitle-apex">La ruta o recurso al que intentas acceder no existe en el sistema.</p>
+</div>
+
+<div class="panel text-center py-5" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; max-width: 600px; margin: 40px auto; padding: 48px 32px;">
+    <div class="mb-4">
+        <div style="width: 90px; height: 90px; margin: 0 auto 20px; background: rgba(255, 183, 77, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 183, 77, 0.2);">
+            <i class="bi bi-compass" style="font-size: 3rem; color: #ffb74d;"></i>
+        </div>
+        <h2 style="font-weight: 800; color: #ffffff; font-size: 1.8rem; margin-bottom: 12px;">
+            ¡Ups! No encontramos esta página
+        </h2>
+        <p style="color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px;">
+            La dirección web ingresada no está disponible o ha sido cambiada de ubicación. Verifica el enlace o regresa al panel principal.
+        </p>
+    </div>
+
+    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('dashboard') }}" class="btn-neon-primary" style="padding: 12px 24px; font-size: 0.95rem;">
+            <i class="bi bi-house-door-fill me-2"></i> Ir al Dashboard
+        </a>
+        <button type="button" class="btn-apex-outline" onclick="window.history.back()" style="padding: 12px 24px; font-size: 0.95rem;">
+            <i class="bi bi-arrow-left me-2"></i> Regresar Atrás
+        </button>
+    </div>
+</div>
+{% endblock %}

@@ -1,362 +1,202 @@
 {% extends "base.html" %}
 
-{% block title %}
-Información de la Empresa
-{% endblock %}
+{% block title %}Información de la Empresa{% endblock %}
 
-{% block extra_css %}
-<style>
-    .empresa-card {
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        border: none;
-        transition: all 0.3s ease;
-        background: #ffffff;
-    }
-    .empresa-card:hover {
-        box-shadow: 0 8px 25px rgba(0, 56, 145, 0.08);
-    }
-    .empresa-logo-preview {
-        width: 140px;
-        height: 140px;
-        margin: 0 auto;
-        border-radius: 15px;
-        border: 2px dashed #a5b4fc;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f8fafc;
-        transition: all 0.3s ease;
-    }
-    .empresa-logo-preview:hover {
-        border-color: #1f4fe0;
-        background-color: #f0f7ff;
-    }
-    .card-header-gradient {
-        background: linear-gradient(135deg, #003891 0%, #1f4fe0 100%);
-        color: white;
-        border-radius: 15px 15px 0 0 !important;
-        padding: 1.2rem 1.5rem;
-    }
-    .card-header-gradient h5 {
-        color: white !important;
-        margin: 0;
-        font-size: 1.1rem;
-        letter-spacing: 0.5px;
-    }
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: #1f4fe0;
-        box-shadow: 0 0 0 0.2rem rgba(31, 79, 224, 0.15);
-    }
-    .form-control:disabled, .form-select:disabled {
-        background-color: #f8fafc;
-        opacity: 0.8;
-        border-color: #e2e8f0;
-        cursor: not-allowed;
-    }
-    .section-title {
-        color: #003891;
-        font-weight: 700;
-        font-size: 1rem;
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1.5rem;
-    }
-    .input-icon-wrapper {
-        position: relative;
-    }
-    .input-icon-wrapper i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-    }
-    .input-icon-wrapper .form-control {
-        padding-left: 35px;
-    }
-</style>
+{% block page_title %}
+<i class="bi bi-building"></i> Información de la Empresa
 {% endblock %}
 
 {% block content %}
 
-<div class="container-fluid pt-1 pb-2">
-
-    <!-- ===================================== -->
-    <!-- HEADER / TOP BAR -->
-    <!-- ===================================== -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Información de la Empresa
-        </h4>
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-            </button>
-            <a href="{{ url_for('empresa.informacion_empresa') }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-gear fs-5 text-secondary"></i>
-            </a>
-            <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-moon fs-5 text-secondary"></i>
-            </button>
-                        <a href="{{ url_for('perfil.editar_perfil') }}" class="text-decoration-none" title="Mi Perfil">
-                {% if current_user and current_user.foto_perfil %}
-                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="rounded-circle shadow-sm object-fit-cover" style="width: 40px; height: 40px;">
-                {% else %}
-                    <div class="avatar rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; background-color: #ffe0d3; color: #ff5722; font-weight: bold;">
-                        {{ current_user.username[:2].upper() if current_user else 'AD' }}
-                    </div>
-                {% endif %}
-            </a>
-        </div>
+<!-- ===================================== -->
+<!-- ENCABEZADO DE PÁGINA APEX DARK -->
+<!-- ===================================== -->
+<div class="page-header-apex">
+    <div class="breadcrumbs-apex">
+        Salpicadero &gt; <span>Información de la Empresa</span>
     </div>
-    <form method="POST" enctype="multipart/form-data" id="formEmpresa"
-        data-tiene-empresa="{{ 'true' if empresa else 'false' }}">
-        <div class="row g-4">
-            <!-- PANEL LATERAL: LOGO Y RESUMEN -->
-            <div class="col-lg-3">
-                <div class="card empresa-card h-100">
-                    <div class="card-body text-center p-4">
-                        <div class="empresa-logo-preview mb-4">
-                            {% if empresa and empresa.logo %}
-                            <img src="{{ url_for('static', filename=empresa.logo) }}" class="img-fluid rounded" style="object-fit: contain; width: 100%; height: 100%;">
-                            {% else %}
-                            <i class="bi bi-building text-primary" style="font-size: 4rem; opacity: 0.5;"></i>
-                            {% endif %}
-                        </div>
-
-                        <h5 class="fw-bold text-dark mb-1">
-                            {{ empresa.razon_social if empresa else 'Mi Empresa' }}
-                        </h5>
-                        
-                        <div class="text-muted small mb-3 fw-semibold">
-                            RUC: {{ empresa.ruc if empresa and empresa.ruc else 'No registrado' }}
-                        </div>
-
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill mb-4 fw-semibold">
-                            <i class="bi bi-check-circle me-1"></i> Perfil Activo
-                        </span>
-
-                        <label class="btn btn-outline-primary w-100 fw-semibold" style="border-radius: 8px;">
-                            <i class="bi bi-cloud-arrow-up me-2"></i> Actualizar Logo
-                            <input type="file" name="logo" class="d-none" accept="image/*">
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PANEL PRINCIPAL: FORMULARIO -->
-            <div class="col-lg-9">
-                <div class="card empresa-card">
-                    <div class="card-body p-4">
-                        <h6 class="section-title"><i class="bi bi-info-circle me-2"></i>Datos Generales</h6>
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-5">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">RAZÓN SOCIAL *</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-buildings"></i>
-                                    <input type="text" class="form-control fw-semibold" name="razon_social"
-                                        value="{{ empresa.razon_social if empresa else '' }}" required placeholder="Ej. Mi Empresa S.A.">
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">RUC *</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-upc-scan"></i>
-                                    <input type="text" class="form-control fw-semibold" name="ruc"
-                                        value="{{ empresa.ruc if empresa else '' }}" required placeholder="Número RUC">
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">TIPO DE SOCIEDAD</label>
-                                <select class="form-select fw-semibold" name="tipo_empresa">
-                                    <option value="S.A." {% if empresa and empresa.tipo_empresa=='S.A.' %}selected{% endif %}>S.A.</option>
-                                    <option value="S.A.C." {% if empresa and empresa.tipo_empresa=='S.A.C.' %}selected{% endif %}>S.A.C.</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">DIRECCIÓN FÍSICA</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-geo-alt"></i>
-                                    <input type="text" class="form-control" name="direccion"
-                                        value="{{ empresa.direccion if empresa else '' }}" placeholder="Dirección completa">
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">CIUDAD</label>
-                                <input type="text" class="form-control" name="ciudad"
-                                    value="{{ empresa.ciudad if empresa else '' }}" placeholder="Ej. Managua">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">TELÉFONO</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-telephone"></i>
-                                    <input type="text" class="form-control" name="telefono"
-                                        value="{{ empresa.telefono if empresa else '' }}" placeholder="Ej. +505 1234 5678">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">CORREO ELECTRÓNICO</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-envelope"></i>
-                                    <input type="email" class="form-control" name="email"
-                                        value="{{ empresa.email if empresa else '' }}" placeholder="contacto@empresa.com">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">SITIO WEB</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-globe"></i>
-                                    <input type="url" class="form-control" name="sitio_web"
-                                        value="{{ empresa.sitio_web if empresa else '' }}" placeholder="https://www.empresa.com">
-                                </div>
-                            </div>
-                        </div>
-
-                        <h6 class="section-title mt-2"><i class="bi bi-receipt me-2"></i>Configuración Tributaria y Facturación</h6>
-                        <div class="row g-4 align-items-end">
-                            <div class="col-md-4">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">RÉGIMEN FISCAL</label>
-                                <select class="form-select" name="regimen">
-                                    <option value="Regimen General" {% if empresa and empresa.regimen=='Regimen General' %}selected{% endif %}>Régimen General</option>
-                                    <option value="Regimen MiPYME Tributario" {% if empresa and empresa.regimen=='Regimen MiPYME Tributario' %}selected{% endif %}>Régimen MiPYME Tributario</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">SERIE FAC.</label>
-                                <input type="text" class="form-control text-center fw-bold text-primary" name="serie_factura"
-                                    value="{{ empresa.serie_factura if empresa else 'F001' }}">
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">CORRELATIVO</label>
-                                <input type="text" class="form-control text-center fw-bold" name="correlativo"
-                                    value="{{ empresa.correlativo if empresa else '00034' }}">
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">IVA (%)</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="bi bi-percent"></i>
-                                    <input type="number" class="form-control fw-bold" name="iva" step="0.01"
-                                        value="{{ empresa.iva if empresa else 15 }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label text-xs fw-semibold text-blue mb-1">ESTADO</label>
-                                <select class="form-select fw-semibold" name="estado">
-                                    <option value="ACTIVO" selected>Activo</option>
-                                    <option value="INACTIVO">Inactivo</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="row mt-5">
-                            <div class="col-12 d-flex justify-content-end gap-3 border-top pt-4">
-                                <button type="button" class="btn btn-light border px-4 fw-semibold text-warning"
-                                    id="btnEditarEmpresa">
-                                    <i class="bi bi-pencil-square me-2"></i> Habilitar Edición
-                                </button>
-
-                                <button type="submit" class="btn btn-primary px-5 fw-semibold shadow-sm" id="btnGuardarEmpresa">
-                                    <i class="bi bi-floppy me-2"></i> Guardar Cambios
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+    <h1 class="page-title-apex">Información de la Empresa</h1>
+    <p class="page-subtitle-apex">Configura la razón social, RUC, datos de contacto, régimen fiscal y parámetros de facturación.</p>
 </div>
 
-<!-- MODAL CONFIRMAR EDICIÓN -->
-<div class="modal fade" id="modalConfirmarEdicion" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header" style="background-color: #003891; color: white;">
-                <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>¿Habilitar edición?
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body px-4 py-4">
-                <p class="fs-6 mb-0 text-muted">
-                    Advertencia: estos datos son sensibles y alterarán la información tributaria y facturación del sistema.
-                </p>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnConfirmarEdicionModal" style="background-color: #003891; border-color: #003891;">Sí, editar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const btnEditarEmpresa = document.getElementById("btnEditarEmpresa");
-    const formEmpresa = document.getElementById("formEmpresa");
-    const btnGuardarEmpresa = document.getElementById("btnGuardarEmpresa");
-    let modalEdicionInstancia = null;
-
-    const tieneEmpresa = formEmpresa.dataset.tieneEmpresa === "true";
-
-    function bloquearCamposEmpresa() {
-        formEmpresa.querySelectorAll("input, select, textarea").forEach(campo => {
-            if (campo.type !== "file") {
-                campo.disabled = true;
-            }
-        });
-    }
-
-    function habilitarCamposEmpresa() {
-        formEmpresa.querySelectorAll("input, select, textarea").forEach(campo => {
-            campo.disabled = false;
-        });
-    }
-
-    if (tieneEmpresa) {
-        bloquearCamposEmpresa();
-        btnGuardarEmpresa.disabled = true;
-        btnEditarEmpresa.disabled = false;
-        btnEditarEmpresa.classList.remove('d-none');
-    } else {
-        habilitarCamposEmpresa();
-        btnEditarEmpresa.disabled = true;
-        btnEditarEmpresa.classList.add('d-none');
-        btnGuardarEmpresa.disabled = false;
-    }
-
-    btnEditarEmpresa.addEventListener("click", function () {
-        if (!modalEdicionInstancia) {
-            modalEdicionInstancia = new bootstrap.Modal(document.getElementById('modalConfirmarEdicion'));
-        }
-        modalEdicionInstancia.show();
-    });
-
-    document.getElementById("btnConfirmarEdicionModal").addEventListener("click", function () {
-        modalEdicionInstancia.hide();
-        habilitarCamposEmpresa();
-        btnEditarEmpresa.disabled = true;
-        btnGuardarEmpresa.disabled = false;
+<form method="POST" enctype="multipart/form-data" id="formEmpresa" data-tiene-empresa="{{ 'true' if empresa else 'false' }}" novalidate>
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start;">
         
-        // Cambiar el estilo del botón para mostrar que estamos en modo edición
-        btnEditarEmpresa.classList.replace('text-warning', 'text-muted');
-        btnEditarEmpresa.innerHTML = '<i class="bi bi-unlock me-2"></i> Modo Edición Activo';
-    });
-</script>
+        <!-- PANEL IZQUIERDO: LOGO E IDENTIDAD -->
+        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; text-align: center;">
+            <div style="font-size: 0.9rem; font-weight: 800; color: #ffffff; margin-bottom: 16px; text-align: left; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-image text-success"></i> Logo Institucional
+            </div>
+
+            <div class="empresa-logo-preview mb-3" style="width: 160px; height: 160px; margin: 0 auto 16px; border-radius: 16px; border: 2px dashed rgba(255,255,255,0.15); overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #181922; transition: all 0.3s ease;">
+                {% if empresa and empresa.logo %}
+                <img src="{{ url_for('static', filename=empresa.logo) }}" class="img-fluid" style="object-fit: contain; width: 100%; height: 100%;">
+                {% else %}
+                <i class="bi bi-building text-primary" style="font-size: 3.5rem; opacity: 0.6;"></i>
+                {% endif %}
+            </div>
+
+            <h5 style="font-weight: 800; color: #ffffff; margin-bottom: 4px; font-size: 1.15rem;">
+                {{ empresa.razon_social if empresa else 'Mi Empresa' }}
+            </h5>
+            
+            <div style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 16px; font-weight: 600;">
+                RUC: <span style="color: #ffffff;">{{ empresa.ruc if empresa and empresa.ruc else 'No registrado' }}</span>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <span class="badge-pill-apex badge-pill-apex--active" style="padding: 5px 14px; font-size: 0.8rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i> Perfil Activo
+                </span>
+            </div>
+
+            <label class="btn-apex-outline w-100 justify-content-center" style="cursor: pointer; padding: 10px 14px; font-size: 0.88rem;">
+                <i class="bi bi-cloud-arrow-up me-2 text-primary"></i> Subir / Cambiar Logo
+                <input type="file" name="logo" class="d-none" accept="image/*">
+            </label>
+        </div>
+
+        <!-- PANEL DERECHO: FORMULARIO PROPORCIONADO Y COMPACTO -->
+        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px;">
+            
+            <!-- SECCIÓN 1: DATOS DE IDENTIFICACIÓN -->
+            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-buildings text-success"></i> Identificación y Razón Social
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label class="form-label form-label--required">Razón Social o Nombre Comercial</label>
+                    <input type="text" class="form-input" id="form_razon_social" name="razon_social" value="{{ empresa.razon_social if empresa else '' }}" required placeholder="Ej. Mi Empresa S.A." style="font-weight: 700;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label form-label--required">RUC (Identificación Fiscal)</label>
+                    <input type="text" class="form-input" id="form_ruc" name="ruc" value="{{ empresa.ruc if empresa else '' }}" required placeholder="Número RUC" style="font-weight: 700; color: var(--color-primary);">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipo Sociedad</label>
+                    <select class="form-input" name="tipo_empresa">
+                        <option value="S.A." {% if empresa and empresa.tipo_empresa=='S.A.' %}selected{% endif %}>S.A.</option>
+                        <option value="S.A.C." {% if empresa and empresa.tipo_empresa=='S.A.C.' %}selected{% endif %}>S.A.C.</option>
+                        <option value="CÍA. LTDA." {% if empresa and empresa.tipo_empresa=='CÍA. LTDA.' %}selected{% endif %}>CÍA. LTDA.</option>
+                        <option value="PERSONA NATURAL" {% if empresa and empresa.tipo_empresa=='PERSONA NATURAL' %}selected{% endif %}>PERSONA NATURAL</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: UBICACIÓN Y CONTACTO -->
+            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-geo-alt text-primary"></i> Ubicación y Contacto
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div class="form-group">
+                    <label class="form-label">Dirección Física del Establecimiento</label>
+                    <input type="text" class="form-input" name="direccion" value="{{ empresa.direccion if empresa else '' }}" placeholder="Dirección exacta del negocio">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ciudad / Depto.</label>
+                    <input type="text" class="form-input" name="ciudad" value="{{ empresa.ciudad if empresa else '' }}" placeholder="Ej. Managua">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label class="form-label">Teléfono de Contacto</label>
+                    <input type="text" class="form-input" name="telefono" value="{{ empresa.telefono if empresa else '' }}" placeholder="Ej. +505 2222 3333">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-input" name="email" value="{{ empresa.email if empresa else '' }}" placeholder="contacto@empresa.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sitio Web Oficial</label>
+                    <input type="url" class="form-input" name="sitio_web" value="{{ empresa.sitio_web if empresa else '' }}" placeholder="https://www.empresa.com">
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: CONFIGURACIÓN TRIBUTARIA (ANCHOS COMPACTOS PROPORCIONADOS) -->
+            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-receipt text-warning"></i> Régimen Fiscal y Parámetros de Facturación
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.8fr 110px 130px 100px 140px; gap: 14px; align-items: end; margin-bottom: 10px;">
+                <div class="form-group">
+                    <label class="form-label">Régimen Fiscal DGI</label>
+                    <select class="form-input" name="regimen">
+                        <option value="Regimen General" {% if empresa and empresa.regimen=='Regimen General' %}selected{% endif %}>Régimen General</option>
+                        <option value="Regimen MiPYME Tributario" {% if empresa and empresa.regimen=='Regimen MiPYME Tributario' %}selected{% endif %}>Régimen MiPYME Tributario</option>
+                        <option value="Cuota Fija" {% if empresa and empresa.regimen=='Cuota Fija' %}selected{% endif %}>Cuota Fija</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Serie Fac.</label>
+                    <input type="text" class="form-input text-center" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}" style="font-weight: 800; color: var(--color-primary);">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Correlativo</label>
+                    <input type="text" class="form-input text-center" name="correlativo" value="{{ empresa.correlativo if empresa else '00034' }}" style="font-weight: 800; color: #ffffff;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">IVA (%)</label>
+                    <input type="number" step="0.01" class="form-input text-center" name="iva" value="{{ empresa.iva if empresa else 15 }}" style="font-weight: 800; color: #00e676;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <select class="form-input select-estado-apex" name="estado" id="form_estado" data-estado="ACTIVO">
+                        <option value="ACTIVO" selected> Activo</option>
+                        <option value="INACTIVO"> Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN (PIE DEL PANEL DERECHO) -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 20px;">
+                <button type="button" class="btn-apex-outline" id="btnEditarEmpresa" style="color: #ffb74d; border-color: rgba(255,183,77,0.3);">
+                    <i class="bi bi-pencil-square me-1"></i> Habilitar Edición
+                </button>
+
+                <button type="submit" class="btn-neon-primary" id="btnGuardarEmpresa">
+                    <i class="bi bi-floppy me-1"></i> Guardar Cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<!-- MODAL CONFIRMAR EDICIÓN APEX DARK -->
+<div class="modal-overlay" id="modalConfirmarEdicion">
+    <div class="modal-window" style="max-width: 460px; text-align: center;">
+        <div class="modal-header">
+            <h5 class="modal-title" style="color: #ffffff;">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> ¿Habilitar Edición?
+            </h5>
+            <button type="button" class="modal-close-btn" onclick="cerrarModal('modalConfirmarEdicion')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body py-4">
+            <p style="color: var(--color-text-muted); font-size: 0.92rem; margin-bottom: 0;">
+                Advertencia: Estos datos son sensibles y alterarán la información de facturación y régimen tributario del sistema.
+            </p>
+        </div>
+        <div class="modal-footer" style="justify-content: center; gap: 12px;">
+            <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalConfirmarEdicion')">Cancelar</button>
+            <button type="button" class="btn-neon-primary" id="btnConfirmarEdicionModal">
+                <i class="bi bi-check-lg me-1"></i> Sí, habilitar edición
+            </button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

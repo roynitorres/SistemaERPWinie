@@ -43,89 +43,115 @@
     {% set rol_actual = current_user.rol.nombre.upper() if current_user.is_authenticated and current_user.rol else '' %}
     
     <div id="app-container" class="app-container">
+        <!-- BOTÓN HAMBURGUESA FLOTANTE -->
+        <button id="btnHamburgerTrigger" class="hamburger-trigger-btn" title="Abrir Menú">
+            <i class="bi bi-list"></i>
+        </button>
         <!-- ===================================== -->
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR APEX DARK -->
         <!-- ===================================== -->
-        <aside id="sidebar" class="sidebar collapsed">
-            <!-- HEADER LOGO & TOGGLE -->
+        <aside id="sidebar" class="sidebar">
+            <!-- HEADER LOGO -->
             <div class="sidebar__header">
-                <a class="text-decoration-none d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}" style="color: white; font-weight: bold; font-size: 1.2rem;">
-                    <i class="bi bi-grid-fill" style="color: var(--color-secondary);"></i>
-                    <span class="sidebar__text">C<span style="color: var(--color-secondary);">Pagos</span></span>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="{{ url_for('dashboard') }}" style="color: white; font-weight: 700; font-size: 1.15rem;">
+                    <div class="sidebar__logo-badge">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <span class="sidebar__text">Sistema<span style="color: var(--color-primary);">ERP</span></span>
                 </a>
-                <button id="btnToggleSidebar" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">
-                    <i class="bi bi-list"></i>
-                </button>
+                
             </div>
 
             <!-- BODY LINKS -->
             <nav class="sidebar__nav">
                 <ul class="sidebar__menu">
+                    <!-- 1. DASHBOARD -->
                     {% if rol_actual == 'ADMIN' %}
                     <li>
-                        <a class="sidebar__link {% if request.endpoint == 'clientes.clientes' %}sidebar__link--active{% endif %}" href="{{ url_for('clientes.clientes') }}">
-                            <i class="bi bi-people sidebar__icon"></i>
+                        <a class="sidebar__link {% if request.endpoint == 'dashboard' %}sidebar__link--active{% endif %}" href="{{ url_for('dashboard') }}">
+                            <i class="bi bi-grid-fill sidebar__icon"></i>
+                            <span class="sidebar__text">Dashboard</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- 2. CLIENTES -->
+                    {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
+                    <li>
+                        <a class="sidebar__link {% if request.endpoint and 'clientes' in request.endpoint %}sidebar__link--active{% endif %}" href="{{ url_for('clientes.clientes') }}">
+                            <i class="bi bi-people-fill sidebar__icon"></i>
                             <span class="sidebar__text">Clientes</span>
                         </a>
                     </li>
-                    <li>
-                        <a class="sidebar__link {% if request.endpoint == 'proveedores.proveedores' %}sidebar__link--active{% endif %}" href="{{ url_for('proveedores.proveedores') }}">
-                            <i class="bi bi-truck sidebar__icon"></i>
-                            <span class="sidebar__text">Proveedores</span>
-                        </a>
-                    </li>
-                    <li class="sidebar__item">
-                        <a href="#" class="sidebar__link" onclick="this.nextElementSibling.classList.toggle('is-open'); return false;">
-                            <i class="bi bi-box-seam sidebar__icon"></i>
+
+                    <!-- 3. PRODUCTOS (SUBMENÚ CATEGORÍAS) -->
+                    <li class="sidebar__dropdown {% if request.endpoint and ('productos' in request.endpoint or 'categorias' in request.endpoint) %}is-expanded{% endif %}">
+                        <div class="sidebar__link sidebar__dropdown-toggle {% if request.endpoint and ('productos' in request.endpoint or 'categorias' in request.endpoint) %}sidebar__link--active{% endif %}" onclick="toggleSidebarDropdown(this)">
+                            <i class="bi bi-box-seam-fill sidebar__icon"></i>
                             <span class="sidebar__text">Productos</span>
-                            <i class="bi bi-chevron-down sidebar__chevron" style="margin-left: auto;"></i>
-                        </a>
-                        <ul class="sidebar__submenu {% if request.endpoint in ['productos.productos', 'categorias.categorias'] %}is-open{% endif %}">
+                            <i class="bi bi-chevron-down sidebar__chevron"></i>
+                        </div>
+                        <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__submenu-link {% if request.endpoint == 'productos.productos' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('productos.productos') }}">
-                                    Lista de Productos
+                                <a class="sidebar__sublink {% if request.endpoint and 'productos' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('productos.productos') }}">
+                                    <span class="sidebar__subtext">Catálogo Productos</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="sidebar__submenu-link {% if request.endpoint == 'categorias.categorias' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('categorias.categorias') }}">
-                                    Categorías
+                                <a class="sidebar__sublink {% if request.endpoint and 'categorias' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('categorias.categorias') }}">
+                                    <span class="sidebar__subtext">Categorías</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
                     {% endif %}
 
+                    <!-- 4. PROVEEDORES -->
+                    {% if rol_actual == 'ADMIN' %}
+                    <li>
+                        <a class="sidebar__link {% if request.endpoint and 'proveedores' in request.endpoint %}sidebar__link--active{% endif %}" href="{{ url_for('proveedores.proveedores') }}">
+                            <i class="bi bi-truck sidebar__icon"></i>
+                            <span class="sidebar__text">Proveedores</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- 5. VENTAS -->
                     {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
                     <li>
-                        <a class="sidebar__link {% if request.endpoint == 'ventas.ventas' %}sidebar__link--active{% endif %}" href="{{ url_for('ventas.ventas') }}">
-                            <i class="bi bi-cart-check sidebar__icon"></i>
+                        <a class="sidebar__link {% if request.endpoint and 'ventas' in request.endpoint %}sidebar__link--active{% endif %}" href="{{ url_for('ventas.ventas') }}">
+                            <i class="bi bi-receipt-cutoff sidebar__icon"></i>
                             <span class="sidebar__text">Ventas</span>
                         </a>
                     </li>
-                    
-                    <li class="sidebar__item">
-                        <a href="#" class="sidebar__link" onclick="this.nextElementSibling.classList.toggle('is-open'); return false;">
-                            <i class="bi bi-receipt sidebar__icon"></i>
+
+                    <!-- 6. FACTURAS (CONTADO Y CRÉDITO) -->
+                    <li class="sidebar__dropdown {% if request.endpoint and 'pagos' in request.endpoint %}is-expanded{% endif %}">
+                        <div class="sidebar__link sidebar__dropdown-toggle {% if request.endpoint and 'pagos' in request.endpoint %}sidebar__link--active{% endif %}" onclick="toggleSidebarDropdown(this)">
+                            <i class="bi bi-credit-card-fill sidebar__icon"></i>
                             <span class="sidebar__text">Facturas</span>
-                            <i class="bi bi-chevron-down sidebar__chevron" style="margin-left: auto;"></i>
-                        </a>
-                        <ul class="sidebar__submenu {% if request.endpoint and 'pagos.facturas' in request.endpoint %}is-open{% endif %}">
+                            <i class="bi bi-chevron-down sidebar__chevron"></i>
+                        </div>
+                        <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__submenu-link {% if request.endpoint and request.view_args.get('tipo') == 'contado' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}">
-                                    Contado
+                                <a class="sidebar__sublink {% if request.path and '/facturas/contado' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}">
+                                    <span class="sidebar__subtext">Facturas de Contado</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="sidebar__submenu-link {% if request.endpoint and request.view_args.get('tipo') == 'credito' %}sidebar__submenu-link--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}">
-                                    Crédito
+                                <a class="sidebar__sublink {% if request.path and '/facturas/credito' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}">
+                                    <span class="sidebar__subtext">Facturas a Crédito</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
+                    {% endif %}
 
+                    <!-- 7. REPORTES -->
+                    {% if rol_actual == 'ADMIN' %}
                     <li>
                         <a class="sidebar__link {% if request.endpoint == 'reportes.financiero' %}sidebar__link--active{% endif %}" href="{{ url_for('reportes.financiero') }}">
-                            <i class="bi bi-bar-chart-line sidebar__icon"></i>
+                            <i class="bi bi-bar-chart-line-fill sidebar__icon"></i>
                             <span class="sidebar__text">Reportes</span>
                         </a>
                     </li>
@@ -133,15 +159,27 @@
                 </ul>
             </nav>
 
-            <!-- FOOTER PROFILE -->
-            {% if current_user.is_authenticated %}
-            <div style="padding: var(--spacing-lg); text-align: center;">
-                <button id="btnLogout" class="btn btn--outline" style="width: 100%; color: white; border-color: rgba(255,255,255,0.2);">
-                    <i class="bi bi-box-arrow-right sidebar__icon"></i>
-                    <span class="sidebar__text">Cerrar Sesión</span>
+            <!-- ANCLADO INFERIOR IZQUIERDA: AVATAR DE USUARIO (LINK A PERFIL) -->
+            <div class="sidebar__user-profile">
+                <a href="{{ url_for('perfil.editar_perfil') }}" class="d-flex align-items-center gap-2 text-decoration-none" style="flex: 1; min-width: 0;" title="Ver Perfil de Admin">
+                    <div class="sidebar__user-avatar" style="overflow: hidden;">
+                        {% if current_user.is_authenticated and current_user.foto_perfil %}
+                        <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        {{ current_user.username[:2].upper() if current_user.is_authenticated else 'AD' }}
+                        {% endif %}
+                    </div>
+                    <div class="sidebar__user-info" style="min-width: 0;">
+                        <div class="sidebar__user-name text-truncate">{{ current_user.username if current_user.is_authenticated else 'Usuario' }}</div>
+                        <div class="sidebar__user-role">{{ rol_actual if rol_actual else 'ADMIN' }}</div>
+                    </div>
+                </a>
+                {% if current_user.is_authenticated %}
+                <button type="button" class="sidebar__logout-btn" onclick="confirmarCerrarSesion()" title="Cerrar Sesión" style="background: transparent; border: none; cursor: pointer;">
+                    <i class="bi bi-box-arrow-right"></i>
                 </button>
+                {% endif %}
             </div>
-            {% endif %}
         </aside>
 
         <!-- ===================================== -->
@@ -149,33 +187,34 @@
         <!-- ===================================== -->
         <main id="main-content" class="main-content">
             <!-- ===================================== -->
-            <!-- TOPBAR GLOBAL -->
+            <!-- TOPBAR GLOBAL APEX DARK -->
             <!-- ===================================== -->
+            {% block topbar %}
             <header class="topbar">
-                <div class="topbar__title">
-                    {% block page_title %}{% endblock %}
+                <!-- IZQUIERDA: RELOJ DIGITAL Y FECHA EN VIVO -->
+                <div class="topbar__left-widget">
+                    <i class="bi bi-clock-fill text-success me-2 fs-5"></i>
+                    <span id="liveClockDate" class="topbar__date-text"></span>
+                    <strong id="liveClockTime" class="topbar__time-text"></strong>
                 </div>
-                <div class="topbar__actions">
-                    <button class="topbar__btn" title="Notificaciones">
-                        <i class="bi bi-bell"></i>
-                    </button>
-                    <a href="{{ url_for('empresa.informacion_empresa') }}" class="topbar__btn" title="Configuración de Empresa">
-                        <i class="bi bi-gear"></i>
+
+                <!-- DERECHA: ALERTAS DE COBRO Y CONFIGURACIÓN EMPRESA -->
+                <div class="topbar__actions" style="display: flex; align-items: center; gap: 10px;">
+                    <!-- Control de alertas -->
+                    <a href="javascript:void(0)" class="topbar-icon-btn" title="Alertas de Cobro">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="topbar-badge-dot"></span>
                     </a>
-                    <button class="topbar__btn" title="Modo Oscuro">
-                        <i class="bi bi-moon"></i>
-                    </button>
-                    <a href="{{ url_for('perfil.editar_perfil') }}" title="Mi Perfil">
-                        {% if current_user.is_authenticated and current_user.foto_perfil %}
-                            <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" alt="Perfil" class="topbar__profile">
-                        {% else %}
-                            <div class="topbar__profile-fallback">
-                                {{ current_user.username[:2].upper() if current_user.is_authenticated else 'AD' }}
-                            </div>
-                        {% endif %}
+
+                    <!-- Configuración de Empresa (Engranaje) -->
+                    {% if rol_actual == 'ADMIN' %}
+                    <a href="{{ url_for('empresa.informacion_empresa') }}" class="topbar-icon-btn" title="Información de la Empresa">
+                        <i class="bi bi-gear-fill"></i>
                     </a>
+                    {% endif %}
                 </div>
             </header>
+            {% endblock topbar %}
 
             <div class="content-wrapper">
 
@@ -217,42 +256,38 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const sidebar = document.getElementById('sidebar');
+            const btnHamburger = document.getElementById('btnHamburgerTrigger');
             const btnToggle = document.getElementById('btnToggleSidebar');
-            
-            // El sidebar inicia colapsado por defecto para el efecto hover
-            sidebar.classList.add('collapsed');
 
-            // Expandir al pasar el cursor
-            sidebar.addEventListener('mouseenter', function() {
-                sidebar.classList.remove('collapsed');
-            });
+            function abrirSidebar() {
+                if (sidebar) sidebar.classList.add('is-open');
+            }
 
-            // Colapsar al retirar el cursor
-            sidebar.addEventListener('mouseleave', function() {
-                sidebar.classList.add('collapsed');
-                // Ocultar submenús al colapsar
-                document.querySelectorAll('.sidebar-submenu').forEach(el => {
-                    el.parentElement.classList.remove('show');
-                    const link = el.parentElement.previousElementSibling;
-                    if(link && link.hasAttribute('aria-expanded')){
-                        link.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            });
-
-            // Botón toggle para dispositivos móviles
-            btnToggle.addEventListener('click', function(e) {
-                sidebar.classList.toggle('collapsed');
-                if (sidebar.classList.contains('collapsed')) {
+            function cerrarSidebar() {
+                if (sidebar) {
+                    sidebar.classList.remove('is-open');
                     document.querySelectorAll('.sidebar-submenu').forEach(el => {
-                        el.parentElement.classList.remove('show');
-                        const link = el.parentElement.previousElementSibling;
-                        if(link && link.hasAttribute('aria-expanded')){
-                            link.setAttribute('aria-expanded', 'false');
-                        }
+                        el.classList.remove('is-open');
                     });
                 }
-            });
+            }
+
+            if (btnHamburger) {
+                btnHamburger.addEventListener('mouseenter', abrirSidebar);
+                btnHamburger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (sidebar) sidebar.classList.toggle('is-open');
+                });
+            }
+
+            if (sidebar) {
+                sidebar.addEventListener('mouseenter', abrirSidebar);
+                sidebar.addEventListener('mouseleave', cerrarSidebar);
+            }
+
+            if (btnToggle) {
+                btnToggle.addEventListener('click', cerrarSidebar);
+            }
 
             // Expand sidebar if clicking a nav-link when collapsed
             document.querySelectorAll('#sidebar .nav-link').forEach(link => {
@@ -274,6 +309,21 @@
                     // Let Bootstrap handle the collapse, just prevent the default jump
                 });
             });
+
+            // Reloj Digital en Vivo en Tiempo Real (Nicaragua / Español)
+            function updateLiveClock() {
+                const now = new Date();
+                const optionsDate = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+                const dateStr = now.toLocaleDateString('es-ES', optionsDate).toUpperCase();
+                const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true });
+                
+                const dateEl = document.getElementById('liveClockDate');
+                const timeEl = document.getElementById('liveClockTime');
+                if (dateEl) dateEl.textContent = dateStr;
+                if (timeEl) timeEl.textContent = timeStr;
+            }
+            setInterval(updateLiveClock, 1000);
+            updateLiveClock();
 
             // Auto-hide Toasts
             const toasts = document.querySelectorAll('.alert-toast');
@@ -310,7 +360,7 @@
     <div class="modal fade" id="modalLogout" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header" style="background-color: #003891; color: white;">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #004aad 0%, #002b80 100%);">
                     <h5 class="modal-title">
                         <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
                     </h5>
@@ -322,7 +372,7 @@
                 </div>
                 <div class="modal-footer justify-content-center">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary" style="background-color: #003891; border-color: #003891;">Sí, salir</a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary" style="background-color: #004aad; border-color: #004aad;">Sí, salir</a>
                 </div>
             </div>
         </div>
@@ -416,9 +466,76 @@
                 setTimeout(() => toast.remove(), 350);
             }, duracion);
         }
+
+        function toggleSidebarDropdown(element) {
+            const parent = element.closest('.sidebar__dropdown');
+            if (parent) {
+                parent.classList.toggle('is-expanded');
+            }
+        }
+
+        function confirmarCerrarSesion() {
+            const modalEl = document.getElementById('modalConfirmarLogout');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            } else {
+                window.location.href = "{{ url_for('auth.logout') }}";
+            }
+        }
     </script>
 
+    <!-- ===================================== -->
+    <!-- MODAL GLOBAL CONFIRMACIÓN CERRAR SESIÓN (APEX DARK GLASSMORPHISM) -->
+    <!-- ===================================== -->
+    <div class="modal fade" id="modalConfirmarLogout" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 390px;">
+            <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 22px; color: #ffffff; box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 35px rgba(255, 82, 82, 0.18); backdrop-filter: blur(16px);">
+                <div class="modal-body text-center p-4">
+                    
+                    <!-- ICONO CON HALO ROJO REVERBERANTE -->
+                    <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; border-radius: 50%; background: rgba(255, 82, 82, 0.12); border: 2px solid rgba(255, 82, 82, 0.3); color: #ff5252; box-shadow: 0 0 25px rgba(255, 82, 82, 0.25);">
+                        <i class="bi bi-box-arrow-right" style="font-size: 2.2rem;"></i>
+                    </div>
 
+                    <h4 class="fw-bold text-white mb-2" style="font-size: 1.3rem;">¿Cerrar Sesión?</h4>
+                    <p style="color: #cbd5e1; font-size: 0.92rem; margin-bottom: 16px; line-height: 1.4;">
+                        ¿Estás seguro de que deseas salir del sistema?
+                    </p>
+
+                    <div class="p-2.5 rounded-3 mb-4" style="background: rgba(255, 82, 82, 0.08); border: 1px dashed rgba(255, 82, 82, 0.25); color: #ff8a8a; font-size: 0.8rem; text-align: center;">
+                        <i class="bi bi-shield-exclamation me-1"></i> Se cerrará tu sesión activa y deberás autenticarte nuevamente.
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="flex: 1; padding: 10px 14px; font-weight: 700;">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <a href="{{ url_for('auth.logout') }}" class="btn-logout-confirm" style="flex: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-box-arrow-right me-1"></i> Sí, Salir
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULOS JAVASCRIPT CLEAN CODE -->
+    <script src="{{ url_for('static', filename='js/core/ui.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/validators.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/perfil.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/clientes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/ventas.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/pagos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/inventario.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/proveedores.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/empresa.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/reportes.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+    {% block scripts %}{% endblock %}
 
 </body>
 

@@ -8,38 +8,51 @@
 
 {% block content %}
     <!-- ===================================== -->
-    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
+    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
     <!-- ===================================== -->
-    <div class="filter-bar">
-        <!-- Nuevo (Enfocar formulario) -->
-        <button type="button" class="btn btn--primary" id="btnIrForm">
-            <i class="bi bi-plus-lg" style="margin-right: var(--spacing-xs);"></i> Nuevo Producto
-        </button>
+    <div class="page-header-apex">
+        <div class="breadcrumbs-apex">
+            Salpicadero &gt; <span>Productos</span>
+        </div>
+        <h1 class="page-title-apex">Productos</h1>
+        <p class="page-subtitle-apex">Visualiza y gestiona tu catálogo de productos.</p>
+    </div>
 
-        <!-- Buscador -->
-        <input type="text" class="form-input filter-bar__input" id="buscarProducto" placeholder="🔍 Buscar por código, nombre o marca...">
+    <!-- ===================================== -->
+    <!-- BARRA DE HERRAMIENTAS, BÚSQUEDA Y PILLS APEX -->
+    <!-- ===================================== -->
+    <div class="toolbar-apex">
+        <!-- Grupo Izquierdo: Buscador Oscuro + Pills de Estado al lado derecho -->
+        <div class="toolbar-left-group">
+            <div class="toolbar-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="toolbar-input" id="buscarProducto" placeholder="Buscar por código, nombre o marca...">
+            </div>
 
-        <!-- Filtro Mes -->
-        <select class="form-input filter-bar__select" id="filtroMes">
-            <option value="">Todos los meses</option>
-        </select>
+            <!-- TABS PILLS DE ESTADO (TODOS, ACTIVO, INACTIVO) -->
+            <div class="state-pills-bar">
+                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
+                <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
+                <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
+            </div>
+        </div>
 
-        <!-- Filtro Proveedor -->
-        <select class="form-input filter-bar__select" id="filtroProveedor">
-            <option value="">Todos los proveedores</option>
-            {% for proveedor in proveedores %}
-            <option value="{{ proveedor.id }}">{{ proveedor.nombre_proveedor }}</option>
-            {% endfor %}
-        </select>
-
-        <!-- Exportar y Contador -->
-        <div style="margin-left: auto; display: flex; align-items: center; gap: var(--spacing-md);">
-            <span id="badgeTotalItems" style="color: var(--color-text-main); font-size: 0.95rem;">
-                Productos: <strong>0</strong>
-            </span>
-            <a href="#" class="btn btn--outline">
-                <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+        <!-- Acciones Derecha -->
+        <div class="toolbar-actions-right">
+            <!-- Dynamic Count Badge (Número Puro) -->
+            <span id="badgeTotalItems" class="count-badge-apex" title="Total de registros">0</span>
+            
+            <a href="{{ url_for('categorias.categorias') }}" class="btn-apex-outline" title="Gestionar Categorías">
+                <i class="bi bi-tags"></i> Categorías
             </a>
+
+            <a href="#" class="btn-apex-outline">
+                <i class="bi bi-download"></i> Exportación
+            </a>
+            
+            <button type="button" class="btn-neon-primary" id="btnIrForm">
+                <i class="bi bi-plus-lg"></i> Nuevo Producto
+            </button>
         </div>
     </div>
 
@@ -50,48 +63,48 @@
         <div class="modal-window" style="max-width: 800px;">
             <div class="modal-header">
                 <h5 class="modal-title" id="formTitle">
-                    <i class="bi bi-box-seam"></i> NUEVO PRODUCTO
+                    <i class="bi bi-box-seam-fill text-success me-1"></i> NUEVO PRODUCTO
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalFormProducto')">
-                    <i class="bi bi-x"></i>
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             
             <div class="modal-body">
-                <form method="POST" id="formProductos">
+                <form method="POST" id="formProductos" novalidate>
                     <input type="hidden" id="producto_id" name="producto_id">
 
                     <div class="grid grid--2-cols">
                         <!-- CÓDIGO -->
                         <div class="form-group">
                             <label class="form-label form-label--required">CÓDIGO</label>
-                            <input type="text" class="form-input" id="form_codigo" name="codigo_producto" placeholder="Ej. P001" required oninput="this.value = this.value.toUpperCase()">
+                            <input type="text" class="form-input" id="form_codigo" name="codigo_producto" placeholder="Ej. P001" oninput="this.value = this.value.toUpperCase()">
                         </div>
 
                         <!-- FECHA -->
                         <div class="form-group">
                             <label class="form-label form-label--required">FECHA DE COMPRA</label>
-                            <input type="date" class="form-input" id="form_fecha_compra" name="fecha_compra" required>
+                            <input type="date" class="form-input" id="form_fecha_compra" name="fecha_compra">
                         </div>
                     </div>
 
                     <!-- NOMBRE DEL PRODUCTO -->
                     <div class="form-group">
                         <label class="form-label form-label--required">NOMBRE DEL PRODUCTO</label>
-                        <input type="text" class="form-input" id="form_nombre" name="nombre" placeholder="Nombre completo del producto" required oninput="this.value = this.value.toUpperCase()">
+                        <input type="text" class="form-input" id="form_nombre" name="nombre" placeholder="Nombre completo del producto" oninput="this.value = this.value.toUpperCase()">
                     </div>
 
                     <div class="grid grid--2-cols">
                         <!-- MARCA -->
                         <div class="form-group">
                             <label class="form-label form-label--required">MARCA</label>
-                            <input type="text" class="form-input" id="form_marca" name="marca" placeholder="Marca del producto" required oninput="this.value = this.value.toUpperCase()">
+                            <input type="text" class="form-input" id="form_marca" name="marca" placeholder="Marca del producto" oninput="this.value = this.value.toUpperCase()">
                         </div>
 
                         <!-- CANTIDAD -->
                         <div class="form-group">
                             <label class="form-label form-label--required">CANTIDAD COMPRADA</label>
-                            <input type="number" min="1" class="form-input" id="form_cantidad_comprada" name="cantidad_comprada" placeholder="0" required>
+                            <input type="number" class="form-input" id="form_cantidad_comprada" name="cantidad_comprada" placeholder="0">
                         </div>
                     </div>
 
@@ -99,7 +112,7 @@
                         <!-- CATEGORÍA -->
                         <div class="form-group">
                             <label class="form-label form-label--required">CATEGORÍA</label>
-                            <select class="form-input" id="form_categoria" name="categoria_id" required>
+                            <select class="form-input" id="form_categoria" name="categoria_id">
                                 <option value="">Seleccione una categoría...</option>
                                 {% for categoria in categorias %}
                                 <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
@@ -110,7 +123,7 @@
                         <!-- PROVEEDOR -->
                         <div class="form-group">
                             <label class="form-label form-label--required">PROVEEDOR</label>
-                            <select class="form-input" id="form_proveedor" name="proveedor_id" required>
+                            <select class="form-input" id="form_proveedor" name="proveedor_id">
                                 <option value="">Seleccione un proveedor...</option>
                                 {% for proveedor in proveedores %}
                                 <option value="{{ proveedor.id }}">{{ proveedor.nombre_proveedor }}</option>
@@ -119,24 +132,35 @@
                         </div>
                     </div>
 
-                    <div class="grid grid--2-cols">
+                    <div class="grid grid--3-cols">
                         <!-- PRECIO COSTO -->
                         <div class="form-group">
                             <label class="form-label form-label--required">PRECIO COSTO (C$)</label>
-                            <input type="number" step="0.01" min="0.01" class="form-input" id="form_precio_compra" name="precio_compra" placeholder="0.00" required>
+                            <input type="number" step="0.01" class="form-input" id="form_precio_compra" name="precio_compra" placeholder="0.00">
                         </div>
 
                         <!-- PRECIO VENTA -->
                         <div class="form-group">
                             <label class="form-label form-label--required">PRECIO VENTA (C$)</label>
-                            <input type="number" step="0.01" min="0.01" class="form-input" id="form_precio_venta" name="precio_venta" placeholder="0.00" required>
+                            <input type="number" step="0.01" class="form-input" id="form_precio_venta" name="precio_venta" placeholder="0.00">
+                        </div>
+
+                        <!-- ESTADO -->
+                        <div class="form-group">
+                            <label class="form-label">ESTADO</label>
+                            <select class="form-input select-estado-apex" name="estado" id="form_estado" data-estado="ACTIVO">
+                                <option value="ACTIVO"> Activo</option>
+                                <option value="INACTIVO"> Inactivo</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
-                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalFormProducto')">Cancelar</button>
-                        <button type="button" class="btn btn--secondary" id="btnLimpiar">Limpiar</button>
-                        <button type="submit" class="btn btn--primary" id="btnGuardar">Guardar</button>
+                    <div class="modal-footer" style="margin-top: 24px;">
+                        <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalFormProducto')">Cancelar</button>
+                        <button type="button" class="btn-apex-outline" id="btnLimpiar" style="color: var(--color-text-muted);">Limpiar</button>
+                        <button type="submit" class="btn-neon-primary" id="btnGuardar">
+                            <i class="bi bi-check-lg me-1"></i> Guardar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -151,14 +175,14 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th style="width: 100px;">CÓDIGO</th>
-                        <th>PRODUCTO</th>
-                        <th>CATEGORÍA</th>
-                        <th>FECHA COMPRA</th>
-                        <th style="text-align: right;">P. VENTA</th>
-                        <th style="text-align: center;">STOCK</th>
-                        <th>ESTADO</th>
-                        <th style="text-align: right;">ACCIONES</th>
+                        <th>Producto</th>
+                        <th>Estado</th>
+                        <th>Código</th>
+                        <th>Categoría</th>
+                        <th>Fecha Compra</th>
+                        <th style="text-align: right;">P. Venta</th>
+                        <th style="text-align: center;">Stock</th>
+                        <th style="text-align: right;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaProductos">
@@ -178,43 +202,53 @@
                         data-cantidad-comprada="{{ producto.cantidad_comprada }}" 
                         data-stock="{{ producto.stock }}">
 
-                        <td class="data-table__cell" style="font-family: monospace; font-weight: bold;">
-                            {{ producto.codigo_producto }}
-                        </td>
-                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-primary-dark);">
-                            <div class="avatar-wrapper">
-                                <div class="avatar" style="background-color: var(--color-secondary); color: var(--color-text-main);">
-                                    <i class="bi bi-box-seam"></i>
+                        <td class="data-table__cell">
+                            <div class="customer-cell-wrapper">
+                                <div class="avatar-circle-apex" style="background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%); color: #090a0f;">
+                                    <i class="bi bi-box-seam-fill"></i>
                                 </div>
-                                <div class="avatar-text">
-                                    <span class="avatar-text__title">{{ producto.nombre }}</span>
-                                    <small style="color: var(--color-text-muted); font-weight: normal;"><i class="bi bi-bookmark" style="margin-right: 4px;"></i>{{ producto.marca }}</small>
+                                <div>
+                                    <span class="customer-title-text">{{ producto.nombre }}</span>
+                                    <span class="customer-sub-text">{{ producto.marca or 'Sin marca' }}</span>
                                 </div>
                             </div>
                         </td>
                         <td class="data-table__cell">
-                            {{ producto.categoria.nombre }}
-                        </td>
-                        <td class="data-table__cell text-muted">
-                            {{ producto.fecha_compra.strftime('%d/%m/%Y') if producto.fecha_compra else '' }}
-                        </td>
-                        <td class="data-table__cell" style="text-align: right; font-weight: bold; color: var(--color-success);">
-                            C$ {{ "%.2f"|format(producto.precio_venta) }}
-                        </td>
-                        <td class="data-table__cell" style="text-align: center; font-weight: bold;">
-                            {{ producto.stock }}
-                        </td>
-                        <td class="data-table__cell">
-                            {% if producto.stock > 0 %}
-                            <span class="badge badge--success">En Stock</span>
+                            {% if producto.estado.value == 'ACTIVO' %}
+                            <span class="badge-pill-apex badge-pill-apex--active">ACTIVO</span>
                             {% else %}
-                            <span class="badge badge--danger">Agotado</span>
+                            <span class="badge-pill-apex badge-pill-apex--inactive">INACTIVO</span>
                             {% endif %}
                         </td>
-                        <td class="data-table__cell data-table__cell--actions">
-                            <button type="button" class="btn btn--secondary btn--small btn-editar-fila" title="Editar Producto">
-                                <i class="bi bi-pencil-fill"></i> Editar
-                            </button>
+                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">
+                            {{ producto.codigo_producto }}
+                        </td>
+                        <td class="data-table__cell">
+                            {{ producto.categoria.nombre }}
+                        </td>
+                        <td class="data-table__cell" style="color: var(--color-text-muted);">
+                            {{ producto.fecha_compra.strftime('%d/%m/%Y') if producto.fecha_compra else '-' }}
+                        </td>
+                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-primary);">
+                            C$ {{ "%.2f"|format(producto.precio_venta) }}
+                        </td>
+                        <td class="data-table__cell text-center" style="font-weight: 700;">
+                            {{ producto.stock }}
+                        </td>
+                        <td class="data-table__cell text-end">
+                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
+                            <div class="dropdown d-inline-block">
+                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Opciones">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
+                                    <li>
+                                        <button type="button" class="dropdown-item btn-editar-fila">
+                                            <i class="bi bi-pencil me-2 text-primary"></i> Editar Producto
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -233,286 +267,4 @@
         </div>
     </div>
 
-<script>
-    // ==========================================
-    // SISTEMA DE MODALES CUSTOM
-    // ==========================================
-    function abrirModal(id) {
-        document.getElementById(id).classList.add('is-open');
-    }
-
-    function cerrarModal(id) {
-        document.getElementById(id).classList.remove('is-open');
-    }
-
-    // ==========================================
-    // LÓGICA DEL FORMULARIO PRODUCTO
-    // ==========================================
-    const formulario = document.getElementById("formProductos");
-    const formTitle = document.getElementById("formTitle");
-
-    formulario.addEventListener("keydown", function(e) {
-        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
-            e.preventDefault();
-        }
-    });
-
-    const productoId = document.getElementById("producto_id");
-    const formCodigo = document.getElementById("form_codigo");
-    const formNombre = document.getElementById("form_nombre");
-    const formCategoria = document.getElementById("form_categoria");
-    const formProveedor = document.getElementById("form_proveedor");
-    const formPrecioCompra = document.getElementById("form_precio_compra");
-    const formPrecioVenta = document.getElementById("form_precio_venta");
-    const formFechaCompra = document.getElementById("form_fecha_compra");
-    const formCantidad = document.getElementById("form_cantidad_comprada");
-    const formMarca = document.getElementById("form_marca");
-
-    const btnLimpiar = document.getElementById("btnLimpiar");
-    const btnIrForm = document.getElementById("btnIrForm");
-    const buscarProducto = document.getElementById("buscarProducto");
-
-    // AUTOCOMPLETADO
-    formCodigo.addEventListener("blur", async function() {
-        const codigo = this.value.trim();
-        if (codigo && !productoId.value) {
-            try {
-                const response = await fetch(`/buscar/${codigo}`);
-                const data = await response.json();
-                
-                if (data.encontrado) {
-                    formNombre.value = data.nombre;
-                    formMarca.value = data.marca;
-                    formCategoria.value = data.categoria_id;
-                    formProveedor.value = data.proveedor_id;
-                    formPrecioCompra.value = data.precio_compra;
-                    formPrecioVenta.value = data.precio_venta;
-                    
-                    const btnGuardar = document.getElementById("btnGuardar");
-                    const iconHtml = btnGuardar.innerHTML;
-                    btnGuardar.innerHTML = `<i class="bi bi-magic"></i> ¡Autocompletado!`;
-                    btnGuardar.classList.remove("btn--primary");
-                    btnGuardar.classList.add("btn--success");
-                    btnGuardar.style.backgroundColor = "var(--color-success)";
-                    btnGuardar.style.color = "white";
-
-                    setTimeout(() => {
-                        btnGuardar.innerHTML = iconHtml;
-                        btnGuardar.classList.remove("btn--success");
-                        btnGuardar.classList.add("btn--primary");
-                        btnGuardar.style.backgroundColor = "";
-                        btnGuardar.style.color = "";
-                    }, 2500);
-                    
-                    formCantidad.focus();
-                }
-            } catch (error) {
-                console.error("Error autocompletando:", error);
-            }
-        }
-    });
-
-    function resetForm() {
-        formulario.reset();
-        productoId.value = "";
-        formCodigo.value = "";
-        formTitle.innerHTML = `<i class="bi bi-box-seam"></i> NUEVO PRODUCTO`;
-        formNombre.focus();
-    }
-
-    function cargarProducto(row) {
-        productoId.value = row.dataset.id;
-        formCodigo.value = row.dataset.codigo;
-        formNombre.value = row.dataset.nombre;
-        formCategoria.value = row.dataset.categoria;
-        formProveedor.value = row.dataset.proveedor;
-
-        formPrecioCompra.value = row.dataset.precioCompra;
-        formPrecioVenta.value = row.dataset.precioVenta;
-        formFechaCompra.value = row.dataset.fechaCompra;
-        formCantidad.value = row.dataset.cantidadComprada;
-        formMarca.value = row.dataset.marca;
-
-        formTitle.innerHTML = `<i class="bi bi-pencil"></i> EDITAR PRODUCTO`;
-        abrirModal('modalFormProducto');
-    }
-
-    btnLimpiar.addEventListener("click", resetForm);
-
-    btnIrForm.addEventListener("click", () => {
-        resetForm();
-        abrirModal('modalFormProducto');
-    });
-
-    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            cargarProducto(this.closest("tr"));
-        });
-    });
-
-    document.querySelectorAll("#tablaProductos tr").forEach(row => {
-        row.addEventListener("dblclick", function () {
-            cargarProducto(this);
-        });
-    });
-
-    // ==========================================
-    // PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE
-    // ==========================================
-    let currentPage = 1;
-    const itemsPerPage = 10;
-    let filteredRows = [];
-    const allRows = Array.from(document.querySelectorAll("#tablaProductos tr"));
-
-    function initPagination() {
-        filteredRows = [...allRows];
-
-        const filtroMes = document.getElementById("filtroMes");
-        if (filtroMes) {
-            const mesesSet = new Set();
-            allRows.forEach(row => {
-                const fecha = row.dataset.fechaCompra;
-                if (fecha && fecha !== "None") {
-                    mesesSet.add(fecha.substring(0, 7));
-                }
-            });
-            
-            const mesesArray = Array.from(mesesSet).sort().reverse();
-            mesesArray.forEach(mes => {
-                const option = document.createElement("option");
-                option.value = mes;
-                const [y, m] = mes.split('-');
-                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                option.text = `${monthNames[parseInt(m) - 1]} ${y}`;
-                filtroMes.appendChild(option);
-            });
-        }
-
-        renderTable();
-    }
-
-    function renderTable() {
-        const totalItems = filteredRows.length;
-        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-        allRows.forEach(row => row.style.display = "none");
-
-        let totalPrecioCompra = 0;
-        for (let i = startIndex; i < endIndex; i++) {
-            if(filteredRows[i]){
-                filteredRows[i].style.display = "";
-                const pCompra = parseFloat(filteredRows[i].dataset.precioCompra) || 0;
-                totalPrecioCompra += pCompra;
-            }
-        }
-
-        const paginationText = totalItems > 0
-            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
-            : "Mostrando 0 a 0 de 0 registros";
-            
-        const paginationSummary = document.getElementById("paginationSummary");
-        if (paginationSummary) {
-            paginationSummary.innerHTML = `${paginationText} | <strong style="margin-left: 10px; color: var(--color-primary-dark);">Total P. Costo de página: C$ ${totalPrecioCompra.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
-        }
-
-        const badgeTotal = document.getElementById("badgeTotalItems");
-        if (badgeTotal) {
-            badgeTotal.innerHTML = `Productos: <strong>${totalItems}</strong>`;
-        }
-
-        renderControls(totalPages);
-    }
-
-    function renderControls(totalPages) {
-        const controlsContainer = document.getElementById("paginationControls");
-        controlsContainer.innerHTML = "";
-
-        if (totalPages <= 1) return;
-
-        // Botón Anterior
-        const btnPrev = document.createElement("button");
-        btnPrev.className = "btn btn--outline btn--small";
-        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
-        if (currentPage === 1) btnPrev.disabled = true;
-        else {
-            btnPrev.addEventListener("click", () => {
-                currentPage--;
-                renderTable();
-            });
-        }
-        controlsContainer.appendChild(btnPrev);
-
-        // Páginas numeradas
-        for (let i = 1; i <= totalPages; i++) {
-            const btnPage = document.createElement("button");
-            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
-            btnPage.innerText = i;
-            btnPage.addEventListener("click", () => {
-                currentPage = i;
-                renderTable();
-            });
-            controlsContainer.appendChild(btnPage);
-        }
-
-        // Botón Siguiente
-        const btnNext = document.createElement("button");
-        btnNext.className = "btn btn--outline btn--small";
-        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
-        if (currentPage === totalPages) btnNext.disabled = true;
-        else {
-            btnNext.addEventListener("click", () => {
-                currentPage++;
-                renderTable();
-            });
-        }
-        controlsContainer.appendChild(btnNext);
-    }
-
-    function filterTable() {
-        const query = buscarProducto.value.toLowerCase().trim();
-        const mes = document.getElementById("filtroMes") ? document.getElementById("filtroMes").value : "";
-        const proveedor = document.getElementById("filtroProveedor") ? document.getElementById("filtroProveedor").value : "";
-
-        filteredRows = allRows.filter(row => {
-            const codigo = row.dataset.codigo.toLowerCase();
-            const nombre = row.dataset.nombre.toLowerCase();
-            const marca = row.dataset.marca.toLowerCase();
-            const fecha = row.dataset.fechaCompra; // format YYYY-MM-DD
-            const rowProveedor = row.dataset.proveedor;
-
-            let matchesSearch = codigo.includes(query) || nombre.includes(query) || marca.includes(query);
-
-            let matchesMonth = true;
-            if (mes && fecha && fecha !== "None") {
-                const monthPart = fecha.substring(0, 7);
-                matchesMonth = (monthPart === mes);
-            } else if (mes) {
-                matchesMonth = false;
-            }
-
-            let matchesProveedor = true;
-            if (proveedor) {
-                matchesProveedor = (rowProveedor === proveedor);
-            }
-
-            return matchesSearch && matchesMonth && matchesProveedor;
-        });
-
-        currentPage = 1;
-        renderTable();
-    }
-
-    buscarProducto.addEventListener("input", filterTable);
-    if (document.getElementById("filtroMes")) document.getElementById("filtroMes").addEventListener("change", filterTable);
-    if (document.getElementById("filtroProveedor")) document.getElementById("filtroProveedor").addEventListener("change", filterTable);
-
-    window.addEventListener("load", initPagination);
-</script>
 {% endblock %}

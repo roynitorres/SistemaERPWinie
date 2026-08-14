@@ -1,5 +1,65 @@
 {% extends "base.html" %}
 {% block extra_css %}
+<style>
+    /* BOTONES DE CANTIDAD APEX DARK */
+    .cantidad-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #181922;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 3px 6px;
+    }
+    .cantidad-btn {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.06);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+    .cantidad-btn:hover {
+        background: #00e676;
+        color: #090a0f;
+        border-color: #00e676;
+    }
+    .cantidad-num {
+        min-width: 24px;
+        text-align: center;
+        font-weight: 700;
+        color: #ffffff;
+        font-size: 0.9rem;
+    }
+    .stepper-tab-btn {
+        padding: 8px 18px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .stepper-tab-btn.active {
+        background: var(--color-primary);
+        color: #090a0f;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+    }
+</style>
 {% endblock %}
 
 {% block title %}Nueva Venta{% endblock %}
@@ -9,214 +69,284 @@
 {% endblock %}
 
 {% block content %}
-<style>
-    .ventas-tabs {
-        display: flex;
-        gap: var(--spacing-sm);
-        margin-bottom: var(--spacing-md);
-        border-bottom: 2px solid var(--color-border);
-    }
-    .ventas-tab-btn {
-        padding: var(--spacing-sm) var(--spacing-lg);
-        background: none;
-        border: none;
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--color-text-muted);
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all var(--transition-fast);
-        margin-bottom: -2px;
-    }
-    .ventas-tab-btn:hover {
-        color: var(--color-primary);
-    }
-    .ventas-tab-btn.active {
-        color: var(--color-primary);
-        border-bottom-color: var(--color-primary);
-    }
-    .tab-content {
-        display: none;
-        flex-direction: column;
-        flex-grow: 1;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-    .tab-content.active {
-        display: flex;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
+<!-- ===================================== -->
+<!-- ENCABEZADO DE PÁGINA Y STEPPER APEX DARK -->
+<!-- ===================================== -->
+<div class="page-header-apex d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <div class="breadcrumbs-apex">
+            Salpicadero &gt; <span>Nueva Venta</span>
+        </div>
+        <h1 class="page-title-apex">Nueva Venta</h1>
+        <p class="page-subtitle-apex">Gestión paso a paso de facturación, selección de productos y planes de pago a crédito.</p>
+    </div>
 
-<div class="ventas-tabs">
-    <button class="ventas-tab-btn active" id="btnTabCliente" onclick="cambiarTab('cliente')">
-        <i class="bi bi-person-lines-fill"></i> 1. Datos del Cliente
-    </button>
-    <button class="ventas-tab-btn" id="btnTabDetalle" onclick="cambiarTab('detalle')">
-        <i class="bi bi-list-check"></i> 2. Detalle de Factura
-    </button>
+    <!-- PILDORAS STEPPER PASO 1 Y PASO 2 -->
+    <div class="d-flex gap-2">
+        <button type="button" class="stepper-tab-btn active" id="pillPaso1">
+            <span style="background: rgba(0,0,0,0.2); width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">1</span>
+            Productos de la Venta
+        </button>
+        <button type="button" class="stepper-tab-btn" id="pillPaso2">
+            <span style="background: rgba(0,0,0,0.2); width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">2</span>
+            Cliente & Pago / Crédito
+        </button>
+    </div>
 </div>
 
 <!-- ===================================== -->
-<!-- TAB 1: DATOS DEL CLIENTE -->
+<!-- PASO 1: PRODUCTOS PRIMERO (CARRITO Y TOTALES) -->
 <!-- ===================================== -->
-<div id="tabCliente" class="tab-content active panel">
-    <h5 style="margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-sm);">
-        <i class="bi bi-person-lines-fill"></i> Información Inicial de la Venta
-    </h5>
-    
-    <form id="formVenta" class="grid grid--2-cols" style="max-width: 800px;">
-        <div class="form-group" style="grid-column: span 2;">
-            <label class="form-label form-label--required">Cliente</label>
-            <input type="text" class="form-input" id="cliente_nombre"
-                list="clientesList" placeholder="Escriba o seleccione un cliente" required autocomplete="off">
-            <datalist id="clientesList">
-                {% for cliente in clientes %}
-                <option value="{{ cliente.nombres }}"
-                    data-id="{{ cliente.id }}"
-                    data-telefono="{{ cliente.telefono or '' }}"></option>
-                {% endfor %}
-            </datalist>
-            <input type="hidden" id="cliente_id" name="cliente_id" required>
+<div id="vistaPaso1" class="step-view">
+    <div class="panel" style="padding: 0; display: flex; flex-direction: column; background-color: #121318; border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
+        <div style="padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); background-color: #0f1016;">
+            <div>
+                <h5 style="margin: 0; color: #ffffff; font-weight: 700;">
+                    <i class="bi bi-box-seam-fill text-success me-2"></i> Detalle de Productos en Factura
+                </h5>
+                <small style="color: var(--color-text-muted);">Busque y seleccione los productos que el cliente va a comprar.</small>
+            </div>
+            <button type="button" class="btn-neon-primary" id="btnAgregarProducto" onclick="abrirModal('modalProductos')">
+                <i class="bi bi-plus-lg me-1"></i> Agregar Producto
+            </button>
         </div>
 
-        <div class="form-group">
-            <label class="form-label">Tipo de venta</label>
-            <select class="form-input" id="tipo_venta" name="tipo_venta">
-                <option value="CONTADO">Contado</option>
-                <option value="CREDITO">Crédito</option>
-            </select>
+        <div class="table-responsive" style="min-height: 280px; max-height: 480px; overflow-y: auto;">
+            <table class="data-table" style="margin-bottom: 0;">
+                <thead class="data-table__head" style="position: sticky; top: 0; z-index: 2; background-color: #0f1016;">
+                    <tr>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                        <th style="text-align: center;">Cantidad</th>
+                        <th style="text-align: right;">P. Unitario (C$)</th>
+                        <th style="text-align: right;">Descuento (C$)</th>
+                        <th style="text-align: right;">Subtotal (C$)</th>
+                        <th style="text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="detalleVentaBody"></tbody>
+            </table>
         </div>
 
-        <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
+        <!-- PIE DE FACTURA CON TOTALES -->
+        <div style="z-index: 10; margin-top: auto; background-color: #0f1016; border-top: 1px solid var(--color-border);">
+            <div style="padding: 20px 24px;">
+                <div style="max-width: 340px; margin-left: auto;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--color-text-muted);">Subtotal</span>
+                        <strong id="subtotalVenta" style="color: #ffffff;">C$ 0.00</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--color-text-muted);">IVA ({{ empresa.iva if empresa else 15 }}%)</span>
+                        <strong id="ivaVenta" style="color: #ffffff;">C$ 0.00</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); font-size: 1.35rem;">
+                        <span style="font-weight: 800; color: #ffffff;">Total a Pagar</span>
+                        <strong id="totalVenta" style="color: var(--color-primary); font-weight: 800; font-size: 1.5rem;">C$ 0.00</strong>
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label class="form-label">N° factura</label>
-            <input type="text" class="form-input" id="numero_factura" name="numero_factura"
-                value="{{ numero_factura }}" readonly style="background-color: var(--color-bg-stripe);">
+            <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--color-border); background-color: #121318;">
+                <button type="button" class="btn-apex-outline" id="btnLimpiarVenta">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Limpiar Carrito
+                </button>
+                <button type="button" class="btn-neon-primary" id="btnIrPaso2" style="padding: 10px 24px;">
+                    Continuar a Datos del Cliente & Pago <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
         </div>
+    </div>
+</div>
 
-        <div class="form-group">
-            <label class="form-label">Fecha venta</label>
-            <input type="date" class="form-input" id="fecha_venta" name="fecha_venta" value="{{ fecha_actual }}">
-        </div>
+<!-- ===================================== -->
+<!-- PASO 2: DATOS DEL CLIENTE ARRIBA & PLAN DE CUOTAS ABAJO -->
+<!-- ===================================== -->
+<div id="vistaPaso2" class="step-view" style="display: none;">
+    <form id="formVenta" novalidate>
+        <div class="d-flex flex-column gap-4">
+            
+            <!-- PANEL SUPERIOR: DATOS DEL CLIENTE Y FACTURA -->
+            <div class="panel" style="background-color: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 24px;">
+                <h5 style="margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; color: #ffffff; font-weight: 700;">
+                    <i class="bi bi-person-lines-fill text-success me-2"></i> Datos del Cliente y la Factura
+                </h5>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr; gap: 16px; align-items: start;">
+                    <!-- CLIENTE -->
+                    <div class="form-group">
+                        <label class="form-label form-label--required">Cliente</label>
+                        <input type="text" class="form-input" id="cliente_nombre"
+                            list="clientesList" placeholder="Escriba o seleccione un cliente" autocomplete="off">
+                        <datalist id="clientesList">
+                            {% for cliente in clientes %}
+                            <option value="{{ cliente.nombres }}"
+                                data-id="{{ cliente.id }}"
+                                data-telefono="{{ cliente.telefono or '' }}"></option>
+                            {% endfor %}
+                        </datalist>
+                        <input type="hidden" id="cliente_id" name="cliente_id">
+                    </div>
 
-        <div class="form-group">
-            <label class="form-label">Fecha límite</label>
-            <input type="date" class="form-input" id="fecha_limite" name="fecha_limite_credito">
+                    <!-- TIPO VENTA -->
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Venta</label>
+                        <select class="form-input" id="tipo_venta" name="tipo_venta">
+                            <option value="CONTADO">Contado</option>
+                            <option value="CREDITO">Crédito</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
+
+                    <!-- N° FACTURA -->
+                    <div class="form-group">
+                        <label class="form-label">N° Factura</label>
+                        <input type="text" class="form-input" id="numero_factura" name="numero_factura"
+                            value="{{ numero_factura }}" readonly style="background-color: rgba(255, 255, 255, 0.03); color: var(--color-primary); font-weight: 700;">
+                    </div>
+
+                    <!-- FECHA VENTA -->
+                    <div class="form-group">
+                        <label class="form-label">Fecha Emisión</label>
+                        <input type="date" class="form-input" id="fecha_venta" name="fecha_venta" value="{{ fecha_actual }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL INFERIOR: CONFIGURACIÓN Y TABLA DE CUOTAS / AMORTIZACIÓN (SÓLO CRÉDITO) -->
+            <div class="panel" id="panelCuotasCredito" style="background-color: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; margin-bottom: 20px;">
+                    <h5 style="margin: 0; color: #ffffff; font-weight: 700;">
+                        <i class="bi bi-calendar-range-fill text-warning me-2"></i> Plan de Cuotas / Amortización de Crédito
+                    </h5>
+                    <span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.8rem; padding: 4px 10px;">
+                        Cuotas <span id="lblCuotasContador">0/0</span>
+                    </span>
+                </div>
+
+                <!-- PARÁMETROS DEL PLAN DE PAGOS -->
+                <div style="display: grid; grid-template-columns: 1fr 1.3fr 1fr 140px; gap: 14px; align-items: end; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">N° de Cuotas</label>
+                        <input type="number" id="num_cuotas" class="form-input text-center" min="1" max="24" value="2" style="font-weight: 800; color: #00e676;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Frecuencia de Pago</label>
+                        <select id="frecuencia_pago" class="form-input">
+                            <option value="15">Quincenal (cada 15 días)</option>
+                            <option value="30" selected>Mensual (cada 30 días)</option>
+                            <option value="7">Semanal (cada 7 días)</option>
+                            <option value="CUSTOM">Personalizado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Días de Gracia</label>
+                        <input type="number" id="dias_gracia_cuota" class="form-input text-center" min="0" max="15" value="2" style="font-weight: 700;">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn-apex-outline w-100" id="btnGenerarCuotas" style="padding: 10px 8px; font-size: 0.82rem;">
+                            <i class="bi bi-arrow-repeat me-1"></i> Recalcular
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABLA EDITABLE DE CUOTAS SUGERIDAS -->
+                <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: 12px; background: #0f1016; max-height: 320px; overflow-y: auto;">
+                    <table class="data-table" style="margin-bottom: 0;">
+                        <thead class="data-table__head" style="position: sticky; top: 0; background: #0f1016; z-index: 2;">
+                            <tr>
+                                <th style="width: 70px; text-align: center;">N°</th>
+                                <th>Fecha Vencimiento Sugerida (Editable)</th>
+                                <th style="text-align: right;">Monto Cuota (C$) (Editable)</th>
+                                <th style="text-align: center;">Días Gracia</th>
+                                <th style="text-align: center;">Vencimiento Final con Gracia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCuotasCredito"></tbody>
+                    </table>
+                </div>
+
+                <!-- BARRA DE VERIFICACIÓN DE TOTAL DE CUOTAS EN TIEMPO REAL -->
+                <div style="margin-top: 16px; padding: 12px 16px; background-color: #181922; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--color-border);">
+                    <div style="font-size: 0.88rem; color: var(--color-text-muted);">
+                        Suma total del plan de cuotas:
+                    </div>
+                    <div id="resumenCuotasValidacion" style="font-size: 1.1rem; font-weight: 800; color: #00e676;">
+                        C$ 0.00
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESUMEN FINAL Y BOTONES DE ACCIÓN PASO 2 -->
+            <div class="panel" style="background-color: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span style="font-size: 1rem; color: #ffffff; font-weight: 700;">Resumen General Factura</span>
+                    <span style="font-size: 1.3rem; font-weight: 800; color: var(--color-primary);" id="totalPaso2">C$ 0.00</span>
+                </div>
+
+                <div class="pt-3" style="display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--color-border);">
+                    <button type="button" class="btn-apex-outline" id="btnVolverPaso1" style="padding: 12px 20px;">
+                        <i class="bi bi-arrow-left me-2"></i> Volver a Productos
+                    </button>
+                    <button type="button" class="btn-neon-primary" id="btnGuardar" style="padding: 12px 28px; font-size: 1rem;">
+                        <i class="bi bi-floppy me-2"></i> Procesar y Emitir Factura
+                    </button>
+                </div>
+            </div>
+
         </div>
     </form>
-    
-    <div style="margin-top: var(--spacing-xl); text-align: right;">
-        <button type="button" class="btn btn--primary" onclick="cambiarTab('detalle')">
-            Siguiente: Detalle de Factura <i class="bi bi-arrow-right"></i>
-        </button>
-    </div>
 </div>
 
-<!-- ===================================== -->
-<!-- TAB 2: DETALLE DE LA FACTURA -->
-<!-- ===================================== -->
-<div id="tabDetalle" class="tab-content">
-    
-<!-- Panel Principal (Detalle de Productos) -->
-<div class="panel" style="padding: 0; display: flex; flex-direction: column; flex-grow: 1; position: relative; height: auto !important;">
-    <div style="padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); background-color: white;">
-        <h5 style="margin: 0;">
-            <i class="bi bi-list-check"></i> Detalle de productos
-        </h5>
-        <button type="button" class="btn btn--primary btn--small" id="btnAgregarProducto" onclick="abrirModal('modalProductos')">
-            <i class="bi bi-plus-lg"></i> Agregar Producto
-        </button>
-    </div>
-
-    <div class="table-responsive">
-        <table class="data-table" style="margin-bottom: 0;">
-            <thead class="data-table__head">
-                <tr>
-                    <th>Código</th>
-                    <th>Descripción</th>
-                    <th style="text-align: center;">Cantidad</th>
-                    <th style="text-align: right;">P. Unitario (C$)</th>
-                    <th style="text-align: right;">Descuento (C$)</th>
-                    <th style="text-align: right;">Subtotal (C$)</th>
-                    <th style="text-align: right;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="detalleVentaBody"></tbody>
-        </table>
-    </div>
-
-    <!-- PIE DE FACTURA -->
-    <div style="z-index: 10; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); margin-top: auto;">
-        <div class="grid grid--2-cols" style="padding: var(--spacing-lg); background-color: var(--color-bg-stripe); border-top: 1px solid var(--color-border);">
-            <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
-                <label class="form-label">Observaciones</label>
-                <input type="text" id="observaciones" class="form-input" placeholder="Notas internas...">
-            </div>
-
-            <div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
-                    <span style="color: var(--color-text-muted);">Subtotal</span>
-                    <strong id="subtotalVenta">C$ 0.00</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-xs);">
-                    <span style="color: var(--color-text-muted);">IVA</span>
-                    <strong id="ivaVenta">C$ 0.00</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); font-size: 1.35rem;">
-                    <span style="font-weight: 800; color: var(--color-primary-dark);">Total</span>
-                    <strong id="totalVenta" style="color: var(--color-primary-dark); font-weight: 800;">C$ 0.00</strong>
-                </div>
-            </div>
-        </div>
-
-        <div style="padding: var(--spacing-md) var(--spacing-lg); display: flex; justify-content: flex-end; gap: var(--spacing-sm); border-top: 1px solid var(--color-border); background-color: white;">
-            <button type="button" class="btn btn--outline" id="btnLimpiarVenta">
-                <i class="bi bi-arrow-clockwise"></i> Limpiar
-            </button>
-            <button type="button" class="btn btn--primary" id="btnGuardar">
-                <i class="bi bi-floppy"></i> Guardar Factura
-            </button>
-        </div>
-    </div>
-</div> <!-- Cierra tabDetalle -->
-
 
 <!-- ===================================== -->
-<!-- MODAL PRODUCTOS -->
+<!-- MODAL PRODUCTOS APEX DARK -->
 <!-- ===================================== -->
 <div class="modal-overlay" id="modalProductos">
-    <div class="modal-window" style="max-width: 900px;">
+    <div class="modal-window" style="max-width: 950px;">
         <div class="modal-header">
             <h5 class="modal-title">
-                <i class="bi bi-box-seam"></i> Agregar Producto
+                <i class="bi bi-box-seam-fill text-success me-1"></i> Catálogo de Productos
             </h5>
             <button type="button" class="modal-close-btn" onclick="cerrarModal('modalProductos')">
-                <i class="bi bi-x"></i>
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
-        <div class="modal-body">
-            <div class="form-group" style="margin-bottom: var(--spacing-md);">
-                <label class="form-label">Buscar producto</label>
-                <input type="text" class="form-input" id="buscarProducto" placeholder="Buscar por código, nombre o marca">
+        <div class="modal-body py-3">
+            <!-- BUSCADOR + CATEGORÍA PILLS -->
+            <div class="d-flex flex-column gap-2 mb-3">
+                <div class="toolbar-search-box" style="width: 100%;">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="toolbar-input" id="buscarProducto" placeholder="Buscar por código, nombre o marca... (Doble clic en fila para agregar al instante)">
+                </div>
+
+                <!-- PILLS DE CATEGORÍAS -->
+                <div class="state-pills-bar modal-category-pills" style="overflow-x: auto; white-space: nowrap; padding-bottom: 4px; border-bottom: 1px solid var(--color-border);">
+                    <button type="button" class="state-pill state-pill--active modal-cat-pill" data-categoria-id="TODAS">Todas las Categorías</button>
+                    {% for cat in categorias %}
+                    <button type="button" class="state-pill modal-cat-pill" data-categoria-id="{{ cat.id }}">{{ cat.nombre }}</button>
+                    {% endfor %}
+                </div>
             </div>
 
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm);">
+            <!-- TABLA DE PRODUCTOS -->
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 12px; background: #121318;">
                 <table class="data-table" style="margin-bottom: 0;">
-                    <thead class="data-table__head" style="position: sticky; top: 0; z-index: 1;">
+                    <thead class="data-table__head" style="position: sticky; top: 0; z-index: 2; background-color: #0f1016;">
                         <tr>
-                            <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" id="selectAllProducts" onchange="toggleAllProducts(this)">
-                            </th>
+                            <th>Producto</th>
                             <th>Código</th>
-                            <th>Nombre</th>
-                            <th>Marca</th>
-                            <th style="text-align: right;">Precio</th>
+                            <th>Categoría</th>
+                            <th style="text-align: right;">Precio (C$)</th>
                             <th style="text-align: center;">Stock</th>
+                            <th style="width: 50px; text-align: center;">
+                                <input type="checkbox" id="selectAllProducts" onchange="toggleAllProducts(this)" title="Seleccionar Todos">
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="tbodyBusquedaProductos"></tbody>
@@ -224,552 +354,76 @@
             </div>
         </div>
 
-        <div class="modal-footer">
-            <button type="button" class="btn btn--outline" id="btnLimpiarModal">Limpiar</button>
-            <button type="button" class="btn btn--primary" id="btnAgregarDetalleMultiple">
-                <i class="bi bi-check-lg"></i> Agregar al Detalle
-            </button>
+        <!-- PIE DE MODAL CON RESUMEN DE SELECCIÓN -->
+        <div class="modal-footer" style="justify-content: space-between; align-items: center; background: #0f1016; border-top: 1px solid var(--color-border);">
+            <div id="modalSelectionSummary" style="font-size: 0.88rem; color: var(--color-text-muted);">
+                <span id="selectedCountText">0 productos seleccionados</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-apex-outline" id="btnLimpiarModal">Limpiar</button>
+                <button type="button" class="btn-neon-primary" id="btnAgregarDetalleMultiple">
+                    <i class="bi bi-check-lg me-1"></i> Agregar a la Factura
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-
-
 <!-- ===================================== -->
-<!-- JAVASCRIPT -->
-<!-- ===================================== -->
-
-<!-- ===================================== -->
-<!-- MODAL CONFIRMACION VENTA -->
+<!-- MODAL CONFIRMACION VENTA ENRIQUECIDO -->
 <!-- ===================================== -->
 <div class="modal-overlay" id="modalConfirmarVenta">
     <div class="modal-window" style="max-width: 500px;">
         <div class="modal-header">
             <h5 class="modal-title">
-                <i class="bi bi-question-circle"></i> Confirmar Venta
+                <i class="bi bi-question-circle-fill text-warning me-1"></i> Confirmar Emisión de Factura
             </h5>
             <button type="button" class="modal-close-btn" onclick="cerrarModal('modalConfirmarVenta')">
-                <i class="bi bi-x"></i>
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
-        <div class="modal-body">
-            <div class="modal-summary-panel">
-                <div style="margin-bottom: var(--spacing-sm); display: flex; justify-content: space-between;">
-                    <span style="color: var(--color-text-muted);">Cliente:</span>
-                    <strong id="confirmCliente"></strong>
+        <div class="modal-body py-4">
+            <div class="p-3 mb-3" style="background-color: #181922; border: 1px solid var(--color-border); border-radius: 12px;">
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color: var(--color-text-muted); font-size: 0.88rem;">Cliente:</span>
+                    <strong id="confirmCliente" style="color: #ffffff;"></strong>
                 </div>
-                <div style="margin-bottom: var(--spacing-sm); display: flex; justify-content: space-between;">
-                    <span style="color: var(--color-text-muted);">Tipo de Venta:</span>
-                    <strong id="confirmTipoVenta"></strong>
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color: var(--color-text-muted); font-size: 0.88rem;">Tipo de Venta:</span>
+                    <strong id="confirmTipoVenta" style="color: var(--color-primary);"></strong>
                 </div>
-                <div style="margin-bottom: var(--spacing-sm); display: flex; justify-content: space-between;">
-                    <span style="color: var(--color-text-muted);">N° Factura:</span>
-                    <strong id="confirmNumFactura"></strong>
+                <div class="d-flex justify-content-between mb-2" id="rowConfirmCuotas" style="display: none;">
+                    <span style="color: var(--color-text-muted); font-size: 0.88rem;">Cantidad de Cuotas:</span>
+                    <strong id="confirmCuotas" style="color: #00e676;"></strong>
                 </div>
-                <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; font-size: 1.25rem;">
-                    <span style="color: var(--color-primary-dark); font-weight: 700;">Monto Total:</span>
-                    <strong id="confirmTotal" style="color: var(--color-primary-dark); font-weight: 800;"></strong>
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color: var(--color-text-muted); font-size: 0.88rem;">N° Factura:</span>
+                    <strong id="confirmNumFactura" style="color: #ffffff;"></strong>
+                </div>
+                <div class="d-flex justify-content-between mt-3 pt-2" style="border-top: 1px solid var(--color-border); font-size: 1.25rem;">
+                    <span style="color: #ffffff; font-weight: 700;">Monto Total:</span>
+                    <strong id="confirmTotal" style="color: var(--color-primary); font-weight: 800;"></strong>
                 </div>
             </div>
-            <p style="text-align: center; margin-top: var(--spacing-md); color: var(--color-text-muted);">¿Está seguro que desea procesar esta factura?</p>
+            <p style="text-align: center; margin-top: 12px; color: var(--color-text-muted); font-size: 0.9rem;">¿Está seguro que desea procesar y registrar esta factura?</p>
         </div>
 
-        <div class="modal-footer" style="justify-content: center; gap: var(--spacing-md);">
-            <button type="button" class="btn btn--outline" onclick="cerrarModal('modalConfirmarVenta')">
+        <div class="modal-footer" style="justify-content: center; gap: 12px;">
+            <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalConfirmarVenta')">
                 Cancelar
             </button>
-            <button type="button" class="btn btn--primary" id="btnConfirmarGuardar">
-                <i class="bi bi-check-lg"></i> Confirmar y Guardar
+            <button type="button" class="btn-neon-primary" id="btnConfirmarGuardar">
+                <i class="bi bi-check-lg me-1"></i> Confirmar y Guardar
             </button>
         </div>
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    // Logica de Pestañas
-    function cambiarTab(tabName) {
-        document.getElementById('tabCliente').classList.remove('active');
-        document.getElementById('tabDetalle').classList.remove('active');
-        document.getElementById('btnTabCliente').classList.remove('active');
-        document.getElementById('btnTabDetalle').classList.remove('active');
-        
-        if (tabName === 'cliente') {
-            document.getElementById('tabCliente').classList.add('active');
-            document.getElementById('btnTabCliente').classList.add('active');
-        } else {
-            document.getElementById('tabDetalle').classList.add('active');
-            document.getElementById('btnTabDetalle').classList.add('active');
-        }
-    }
-
-    function abrirModal(id) {
-        document.getElementById(id).classList.add("is-open");
-    }
-
-    function cerrarModal(id) {
-        document.getElementById(id).classList.remove("is-open");
-    }
-
-    function mostrarMensaje(tipo, mensaje) {
-        const container = document.getElementById("toastContainer") || document.body;
-        const div = document.createElement("div");
-
-        div.className = `alert-toast alert-toast--${tipo}`;
-        
-        let iconClass = "bi-exclamation-triangle-fill";
-        let title = "Atención";
-        
-        if (tipo === "success") {
-            iconClass = "bi-check-circle-fill";
-            title = "¡Éxito!";
-        } else if (tipo === "danger") {
-            iconClass = "bi-x-circle-fill";
-            title = "Error";
-        }
-        
-        div.innerHTML = `
-            <div class="alert-icon">
-                <i class="bi ${iconClass} fs-5"></i>
-            </div>
-            <div class="alert-content">
-                <p class="alert-title">${title}</p>
-                <p class="alert-message">${mensaje}</p>
-            </div>
-        `;
-
-        container.appendChild(div);
-
-        setTimeout(() => {
-            div.classList.add('is-closing');
-            setTimeout(() => {
-                div.remove();
-            }, 300);
-        }, 4000);
-    }
-
-    let detalleVenta = [];
-    let productoSeleccionado = null;
-
-    const empresaInfo = {
-        razon_social: "{{ empresa.razon_social if empresa else '' }}",
-        ruc: "{{ empresa.ruc if empresa else '' }}",
-        direccion: "{{ empresa.direccion if empresa else '' }}",
-        ciudad: "{{ empresa.ciudad if empresa else '' }}",
-        telefono: "{{ empresa.telefono if empresa else '' }}",
-        email: "{{ empresa.email if empresa else '' }}",
-        sitio_web: "{{ empresa.sitio_web if empresa else '' }}",
-        serie_factura: "{{ empresa.serie_factura if empresa else 'F001' }}",
-        correlativo: "{{ empresa.correlativo if empresa else '00034' }}",
-        iva: Number("{{ empresa.iva if empresa else 15 }}")
-    };
-    const IVA_RATE = empresaInfo.iva / 100;
-    const DESCUENTO_MAXIMO_USUARIO = Number("{{ descuento_maximo }}");
-
-    const tbody = document.getElementById("detalleVentaBody");
-    const tbodyBusqueda = document.getElementById("tbodyBusquedaProductos");
-    const buscarProducto = document.getElementById("buscarProducto");
-
-    const btnLimpiarVenta = document.getElementById("btnLimpiarVenta");
-    const btnGuardar = document.getElementById("btnGuardar");
-    const btnConfirmarGuardar = document.getElementById("btnConfirmarGuardar");
-
-    const tipoVentaSelect = document.getElementById("tipo_venta");
-    const fechaLimite = document.getElementById("fecha_limite");
-
-    // Lógica para el Combobox del Cliente (Datalist)
-    const inputClienteNombre = document.getElementById("cliente_nombre");
-    const inputClienteId = document.getElementById("cliente_id");
-    const datalistClientes = document.getElementById("clientesList");
-    let clienteSeleccionado = { nombre: "", direccion: "-", telefono: "-" };
-
-    function checkClienteSelection() {
-        const val = inputClienteNombre.value.trim();
-        const options = Array.from(datalistClientes.options);
-        
-        // Buscar coincidencia exacta (ignorando espacios extra y mayúsculas/minúsculas)
-        const selectedOption = options.find(opt => opt.value.trim().toLowerCase() === val.toLowerCase());
-
-        if (selectedOption) {
-            inputClienteId.value = selectedOption.dataset.id;
-            clienteSeleccionado = {
-                nombre: selectedOption.value,
-                direccion: "-",
-                telefono: selectedOption.dataset.telefono || "-"
-            };
-        } else {
-            inputClienteId.value = "";
-            clienteSeleccionado = { nombre: val, direccion: "-", telefono: "-" };
-        }
-    }
-
-    inputClienteNombre.addEventListener("input", checkClienteSelection);
-    inputClienteNombre.addEventListener("change", checkClienteSelection);
-
-    function actualizarFechaLimite() {
-        if (tipoVentaSelect.value === "CREDITO") {
-            fechaLimite.disabled = false;
-        } else {
-            fechaLimite.disabled = true;
-            fechaLimite.value = "";
-        }
-    }
-
-    tipoVentaSelect.addEventListener("change", actualizarFechaLimite);
-    actualizarFechaLimite();
-
-    // Nueva función para actualizar el resumen visual del header
-    // Removed actualizarResumen since we no longer have a summary panel on tab 2
-
-    buscarProducto.addEventListener("input", async function () {
-        const texto = this.value.trim();
-
-        if (texto.length < 1) {
-            tbodyBusqueda.innerHTML = "";
-            return;
-        }
-
-        await buscarProductos(texto);
-    });
-
-    const btnAgregarDetalle = document.getElementById("btnAgregarDetalle");
-    async function buscarProductos(textoBusqueda) {
-        tbodyBusqueda.innerHTML = `
-            <tr class="data-table__row">
-                <td colspan="4" class="data-table__cell data-table__cell--center">
-                </td>
-            </tr>
-        `;
-
-        try {
-            const respuesta = await fetch(`/buscar-productos?busqueda=${encodeURIComponent(textoBusqueda)}`);
-            const productos = await respuesta.json();
-
-            tbodyBusqueda.innerHTML = "";
-
-            if (productos.length === 0) {
-                tbodyBusqueda.innerHTML = `
-                    <tr class="data-table__row">
-                        <td colspan="4" class="data-table__cell data-table__cell--center" style="color: var(--color-danger);">
-                            No se encontraron productos
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            productos.forEach(producto => {
-                // Escapar comillas en JSON
-                const prodJson = JSON.stringify(producto).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-                tbodyBusqueda.innerHTML += `
-                    <tr class="data-table__row">
-                        <td class="data-table__cell data-table__cell--center">
-                            <input type="checkbox" class="producto-checkbox" value="${prodJson}">
-                        </td>
-                        <td class="data-table__cell">${producto.codigo}</td>
-                        <td class="data-table__cell">${producto.nombre}</td>
-                        <td class="data-table__cell">${producto.marca || '-'}</td>
-                        <td class="data-table__cell data-table__cell--right">C$ ${producto.precio.toFixed(2)}</td>
-                        <td class="data-table__cell data-table__cell--center">${producto.stock}</td>
-                    </tr>
-                `;
-            });
-
-        } catch (error) {
-            console.error(error);
-
-            tbodyBusqueda.innerHTML = `
-                <tr class="data-table__row">
-                    <td colspan="4" class="data-table__cell data-table__cell--center" style="color: var(--color-danger);">
-                        Error al buscar productos
-                    </td>
-                </tr>
-            `;
-        }
-    }
-
-    function toggleAllProducts(checkbox) {
-        const checkboxes = document.querySelectorAll('.producto-checkbox');
-        checkboxes.forEach(cb => {
-            cb.checked = checkbox.checked;
-        });
-    }
-
-    document.getElementById("btnAgregarDetalleMultiple").addEventListener("click", function () {
-        const checkboxes = document.querySelectorAll('.producto-checkbox:checked');
-        
-        if (checkboxes.length === 0) {
-            mostrarMensaje("warning", "Seleccione al menos un producto");
-            return;
-        }
-
-        let agregados = 0;
-        let erroresStock = 0;
-        let repetidos = 0;
-
-        checkboxes.forEach(cb => {
-            const producto = JSON.parse(cb.value);
-
-            if (producto.stock <= 0) {
-                erroresStock++;
-                return;
-            }
-
-            const existe = detalleVenta.find(p => p.producto_id === producto.id);
-            if (existe) {
-                repetidos++;
-                return;
-            }
-
-            detalleVenta.push({
-                producto_id: producto.id,
-                codigo: producto.codigo,
-                nombre: producto.nombre,
-                precio: producto.precio,
-                descuento_monto: 0,
-                cantidad: 1,
-                stock: producto.stock,
-                subtotal: producto.precio
-            });
-            agregados++;
-        });
-
-        if (agregados > 0) {
-            renderizarTabla();
-        }
-        
-        if (erroresStock > 0 || repetidos > 0) {
-            let msg = [];
-            if (erroresStock > 0) msg.push(`${erroresStock} sin stock`);
-            if (repetidos > 0) msg.push(`${repetidos} ya estaban en la lista`);
-            mostrarMensaje("warning", "No se agregaron: " + msg.join(", "));
-        }
-
-        cerrarModal("modalProductos");
-        limpiarModalProducto();
-    });
-
-    document.getElementById("btnLimpiarModal").addEventListener("click", limpiarModalProducto);
-
-    function limpiarModalProducto() {
-        document.getElementById("buscarProducto").value = "";
-        document.getElementById("tbodyBusquedaProductos").innerHTML = "";
-        const checkAll = document.getElementById("selectAllProducts");
-        if (checkAll) checkAll.checked = false;
-    }
-
-    function renderizarTabla() {
-        tbody.innerHTML = "";
-
-        let subtotalGeneral = 0;
-
-        if (detalleVenta.length === 0) {
-            tbody.innerHTML = `
-                <tr class="data-table__row">
-                    <td colspan="7" class="data-table__cell data-table__cell--center" style="padding: var(--spacing-xl); color: var(--color-text-muted);">
-                        <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem;"></i>
-                        Sin productos agregados
-                    </td>
-                </tr>
-            `;
-
-            actualizarTotales(0);
-            return;
-        }
-
-        detalleVenta.forEach((producto, index) => {
-            subtotalGeneral += producto.subtotal;
-
-            tbody.innerHTML += `
-                <tr class="data-table__row">
-                    <td class="data-table__cell">${producto.codigo}</td>
-                    <td class="data-table__cell">${producto.nombre}</td>
-                    <td class="data-table__cell data-table__cell--center">
-                        <div class="cantidad-control">
-                            <button type="button" onclick="disminuirCantidad(${index})">-</button>
-                            <span>${producto.cantidad}</span>
-                            <button type="button" onclick="aumentarCantidad(${index})">+</button>
-                        </div>
-                    </td>
-                    <td class="data-table__cell data-table__cell--right">C$ ${producto.precio.toFixed(2)}</td>
-                    <td class="data-table__cell data-table__cell--center">
-                        <input type="number" class="form-input text-end" style="width: 80px;" 
-                        value="${producto.descuento_monto}" min="0" 
-                        onchange="actualizarLinea(${index}, 'descuento_monto', this.value)">
-                    </td>
-                    <td class="data-table__cell data-table__cell--right" style="font-weight: var(--font-weight-bold);">C$ ${producto.subtotal.toFixed(2)}</td>
-                    <td class="data-table__cell data-table__cell--actions">
-                        <button type="button" class="btn btn--outline btn--small" onclick="eliminarProducto(${index})" style="color: var(--color-danger); border-color: var(--color-danger);">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        actualizarTotales(subtotalGeneral);
-    }
-
-    function actualizarTotales(subtotal) {
-        const iva = subtotal * IVA_RATE;
-        const total = subtotal + iva;
-
-        document.getElementById("subtotalVenta").textContent = "C$ " + subtotal.toFixed(2);
-        document.getElementById("ivaVenta").textContent = "C$ " + iva.toFixed(2);
-        document.getElementById("totalVenta").textContent = "C$ " + total.toFixed(2);
-    }
-
-    function actualizarLinea(index, campo, valor) {
-        const p = detalleVenta[index];
-        const val = parseFloat(valor) || 0;
-        
-        if (campo === 'descuento_monto') {
-            const bruto = p.cantidad * p.precio;
-            const descuentoMonto = Math.min(val, bruto); 
-            p.descuento_monto = descuentoMonto;
-            p.subtotal = bruto - descuentoMonto;
-        }
-        renderizarTabla();
-    }
-
-    function recalcularItem(producto) {
-        const bruto = producto.cantidad * producto.precio;
-        const descuentoMonto = parseFloat(producto.descuento_monto) || 0;
-        producto.subtotal = Math.max(bruto - descuentoMonto, 0);
-    }
-
-    function eliminarProducto(index) {
-        detalleVenta.splice(index, 1);
-        renderizarTabla();
-    }
-
-    function aumentarCantidad(index) {
-        const producto = detalleVenta[index];
-
-        if (producto.cantidad >= producto.stock) {
-            mostrarMensaje("danger", "No hay stock disponible");
-            return;
-        }
-
-        producto.cantidad++;
-        recalcularItem(producto);
-        renderizarTabla();
-    }
-
-    function disminuirCantidad(index) {
-        const producto = detalleVenta[index];
-
-        if (producto.cantidad <= 1) {
-            return;
-        }
-
-        producto.cantidad--;
-        recalcularItem(producto);
-        renderizarTabla();
-    }
-
-    btnLimpiarVenta.addEventListener("click", function () {
-        detalleVenta = [];
-        document.getElementById("formVenta").reset();
-        actualizarFechaLimite();
-        renderizarTabla();
-    });
-
-    btnGuardar.addEventListener("click", function () {
-        const clienteId = document.getElementById("cliente_id").value;
-        const tipoVenta = document.getElementById("tipo_venta").value;
-        const fechaVenta = document.getElementById("fecha_venta").value;
-        const fechaLimiteCredito = document.getElementById("fecha_limite").value;
-        
-        if (!clienteId) {
-            cambiarTab('cliente');
-            mostrarMensaje("warning", "Seleccione un cliente para la venta");
-            return;
-        }
-
-        if (!fechaVenta) {
-            cambiarTab('cliente');
-            mostrarMensaje("warning", "Seleccione la fecha de venta");
-            return;
-        }
-
-        if (tipoVenta === "CREDITO" && !fechaLimiteCredito) {
-            cambiarTab('cliente');
-            mostrarMensaje("warning", "Seleccione la fecha límite del crédito");
-            return;
-        }
-
-        if (detalleVenta.length === 0) {
-            mostrarMensaje("warning", "Debe agregar productos a la venta");
-            return;
-        }
-
-        // Poblar datos del modal
-        const clienteNombre = document.getElementById("cliente_nombre").value;
-        const numFactura = document.getElementById("numero_factura").value;
-        const total = document.getElementById("totalVenta").textContent;
-
-        document.getElementById("confirmCliente").textContent = clienteNombre;
-        document.getElementById("confirmTipoVenta").textContent = tipoVenta;
-        document.getElementById("confirmNumFactura").textContent = numFactura;
-        document.getElementById("confirmTotal").textContent = total;
-
-        abrirModal("modalConfirmarVenta");
-    });
-
-    btnConfirmarGuardar.addEventListener("click", guardarVentaFinal);
-
-    async function guardarVentaFinal() {
-        const clienteId = document.getElementById("cliente_id").value;
-        const tipoVenta = document.getElementById("tipo_venta").value;
-        const fechaVenta = document.getElementById("fecha_venta").value;
-        const fechaLimiteCredito = document.getElementById("fecha_limite").value;
-        const observaciones = document.getElementById("observaciones").value;
-
-        // Las validaciones ahora ocurren al presionar el botón "Guardar" principal antes del modal
-
-        btnConfirmarGuardar.disabled = true;
-        btnConfirmarGuardar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Procesando...`;
-
-        const datos = {
-            cliente_id: clienteId,
-            tipo_venta: tipoVenta,
-            fecha_venta: fechaVenta,
-            fecha_limite_credito: fechaLimiteCredito,
-            observaciones: observaciones,
-            productos: detalleVenta
-        };
-
-        try {
-            const respuesta = await fetch("/guardar-venta", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(datos)
-            });
-
-            const resultado = await respuesta.json();
-
-            if (!resultado.success) {
-                mostrarMensaje("danger", resultado.message);
-                btnConfirmarGuardar.disabled = false;
-                btnConfirmarGuardar.innerHTML = `<i class="bi bi-check-lg"></i> Confirmar y Guardar`;
-                return;
-            }
-
-            window.open(`/factura/${resultado.venta_id}`, "_blank");
-            location.reload();
-
-        } catch (error) {
-            console.error(error);
-            mostrarMensaje("danger", "Error al emitir el comprobante");
-
-            btnConfirmarGuardar.disabled = false;
-            btnConfirmarGuardar.innerHTML = `<i class="bi bi-check-lg"></i> Confirmar y Guardar`;
-        }
-    }
-
-    renderizarTabla();
+    window.empresaIVA = Number("{{ empresa.iva if empresa else 15 }}");
 </script>
 {% endblock %}

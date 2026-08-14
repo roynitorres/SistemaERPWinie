@@ -27,6 +27,9 @@ from services.venta_service import generar_numero_factura, crear_venta
 # Fechas
 from datetime import datetime, date
 
+from models.categoria import Categoria
+from models.enums import EstadoCategoria, EstadoProducto
+
 # BLUEPRINT
 ventas_bp = Blueprint("ventas", __name__)
 
@@ -38,7 +41,8 @@ ventas_bp = Blueprint("ventas", __name__)
 @roles_required("ADMIN", "VENDEDOR")
 def ventas():
     clientes = Cliente.query.order_by(Cliente.nombres.asc()).all()
-    productos = Producto.query.filter(Producto.stock > 0).all()
+    productos = Producto.query.filter(Producto.stock > 0, Producto.estado == EstadoProducto.ACTIVO).all()
+    categorias = Categoria.query.filter_by(estado=EstadoCategoria.ACTIVO).order_by(Categoria.nombre.asc()).all()
     numero_factura = generar_numero_factura()
     fecha_actual = datetime.now().strftime("%Y-%m-%d")
     empresa = Empresa.query.first()
@@ -47,6 +51,7 @@ def ventas():
         "ventas/ventas.html",
         clientes=clientes,
         productos=productos,
+        categorias=categorias,
         numero_factura=numero_factura,
         fecha_actual=fecha_actual,
         descuento_maximo=descuento_maximo,
@@ -59,27 +64,35 @@ def ventas():
 @login_required
 def buscar_productos():
     busqueda = request.args.get("busqueda","").strip()
-    if not busqueda:
-        return jsonify([])
-    productos = Producto.query.filter(
-        Producto.stock > 0,
-        or_(
-            Producto.codigo_producto.ilike(f"%{busqueda}%"),
-            Producto.marca.ilike(f"%{busqueda}%"),
-            Producto.nombre.ilike(f"%{busqueda}%")
-        ),
-    ).all()
+    categoria_id = request.args.get("categoria_id", "").strip()
+
+    query = Producto.query.filter(Producto.stock > 0, Producto.estado == EstadoProducto.ACTIVO)
+
+    if categoria_id and categoria_id != "TODAS":
+        query = query.filter(Producto.categoria_id == int(categoria_id))
+
+    if busqueda:
+        query = query.filter(
+            or_(
+                Producto.codigo_producto.ilike(f"%{busqueda}%"),
+                Producto.marca.ilike(f"%{busqueda}%"),
+                Producto.nombre.ilike(f"%{busqueda}%")
+            )
+        )
+
+    productos = query.limit(50).all()
 
     resultado = []
     for producto in productos:
         resultado.append({
-            "id":producto.id,
-            "codigo":producto.codigo_producto,
-            "nombre":producto.nombre,
-            "marca":producto.marca,
-            "categoria":producto.categoria.nombre,
-            "precio":float(producto.precio_venta),
-            "stock":producto.stock
+            "id": producto.id,
+            "codigo": producto.codigo_producto,
+            "nombre": producto.nombre,
+            "marca": producto.marca,
+            "categoria_id": producto.categoria_id,
+            "categoria": producto.categoria.nombre if producto.categoria else 'Sin categoría',
+            "precio": float(producto.precio_venta),
+            "stock": producto.stock
         })
     return jsonify(resultado)
 

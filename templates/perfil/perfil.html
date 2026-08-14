@@ -1,136 +1,293 @@
 {% extends "base.html" %}
 
-{% block title %}
-Mi Perfil
+{% block title %}Perfil de Administrador{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-person-badge-fill"></i> Perfil de Administrador
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid pt-1 pb-2">
-    <!-- HEADER / TOP BAR -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light">
-        <h4 class="mb-0 fw-bold text-dark d-flex align-items-center">
-            Mi Perfil
-        </h4>
+<div class="perfil-page-apex">
+
+    <!-- ===================================== -->
+    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
+    <!-- ===================================== -->
+    <div class="page-header-apex" style="margin-bottom: 24px;">
+        <div class="breadcrumbs-apex">
+            Salpicadero &gt; <span>Perfil de Administrador</span>
+        </div>
+        <h1 class="page-title-apex">Perfil del Administrador</h1>
+        <p class="page-subtitle-apex">Gestiona tu información personal, foto de perfil y credenciales de seguridad en módulos separados con validación.</p>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="row mt-4">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow-sm border-0" style="border-radius: 12px;">
-                <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
-                    <h5 class="fw-bold mb-0 text-primary">Configuración de Perfil</h5>
-                    <p class="text-muted small">Actualiza tu información personal y foto de perfil</p>
-                </div>
-                <div class="card-body p-4">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
+    <!-- ===================================== -->
+    <!-- CONTENIDO EN DOS COLUMNAS -->
+    <!-- ===================================== -->
+    <div class="grid grid--2-cols" style="grid-template-columns: 300px 1fr; gap: 24px; align-items: start;">
+        
+        <!-- TARJETA IZQUIERDA: AVATAR Y BOTÓN DE SUBIR FOTO -->
+        <div class="panel" style="background: #13141c; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 28px 20px; text-align: center;">
+            
+            <form id="formFotoPerfil" action="{{ url_for('perfil.editar_perfil') }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="actualizar_foto">
+
+                <!-- CONTENEDOR AVATAR -->
+                <div class="position-relative d-inline-block mb-3">
+                    <div id="avatarContainer" style="width: 130px; height: 130px; border-radius: 50%; border: 3px solid var(--color-primary); box-shadow: 0 0 20px rgba(0, 230, 118, 0.25); overflow: hidden; margin: 0 auto; background: #1a1c26; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 800; color: #00e676;">
+                        {% if current_user.foto_perfil %}
+                            <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" id="imgPreview" alt="Foto de Perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <span id="initialsFallback">{{ current_user.username[:2].upper() }}</span>
                         {% endif %}
-                    {% endwith %}
+                    </div>
+                </div>
 
-                    <form action="{{ url_for('perfil.editar_perfil') }}" method="POST" enctype="multipart/form-data">
+                <!-- BOTÓN DE SUBIR FOTO (EN TARJETA IZQUIERDA) -->
+                <div class="mb-3">
+                    <label for="foto_perfil" class="btn-apex-outline btn--small" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-camera-fill text-success"></i> Cambiar Foto
+                    </label>
+                    <input type="file" id="foto_perfil" name="foto_perfil" accept="image/png, image/jpeg, image/jpg, image/webp" class="d-none" onchange="validarYPrevisualizarFoto(this)">
+                    <div style="font-size: 0.72rem; color: var(--color-text-subtle); margin-top: 6px;">
+                        Máximo 5 MB (PNG, JPG, WEBP)
+                    </div>
+                </div>
+
+                <h4 style="color: #ffffff; font-weight: 800; margin-bottom: 4px; font-size: 1.25rem;">
+                    {{ current_user.nombre_completo or current_user.username }}
+                </h4>
+                <div style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 14px;">
+                    @{{ current_user.username }}
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <span class="badge-pill-apex badge-pill-apex--active" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 700;">
+                        <i class="bi bi-shield-check me-1"></i> {{ current_user.rol.nombre if current_user.rol and current_user.rol.nombre else 'ADMIN' }}
+                    </span>
+                    <span class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff; padding: 6px 14px; font-size: 0.82rem; font-weight: 700;">
+                        <i class="bi bi-check-circle-fill me-1"></i> ACTIVO
+                    </span>
+                </div>
+
+                <div class="pt-3" style="font-size: 0.78rem; color: var(--color-text-subtle); border-top: 1px dashed rgba(255, 255, 255, 0.08); margin-top: 16px;">
+                    <i class="bi bi-info-circle me-1"></i> Administrador General del Sistema
+                </div>
+            </form>
+        </div>
+
+        <!-- TARJETA DERECHA: PESTAÑAS INDEPENDIENTES -->
+        <div>
+            
+            <!-- NAVEGACIÓN PESTAÑAS (TABS) -->
+            <div class="d-flex gap-2 mb-3" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 6px;">
+                <button type="button" id="btn-tab-perfil" class="btn {% if active_tab != 'seguridad' %}active{% else %}btn--outline{% endif %}" onclick="switchPerfilTab('perfil')" style="flex: 1; border-radius: 8px; font-weight: 700; font-size: 0.9rem; padding: 10px;">
+                    <i class="bi bi-person-vcard-fill me-2"></i> Información del Perfil
+                </button>
+                <button type="button" id="btn-tab-seguridad" class="btn {% if active_tab == 'seguridad' %}active{% else %}btn--outline{% endif %}" onclick="switchPerfilTab('seguridad')" style="flex: 1; border-radius: 8px; font-weight: 700; font-size: 0.9rem; padding: 10px;">
+                    <i class="bi bi-shield-lock-fill me-2"></i> Cambio de Contraseña
+                </button>
+            </div>
+
+            <!-- ===================================== -->
+            <!-- PESTAÑA 1: INFORMACIÓN DEL PERFIL (INHABILITADO POR DEFECTO) -->
+            <!-- ===================================== -->
+            <div id="panel-tab-perfil" class="panel {% if active_tab == 'seguridad' %}d-none{% endif %}" style="background: #13141c; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 28px;">
+                
+                <form id="formInfoPerfil" action="{{ url_for('perfil.editar_perfil') }}" method="POST">
+                    <input type="hidden" name="action" value="actualizar_perfil">
+
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h5 style="margin: 0; color: #ffffff; font-weight: 800;">
+                                <i class="bi bi-person-lines-fill text-success me-2"></i> Datos Personales y de Usuario
+                            </h5>
+                            <span style="font-size: 0.8rem; color: var(--color-text-muted);">Campos inhabilitados. Presiona "Habilitar Edición" para modificar.</span>
+                        </div>
                         
-                        <!-- Foto de perfil centrada -->
-                        <div class="d-flex flex-column align-items-center mb-4">
-                            <div class="position-relative mb-3">
-                                {% if current_user.foto_perfil %}
-                                    <img src="{{ url_for('static', filename='uploads/perfiles/' + current_user.foto_perfil) }}" 
-                                         alt="Foto de Perfil" 
-                                         class="rounded-circle shadow-sm object-fit-cover border border-3 border-white"
-                                         style="width: 120px; height: 120px; background-color: #f8f9fa;">
-                                {% else %}
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm border border-3 border-white" 
-                                         style="width: 120px; height: 120px; background-color: #ffe0d3; color: #ff5722; font-size: 2.5rem; font-weight: bold;">
-                                        {{ current_user.username[:2].upper() }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <label class="btn btn-sm btn-outline-primary rounded-pill px-4" for="foto_perfil">
-                                <i class="bi bi-camera me-1"></i> Cambiar Foto
-                            </label>
-                            <input type="file" class="d-none" id="foto_perfil" name="foto_perfil" accept="image/*" onchange="previewImage(this)">
+                        <!-- BOTÓN HABILITAR EDICIÓN -->
+                        <button type="button" id="btnHabilitarEdicion" class="btn-apex-outline" onclick="toggleEdicionPerfil(true)" style="border-color: #00b0ff; color: #00b0ff; padding: 6px 14px; font-size: 0.85rem;">
+                            <i class="bi bi-pencil-square me-1"></i> Habilitar Edición
+                        </button>
+                    </div>
+
+                    <!-- MENSAJE DE ESTADO DE CAMPOS -->
+                    <div id="alertModoedicion" class="alert alert-info d-flex align-items-center gap-2 mb-4" style="background: rgba(0,176,255,0.08); border: 1px solid rgba(0,176,255,0.2); color: #00b0ff; border-radius: 10px; padding: 10px 16px; font-size: 0.82rem;">
+                        <i class="bi bi-lock-fill fs-5"></i>
+                        <span id="txtModoEdicion">Los campos están protegidos en modo solo lectura. Haz clic en "Habilitar Edición" para cambiarlos.</span>
+                    </div>
+
+                    <!-- USUARIO Y CORREO ELECTRÓNICO -->
+                    <div class="grid grid--2-cols" style="gap: 16px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">NOMBRE DE USUARIO (LOGIN) <span class="text-danger">*</span></label>
+                            <input type="text" id="inputUsername" class="form-input field-perfil" name="username" value="{{ current_user.username }}" required disabled placeholder="EJ. ADMIN" style="color: #00e676; font-weight: 700;">
+                            <div class="invalid-feedback-apex" id="err-username" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Este campo no puede quedar vacío.</div>
                         </div>
 
-                        <!-- Campos del formulario -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">USUARIO</label>
-                                <input type="text" class="form-control bg-light" value="{{ current_user.username }}" readonly disabled>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">CORREO ELECTRÓNICO <span class="text-danger">*</span></label>
+                            <input type="email" id="inputEmail" class="form-input field-perfil" name="email" value="{{ current_user.email or '' }}" required disabled placeholder="EJ. ADMIN@EMPRESA.COM" style="color: #00b0ff; font-weight: 600;">
+                            <div class="invalid-feedback-apex" id="err-email" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Ingresa un correo electrónico válido (ej. admin@empresa.com).</div>
+                        </div>
+                    </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">NUEVA CONTRASEÑA (Opcional)</label>
-                                <input type="password" class="form-control" name="nueva_password" placeholder="Dejar en blanco para no cambiar">
-                            </div>
-
-                            <div class="col-12 mt-3">
-                                <hr class="border-light">
-                                <h6 class="fw-bold text-dark mb-3">Información Personal</h6>
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">NOMBRE COMPLETO</label>
-                                <input type="text" class="form-control" name="nombre_completo" value="{{ current_user.nombre_completo or '' }}" placeholder="Ej. Juan Pérez">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">TELÉFONO</label>
-                                <input type="text" class="form-control" name="telefono" value="{{ current_user.telefono or '' }}" placeholder="Ej. 8888-8888">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">GÉNERO</label>
-                                <select class="form-select" name="genero">
-                                    <option value="" {% if not current_user.genero %}selected{% endif %}>Seleccionar...</option>
-                                    <option value="Masculino" {% if current_user.genero == 'Masculino' %}selected{% endif %}>Masculino</option>
-                                    <option value="Femenino" {% if current_user.genero == 'Femenino' %}selected{% endif %}>Femenino</option>
-                                    <option value="Otro" {% if current_user.genero == 'Otro' %}selected{% endif %}>Otro</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label text-xs fw-semibold text-muted mb-1">DIRECCIÓN</label>
-                                <input type="text" class="form-control" name="direccion" value="{{ current_user.direccion or '' }}" placeholder="Dirección completa">
-                            </div>
+                    <!-- NOMBRE COMPLETO Y TELÉFONO -->
+                    <div class="grid grid--2-cols" style="gap: 16px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">NOMBRE COMPLETO <span class="text-danger">*</span></label>
+                            <input type="text" id="inputNombreCompleto" class="form-input field-perfil" name="nombre_completo" value="{{ current_user.nombre_completo or '' }}" required disabled placeholder="EJ. JUAN PÉREZ LÓPEZ">
+                            <div class="invalid-feedback-apex" id="err-nombre" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Ingresa el nombre completo del administrador.</div>
                         </div>
 
-                        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
-                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
-                                <i class="bi bi-save me-2"></i> Guardar Cambios
+                        <div class="form-group">
+                            <label class="form-label">TELÉFONO DE CONTACTO <span class="text-danger">*</span></label>
+                            <input type="text" id="inputTelefono" class="form-input field-perfil" name="telefono" value="{{ current_user.telefono or '' }}" required disabled placeholder="EJ. 8888-8888">
+                            <div class="invalid-feedback-apex" id="err-telefono" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Ingresa el número de teléfono de contacto.</div>
+                        </div>
+                    </div>
+
+                    <!-- GÉNERO Y DIRECCIÓN -->
+                    <div class="grid grid--2-cols" style="gap: 16px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">GÉNERO <span class="text-danger">*</span></label>
+                            <select id="selectGenero" class="form-input field-perfil" name="genero" required disabled>
+                                <option value="" {% if not current_user.genero %}selected{% endif %}>SELECCIONAR...</option>
+                                <option value="Masculino" {% if current_user.genero == 'Masculino' %}selected{% endif %}>MASCULINO</option>
+                                <option value="Femenino" {% if current_user.genero == 'Femenino' %}selected{% endif %}>FEMENINO</option>
+                            </select>
+                            <div class="invalid-feedback-apex" id="err-genero" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Selecciona el género.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">DIRECCIÓN DE DOMICILIO <span class="text-danger">*</span></label>
+                            <input type="text" id="inputDireccion" class="form-input field-perfil" name="direccion" value="{{ current_user.direccion or '' }}" required disabled placeholder="DIRECCIÓN COMPLETA">
+                            <div class="invalid-feedback-apex" id="err-direccion" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Ingresa la dirección completa de domicilio.</div>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DE ACCIÓN PERFIL -->
+                    <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                        <button type="button" id="btnCancelarEdicion" class="btn-apex-outline d-none" onclick="toggleEdicionPerfil(false)">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <button type="button" id="btnSolicitarGuardado" class="btn-neon-primary d-none" onclick="validarYSolicitarConfirmacionPerfil()">
+                            <i class="bi bi-save-fill me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- PESTAÑA 2: CAMBIO DE CONTRASEÑA -->
+            <!-- ===================================== -->
+            <div id="panel-tab-seguridad" class="panel {% if active_tab != 'seguridad' %}d-none{% endif %}" style="background: #13141c; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 28px;">
+                
+                <form id="formCambiarPassword" action="{{ url_for('perfil.editar_perfil') }}" method="POST">
+                    <input type="hidden" name="action" value="cambiar_password">
+
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <h5 style="margin: 0; color: #ffb74d; font-weight: 800;">
+                            <i class="bi bi-shield-lock-fill me-2"></i> Seguridad y Cambio de Contraseña
+                        </h5>
+                        <span style="font-size: 0.8rem; color: var(--color-text-muted);">Actualización de credenciales</span>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center gap-2 mb-4" style="background: rgba(255,183,77,0.1); border: 1px solid rgba(255,183,77,0.2); color: #ffb74d; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem;">
+                        <i class="bi bi-info-circle-fill fs-5"></i>
+                        <div>Para modificar tu clave debes ingresar tu <strong>Contraseña Actual</strong> y especificar la <strong>Nueva Contraseña</strong> (mínimo 6 caracteres).</div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">CONTRASEÑA ACTUAL <span class="text-danger">*</span></label>
+                        <div class="position-relative">
+                            <input type="password" id="inputPassActual" class="form-input" name="password_actual" required placeholder="Ingresa tu clave actual para autorizar el cambio" style="padding-right: 42px;">
+                            <button type="button" class="btn-link text-muted position-absolute end-0 top-50 translate-middle-y me-2 p-1 border-0" onclick="togglePasswordVisibility('inputPassActual', 'iconPassActual')" style="background: transparent; cursor: pointer;">
+                                <i class="bi bi-eye-fill" id="iconPassActual" style="font-size: 1.1rem; color: var(--color-text-muted);"></i>
                             </button>
                         </div>
-                    </form>
-                </div>
+                        <div class="invalid-feedback-apex" id="err-pass-actual" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Debes ingresar tu contraseña actual.</div>
+                    </div>
+
+                    <div class="grid grid--2-cols" style="gap: 16px; margin-bottom: 28px;">
+                        <div class="form-group">
+                            <label class="form-label">NUEVA CONTRASEÑA <span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <input type="password" id="inputPassNueva" class="form-input" name="nueva_password" required placeholder="Mínimo 6 caracteres" style="padding-right: 42px;">
+                                <button type="button" class="btn-link text-muted position-absolute end-0 top-50 translate-middle-y me-2 p-1 border-0" onclick="togglePasswordVisibility('inputPassNueva', 'iconPassNueva')" style="background: transparent; cursor: pointer;">
+                                    <i class="bi bi-eye-fill" id="iconPassNueva" style="font-size: 1.1rem; color: var(--color-text-muted);"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback-apex" id="err-pass-nueva" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Mínimo 6 caracteres requeridos.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CONFIRMAR NUEVA CONTRASEÑA <span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <input type="password" id="inputPassConfirm" class="form-input" name="confirmar_password" required placeholder="Repite la nueva contraseña" style="padding-right: 42px;">
+                                <button type="button" class="btn-link text-muted position-absolute end-0 top-50 translate-middle-y me-2 p-1 border-0" onclick="togglePasswordVisibility('inputPassConfirm', 'iconPassConfirm')" style="background: transparent; cursor: pointer;">
+                                    <i class="bi bi-eye-fill" id="iconPassConfirm" style="font-size: 1.1rem; color: var(--color-text-muted);"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback-apex" id="err-pass-confirm" style="display: none; color: #ff5252; font-size: 0.75rem; margin-top: 4px;">Las contraseñas no coinciden.</div>
+                        </div>
+                    </div>
+
+                    <!-- ACCIÓN DE CAMBIAR CONTRASEÑA -->
+                    <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                        <button type="button" onclick="switchPerfilTab('perfil')" class="btn-apex-outline">
+                            <i class="bi bi-arrow-left me-1"></i> Volver a Perfil
+                        </button>
+                        <button type="button" onclick="validarYGuardarPassword()" class="btn-neon-primary" style="background: #ffb74d; color: #000000; border-color: #ffb74d;">
+                            <i class="bi bi-shield-check me-1"></i> Actualizar Contraseña
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===================================== -->
+<!-- MODAL DE ADVERTENCIA / CONFIRMACIÓN DE GUARDADO -->
+<!-- ===================================== -->
+<div class="modal fade" id="modalAdvertenciaPerfil" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; color: #ffffff;">
+            <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+                <h5 class="modal-title fw-bold text-warning d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i> Advertencia de Confirmación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-2" style="font-size: 1rem; font-weight: 600;">¿Estás seguro de que deseas actualizar la información de tu perfil?</p>
+                <p class="text-muted small mb-0">Los datos modificados (nombre, usuario, teléfono, género, dirección) serán aplicados inmediatamente a tu cuenta de administrador.</p>
+            </div>
+            <div class="modal-footer border-top border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+                <button type="button" class="btn-apex-outline" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                </button>
+                <button type="button" id="btnConfirmarGuardadoModal" class="btn-neon-primary">
+                    <i class="bi bi-check-circle-fill me-1"></i> Sí, Confirmar y Guardar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                // Si ya hay una imagen mostrándose, actualizamos su src
-                let img = input.closest('.d-flex').querySelector('img');
-                if (img) {
-                    img.src = e.target.result;
-                } else {
-                    // Si solo estaban las iniciales, creamos la imagen
-                    let container = input.closest('.d-flex').querySelector('.position-relative');
-                    container.innerHTML = `<img src="${e.target.result}" class="rounded-circle shadow-sm object-fit-cover border border-3 border-white" style="width: 120px; height: 120px; background-color: #f8f9fa;">`;
-                }
-            }
-            
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-</script>
+<style>
+/* Resaltado de validación en rojo */
+.form-input.is-invalid-apex {
+    border-color: #ff5252 !important;
+    background-color: rgba(255, 82, 82, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.2) !important;
+}
+</style>
+
 {% endblock %}

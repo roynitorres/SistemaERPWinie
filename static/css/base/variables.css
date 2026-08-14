@@ -1,75 +1,43 @@
 /* ==========================================================================
-   VARIABLES GLOBALES (Design Tokens)
+   VARIABLES GLOBALES - APEX SHADCN DARK MODE
    ========================================================================== */
 :root {
-    /* ----------------------------------------------------------------------
-       COLORES PRINCIPALES (Tema Clásico/Institucional)
-       ---------------------------------------------------------------------- */
-    --color-primary: #0f4c81;        /* Azul clásico de Moodle / Institucional */
-    --color-primary-dark: #003366;   /* Azul profundo para hover o header */
-    --color-primary-light: #e6f0fa;  /* Azul muy suave para fondos activos o alertas */
+    /* Fondos y Superficies Dark */
+    --color-bg-app: #090a0f;         /* Lienzo negro Slate profundo */
+    --color-bg-card: #121318;        /* Tarjetas y paneles oscuros */
+    --color-bg-card-hover: #181920;  /* Hover en tarjetas */
+    --color-bg-sidebar: #0c0d12;     /* Sidebar oscuro rail */
+    --color-bg-input: #18181b;       /* Inputs oscuros */
     
-    --color-secondary: #f4b400;      /* Color secundario / Acento (opcional) */
+    /* Colores Principales y Acentos */
+    --color-primary: #00e676;        /* Verde Neón / Menta Esmeralda */
+    --color-primary-dark: #00c853;   /* Verde oscuro hover */
+    --color-primary-glow: rgba(0, 230, 118, 0.18);
+    --color-secondary: #00b0ff;      /* Azul Cian Eléctrico */
     
-    /* ----------------------------------------------------------------------
-       FONDOS Y SUPERFICIES
-       ---------------------------------------------------------------------- */
-    --color-bg-app: #f4f6f9;         /* Fondo general de la aplicación (Gris muy claro) */
-    --color-bg-card: #ffffff;        /* Fondo blanco para las áreas de contenido/tablas */
-    --color-bg-stripe: #f9f9f9;      /* Gris súper sutil para filas de tablas (cebreadas) */
-    --color-bg-sidebar: #003366;     /* Azul oscuro para el menú lateral */
+    /* Textos */
+    --color-text-main: #ffffff;      /* Blanco puro para títulos y cifras */
+    --color-text-muted: #a1a1aa;     /* Gris tenue para subtítulos */
+    --color-text-subtle: #71717a;    /* Gris atenuado para notas */
     
-    /* ----------------------------------------------------------------------
-       TEXTOS
-       ---------------------------------------------------------------------- */
-    --color-text-main: #212529;      /* Texto principal oscuro, casi negro */
-    --color-text-muted: #6c757d;     /* Texto secundario grisáceo */
-    --color-text-sidebar: #ffffff;   /* Texto blanco para el sidebar */
+    /* Estados y Badges */
+    --color-success: #00e676;        /* Verde Neón */
+    --color-warning: #ffab00;        /* Naranja / Ámbar */
+    --color-danger: #ff5252;         /* Rojo Coral */
+    --color-info: #00b0ff;           /* Azul */
     
-    /* ----------------------------------------------------------------------
-       ESTADOS Y ALERTAS
-       ---------------------------------------------------------------------- */
-    --color-success: #198754;
-    --color-warning: #ffc107;
-    --color-danger: #dc3545;
+    /* Bordes y Líneas */
+    --color-border: #1e2029;         /* Líneas finas oscuras */
+    --color-border-hover: #27272a;   /* Borde hover */
     
-    /* ----------------------------------------------------------------------
-       BORDES Y LÍNEAS
-       ---------------------------------------------------------------------- */
-    --color-border: #dee2e6;         /* Gris claro para divisores y bordes sutiles */
-    --color-border-dark: #ced4da;    /* Gris medio para bordes de inputs enfocados */
+    /* Tipografía y Espaciados */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-size-base: 0.9rem;
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+    --border-radius-pill: 9999px;
     
-    /* ----------------------------------------------------------------------
-       TIPOGRAFÍA
-       ---------------------------------------------------------------------- */
-    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-size-base: 1rem;          /* 16px */
-    --font-size-sm: 0.875rem;        /* 14px */
-    --font-weight-regular: 400;
-    --font-weight-medium: 500;
-    --font-weight-bold: 600;
-    
-    /* ----------------------------------------------------------------------
-       ESPACIADOS (Sistema Base 8)
-       ---------------------------------------------------------------------- */
-    --spacing-xs: 0.25rem;           /* 4px */
-    --spacing-sm: 0.5rem;            /* 8px */
-    --spacing-md: 1rem;              /* 16px */
-    --spacing-lg: 1.5rem;            /* 24px */
-    --spacing-xl: 2rem;              /* 32px */
-    
-    /* ----------------------------------------------------------------------
-       SOMBRAS Y BORDES (Premium UI)
-       ---------------------------------------------------------------------- */
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-    --border-radius-sm: 4px;
-    --border-radius-md: 6px;
-    --border-radius-lg: 8px;
-    
-    /* ----------------------------------------------------------------------
-       TRANSICIONES
-       ---------------------------------------------------------------------- */
-    --transition-fast: 0.15s ease-in-out;
-    --transition-base: 0.25s ease-in-out;
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+    --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

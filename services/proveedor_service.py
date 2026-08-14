@@ -51,10 +51,12 @@ def crear_o_actualizar_proveedor(proveedor_id, codigo, nombre_proveedor, nombre_
         if not proveedor:
             return False, "Proveedor no encontrado"
             
-        # Validar desactivación
-        if estado == EstadoProveedor.INACTIVO and proveedor.estado != EstadoProveedor.INACTIVO:
-            if proveedor.productos:
-                return False, "No se puede desactivar el proveedor porque tiene productos asociados"
+        # Validar desactivación si hay productos asociados
+        es_inactivo_target = (estado == EstadoProveedor.INACTIVO) or (hasattr(estado, 'value') and estado.value == "INACTIVO")
+        if es_inactivo_target:
+            cant_productos = len(proveedor.productos) if proveedor.productos else 0
+            if cant_productos > 0:
+                return False, f"No se puede inactivar al proveedor '{proveedor.nombre_proveedor}' porque tiene {cant_productos} producto(s) asociado(s)."
                 
         proveedor.nombre_proveedor = nombre_proveedor
         proveedor.nombre_contacto = nombre_contacto

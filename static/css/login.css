@@ -1,231 +1,332 @@
-﻿:root {
-    --login-blue: #0d3f9f;
-    --login-blue-dark: #0a3486;
-    --login-border: #dde3ec;
-    --login-muted: #667085;
-    --fuente-principal: 'Inter', sans-serif;
+/* ==========================================================================
+   ESTILOS APEX DARK LOGIN — SISTEMA ERP WINIE
+   ========================================================================== */
+
+:root {
+    --color-bg-main: #090a0f;
+    --color-bg-card: #13141c;
+    --color-bg-card-header: #0f1016;
+    --color-primary: #00e676;
+    --color-accent: #00b0ff;
+    --color-warning: #ffb74d;
+    --color-danger: #ff5252;
+    --color-text-main: #f8fafc;
+    --color-text-muted: #94a3b8;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --fuente-principal: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body {
     min-height: 100vh;
-    background:
-        radial-gradient(circle at top left, rgba(13, 63, 159, 0.08), transparent 32%),
-        linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+    background-color: var(--color-bg-main);
+    color: var(--color-text-main);
     font-family: var(--fuente-principal);
-}
-
-.login-shell.login-centered {
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    margin: 0;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
 }
 
-.login-brand-panel {
-    display: none;
+/* ─── FONDOS CON GLOW NEÓN ANIMADOS ────── */
+body::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    animation: orbFloat 10s ease-in-out infinite alternate;
 }
 
-.login-form-panel {
+body::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 176, 255, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    animation: orbFloat 12s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -20px) scale(1.1); }
+    100% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+/* ─── CONTENEDOR LOGIN ────── */
+.login-shell {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 440px;
+    position: relative;
+    z-index: 1;
 }
 
 .login-card {
-    width: min(100%, 430px);
-    background: #fff;
-    border: 1px solid rgba(221, 227, 236, 0.92);
-    border-radius: 14px;
-    box-shadow: 0 22px 52px rgba(15, 23, 42, 0.12);
-    padding: 30px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 230, 118, 0.05);
+    backdrop-filter: blur(16px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.login-card:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(0, 230, 118, 0.08);
+}
+
+/* ─── LOGO Y ENCABEZADO APEX ────── */
 .login-logo-block {
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 28px;
 }
 
-.login-logo-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 16px;
-    background: var(--login-blue);
-    color: #fff;
+.login-logo-badge {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
+    color: #090a0f;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    box-shadow: 0 12px 24px rgba(13, 63, 159, 0.24);
-    margin-bottom: 10px;
+    font-size: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 230, 118, 0.3);
+    margin-bottom: 14px;
 }
 
 .login-logo-text {
-    font-size: 1.3rem;
-    font-weight: 850;
-    color: #111827;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
 }
 
 .login-logo-text span {
-    color: var(--login-blue);
+    color: var(--color-primary);
 }
 
-.login-logo-version {
-    color: var(--login-muted);
-    font-size: 0.76rem;
+.login-logo-sub {
+    font-size: 0.78rem;
     font-weight: 700;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
-.login-heading {
-    margin-bottom: 22px;
-}
-
-.login-heading h2 {
-    font-size: 1.55rem;
-    font-weight: 850;
-    margin-bottom: 6px;
-    color: #101828;
-}
-
-.login-heading p {
-    color: var(--login-muted);
-    margin: 0;
-}
-
-.access-switch {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    padding: 4px;
-    border: 1px solid var(--login-border);
-    border-radius: 10px;
-    background: #f8fafc;
-}
-
-.access-option {
-    min-height: 36px;
-    border-radius: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    cursor: pointer;
-    color: #667085;
-    font-size: 0.82rem;
-    font-weight: 800;
-    transition: 0.2s ease;
-}
-
-.access-option.active {
-    background: var(--login-blue);
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(13, 63, 159, 0.25);
-}
-
+/* ─── CAMPOS DE FORMULARIO APEX ────── */
 .login-label {
-    color: var(--login-blue);
-    font-size: 0.68rem;
-    font-weight: 850;
-    letter-spacing: 0.08em;
-    margin-left: 10px;
-    margin-bottom: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.login-input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.login-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+    font-size: 1.15rem;
+    transition: color 0.15s ease;
+    pointer-events: none;
+    z-index: 2;
 }
 
 .login-input {
-    min-height: 42px;
-    border-radius: 10px;
-    border: 1px solid var(--login-border);
-    color: #101828;
+    width: 100%;
+    min-height: 48px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 10px 42px 10px 44px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.login-input::placeholder {
+    color: rgba(148, 163, 184, 0.5);
+    font-weight: 400;
 }
 
 .login-input:focus {
-    border-color: var(--login-blue);
-    box-shadow: 0 0 0 0.2rem rgba(13, 63, 159, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15);
 }
 
-.login-error {
-    color: #dc3545;
-    font-size: 0.85rem;
-    margin-top: 6px;
-    font-weight: 700;
+.login-input-group:focus-within .login-input-icon {
+    color: var(--color-primary);
 }
 
-.recaptcha-placeholder {
-    min-height: 76px;
-    border: 1px solid var(--login-border);
-    border-radius: 10px;
-    background: #fafafa;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-}
-
-.fake-checkbox {
-    width: 24px;
-    height: 24px;
-    border: 2px solid #cfd6df;
-    border-radius: 3px;
-    background: #fff;
-}
-
-.recaptcha-brand {
-    margin-left: auto;
-    color: #6b7280;
-    display: grid;
-    justify-items: center;
-    font-size: 1.65rem;
-}
-
-.recaptcha-brand i {
-    color: #3c91d0;
-}
-
-.recaptcha-brand small {
-    font-size: 0.56rem;
-}
-
-.btn-login {
-    width: 100%;
-    min-height: 44px;
-    border: 0;
-    border-radius: 10px;
-    background: var(--login-blue);
-    color: #fff;
-    font-weight: 850;
+/* Botón Ojo Toggle Password */
+.login-eye-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 3;
+    transition: color 0.15s ease;
+}
+
+.login-eye-btn:hover {
+    color: #ffffff;
+}
+
+/* Enlace Olvidaste Contraseña */
+.login-forgot-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -10px;
+    margin-bottom: 22px;
+}
+
+.login-forgot-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.login-forgot-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* ─── BOTÓN PRINCIPAL NEÓN ────── */
+.btn-login-apex {
+    width: 100%;
+    min-height: 48px;
+    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
+    border: none;
+    border-radius: 12px;
+    color: #090a0f;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 230, 118, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-login-apex:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0, 230, 118, 0.35);
+    filter: brightness(1.05);
+}
+
+.btn-login-apex:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(0, 230, 118, 0.2);
+}
+
+/* ─── ALERTAS Y ERRORES APEX ────── */
+.login-alert-danger {
+    background: rgba(255, 82, 82, 0.1);
+    border: 1px solid rgba(255, 82, 82, 0.25);
+    color: #ff5252;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
     gap: 10px;
-    box-shadow: 0 10px 18px rgba(13, 63, 159, 0.22);
 }
 
-.btn-login:hover,
-.btn-login:focus {
-    background: var(--login-blue-dark);
-    color: #fff;
+.login-alert-success {
+    background: rgba(0, 230, 118, 0.1);
+    border: 1px solid rgba(0, 230, 118, 0.25);
+    color: #00e676;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.login-footer {
-    margin-top: 28px;
+.login-alert-warning {
+    background: rgba(255, 183, 77, 0.1);
+    border: 1px solid rgba(255, 183, 77, 0.25);
+    color: #ffb74d;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* BORDES ROJOS PARA CAMPOS INVÁLIDOS */
+.login-input.is-invalid-apex {
+    border-color: #ff5252 !important;
+    background-color: rgba(255, 82, 82, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.2) !important;
+}
+
+.login-feedback-err {
+    color: #ff5252;
+    font-size: 0.76rem;
+    font-weight: 600;
+    margin-top: 5px;
+    margin-left: 10px;
+    display: none;
+}
+
+/* ─── PIE DE PÁGINA ────── */
+.login-footer-text {
     text-align: center;
-    font-size: 0.72rem;
-    color: #98a2b3;
-}
-
-@media (max-width: 480px) {
-    .login-shell.login-centered {
-        padding: 16px;
-    }
-
-    .login-card {
-        padding: 24px;
-    }
-
-    .recaptcha-placeholder {
-        min-height: 70px;
-    }
+    margin-top: 24px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }

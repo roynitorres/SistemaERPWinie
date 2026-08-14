@@ -4,3 +4,5 @@ Flask-Migrate
 Flask-Login
 Flask-WTF
 python-dotenv
+waitress==3.0.2
+psycopg2-binary

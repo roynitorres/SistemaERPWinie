@@ -8,32 +8,47 @@
 
 {% block content %}
     <!-- ===================================== -->
-    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
+    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
     <!-- ===================================== -->
-    <div class="filter-bar">
-        <!-- Nuevo (Enfocar formulario) -->
-        <button type="button" class="btn btn--primary" id="btnIrForm">
-            <i class="bi bi-plus-lg" style="margin-right: var(--spacing-xs);"></i> Nueva Categoría
-        </button>
+    <div class="page-header-apex">
+        <div class="breadcrumbs-apex">
+            Salpicadero &gt; <span>Categorías</span>
+        </div>
+        <h1 class="page-title-apex">Categorías</h1>
+        <p class="page-subtitle-apex">Visualiza y gestiona las categorías de productos.</p>
+    </div>
 
-        <!-- Buscador -->
-        <input type="text" class="form-input filter-bar__input" id="buscarCategoria" placeholder="🔍 Buscar categoría...">
+    <!-- ===================================== -->
+    <!-- BARRA DE HERRAMIENTAS, BÚSQUEDA Y PILLS APEX -->
+    <!-- ===================================== -->
+    <div class="toolbar-apex">
+        <!-- Grupo Izquierdo: Buscador Oscuro + Pills de Estado al lado derecho -->
+        <div class="toolbar-left-group">
+            <div class="toolbar-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="toolbar-input" id="buscarCategoria" placeholder="Buscar categoría...">
+            </div>
 
-        <!-- Filtro Estado -->
-        <select class="form-input filter-bar__select" id="filtroEstadoCategoria">
-            <option value="TODOS">Todos los estados</option>
-            <option value="ACTIVO">Activos</option>
-            <option value="INACTIVO">Inactivos</option>
-        </select>
+            <!-- TABS PILLS DE ESTADO (TODOS, ACTIVO, INACTIVO) -->
+            <div class="state-pills-bar">
+                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
+                <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
+                <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
+            </div>
+        </div>
 
-        <!-- Exportar y Contador -->
-        <div style="margin-left: auto; display: flex; align-items: center; gap: var(--spacing-md);">
-            <span id="badgeTotalItems" style="color: var(--color-text-main); font-size: 0.95rem;">
-                Categorías: <strong>0</strong>
-            </span>
-            <a href="#" class="btn btn--outline">
-                <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+        <!-- Acciones Derecha -->
+        <div class="toolbar-actions-right">
+            <!-- Dynamic Count Badge (Número Puro) -->
+            <span id="badgeTotalItems" class="count-badge-apex" title="Total de registros">0</span>
+            
+            <a href="#" class="btn-apex-outline">
+                <i class="bi bi-download"></i> Exportación
             </a>
+            
+            <button type="button" class="btn-neon-primary" id="btnIrForm">
+                <i class="bi bi-plus-lg"></i> Nueva Categoría
+            </button>
         </div>
     </div>
 
@@ -44,28 +59,28 @@
         <div class="modal-window">
             <div class="modal-header">
                 <h5 class="modal-title" id="formTitle">
-                    <i class="bi bi-tag"></i> NUEVA CATEGORÍA
+                    <i class="bi bi-tags-fill text-success me-1"></i> NUEVA CATEGORÍA
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalFormCategoria')">
-                    <i class="bi bi-x"></i>
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             
             <div class="modal-body">
-                <form method="POST" id="formCategorias">
+                <form method="POST" id="formCategorias" novalidate>
                     <input type="hidden" id="categoria_id" name="categoria_id">
 
                     <div class="grid grid--2-cols">
                         <!-- CÓDIGO -->
                         <div class="form-group">
                             <label class="form-label form-label--required">CÓDIGO</label>
-                            <input type="text" class="form-input" name="codigo_categoria" id="form_codigo" value="{{ siguiente_codigo }}" readonly style="background-color: var(--color-bg-stripe);">
+                            <input type="text" class="form-input" name="codigo_categoria" id="form_codigo" value="{{ siguiente_codigo }}" readonly>
                         </div>
 
                         <!-- ESTADO -->
                         <div class="form-group">
                             <label class="form-label">ESTADO</label>
-                            <select class="form-input" name="estado" id="form_estado">
+                            <select class="form-input select-estado-apex" name="estado" id="form_estado" data-estado="ACTIVO">
                                 <option value="ACTIVO">Activo</option>
                                 <option value="INACTIVO">Inactivo</option>
                             </select>
@@ -84,10 +99,12 @@
                         <input type="text" class="form-input" name="descripcion" placeholder="DESCRIPCIÓN DE LA CATEGORÍA" id="form_descripcion" oninput="this.value = this.value.toUpperCase()">
                     </div>
 
-                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
-                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalFormCategoria')">Cancelar</button>
-                        <button type="button" class="btn btn--secondary" id="btnLimpiar">Limpiar</button>
-                        <button type="submit" class="btn btn--primary" id="btnGuardar">Guardar</button>
+                    <div class="modal-footer" style="margin-top: 24px;">
+                        <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalFormCategoria')">Cancelar</button>
+                        <button type="button" class="btn-apex-outline" id="btnLimpiar" style="color: var(--color-text-muted);">Limpiar</button>
+                        <button type="submit" class="btn-neon-primary" id="btnGuardar">
+                            <i class="bi bi-check-lg me-1"></i> Guardar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -102,12 +119,12 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th style="width: 100px;">CÓDIGO</th>
-                        <th>CATEGORÍA</th>
-                        <th>DESCRIPCIÓN</th>
-                        <th style="text-align: center;">CANT. PRODUCTOS</th>
-                        <th>FECHA CREACIÓN</th>
-                        <th style="text-align: right;">ACCIONES</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                        <th>Código</th>
+                        <th style="text-align: center;">Cant. Productos</th>
+                        <th>Fecha Creación</th>
+                        <th style="text-align: right;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaCategorias">
@@ -119,37 +136,46 @@
                         data-descripcion="{{ categoria.descripcion or '' }}"
                         data-estado="{{ categoria.estado.value }}">
 
-                        <td class="data-table__cell" style="font-family: monospace;">
-                            {{ categoria.codigo or '-' }}
-                        </td>
-                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-primary-dark);">
-                            <div class="avatar-wrapper">
-                                <div class="avatar" style="background-color: var(--color-primary-light); color: var(--color-primary);"><i class="bi bi-tag"></i></div>
-                                <div class="avatar-text" style="gap: var(--spacing-xs);">
-                                    <span class="avatar-text__title">{{ categoria.nombre }}</span>
-                                    <div>
-                                        <span class="badge {% if categoria.estado.value == 'ACTIVO' %}badge--success{% else %}badge--danger{% endif %}">
-                                            {{ categoria.estado.value }}
-                                        </span>
-                                    </div>
+                        <td class="data-table__cell">
+                            <div class="customer-cell-wrapper">
+                                <div class="avatar-circle-apex" style="background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%); color: #090a0f;">
+                                    <i class="bi bi-tag-fill"></i>
+                                </div>
+                                <div>
+                                    <span class="customer-title-text">{{ categoria.nombre }}</span>
                                 </div>
                             </div>
                         </td>
-                        <td class="data-table__cell text-muted">
-                            {{ categoria.descripcion }}
+                        <td class="data-table__cell">
+                            <span class="badge-pill-apex {% if categoria.estado.value == 'ACTIVO' %}badge-pill-apex--active{% else %}badge-pill-apex--inactive{% endif %}">
+                                {{ categoria.estado.value }}
+                            </span>
                         </td>
-                        <td class="data-table__cell" style="text-align: center; font-weight: bold;">
-                            <span style="background-color: var(--color-bg-stripe); padding: 4px 12px; border-radius: 12px; border: 1px solid var(--color-border);">
+                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">
+                            {{ categoria.codigo or '-' }}
+                        </td>
+                        <td class="data-table__cell text-center" style="font-weight: 700;">
+                            <span style="background-color: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 12px; border: 1px solid var(--color-border); color: #ffffff;">
                                 {{ categoria.productos|length }}
                             </span>
                         </td>
-                        <td class="data-table__cell text-muted">
+                        <td class="data-table__cell " style="color: var(--color-text-muted);">
                             {{ categoria.created_at.strftime('%d/%m/%Y') if categoria.created_at else '-' }}
                         </td>
-                        <td class="data-table__cell data-table__cell--actions">
-                            <button type="button" class="btn btn--secondary btn--small btn-editar-fila" title="Editar Categoría">
-                                <i class="bi bi-pencil-fill"></i> Editar
-                            </button>
+                        <td class="data-table__cell text-end">
+                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
+                            <div class="dropdown d-inline-block">
+                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
+                                    <li>
+                                        <button type="button" class="dropdown-item btn-editar-fila">
+                                            <i class="bi bi-pencil me-2 text-primary"></i> Editar Categoría
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -168,195 +194,4 @@
         </div>
     </div>
 
-<script>
-    // ==========================================
-    // SISTEMA DE MODALES CUSTOM
-    // ==========================================
-    function abrirModal(id) {
-        document.getElementById(id).classList.add('is-open');
-    }
-
-    function cerrarModal(id) {
-        document.getElementById(id).classList.remove('is-open');
-    }
-
-    // ==========================================
-    // LÓGICA DEL FORMULARIO CATEGORIA
-    // ==========================================
-    const formulario = document.getElementById("formCategorias");
-    const formTitle = document.getElementById("formTitle");
-    const categoriaId = document.getElementById("categoria_id");
-    const formCodigo = document.getElementById("form_codigo");
-    const formNombre = document.getElementById("form_nombre");
-    const formDescripcion = document.getElementById("form_descripcion");
-    const formEstado = document.getElementById("form_estado");
-
-    const btnLimpiar = document.getElementById("btnLimpiar");
-    const btnIrform = document.getElementById("btnIrForm");
-
-    // Prevenir el envío con la tecla Enter en los inputs
-    formulario.addEventListener("keydown", function(e) {
-        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
-            e.preventDefault();
-        }
-    });
-
-    const siguienteCodigo = "{{ siguiente_codigo }}";
-
-    function resetForm() {
-        formulario.reset();
-        categoriaId.value = "";
-        formCodigo.value = siguienteCodigo;
-        formEstado.value = "ACTIVO";
-        formTitle.innerHTML = `<i class="bi bi-tag"></i> NUEVA CATEGORÍA`;
-        formNombre.focus();
-    }
-
-    function cargarCategoria(row) {
-        categoriaId.value = row.dataset.id;
-        formCodigo.value = row.dataset.codigo;
-        formNombre.value = row.dataset.nombre;
-        formDescripcion.value = row.dataset.descripcion;
-        formEstado.value = row.dataset.estado;
-
-        formTitle.innerHTML = `<i class="bi bi-pencil"></i> EDITAR CATEGORÍA`;
-        abrirModal('modalFormCategoria');
-    }
-
-    btnLimpiar.addEventListener("click", resetForm);
-
-    btnIrform.addEventListener("click", () => {
-        resetForm();
-        abrirModal('modalFormCategoria');
-    });
-
-    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            cargarCategoria(this.closest("tr"));
-        });
-    });
-
-    document.querySelectorAll("#tablaCategorias tr").forEach(row => {
-        row.addEventListener("dblclick", function () {
-            cargarCategoria(this);
-        });
-    });
-
-    // ==========================================
-    // PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE
-    // ==========================================
-    let currentPage = 1;
-    const itemsPerPage = 10;
-    let filteredRows = [];
-    const allRows = Array.from(document.querySelectorAll("#tablaCategorias tr"));
-
-    function initPagination() {
-        filteredRows = [...allRows];
-        renderTable();
-    }
-
-    function renderTable() {
-        const totalItems = filteredRows.length;
-        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-        allRows.forEach(row => row.style.display = "none");
-
-        for (let i = startIndex; i < endIndex; i++) {
-            if(filteredRows[i]) filteredRows[i].style.display = "";
-        }
-
-        const summaryText = totalItems > 0
-            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
-            : "Mostrando 0 a 0 de 0 registros";
-        document.getElementById("paginationSummary").innerText = summaryText;
-
-        const badgeTotal = document.getElementById("badgeTotalItems");
-        if (badgeTotal) {
-            badgeTotal.innerHTML = `Categorías: <strong>${totalItems}</strong>`;
-        }
-
-        renderControls(totalPages);
-    }
-
-    function renderControls(totalPages) {
-        const controlsContainer = document.getElementById("paginationControls");
-        controlsContainer.innerHTML = "";
-
-        if (totalPages <= 1) return;
-
-        // Botón Anterior
-        const btnPrev = document.createElement("button");
-        btnPrev.className = "btn btn--outline btn--small";
-        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
-        if (currentPage === 1) btnPrev.disabled = true;
-        else {
-            btnPrev.addEventListener("click", () => {
-                currentPage--;
-                renderTable();
-            });
-        }
-        controlsContainer.appendChild(btnPrev);
-
-        // Páginas numeradas
-        for (let i = 1; i <= totalPages; i++) {
-            const btnPage = document.createElement("button");
-            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
-            btnPage.innerText = i;
-            btnPage.addEventListener("click", () => {
-                currentPage = i;
-                renderTable();
-            });
-            controlsContainer.appendChild(btnPage);
-        }
-
-        // Botón Siguiente
-        const btnNext = document.createElement("button");
-        btnNext.className = "btn btn--outline btn--small";
-        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
-        if (currentPage === totalPages) btnNext.disabled = true;
-        else {
-            btnNext.addEventListener("click", () => {
-                currentPage++;
-                renderTable();
-            });
-        }
-        controlsContainer.appendChild(btnNext);
-    }
-
-    function aplicarFiltros() {
-        const query = document.getElementById("buscarCategoria").value.toLowerCase().trim();
-        const estadoFiltro = document.getElementById("filtroEstadoCategoria").value;
-
-        filteredRows = allRows.filter(row => {
-            const codigo = row.dataset.codigo.toLowerCase();
-            const nombre = row.dataset.nombre.toLowerCase();
-            const descripcion = row.dataset.descripcion.toLowerCase();
-            const estadoRow = row.dataset.estado;
-
-            const coincideTexto = query === "" || 
-                codigo.includes(query) ||
-                nombre.includes(query) ||
-                descripcion.includes(query);
-
-            const coincideEstado = estadoFiltro === "TODOS" || estadoRow === estadoFiltro;
-
-            return coincideTexto && coincideEstado;
-        });
-
-        currentPage = 1;
-        renderTable();
-    }
-
-    document.getElementById("buscarCategoria").addEventListener("input", aplicarFiltros);
-    document.getElementById("filtroEstadoCategoria").addEventListener("change", aplicarFiltros);
-
-    window.addEventListener("load", initPagination);
-</script>
 {% endblock %}

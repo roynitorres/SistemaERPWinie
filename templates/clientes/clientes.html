@@ -7,33 +7,47 @@
 {% endblock %}
 
 {% block content %}
+
     <!-- ===================================== -->
-    <!-- BARRA DE CONTROLES DE LA TABLA (FILTROS) -->
+    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
     <!-- ===================================== -->
-    <div class="filter-bar">
-        <!-- Nuevo (Enfocar formulario) -->
-        <button type="button" class="btn btn--primary" id="btnIrForm">
-            <i class="bi bi-plus-lg" style="margin-right: var(--spacing-xs);"></i> Nuevo Cliente
-        </button>
+    <div class="page-header-apex">
+        <div class="breadcrumbs-apex">
+            Salpicadero &gt; <span>Clientes</span>
+        </div>
+        <h1 class="page-title-apex">Clientes</h1>
+        <p class="page-subtitle-apex">Visualiza y gestiona tu base de clientes.</p>
+    <!-- ===================================== -->
+    <!-- BARRA DE HERRAMIENTAS, BÚSQUEDA Y PILLS APEX -->
+    <!-- ===================================== -->
+    <div class="toolbar-apex">
+        <!-- Grupo Izquierdo: Buscador Oscuro + Pills de Estado al lado derecho -->
+        <div class="toolbar-left-group">
+            <div class="toolbar-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="toolbar-input" id="buscarCliente" placeholder="Buscar clientes...">
+            </div>
 
-        <!-- Buscador -->
-        <input type="text" class="form-input filter-bar__input" id="buscarCliente" placeholder="🔍 Buscar cliente...">
+            <!-- TABS PILLS DE ESTADO (AL LADO DERECHO DEL INPUT DE BÚSQUEDA) -->
+            <div class="state-pills-bar">
+                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
+                <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
+                <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
+            </div>
+        </div>
 
-        <!-- Filtro Estado -->
-        <select class="form-input filter-bar__select" id="filtroEstadoCliente">
-            <option value="TODOS">Todos los estados</option>
-            <option value="ACTIVO">Activos</option>
-            <option value="INACTIVO">Inactivos</option>
-        </select>
-
-        <!-- Exportar y Contador -->
-        <div style="margin-left: auto; display: flex; align-items: center; gap: var(--spacing-md);">
-            <span id="badgeTotalItems" style="color: var(--color-text-main); font-size: 0.95rem;">
-                 Clientes <strong>0</strong>
-            </span>
-            <a href="{{ url_for('clientes.exportar_clientes') }}" class="btn btn--outline">
-                <i class="bi bi-download" style="margin-right: var(--spacing-xs);"></i> Exportar
+        <!-- Acciones Derecha -->
+        <div class="toolbar-actions-right">
+            <!-- Dynamic Count Badge (Número Puro) -->
+            <span id="badgeTotalItems" class="count-badge-apex" title="Total de registros">0</span>
+            
+            <a href="{{ url_for('clientes.exportar_clientes') }}" class="btn-apex-outline">
+                <i class="bi bi-download"></i> Exportación
             </a>
+            
+            <button type="button" class="btn-neon-primary" id="btnIrForm">
+                <i class="bi bi-plus-lg"></i> Nuevo Cliente
+            </button>
         </div>
     </div>
 
@@ -44,30 +58,30 @@
         <div class="modal-window">
             <div class="modal-header">
                 <h5 class="modal-title" id="formTitle">
-                    <i class="bi bi-person-plus"></i> NUEVO CLIENTE
+                    <i class="bi bi-person-plus-fill text-success me-1"></i> NUEVO CLIENTE
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalFormCliente')">
-                    <i class="bi bi-x"></i>
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             
             <div class="modal-body">
-                <form method="POST" id="formClientes">
+                <form method="POST" id="formClientes" novalidate>
                     <input type="hidden" id="cliente_id" name="cliente_id">
 
                     <div class="grid grid--2-cols">
                         <!-- CÓDIGO -->
                         <div class="form-group">
                             <label class="form-label form-label--required">CÓDIGO</label>
-                            <input type="text" class="form-input" id="form_codigo" value="{{ siguiente_codigo }}" readonly style="background-color: var(--color-bg-stripe);">
+                            <input type="text" class="form-input" id="form_codigo" value="{{ siguiente_codigo }}" readonly>
                         </div>
 
                         <!-- ESTADO -->
                         <div class="form-group">
                             <label class="form-label form-label--required">ESTADO</label>
-                            <select class="form-input" name="estado" id="form_estado">
-                                <option value="ACTIVO">Activo</option>
-                                <option value="INACTIVO">Inactivo</option>
+                            <select class="form-input select-estado-apex" name="estado" id="form_estado" data-estado="ACTIVO">
+                                <option value="ACTIVO"> Activo</option>
+                                <option value="INACTIVO"> Inactivo</option>
                             </select>
                         </div>
                     </div>
@@ -75,20 +89,20 @@
                     <!-- NOMBRE DEL CLIENTE -->
                     <div class="form-group">
                         <label class="form-label form-label--required">NOMBRE DEL CLIENTE</label>
-                        <input type="text" class="form-input" name="nombres" placeholder="ROYNI JOSE TORRES ACUÑA" required minlength="3" id="form_nombre" oninput="this.value = this.value.toUpperCase()">
+                        <input type="text" class="form-input" name="nombres" placeholder="ROYNI JOSE TORRES ACUÑA" id="form_nombre" oninput="this.value = this.value.toUpperCase()">
                     </div>
 
                     <div class="grid grid--2-cols">
                         <!-- TELÉFONO -->
                         <div class="form-group">
                             <label class="form-label form-label--required">TELÉFONO</label>
-                            <input type="text" class="form-input" id="form_telefono" name="telefono" maxlength="8" minlength="8" pattern="^[578][0-9]{7}$" title="El teléfono debe tener 8 dígitos y comenzar con 5, 7 u 8" inputmode="numeric" placeholder="81234567" required>
+                            <input type="text" class="form-input" id="form_telefono" name="telefono" maxlength="8" inputmode="numeric" placeholder="81234567">
                         </div>
 
                         <!-- CIUDAD -->
                         <div class="form-group">
                             <label class="form-label form-label--required">CIUDAD</label>
-                            <select class="form-input" name="ciudad" id="form_ciudad" required>
+                            <select class="form-input" name="ciudad" id="form_ciudad">
                                 <option value="">SELECCIONAR CIUDAD</option>
                                 <option value="Boaco">BOACO</option>
                                 <option value="Carazo">CARAZO</option>
@@ -111,10 +125,12 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer" style="margin-top: var(--spacing-lg);">
-                        <button type="button" class="btn btn--outline" onclick="cerrarModal('modalFormCliente')">Cancelar</button>
-                        <button type="button" class="btn btn--secondary" id="btnLimpiar">Limpiar</button>
-                        <button type="submit" class="btn btn--primary" id="btnGuardar">Guardar</button>
+                    <div class="modal-footer" style="margin-top: 24px;">
+                        <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalFormCliente')">Cancelar</button>
+                        <button type="button" class="btn-apex-outline" id="btnLimpiar" style="color: var(--color-text-muted);">Limpiar</button>
+                        <button type="submit" class="btn-neon-primary" id="btnGuardar">
+                            <i class="bi bi-check-lg me-1"></i> Guardar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -129,12 +145,13 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th>CÓDIGO</th>
-                        <th>NOMBRE DEL CLIENTE</th>
-                        <th>TELÉFONO</th>
-                        <th>CIUDAD</th>
-                        <th>FECHA CREACIÓN</th>
-                        <th style="text-align: right;">ACCIONES</th>
+                        <th>Cliente</th>
+                        <th>Estado</th>
+                        <th>Código</th>
+                        <th>Teléfono</th>
+                        <th>Ciudad</th>
+                        <th>Incorporado</th>
+                        <th style="text-align: right;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaClientes">
@@ -148,20 +165,37 @@
                         data-estado="{{ cliente.estado.value }}">
 
                         <td class="data-table__cell">
-                            {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
-                        </td>
-                        <td class="data-table__cell" style="font-weight: var(--font-weight-bold); color: var(--color-primary-dark);">
-                            <div class="avatar-wrapper">
-                                <div class="avatar">{{ cliente.nombres[:2].upper() }}</div>
-                                <div class="avatar-text" style="gap: var(--spacing-xs);">
-                                    <span class="avatar-text__title">{{ cliente.nombres }}</span>
-                                    <div>
-                                        <span class="badge {% if cliente.estado.value == 'ACTIVO' %}badge--success{% else %}badge--danger{% endif %}">
-                                            {{ cliente.estado.value }}
-                                        </span>
-                                    </div>
+                            <div class="customer-cell-wrapper">
+                                <div class="avatar-circle-apex">
+                                    {{ cliente.nombres[:2].upper() }}
+                                </div>
+                                <div>
+                                    <span class="customer-title-text">{{ cliente.nombres }}</span>
+                                    {% if cliente.usuario %}
+                                        {% if cliente.usuario.debe_cambiar_password %}
+                                        <div style="margin-top: 2px;">
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; color: #ffb74d; background: rgba(255, 183, 77, 0.1); border-radius: 4px; padding: 1px 6px;" title="Clave temporal activa: restablecimiento bloqueado">
+                                                <i class="bi bi-lock-fill" style="font-size: 0.68rem; color: #ffb74d;"></i>
+                                            </span>
+                                        </div>
+                                        {% else %}
+                                        <div style="margin-top: 2px;">
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; color: #00e676; background: rgba(0, 230, 118, 0.1); border-radius: 4px; padding: 1px 6px;" title="Clave personalizada: listo para restablecer">
+                                                <i class="bi bi-key-fill" style="font-size: 0.68rem; color: #00e676;"></i> Lista
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
                             </div>
+                        </td>
+                        <td class="data-table__cell">
+                            <span class="badge-pill-apex {% if cliente.estado.value == 'ACTIVO' %}badge-pill-apex--active{% else %}badge-pill-apex--inactive{% endif %}">
+                                {{ cliente.estado.value }}
+                            </span>
+                        </td>
+                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">
+                            {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
                         </td>
                         <td class="data-table__cell">
                             {{ cliente.telefono or '-' }}
@@ -169,31 +203,57 @@
                         <td class="data-table__cell">
                             {{ cliente.ciudad or '-' }}
                         </td>
-                        <td class="data-table__cell">
+                        <td class="data-table__cell" style="color: var(--color-text-muted);">
                             {{ cliente.created_at.strftime('%d/%m/%Y') if cliente.created_at else '-' }}
                         </td>
-                        <td class="data-table__cell data-table__cell--actions">
-                            <button type="button" class="btn btn--secondary btn--small btn-editar-fila" title="Editar Cliente">
-                                <i class="bi bi-pencil-fill"></i> Editar
-                            </button>
-                            
-                            {% if cliente.usuario %}
-                                {% if not cliente.usuario.debe_cambiar_password %}
-                                <form method="POST" action="{{ url_for('clientes.restaurar_password_cliente', cliente_id=cliente.id) }}" class="form-restaurar-password" style="display: inline-block;">
-                                    <button type="button" class="btn btn--outline btn--small btn-restaurar-trigger" title="Restaurar contraseña">
-                                        <i class="bi bi-key-fill"></i>
-                                    </button>
-                                </form>
-                                {% else %}
-                                <button type="button" class="btn btn--outline btn--small" disabled title="El cliente tiene una contraseña temporal intacta" style="opacity: 0.5;">
-                                    <i class="bi bi-shield-check"></i>
+                        <td class="data-table__cell text-end">
+                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
+                            <div class="dropdown d-inline-block">
+                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Opciones">
+                                    <i class="bi bi-three-dots-vertical"></i>
                                 </button>
-                                {% endif %}
-                            {% else %}
-                                <button type="button" class="btn btn--outline btn--small" disabled title="Este cliente no tiene una cuenta de usuario" style="opacity: 0.5;">
-                                    <i class="bi bi-person-x"></i>
-                                </button>
-                            {% endif %}
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
+                                    <li>
+                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #00e676; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                            <i class="bi bi-lightning-charge-fill" style="color: #00e676; font-size: 0.8rem;"></i> ACCIONES
+                                        </div>
+                                    </li>
+                                     <li>
+                                         <a href="{{ url_for('clientes.historial_cliente', cliente_id=cliente.id) }}" class="dropdown-item" title="Ver historial de facturas e historial del cliente">
+                                             <i class="bi bi-clock-history me-2 text-info"></i> Ver Historial de Facturas
+                                         </a>
+                                     </li>
+                                     <li>
+                                         <button type="button" class="dropdown-item btn-editar-fila">
+                                             <i class="bi bi-pencil me-2 text-primary"></i> Editar
+                                         </button>
+                                     </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item btn-ver-credenciales-trigger"
+                                                data-id="{{ cliente.id }}"
+                                                data-codigo="{{ cliente.codigo or 'C' ~ '%03d'|format(cliente.id) }}"
+                                                data-nombres="{{ cliente.nombres }}"
+                                                data-telefono="{{ cliente.telefono or '-' }}"
+                                                data-usuario="{{ cliente.usuario.username if cliente.usuario else cliente.telefono or '-' }}"
+                                                data-pass-temp="{{ cliente.usuario.password_temporal_plana if (cliente.usuario and cliente.usuario.debe_cambiar_password and cliente.usuario.password_temporal_plana) else '' }}"
+                                                data-debe-cambiar="{{ '1' if (cliente.usuario and cliente.usuario.debe_cambiar_password) else '0' }}">
+                                            <i class="bi bi-shield-lock me-2 text-info"></i> Ver credenciales
+                                        </button>
+                                    </li>
+                                    {% if cliente.usuario %}
+                                    <li>
+                                        <form method="POST" action="{{ url_for('clientes.restaurar_password_cliente', cliente_id=cliente.id) }}" class="form-restaurar-password">
+                                            <button type="button" class="dropdown-item btn-restaurar-trigger"
+                                                    data-debe-cambiar="{{ '1' if cliente.usuario.debe_cambiar_password else '0' }}"
+                                                    data-pass-temp="{{ cliente.usuario.password_temporal_plana or '' }}"
+                                                    {% if cliente.usuario.debe_cambiar_password %}disabled style="opacity: 0.4; cursor: not-allowed; pointer-events: none;" title="Deshabilitado: El cliente aún no ha cambiado su contraseña temporal activa"{% endif %}>
+                                                <i class="bi bi-key me-2 text-warning"></i> Restablecer contraseña
+                                            </button>
+                                        </form>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -212,256 +272,96 @@
         </div>
     </div>
 
-<!-- MODAL RESTAURAR CONTRASEÑA -->
+<!-- MODAL RESTAURAR CONTRASEÑA APEX DARK -->
 <div class="modal-overlay" id="modalRestaurarPassword">
-    <div class="modal-window" style="max-width: 400px; text-align: center;">
+    <div class="modal-window" style="max-width: 440px; text-align: center;">
         <div class="modal-header">
             <h5 class="modal-title">
-                <i class="bi bi-key"></i> Restaurar contraseña
+                <i class="bi bi-key-fill text-warning me-1"></i> Restaurar contraseña
             </h5>
             <button type="button" class="modal-close-btn" onclick="cerrarModal('modalRestaurarPassword')">
-                <i class="bi bi-x"></i>
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        <div class="modal-body">
-            <i class="bi bi-key" style="font-size: 3rem; color: var(--color-primary);"></i>
-            <p style="margin-top: var(--spacing-md);">Se asignará una contraseña temporal y el cliente deberá cambiarla al iniciar sesión. ¿Desea continuar?</p>
+        <div class="modal-body py-4">
+            <div class="mb-3">
+                <i class="bi bi-shield-lock-fill" style="font-size: 3.2rem; color: var(--color-warning);"></i>
+            </div>
+            <p style="color: var(--color-text-main); font-size: 0.95rem; margin-bottom: 0;">
+                Se generará una contraseña temporal y se le solicitará al cliente cambiarla en su próximo inicio de sesión. ¿Deseas continuar?
+            </p>
         </div>
         <div class="modal-footer" style="justify-content: center;">
-            <button type="button" class="btn btn--outline" onclick="cerrarModal('modalRestaurarPassword')">Cancelar</button>
-            <button type="button" class="btn btn--primary" id="btnConfirmarRestaurar">Sí, restaurar</button>
+            <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalRestaurarPassword')">Cancelar</button>
+            <button type="button" class="btn-neon-primary" id="btnConfirmarRestaurar">
+                <i class="bi bi-key-fill me-1"></i> Sí, restaurar
+            </button>
         </div>
     </div>
 </div>
 
-<script>
-    // ==========================================
-    // SISTEMA DE MODALES CUSTOM
-    // ==========================================
-    function abrirModal(id) {
-        document.getElementById(id).classList.add('is-open');
-    }
+<!-- MODAL VER CREDENCIALES APEX DARK -->
+<div class="modal-overlay" id="modalVerCredenciales">
+    <div class="modal-window" style="max-width: 500px;">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="bi bi-shield-lock-fill text-info me-1"></i> Credenciales del Cliente
+            </h5>
+            <button type="button" class="modal-close-btn" onclick="cerrarModal('modalVerCredenciales')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body py-4">
+            <div class="p-3 mb-3" style="background-color: #181922; border: 1px solid var(--color-border); border-radius: 12px;">
+                <div class="mb-3">
+                    <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Cliente</span><br>
+                    <strong id="credNombre" style="color: #ffffff; font-size: 1.05rem;"></strong> (<span id="credCodigo" style="color: var(--color-primary); font-weight: 700;"></span>)
+                </div>
+                
+                <div class="grid grid--2-cols gap-2 mb-3">
+                    <div>
+                        <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Usuario (Teléfono)</span><br>
+                        <strong id="credUsuario" style="color: #00b0ff; font-size: 1.1rem; font-family: monospace;"></strong>
+                    </div>
+                    <div>
+                        <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Estado Portal</span><br>
+                        <span id="credEstadoBadge" class="badge-pill-apex badge-pill-apex--active mt-1" style="font-size: 0.75rem;"></span>
+                    </div>
+                </div>
 
-    function cerrarModal(id) {
-        document.getElementById(id).classList.remove('is-open');
-    }
+                <!-- CAJA DE CONTRASEÑA TEMPORAL -->
+                <div id="cajaPassTemp" class="p-3 mt-2" style="background-color: rgba(0, 230, 118, 0.08); border: 1px dashed #00e676; border-radius: 10px;">
+                    <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+                        <i class="bi bi-key-fill text-warning me-1"></i> Contraseña Temporal Activa
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <span id="credPassTemp" style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: #00e676; letter-spacing: 0.05em;"></span>
+                        <button type="button" class="btn-neon-primary btn--small" id="btnCopiarCredenciales" style="padding: 6px 12px; font-size: 0.82rem;">
+                            <i class="bi bi-clipboard-check me-1"></i> Copiar
+                        </button>
+                    </div>
+                </div>
 
-    // ==========================================
-    // LÓGICA DEL FORMULARIO CLIENTE
-    // ==========================================
-    const form = document.getElementById("formClientes");
-    const formTitle = document.getElementById("formTitle");
-    const formCodigo = document.getElementById("form_codigo");
-    const formNombre = document.getElementById("form_nombre");
-    const formTelefono = document.getElementById("form_telefono");
-    const formCiudad = document.getElementById("form_ciudad");
-    const formEstado = document.getElementById("form_estado");
-    const clienteIdInput = document.getElementById("cliente_id");
+                <!-- MENSAJE CUANDO YA FUE CAMBIADA -->
+                <div id="cajaPassPersonal" class="p-3 mt-2" style="display: none; background-color: rgba(0, 176, 255, 0.08); border: 1px solid rgba(0, 176, 255, 0.3); border-radius: 10px;">
+                    <div style="color: #00b0ff; font-size: 0.88rem; font-weight: 600;">
+                        <i class="bi bi-check-circle-fill me-1"></i> El cliente ya configuró su contraseña personal.
+                    </div>
+                    <div style="color: var(--color-text-muted); font-size: 0.78rem; margin-top: 4px;">
+                        Por razones de seguridad, las contraseñas personales no son visibles. Si el cliente la ha olvidado, utiliza la opción <strong>Restablecer contraseña</strong>.
+                    </div>
+                </div>
+            </div>
+            <p style="color: var(--color-text-muted); font-size: 0.82rem; margin-bottom: 0; text-align: center;">
+                <i class="bi bi-info-circle me-1 text-info"></i> Puedes copiar y compartir las credenciales con el cliente para que ingrese al portal.
+            </p>
+        </div>
+        <div class="modal-footer" style="justify-content: center;">
+            <button type="button" class="btn-apex-outline" data-bs-dismiss="modal">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
 
-    const btnLimpiar = document.getElementById("btnLimpiar");
-    const btnIrForm = document.getElementById("btnIrForm");
-
-    // Prevenir el envío con la tecla Enter en los inputs
-    form.addEventListener("keydown", function(e) {
-        if (e.key === "Enter" && e.target.tagName !== 'BUTTON') {
-            e.preventDefault();
-        }
-    });
-
-    const siguienteCodigo = "{{ siguiente_codigo }}";
-
-    function resetForm() {
-        form.reset();
-        clienteIdInput.value = "";
-        formCodigo.value = siguienteCodigo;
-        formTitle.innerHTML = `<i class="bi bi-person-plus"></i> NUEVO CLIENTE`;
-        formNombre.focus();
-    }
-
-    btnLimpiar.addEventListener("click", resetForm);
-
-    btnIrForm.addEventListener("click", () => {
-        resetForm();
-        abrirModal('modalFormCliente');
-    });
-
-    function cargarCliente(row) {
-        clienteIdInput.value = row.dataset.id;
-        formCodigo.value = row.dataset.codigo;
-        formNombre.value = row.dataset.nombres;
-        formTelefono.value = row.dataset.telefono;
-        formEstado.value = row.dataset.estado;
-
-        // Búsqueda case-insensitive para la Ciudad (porque los datos de la base de datos están mezclados)
-        const ciudadData = (row.dataset.ciudad || "").trim().toUpperCase();
-        let ciudadEncontrada = false;
-        
-        for (let i = 0; i < formCiudad.options.length; i++) {
-            if (formCiudad.options[i].value.toUpperCase() === ciudadData || 
-                formCiudad.options[i].text.toUpperCase() === ciudadData) {
-                formCiudad.selectedIndex = i;
-                ciudadEncontrada = true;
-                break;
-            }
-        }
-        if (!ciudadEncontrada) {
-            formCiudad.value = ""; // Default si no coincide
-        }
-
-        formTitle.innerHTML = `<i class="bi bi-pencil"></i> EDITAR CLIENTE`;
-        abrirModal('modalFormCliente');
-    }
-
-    document.querySelectorAll(".btn-editar-fila").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const row = this.closest("tr");
-            cargarCliente(row);
-        });
-    });
-
-    // Doble clic en la fila
-    document.querySelectorAll("#tablaClientes tr").forEach(row => {
-        row.addEventListener("dblclick", function () {
-            cargarCliente(this);
-        });
-    });
-
-    // ==========================================
-    // PAGINACIÓN Y BÚSQUEDA DEL LADO DEL CLIENTE
-    // ==========================================
-    let currentPage = 1;
-    const itemsPerPage = 10;
-    let filteredRows = [];
-    const allRows = Array.from(document.querySelectorAll("#tablaClientes tr"));
-
-    function initPagination() {
-        filteredRows = [...allRows];
-        renderTable();
-    }
-
-    function renderTable() {
-        const totalItems = filteredRows.length;
-        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-        allRows.forEach(row => row.style.display = "none");
-
-        for (let i = startIndex; i < endIndex; i++) {
-            if(filteredRows[i]) filteredRows[i].style.display = "";
-        }
-
-        const summaryText = totalItems > 0
-            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
-            : "Mostrando 0 a 0 de 0 registros";
-        document.getElementById("paginationSummary").innerText = summaryText;
-
-        const badgeTotal = document.getElementById("badgeTotalItems");
-        if (badgeTotal) {
-            badgeTotal.innerHTML = `Clientes: <strong>${totalItems}</strong>`;
-        }
-
-        renderControls(totalPages);
-    }
-
-    function renderControls(totalPages) {
-        const controlsContainer = document.getElementById("paginationControls");
-        controlsContainer.innerHTML = "";
-
-        if (totalPages <= 1) return;
-
-        // Botón Anterior
-        const btnPrev = document.createElement("button");
-        btnPrev.className = "btn btn--outline btn--small";
-        btnPrev.innerHTML = `<i class="bi bi-chevron-left"></i>`;
-        if (currentPage === 1) btnPrev.disabled = true;
-        else {
-            btnPrev.addEventListener("click", () => {
-                currentPage--;
-                renderTable();
-            });
-        }
-        controlsContainer.appendChild(btnPrev);
-
-        // Páginas numeradas
-        for (let i = 1; i <= totalPages; i++) {
-            const btnPage = document.createElement("button");
-            btnPage.className = `btn btn--small ${currentPage === i ? 'btn--primary' : 'btn--outline'}`;
-            btnPage.innerText = i;
-            btnPage.addEventListener("click", () => {
-                currentPage = i;
-                renderTable();
-            });
-            controlsContainer.appendChild(btnPage);
-        }
-
-        // Botón Siguiente
-        const btnNext = document.createElement("button");
-        btnNext.className = "btn btn--outline btn--small";
-        btnNext.innerHTML = `<i class="bi bi-chevron-right"></i>`;
-        if (currentPage === totalPages) btnNext.disabled = true;
-        else {
-            btnNext.addEventListener("click", () => {
-                currentPage++;
-                renderTable();
-            });
-        }
-        controlsContainer.appendChild(btnNext);
-    }
-
-    function aplicarFiltros() {
-        const query = document.getElementById("buscarCliente").value.toLowerCase().trim();
-        const estadoFiltro = document.getElementById("filtroEstadoCliente").value;
-
-        filteredRows = allRows.filter(row => {
-            const codigo = row.dataset.codigo.toLowerCase();
-            const nombres = row.dataset.nombres.toLowerCase();
-            const telefono = row.dataset.telefono.toLowerCase();
-            const ciudad = row.dataset.ciudad.toLowerCase();
-            const estadoRow = row.dataset.estado;
-
-            const coincideTexto = query === "" || 
-                codigo.includes(query) ||
-                nombres.includes(query) ||
-                telefono.includes(query) ||
-                ciudad.includes(query);
-
-            const coincideEstado = estadoFiltro === "TODOS" || estadoRow === estadoFiltro;
-
-            return coincideTexto && coincideEstado;
-        });
-
-        currentPage = 1;
-        renderTable();
-    }
-
-    document.getElementById("buscarCliente").addEventListener("input", aplicarFiltros);
-    document.getElementById("filtroEstadoCliente").addEventListener("change", aplicarFiltros);
-
-    // ==========================================
-    // MODAL RESTAURAR PASSWORD
-    // ==========================================
-    let formToSubmit = null;
-
-    document.querySelectorAll(".btn-restaurar-trigger").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            formToSubmit = this.closest('form');
-            abrirModal('modalRestaurarPassword');
-        });
-    });
-
-    document.getElementById("btnConfirmarRestaurar").addEventListener("click", function() {
-        if (formToSubmit) {
-            formToSubmit.submit();
-        }
-    });
-
-    window.addEventListener("load", initPagination);
-</script>
 {% endblock %}

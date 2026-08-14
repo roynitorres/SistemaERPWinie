@@ -1,63 +1,91 @@
 {% extends "auth_base.html" %}
 
-{% block title %}
-Sistema de Gestion Empresarial Winie
-{% endblock %}
+{% block title %}Iniciar Sesión | SistemaERP Winie{% endblock %}
 
 {% block content %}
 
-<div class="login-shell login-centered">
-    <section class="login-form-panel">
-        <div class="login-card login-card-centered">
-            <div class="login-logo-block">
-                <div class="login-logo-icon">
-                    <i class="bi bi-bar-chart-line"></i>
-                </div>
-                <div class="login-logo-text">ERP<span>Winie</span></div>
-                <div class="login-logo-version">Sistema de Gestion Empresarial</div>
+<div class="login-shell">
+    <div class="login-card">
+        
+        <!-- ENCABEZADO Y LOGO APEX DARK -->
+        <div class="login-logo-block">
+            <div class="login-logo-badge">
+                <i class="bi bi-lightning-charge-fill"></i>
             </div>
-
-            <div class="login-heading text-center">
-                <h2>Iniciar sesion</h2>
-                <p>Accede al sistema con tus credenciales</p>
+            <div class="login-logo-text">
+                Sistema<span>ERP</span> Winie
             </div>
-
-            <form method="POST">
-                <div class="mb-3 mt-3">
-                    <label class="form-label login-label">USUARIO</label>
-                    <input type="text" name="username" class="form-control login-input" placeholder="Ingrese su usuario">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label login-label">CONTRASENA</label>
-                    <input type="password" name="password" class="form-control login-input" placeholder="Ingrese su contrasena">
-                    {% if error_login %}
-                    <div class="login-error">{{ error_login }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="recaptcha-placeholder mb-3">
-                    <div class="fake-checkbox"></div>
-                    <span>No soy un robot</span>
-                    <div class="recaptcha-brand">
-                        <i class="bi bi-shield-lock-fill"></i>
-                        <small>reCAPTCHA</small>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-login" id="btnLogin">
-                    <span>Ingresar</span>
-                    <i class="bi bi-arrow-right"></i>
-                </button>
-            </form>
-
-            <div class="login-footer">ERPWinie · Sistema seguro SSL</div>
+            <div class="login-logo-sub">
+                Sistema de Gestión Empresarial y Cobro
+            </div>
         </div>
-    </section>
-</div>
 
-<script>
-    // Unified login - logic removed
-</script>
+        <!-- ALERTAS Y ERRORES DE LOGIN -->
+        {% if error_login %}
+        <div class="login-alert-danger" id="alertErrorServidor">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>{{ error_login }}</div>
+        </div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="login-alert-{{ category if category in ['success', 'warning', 'danger', 'info'] else 'danger' }}">
+                <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'warning' %}exclamation-triangle-fill{% else %}exclamation-circle-fill{% endif %} fs-5"></i>
+                <div>{{ message }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- FORMULARIO DE ACCESO -->
+        <form id="formLogin" method="POST" action="{{ url_for('auth.login') }}" novalidate onsubmit="return validarLoginForm(event)">
+            
+            <!-- CAMPO USUARIO -->
+            <div class="form-group mb-3">
+                <label class="login-label">NOMBRE DE USUARIO</label>
+                <div class="login-input-group">
+                    <i class="bi bi-person-fill login-input-icon"></i>
+                    <input type="text" id="loginUsername" name="username" class="login-input {% if error_login %}is-invalid-apex{% endif %}" placeholder="Ej. admin" autofocus autocomplete="username" data-error-id="err-login-username">
+                </div>
+                <div class="login-feedback-err" id="err-login-username">Por favor ingresa tu nombre de usuario.</div>
+            </div>
+
+            <!-- CAMPO CONTRASEÑA -->
+            <div class="form-group mb-3">
+                <label class="login-label">CONTRASEÑA</label>
+                <div class="login-input-group position-relative">
+                    <i class="bi bi-lock-fill login-input-icon"></i>
+                    <input type="password" id="loginPassword" name="password" class="login-input {% if error_login %}is-invalid-apex{% endif %}" placeholder="••••••••" autocomplete="current-password" data-error-id="err-login-password">
+                    <button type="button" class="login-eye-btn" data-toggle-password title="Mostrar/Ocultar contraseña">
+                        <i class="bi bi-eye-fill"></i>
+                    </button>
+                </div>
+                <div class="login-feedback-err" id="err-login-password">Por favor ingresa tu contraseña.</div>
+            </div>
+
+            <!-- ENLACE OLVIDASTE CONTRASEÑA -->
+            <div class="login-forgot-wrap">
+                <a href="#" data-auth-help class="login-forgot-link">
+                    ¿Olvidaste tu contraseña?
+                </a>
+            </div>
+
+            <!-- BOTÓN INGRESAR -->
+            <button type="submit" class="btn-login-apex" id="btnLogin">
+                <span>Ingresar al Sistema</span>
+                <i class="bi bi-arrow-right-short fs-4"></i>
+            </button>
+
+        </form>
+
+        <!-- PIE DE PÁGINA LOGIN -->
+        <div class="login-footer-text">
+            <i class="bi bi-shield-check text-success"></i> SistemaERP Winie • Acceso Seguro SSL
+        </div>
+
+    </div>
+</div>
 
 {% endblock %}

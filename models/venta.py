@@ -23,6 +23,7 @@ class Venta(db.Model):
     usuario = db.relationship("Usuario",back_populates="ventas")
     detalle_ventas = db.relationship("DetalleVenta", back_populates="venta", lazy=True)
     pagos = db.relationship("Pago",back_populates="venta",lazy=True,order_by="Pago.fecha_pago.desc()")
+    cuotas = db.relationship("CuotaVenta", back_populates="venta", lazy=True, cascade="all, delete-orphan", order_by="CuotaVenta.numero_cuota.asc()")
 
     def __repr__(self):
 

@@ -1,188 +1,591 @@
-﻿.cliente-portal {
-    min-height: calc(100vh - 32px);
+/* ==========================================================================
+   ESTILOS APEX DARK PORTAL CLIENTE — SISTEMA ERP WINIE
+   ========================================================================== */
+
+:root {
+    --color-bg-main: #090a0f;
+    --color-bg-card: #13141c;
+    --color-bg-header: #0f1016;
+    --color-primary: #00e676;
+    --color-accent: #00b0ff;
+    --color-warning: #ffb74d;
+    --color-danger: #ff5252;
+    --color-text-main: #f8fafc;
+    --color-text-muted: #94a3b8;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --fuente-principal: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.cliente-header {
-    background: #0d3f9f;
-    border-radius: 8px;
-    padding: 18px 20px;
+/* ─── SOBRESCRITURA DE SCROLLBAR Y LAYOUT GLOBAL ────── */
+html, body {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+body {
+    background-color: var(--color-bg-main) !important;
+    color: var(--color-text-main);
+    font-family: var(--fuente-principal);
+}
+
+.cliente-portal-wrapper {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px 15px;
+}
+
+/* ─── ALERTAS APEX LIMPIAS ────── */
+.alert-apex {
     display: flex;
     align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+}
+
+.alert-apex-success {
+    background: rgba(0, 230, 118, 0.1);
+    border-color: rgba(0, 230, 118, 0.25);
+    color: #00e676;
+}
+
+.alert-apex-warning {
+    background: rgba(255, 183, 77, 0.1);
+    border-color: rgba(255, 183, 77, 0.25);
+    color: #ffb74d;
+}
+
+.alert-apex-danger {
+    background: rgba(255, 82, 82, 0.1);
+    border-color: rgba(255, 82, 82, 0.25);
+    color: #ff5252;
+}
+
+.alert-apex-info {
+    background: rgba(0, 176, 255, 0.1);
+    border-color: rgba(0, 176, 255, 0.25);
+    color: #00b0ff;
+}
+
+/* ─── BANNER DE PORTADA APEX DARK ────── */
+.portal-hero-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.portal-cover-banner {
+    height: 140px;
+    background: linear-gradient(135deg, #054f31 0%, #00e676 60%, #00b0ff 100%);
+    position: relative;
+}
+
+.portal-hero-body {
+    padding: 0 28px 24px 28px;
+    position: relative;
+}
+
+.portal-avatar-wrapper {
+    position: relative;
+    margin-top: -55px;
+    margin-bottom: 14px;
+    display: inline-block;
+}
+
+.portal-avatar-img {
+    width: 105px;
+    height: 105px;
+    border-radius: 50%;
+    border: 4px solid var(--color-bg-card);
+    background: #1a1c26;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.3rem;
+    font-weight: 800;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.portal-hero-header {
+    display: flex;
     justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
     gap: 16px;
 }
 
-.cliente-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.18);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.portal-hero-name {
+    font-size: 1.6rem;
     font-weight: 800;
-    letter-spacing: 0.02em;
-    flex: 0 0 auto;
+    color: #ffffff;
+    margin-bottom: 4px;
 }
 
-.text-white-75 {
-    color: rgba(255, 255, 255, 0.78);
+.portal-hero-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
-.kpi-card {
-    border-radius: 8px;
-    min-height: 88px;
+.portal-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border);
 }
 
-.kpi-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+.portal-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ─── BOTÓN CERRAR SESIÓN NEÓN ────── */
+.btn-logout-portal {
+    background: rgba(255, 82, 82, 0.12);
+    border: 1px solid rgba(255, 82, 82, 0.35);
+    color: #ff5252;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(255, 82, 82, 0.15);
+}
+
+.btn-logout-portal:hover {
+    background: #ff5252;
+    color: #ffffff;
+    border-color: #ff5252;
+    box-shadow: 0 6px 20px rgba(255, 82, 82, 0.38);
+    transform: translateY(-2px);
+}
+
+.btn-logout-portal:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 82, 82, 0.2);
+}
+
+/* ─── TARJETAS MÉTRICAS (KPIs) ────── */
+.portal-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.portal-kpi-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.portal-kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.portal-kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
-    flex: 0 0 auto;
+    font-size: 1.4rem;
+    flex-shrink: 0;
 }
 
-.kpi-label {
-    color: #6c757d;
-    font-size: 0.72rem;
-    text-transform: uppercase;
+.portal-kpi-val {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.portal-kpi-lbl {
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 2px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.portal-tabs {
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #e9ecef;
+/* ─── PESTAÑAS (TABS) APEX ────── */
+.portal-tabs-bar {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 6px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
 }
 
-.portal-tabs .nav-link {
-    border-radius: 0;
-    min-height: 42px;
-    color: #5f6b7a;
+.portal-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    padding: 12px 18px;
+    border-radius: 10px;
     font-weight: 700;
     font-size: 0.9rem;
-    border: 0;
-}
-
-.portal-tabs .nav-link.active {
-    background: #0d3f9f;
-    color: #fff;
-}
-
-.card {
-    border-radius: 8px;
-}
-
-.form-control,
-.form-select {
-    min-height: 38px;
-    border-radius: 6px;
-}
-
-.form-control[readonly] {
-    background: #f8f9fa;
-    color: #212529;
-}
-
-.form-label,
-.text-xs {
-    font-size: 0.72rem;
-    letter-spacing: 0.02em;
-}
-
-.table th {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    padding: 12px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.table td {
-    padding: 12px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f0f2f5;
-}
-
-.table tbody tr:hover {
-    background: #f8f9fa;
-}
-
-.badge {
-    border-radius: 999px;
-    padding: 0.45rem 0.65rem;
-    font-weight: 700;
-}
-
-@media (max-width: 768px) {
-    .cliente-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .cliente-header .btn {
-        width: 100%;
-    }
-
-    .portal-tabs {
-        display: block;
-    }
-
-    .portal-tabs .nav-item {
-        width: 100%;
-    }
-}
-
-.portal-facturas .accordion-item {
-    border: 1px solid #edf0f4;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.portal-facturas .accordion-button {
-    background: #fff;
-    box-shadow: none;
-    padding: 14px 16px;
-}
-
-.portal-facturas .accordion-button:not(.collapsed) {
-    background: #f8fbff;
-    color: #111827;
-}
-
-.factura-resumen {
-    display: grid;
-    grid-template-columns: minmax(160px, 1.5fr) repeat(3, minmax(110px, 0.8fr)) minmax(90px, 0.6fr);
-    align-items: center;
-    gap: 14px;
-    padding-right: 12px;
-}
-
-.factura-totales {
-    width: min(100%, 320px);
-    margin-left: auto;
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 12px 14px;
-}
-
-.factura-totales div {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 4px 0;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.portal-tab-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.portal-tab-btn.active {
+    background: linear-gradient(135deg, rgba(0, 230, 118, 0.15) 0%, rgba(0, 176, 255, 0.15) 100%);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+    color: var(--color-primary);
+}
+
+/* ─── TOOLBAR, BUSCADOR Y PILLS (CORRECCIÓN FONDO BLANCO) ────── */
+.toolbar-apex {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    margin-bottom: 20px !important;
+    flex-wrap: wrap !important;
+}
+
+.toolbar-left-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+}
+
+.toolbar-search-box {
+    position: relative !important;
+    width: 280px !important;
+}
+
+.toolbar-search-box i {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #94a3b8 !important;
+    font-size: 0.95rem !important;
+    z-index: 5 !important;
+}
+
+.toolbar-input {
+    width: 100% !important;
+    background-color: #121318 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    padding: 9px 14px 9px 38px !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.toolbar-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+.toolbar-input:focus {
+    border-color: #00e676 !important;
+    box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15) !important;
+}
+
+.state-pills-bar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.state-pill {
+    background-color: #121318 !important;
+    color: #94a3b8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 7px 16px !important;
+    border-radius: 20px !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.state-pill:hover {
+    color: #ffffff !important;
+    background-color: #181922 !important;
+}
+
+.state-pill.state-pill--active, .state-pill.active {
+    background-color: #1e202c !important;
+    color: #ffffff !important;
+    border-color: #2e3144 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.count-badge-apex {
+    background-color: #121318 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #00e676 !important;
+    font-weight: 800 !important;
+    font-size: 0.92rem !important;
+    padding: 6px 14px !important;
+    border-radius: 10px !important;
+}
+
+/* ─── DROPDOWN DE TRES PUNTOS Y MENÚ DE ACCIONES APEX DARK ────── */
+.btn-three-dots {
+    background-color: #121318 !important;
+    color: #94a3b8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.btn-three-dots:hover, .btn-three-dots:focus {
+    background-color: #181922 !important;
+    color: #00e676 !important;
+    border-color: rgba(0, 230, 118, 0.4) !important;
+}
+
+.dropdown-menu-dark-apex, .dropdown-menu {
+    background-color: #13141c !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    padding: 6px !important;
+}
+
+.dropdown-menu-dark-apex .dropdown-item, .dropdown-menu .dropdown-item {
+    color: #ffffff !important;
+    font-size: 0.85rem !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background-color: transparent !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.dropdown-menu-dark-apex .dropdown-item:hover, 
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu-dark-apex .dropdown-item:focus, 
+.dropdown-menu .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #00e676 !important;
+}
+
+.dropdown-header-apex {
+    padding: 8px 14px !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #00e676 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin-bottom: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+/* ─── PANELES Y CONTENEDOR DE TABLAS APEX ────── */
+.portal-panel-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.portal-table-container {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--color-bg-header);
+}
+
+.portal-table-apex {
+    width: 100%;
+    color: var(--color-text-main);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.portal-table-apex th {
+    background: #0f1016;
+    color: #cbd5e1;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.portal-table-apex td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    vertical-align: middle;
+    font-size: 0.9rem;
+    background: var(--color-bg-card);
+}
+
+.portal-table-apex tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+/* ─── FORMULARIO Y OJOS DENTRO DEL INPUT ────── */
+.position-relative {
+    position: relative !important;
+}
+
+.portal-input-dark {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    color: #ffffff;
+    min-height: 44px;
+    padding: 10px 44px 10px 14px;
+    width: 100%;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.portal-input-dark:focus {
+    border-color: var(--color-warning);
+    box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.15);
+}
+
+.portal-input-dark.is-invalid-apex {
+    border-color: #ff5252 !important;
+    background-color: rgba(255, 82, 82, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.2) !important;
+}
+
+/* Botón Ojo Mostrar/Ocultar Alineado DENTRO del Input */
+.login-eye-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: color 0.15s ease;
+}
+
+.login-eye-btn:hover {
+    color: #ffffff;
+}
+
+/* ─── BOTÓN NEÓN ÁMBAR APEX ────── */
+.btn-neon-amber {
+    background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
+    border: none;
+    border-radius: 12px;
+    color: #090a0f;
+    font-weight: 800;
+    font-size: 0.92rem;
+    padding: 10px 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(255, 183, 77, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-neon-amber:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(255, 183, 77, 0.45);
+    filter: brightness(1.05);
+}
+
+.btn-neon-amber:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(255, 183, 77, 0.25);
+}
+
+/* ─── BOTÓN CONFIRMAR CERRAR SESIÓN (NEÓN ROJO) ────── */
+.btn-logout-confirm {
+    background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+    border: none;
+    border-radius: 12px;
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 10px 18px;
+    box-shadow: 0 8px 20px rgba(255, 82, 82, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-logout-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(255, 82, 82, 0.5);
+    color: #ffffff !important;
+    filter: brightness(1.1);
+}
+
+.btn-logout-confirm:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(255, 82, 82, 0.25);
 }
 
 @media (max-width: 768px) {
-    .factura-resumen {
-        grid-template-columns: 1fr auto;
-        gap: 10px;
+    .portal-hero-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .portal-tabs-bar {
+        flex-direction: column;
     }
 }

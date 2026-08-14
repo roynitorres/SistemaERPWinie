@@ -3,8 +3,9 @@ from models.venta import Venta
 from models.detalle_venta import DetalleVenta
 from models.producto import Producto
 from models.empresa import Empresa
+from models.cuota_venta import CuotaVenta
 from models.enums import EstadoVenta, TipoVenta, EstadoProducto
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 def generar_numero_factura():
     """
@@ -133,6 +134,46 @@ def crear_venta(data, usuario_id, descuento_maximo):
             
             # Ajustar inventario
             producto.stock -= cantidad
+
+        # Si la venta es a Crédito, crear el plan de cuotas
+        if tipo_venta == TipoVenta.CREDITO:
+            cuotas_lista = data.get("cuotas", [])
+            if cuotas_lista:
+                for idx, c_item in enumerate(cuotas_lista, start=1):
+                    num_cuota = int(c_item.get("numero_cuota", idx))
+                    monto_c = float(c_item.get("monto_cuota", 0))
+                    f_venc_str = c_item.get("fecha_vencimiento")
+                    f_gracia_str = c_item.get("fecha_vencimiento_gracia")
+                    dias_g = int(c_item.get("dias_gracia", 2))
+
+                    f_venc = datetime.strptime(f_venc_str, "%Y-%m-%d").date() if f_venc_str else (fecha_limite_credito or date.today())
+                    f_gracia = datetime.strptime(f_gracia_str, "%Y-%m-%d").date() if f_gracia_str else (f_venc + timedelta(days=dias_g))
+
+                    nueva_cuota = CuotaVenta(
+                        venta_id=nueva_venta.id,
+                        numero_cuota=num_cuota,
+                        monto_cuota=monto_c,
+                        monto_abonado=0.00,
+                        fecha_vencimiento=f_venc,
+                        fecha_vencimiento_gracia=f_gracia,
+                        dias_gracia=dias_g,
+                        estado="PENDIENTE"
+                    )
+                    db.session.add(nueva_cuota)
+            else:
+                # Cuota por defecto si no se especificó tabla
+                f_venc = fecha_limite_credito or (date.today() + timedelta(days=30))
+                nueva_cuota = CuotaVenta(
+                    venta_id=nueva_venta.id,
+                    numero_cuota=1,
+                    monto_cuota=total,
+                    monto_abonado=0.00,
+                    fecha_vencimiento=f_venc,
+                    fecha_vencimiento_gracia=f_venc + timedelta(days=2),
+                    dias_gracia=2,
+                    estado="PENDIENTE"
+                )
+                db.session.add(nueva_cuota)
             
         # Transacción completada con éxito
         db.session.commit()
