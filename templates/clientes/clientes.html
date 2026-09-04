@@ -180,8 +180,8 @@
                                         </div>
                                         {% else %}
                                         <div style="margin-top: 2px;">
-                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; color: #00e676; background: rgba(0, 230, 118, 0.1); border-radius: 4px; padding: 1px 6px;" title="Clave personalizada: listo para restablecer">
-                                                <i class="bi bi-key-fill" style="font-size: 0.68rem; color: #00e676;"></i> Lista
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; color: var(--color-primary); background: rgba(0, 230, 118, 0.1); border-radius: 4px; padding: 1px 6px;" title="Clave personalizada: listo para restablecer">
+                                                <i class="bi bi-key-fill" style="font-size: 0.68rem; color: var(--color-primary);"></i> Lista
                                             </span>
                                         </div>
                                         {% endif %}
@@ -194,16 +194,16 @@
                                 {{ cliente.estado.value }}
                             </span>
                         </td>
-                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
                         </td>
-                        <td class="data-table__cell">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ cliente.telefono or '-' }}
                         </td>
-                        <td class="data-table__cell">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ cliente.ciudad or '-' }}
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-muted);">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ cliente.created_at.strftime('%d/%m/%Y') if cliente.created_at else '-' }}
                         </td>
                         <td class="data-table__cell text-end">
@@ -214,18 +214,18 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
                                     <li>
-                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #00e676; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                            <i class="bi bi-lightning-charge-fill" style="color: #00e676; font-size: 0.8rem;"></i> ACCIONES
+                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                            <i class="bi bi-lightning-charge-fill" style="color: var(--color-text-main); font-size: 0.8rem;"></i> ACCIONES
                                         </div>
                                     </li>
                                      <li>
                                          <a href="{{ url_for('clientes.historial_cliente', cliente_id=cliente.id) }}" class="dropdown-item" title="Ver historial de facturas e historial del cliente">
-                                             <i class="bi bi-clock-history me-2 text-info"></i> Ver Historial de Facturas
+                                             <i class="bi bi-clock-history me-2 "></i> Ver Historial de Facturas
                                          </a>
                                      </li>
                                      <li>
                                          <button type="button" class="dropdown-item btn-editar-fila">
-                                             <i class="bi bi-pencil me-2 text-primary"></i> Editar
+                                             <i class="bi bi-pencil me-2"></i> Editar
                                          </button>
                                      </li>
                                     <li>
@@ -237,7 +237,7 @@
                                                 data-usuario="{{ cliente.usuario.username if cliente.usuario else cliente.telefono or '-' }}"
                                                 data-pass-temp="{{ cliente.usuario.password_temporal_plana if (cliente.usuario and cliente.usuario.debe_cambiar_password and cliente.usuario.password_temporal_plana) else '' }}"
                                                 data-debe-cambiar="{{ '1' if (cliente.usuario and cliente.usuario.debe_cambiar_password) else '0' }}">
-                                            <i class="bi bi-shield-lock me-2 text-info"></i> Ver credenciales
+                                            <i class="bi bi-shield-lock me-2"></i> Ver credenciales
                                         </button>
                                     </li>
                                     {% if cliente.usuario %}
@@ -247,7 +247,7 @@
                                                     data-debe-cambiar="{{ '1' if cliente.usuario.debe_cambiar_password else '0' }}"
                                                     data-pass-temp="{{ cliente.usuario.password_temporal_plana or '' }}"
                                                     {% if cliente.usuario.debe_cambiar_password %}disabled style="opacity: 0.4; cursor: not-allowed; pointer-events: none;" title="Deshabilitado: El cliente aún no ha cambiado su contraseña temporal activa"{% endif %}>
-                                                <i class="bi bi-key me-2 text-warning"></i> Restablecer contraseña
+                                                <i class="bi bi-key me-2 "></i> Restablecer contraseña
                                             </button>
                                         </form>
                                     </li>
@@ -312,16 +312,16 @@
             </button>
         </div>
         <div class="modal-body py-4">
-            <div class="p-3 mb-3" style="background-color: #181922; border: 1px solid var(--color-border); border-radius: 12px;">
+            <div class="p-3 mb-3" style="background-color: var(--color-bg-card-hover); border: 1px solid var(--color-border); border-radius: 12px;">
                 <div class="mb-3">
                     <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Cliente</span><br>
-                    <strong id="credNombre" style="color: #ffffff; font-size: 1.05rem;"></strong> (<span id="credCodigo" style="color: var(--color-primary); font-weight: 700;"></span>)
+                    <strong id="credNombre" style="color: var(--color-text-main); font-size: 1.05rem;"></strong> (<span id="credCodigo" style="color: var(--color-primary); font-weight: 700;"></span>)
                 </div>
                 
                 <div class="grid grid--2-cols gap-2 mb-3">
                     <div>
                         <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Usuario (Teléfono)</span><br>
-                        <strong id="credUsuario" style="color: #00b0ff; font-size: 1.1rem; font-family: monospace;"></strong>
+                        <strong id="credUsuario" style="color: var(--color-secondary); font-size: 1.1rem; font-family: monospace;"></strong>
                     </div>
                     <div>
                         <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Estado Portal</span><br>
@@ -330,12 +330,12 @@
                 </div>
 
                 <!-- CAJA DE CONTRASEÑA TEMPORAL -->
-                <div id="cajaPassTemp" class="p-3 mt-2" style="background-color: rgba(0, 230, 118, 0.08); border: 1px dashed #00e676; border-radius: 10px;">
+                <div id="cajaPassTemp" class="p-3 mt-2" style="background-color: rgba(0, 230, 118, 0.08); border: 1px dashed var(--color-primary); border-radius: 10px;">
                     <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
                         <i class="bi bi-key-fill text-warning me-1"></i> Contraseña Temporal Activa
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                        <span id="credPassTemp" style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: #00e676; letter-spacing: 0.05em;"></span>
+                        <span id="credPassTemp" style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: var(--color-primary); letter-spacing: 0.05em;"></span>
                         <button type="button" class="btn-neon-primary btn--small" id="btnCopiarCredenciales" style="padding: 6px 12px; font-size: 0.82rem;">
                             <i class="bi bi-clipboard-check me-1"></i> Copiar
                         </button>
@@ -344,7 +344,7 @@
 
                 <!-- MENSAJE CUANDO YA FUE CAMBIADA -->
                 <div id="cajaPassPersonal" class="p-3 mt-2" style="display: none; background-color: rgba(0, 176, 255, 0.08); border: 1px solid rgba(0, 176, 255, 0.3); border-radius: 10px;">
-                    <div style="color: #00b0ff; font-size: 0.88rem; font-weight: 600;">
+                    <div style="color: var(--color-secondary); font-size: 0.88rem; font-weight: 600;">
                         <i class="bi bi-check-circle-fill me-1"></i> El cliente ya configuró su contraseña personal.
                     </div>
                     <div style="color: var(--color-text-muted); font-size: 0.78rem; margin-top: 4px;">

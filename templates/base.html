@@ -11,7 +11,8 @@
         {% endblock %}
 
     </title>
-
+    <!-- Script de Tema (Cargado primero para evitar parpadeos) -->
+    <script src="{{ url_for('static', filename='js/core/theme.js') }}"></script>
     <!-- ===================================== -->
     <!-- BOOTSTRAP CSS -->
     <!-- ===================================== -->
@@ -200,6 +201,11 @@
 
                 <!-- DERECHA: ALERTAS DE COBRO Y CONFIGURACIÓN EMPRESA -->
                 <div class="topbar__actions" style="display: flex; align-items: center; gap: 10px;">
+                    <!-- Botón Modo Claro/Oscuro -->
+                    <button type="button" class="topbar-icon-btn" onclick="toggleTheme()" title="Cambiar Tema" style="background: transparent; border: none; padding: 0;">
+                        <i id="theme-icon" class="bi bi-sun-fill"></i>
+                    </button>
+
                     <!-- Control de alertas -->
                     <a href="javascript:void(0)" class="topbar-icon-btn" title="Alertas de Cobro">
                         <i class="bi bi-bell-fill"></i>
@@ -490,7 +496,7 @@
     <!-- ===================================== -->
     <div class="modal fade" id="modalConfirmarLogout" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 390px;">
-            <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 22px; color: #ffffff; box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 35px rgba(255, 82, 82, 0.18); backdrop-filter: blur(16px);">
+            <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 22px; color: var(--color-text-main); box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 35px rgba(255, 82, 82, 0.18); backdrop-filter: blur(16px);">
                 <div class="modal-body text-center p-4">
                     
                     <!-- ICONO CON HALO ROJO REVERBERANTE -->
@@ -498,12 +504,12 @@
                         <i class="bi bi-box-arrow-right" style="font-size: 2.2rem;"></i>
                     </div>
 
-                    <h4 class="fw-bold text-white mb-2" style="font-size: 1.3rem;">¿Cerrar Sesión?</h4>
-                    <p style="color: #cbd5e1; font-size: 0.92rem; margin-bottom: 16px; line-height: 1.4;">
+                    <h4 class="fw-bold mb-2" style="font-size: 1.3rem; color: var(--color-text-main);">¿Cerrar Sesión?</h4>
+                    <p style="color: var(--color-text-muted); font-size: 0.92rem; margin-bottom: 16px; line-height: 1.4;">
                         ¿Estás seguro de que deseas salir del sistema?
                     </p>
 
-                    <div class="p-2.5 rounded-3 mb-4" style="background: rgba(255, 82, 82, 0.08); border: 1px dashed rgba(255, 82, 82, 0.25); color: #ff8a8a; font-size: 0.8rem; text-align: center;">
+                    <div class="p-2.5 rounded-3 mb-4" style="background: rgba(255, 82, 82, 0.08); border: 1px dashed rgba(255, 82, 82, 0.25); color: var(--color-danger); font-size: 0.8rem; text-align: center;">
                         <i class="bi bi-shield-exclamation me-1"></i> Se cerrará tu sesión activa y deberás autenticarte nuevamente.
                     </div>
 

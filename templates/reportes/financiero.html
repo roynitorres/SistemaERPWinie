@@ -6,9 +6,7 @@
 <i class="bi bi-bar-chart-line-fill"></i> Resumen Financiero
 {% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/reporte_financiero.css') }}">
-{% endblock %}
+
 
 {% block content %}
 
@@ -57,7 +55,7 @@
                 <div style="font-size: 0.85rem; font-weight: 700; color: #ffb74d; margin-top: 4px;" id="kpi-inversion-proy">
                     Proyección Venta: C$ 0.00
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
                     <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: productos</span>
                     <a href="javascript:void(0)" onclick="mostrarSeccion('productos', document.getElementById('btn-nav-productos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -72,7 +70,7 @@
                     </div>
                 </div>
                 <div class="rpt-kpi-apex__value" id="kpi-ventas">C$ 0.00</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
                     <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: ventas</span>
                     <a href="javascript:void(0)" onclick="mostrarSeccion('ventas', document.getElementById('btn-nav-ventas'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -87,7 +85,7 @@
                     </div>
                 </div>
                 <div class="rpt-kpi-apex__value" id="kpi-cobrado">C$ 0.00</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
                     <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: pagos</span>
                     <a href="javascript:void(0)" onclick="mostrarSeccion('pagos', document.getElementById('btn-nav-pagos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -102,7 +100,7 @@
                     </div>
                 </div>
                 <div class="rpt-kpi-apex__value" id="kpi-por-cobrar">C$ 0.00</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
                     <span style="color: var(--color-text-muted);"><i class="bi bi-database me-1"></i> Tabla: ventas</span>
                     <a href="javascript:void(0)" onclick="mostrarSeccion('pagos', document.getElementById('btn-nav-pagos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -118,8 +116,8 @@
                         <i class="bi bi-trophy-fill"></i>
                     </div>
                 </div>
-                <div class="rpt-kpi-apex__value" style="color: #00e676;" id="kpi-ganancia-real">C$ 0.00</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                <div class="rpt-kpi-apex__value" style="color: var(--color-primary);" id="kpi-ganancia-real">C$ 0.00</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
                     <span style="color: var(--color-text-muted);"><i class="bi bi-calculator me-1"></i> Cálculo: pagos − productos</span>
                     <a href="javascript:void(0)" onclick="mostrarSeccion('pagos', document.getElementById('btn-nav-pagos'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -133,7 +131,7 @@
                     </div>
                 </div>
                 <div class="rpt-kpi-apex__value" style="color: #ffb74d;" id="kpi-ganancia-proy">C$ 0.00</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
                     <span style="color: var(--color-text-muted);"><i class="bi bi-calculator me-1"></i> Cálculo: ventas − productos</span>
                     <a href="javascript:void(0)" onclick="mostrarSeccion('ventas', document.getElementById('btn-nav-ventas'))" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">Ver todo <i class="bi bi-arrow-right"></i></a>
                 </div>
@@ -173,11 +171,11 @@
             </div>
             <div class="rpt-panel-apex__footer">
                 <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Total Unidades: <span id="subtotal-ventas-cant" style="color:#00b0ff; font-weight:700;">0</span></span>
-                    <span class="rpt-total-label">Total Ventas Filtradas: <span id="subtotal-ventas" style="color:#00e676; font-weight:700;">C$ 0.00</span></span>
+                    <span class="rpt-total-label">Total Unidades: <span id="subtotal-ventas-cant" style="color:var(--color-secondary); font-weight:700;">0</span></span>
+                    <span class="rpt-total-label">Total Ventas Filtradas: <span id="subtotal-ventas" style="color:var(--color-primary); font-weight:700;">C$ 0.00</span></span>
                 </div>
                 <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Contado: <span id="subtotal-ventas-contado" style="color:#ffffff;">C$ 0.00</span></span>
+                    <span class="rpt-total-label">Contado: <span id="subtotal-ventas-contado" style="color:var(--color-text-main);">C$ 0.00</span></span>
                     <span class="rpt-total-label">Crédito: <span id="subtotal-ventas-credito" style="color:#ffb74d;">C$ 0.00</span></span>
                 </div>
             </div>
@@ -277,8 +275,8 @@
                                 <td class="data-table__cell text-center" style="color: var(--color-primary); font-size: 0.95rem;" id="foot-total-cant">0</td>
                                 <td class="data-table__cell" style="color: var(--color-text-muted);"></td>
                                 <td class="data-table__cell" style="color: var(--color-text-muted);"></td>
-                                <td class="data-table__cell text-end" style="color: #00e676; font-size: 0.95rem;" id="foot-total-inversion">C$ 0.00</td>
-                                <td class="data-table__cell text-end" style="color: #00b0ff; font-size: 0.95rem;" id="foot-total-proyeccion">C$ 0.00</td>
+                                <td class="data-table__cell text-end" style="color: var(--color-primary); font-size: 0.95rem;" id="foot-total-inversion">C$ 0.00</td>
+                                <td class="data-table__cell text-end" style="color: var(--color-secondary); font-size: 0.95rem;" id="foot-total-proyeccion">C$ 0.00</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -290,7 +288,7 @@
                     <span class="rpt-total-value rpt-total-value--primary" id="subtotal-unidades-compradas">0</span>
                 </div>
                 <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Total Inversión: <span id="subtotal-inversion-compras" style="color:#00e676;">C$ 0.00</span></span>
+                    <span class="rpt-total-label">Total Inversión: <span id="subtotal-inversion-compras" style="color:var(--color-primary);">C$ 0.00</span></span>
                     <span class="rpt-total-label">Proyección Venta: <span id="subtotal-proyeccion-ventas" style="color:#ffb74d;">C$ 0.00</span></span>
                 </div>
             </div>
@@ -331,7 +329,7 @@
             <div class="rpt-panel-apex">
                 <div class="rpt-panel-apex__header">
                     <h5 class="rpt-panel-apex__title"><i class="bi bi-cash-stack text-teal"></i> Abonos a Crédito</h5>
-                    <span class="badge-pill-apex" style="background:rgba(0,176,255,0.12); color:#00b0ff;" id="badge-pagos-credito">0</span>
+                    <span class="badge-pill-apex" style="background:rgba(0,176,255,0.12); color:var(--color-secondary);" id="badge-pagos-credito">0</span>
                 </div>
                 <div class="rpt-panel-apex__body">
                     <div class="table-responsive">

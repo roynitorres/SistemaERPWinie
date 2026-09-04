@@ -9,7 +9,7 @@
     align-items: center;
     gap: 10px;
     padding: 12px 18px;
-    background: #121318;
+    background: var(--color-bg-card);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
     margin-bottom: 24px;
@@ -20,13 +20,13 @@
     align-items: center;
     gap: 10px;
     padding: 8px 16px;
-    background: #181922;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-card-hover);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
 }
 
 .rpt-month-picker i {
-    color: #00e676;
+    color: var(--color-primary);
     font-size: 1.1rem;
 }
 
@@ -36,7 +36,7 @@
     background: transparent;
     font-weight: 700;
     font-size: 0.9rem;
-    color: #ffffff;
+    color: var(--color-text-main);
     cursor: pointer;
     font-family: inherit;
 }
@@ -44,7 +44,7 @@
 .rpt-nav-sep {
     width: 1px;
     height: 26px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-border);
     margin: 0 4px;
 }
 
@@ -54,12 +54,20 @@
     font-size: 0.85rem;
     padding: 8px 16px;
     gap: 8px;
+    color: var(--color-text-muted);
+    border: 1px solid transparent;
+}
+
+.rpt-nav .btn:not(.active):hover {
+    color: var(--color-text-main);
+    background: var(--color-bg-card-hover);
+    border-color: var(--color-border);
 }
 
 .rpt-nav .btn.active {
-    background: #00e676;
+    background: var(--color-primary);
     color: #000000;
-    border-color: #00e676;
+    border-color: var(--color-primary);
     font-weight: 700;
 }
 
@@ -90,8 +98,8 @@
 @media (max-width: 650px)  { .rpt-kpi-grid-apex { grid-template-columns: 1fr; } }
 
 .rpt-kpi-apex {
-    background: #13141c;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 20px 24px;
     display: flex;
@@ -130,8 +138,8 @@
     font-size: 1.25rem;
 }
 
-.rpt-kpi-apex__icon--teal { background: rgba(0, 176, 255, 0.12); color: #00b0ff; }
-.rpt-kpi-apex__icon--green { background: rgba(0, 230, 118, 0.12); color: #00e676; }
+.rpt-kpi-apex__icon--teal { background: rgba(0, 176, 255, 0.12); color: var(--color-secondary); }
+.rpt-kpi-apex__icon--green { background: rgba(0, 230, 118, 0.12); color: var(--color-primary); }
 .rpt-kpi-apex__icon--purple { background: rgba(124, 58, 237, 0.12); color: #a78bfa; }
 .rpt-kpi-apex__icon--amber { background: rgba(255, 183, 77, 0.12); color: #ffb74d; }
 .rpt-kpi-apex__icon--red { background: rgba(255, 82, 82, 0.12); color: #ff5252; }
@@ -139,7 +147,7 @@
 .rpt-kpi-apex__value {
     font-size: 2.1rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--color-text-main);
     letter-spacing: -0.02em;
     margin: 8px 0 4px 0;
     line-height: 1.1;
@@ -153,14 +161,14 @@
     font-weight: 600;
 }
 
-.rpt-kpi-apex__trend--up { color: #00e676; }
+.rpt-kpi-apex__trend--up { color: var(--color-primary); }
 .rpt-kpi-apex__trend--down { color: #ff5252; }
 .rpt-kpi-apex__trend--neutral { color: #9496a1; }
 
 /* ─── PANELES ESTILO APEX SHADCN ────── */
 .rpt-panel-apex {
-    background: #13141c;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     overflow: hidden;
     display: flex;
@@ -173,26 +181,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 18px 24px;
-    background: #0f1016;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .rpt-panel-apex__title {
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--color-text-main);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.data-table__head th {
-    color: #cbd5e1 !important;
-    background-color: #0f1016 !important;
-    font-weight: 700 !important;
-    font-size: 0.82rem !important;
-}
+/* Removed conflicting .data-table__head th to let tables.css handle it */
 
 .rpt-panel-apex__body {
     overflow-x: auto;
@@ -202,8 +205,8 @@
 
 .rpt-panel-apex__footer {
     padding: 16px 24px;
-    background: #0f1016;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--color-bg-card);
+    border-top: 1px solid var(--color-border);
 }
 
 .rpt-footer-row {
@@ -216,7 +219,7 @@
 .rpt-footer-row + .rpt-footer-row {
     margin-top: 6px;
     padding-top: 6px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    border-top: 1px dashed var(--color-border);
 }
 
 .rpt-total-label {
@@ -229,11 +232,11 @@
 .rpt-total-value {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--color-text-main);
 }
 
-.rpt-total-value--primary { color: #00b0ff; }
-.rpt-total-value--success { color: #00e676; }
+.rpt-total-value--primary { color: var(--color-secondary); }
+.rpt-total-value--success { color: var(--color-primary); }
 .rpt-total-value--danger  { color: #ff5252; }
 .rpt-total-value--warning { color: #ffb74d; }
 

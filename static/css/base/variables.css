@@ -3,21 +3,27 @@
    ========================================================================== */
 :root {
     /* Fondos y Superficies Dark */
-    --color-bg-app: #090a0f;         /* Lienzo negro Slate profundo */
+    --color-bg-app: #0d1117;         /* Lienzo negro Slate profundo */
     --color-bg-card: #121318;        /* Tarjetas y paneles oscuros */
     --color-bg-card-hover: #181920;  /* Hover en tarjetas */
-    --color-bg-sidebar: #0c0d12;     /* Sidebar oscuro rail */
     --color-bg-input: #18181b;       /* Inputs oscuros */
     
+    /* Variables exclusivas del Sidebar (siempre oscuras) */
+    --sidebar-bg: #0c0d12;
+    --sidebar-text: #ffffff;
+    --sidebar-text-muted: #a1a1aa;
+    --sidebar-border: #1e2029;
+    --sidebar-hover: rgba(255, 255, 255, 0.05);
+    
     /* Colores Principales y Acentos */
-    --color-primary: #00e676;        /* Verde Neón / Menta Esmeralda */
-    --color-primary-dark: #00c853;   /* Verde oscuro hover */
-    --color-primary-glow: rgba(0, 230, 118, 0.18);
+    --color-primary: #10b981;        /* Verde Esmeralda (menos neón) */
+    --color-primary-dark: #059669;   /* Verde oscuro hover */
+    --color-primary-glow: rgba(16, 185, 129, 0.15);
     --color-secondary: #00b0ff;      /* Azul Cian Eléctrico */
     
     /* Textos */
     --color-text-main: #ffffff;      /* Blanco puro para títulos y cifras */
-    --color-text-muted: #a1a1aa;     /* Gris tenue para subtítulos */
+    --color-text-muted: #faf9f9;     /* Gris tenue para subtítulos */
     --color-text-subtle: #71717a;    /* Gris atenuado para notas */
     
     /* Estados y Badges */
@@ -41,3 +47,34 @@
     --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
     --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+[data-theme='light'] {
+    /* Fondos y Superficies Light (Estilo Netflix / Minimalista) */
+    --color-bg-app: #f9f9f9;
+    --color-bg-card: #ffffff;
+    --color-bg-card-hover: #f3f4f6;
+    --color-bg-input: #ffffff;
+    
+    /* Colores Principales y Acentos (mantienen la identidad pero ajustados) */
+    --color-primary: #007938; /* Verde esmeralda oscuro para contrastar en luz */
+    --color-primary-dark: #007938;
+    --color-primary-glow: rgba(5, 150, 105, 0.15);
+    --color-secondary: #0284c7;
+    
+    /* Textos */
+    --color-text-main: #111827; /* Gris muy oscuro, casi negro */
+    --color-text-muted: #6b7280;
+    --color-text-subtle: #9ca3af;
+    
+    /* Bordes y Lineas */
+    --color-border: #e5e7eb;
+    --color-border-hover: #d1d5db;
+    
+    /* Sombras muy sutiles (casi planas) */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+
+:root { --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.85); }
+[data-theme='light'] { --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+

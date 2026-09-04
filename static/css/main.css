@@ -12,6 +12,7 @@
 @import url('layout/topbar.css');
 
 /* 3. Componentes (Clean Code Blocks) */
+@import url('components/cards.css');
 @import url('components/tables.css');
 @import url('components/buttons.css');
 @import url('components/forms.css');
@@ -19,6 +20,9 @@
 @import url('components/badges.css');
 @import url('components/modals.css');
 @import url('components/alerts.css');
+@import url('components/auth.css');
+@import url('components/reports.css');
+@import url('layout/portal.css');
 
 /* Google Fonts (Inter) - Se importa aquí o en HTML directamente */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');

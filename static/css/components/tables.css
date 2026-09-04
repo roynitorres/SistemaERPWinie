@@ -30,14 +30,14 @@
 
 /* Encabezados */
 .data-table__head th, .table thead th, .table th {
-    background-color: #0c0d12 !important;
+    background-color: transparent !important;
     padding: 1rem 1.2rem !important;
-    color: var(--color-text-muted) !important;
-    font-weight: 600 !important;
-    font-size: 0.8rem !important;
+    color: var(--color-text-main) !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
     text-transform: none !important;
-    letter-spacing: 0.02em !important;
-    border-bottom: 1px solid var(--color-border) !important;
+    letter-spacing: 0.01em !important;
+    border-bottom: 2px solid var(--color-border) !important;
     border-top: none !important;
     white-space: nowrap;
 }
@@ -54,8 +54,8 @@
     transition: background-color 0.15s ease;
 }
 
-.data-table__row:hover, .table tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.025) !important;
+.data-table__row:hover, .table tbody tr:hover td {
+    background-color: var(--color-bg-card-hover) !important;
 }
 
 /* Avatares Circulares */
@@ -63,8 +63,8 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
-    color: #090a0f;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-bg-app);
     font-weight: 800;
     font-size: 0.85rem;
     display: flex;
@@ -81,7 +81,7 @@
 
 .customer-title-text {
     font-weight: 700;
-    color: #ffffff;
+    color: var(--color-text-main);
     display: block;
     font-size: 0.92rem;
 }
@@ -105,7 +105,7 @@
 
 .badge-pill-apex--active {
     background-color: var(--color-primary);
-    color: #090a0f;
+    color: var(--color-bg-app);
     box-shadow: 0 0 12px var(--color-primary-glow);
 }
 
@@ -144,7 +144,7 @@
 }
 
 .dropdown-menu-dark-apex {
-    background-color: #16171e !important;
+    background-color: var(--color-bg-card-hover) !important;
     border: 1px solid var(--color-border) !important;
     border-radius: 12px !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;

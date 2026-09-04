@@ -17,9 +17,9 @@
             </div>
             <h1 class="page-title-apex">Factura #{{ venta.numero_factura }}</h1>
             <p class="page-subtitle-apex">
-                Cliente: <strong style="color: #ffffff;">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</strong> | 
+                Cliente: <strong style="color: var(--color-text-main);">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</strong> | 
                 Tipo: <strong style="color: var(--color-primary);">{{ venta.tipo_venta.value }}</strong> | 
-                Fecha: <strong style="color: #ffffff;">{{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}</strong>
+                Fecha: <strong style="color: var(--color-text-main);">{{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}</strong>
             </p>
         </div>
         <div style="display: flex; gap: 10px;">
@@ -42,35 +42,35 @@
     <!-- ===================================== -->
     <div class="grid grid--4-cols" style="margin-bottom: 24px;">
         <!-- KPI 1: Total Factura -->
-        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Total Factura</span>
-                <h2 style="color: #ffffff; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.total_facturado) }}</h2>
+                <h2 style="color: var(--color-text-main); margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.total_facturado) }}</h2>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.12); color: #00e676; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
                 <i class="bi bi-receipt"></i>
             </div>
         </div>
 
         <!-- KPI 2: Total Abonado / Recaudado -->
-        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Total Abonado</span>
-                <h2 style="color: #00e676; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.total_abonado) }}</h2>
+                <h2 style="color: var(--color-primary); margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.total_abonado) }}</h2>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 176, 255, 0.12); color: #00b0ff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 176, 255, 0.12); color: var(--color-secondary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
                 <i class="bi bi-cash-stack"></i>
             </div>
         </div>
 
         <!-- KPI 3: Saldo Pendiente -->
-        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Saldo Pendiente</span>
                 {% if kpis.saldo_pendiente > 0 %}
                 <h2 style="color: #ff5252; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ {{ "%.2f"|format(kpis.saldo_pendiente) }}</h2>
                 {% else %}
-                <h2 style="color: #00e676; margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ 0.00</h2>
+                <h2 style="color: var(--color-primary); margin: 6px 0 0 0; font-size: 1.6rem; font-weight: 800;">C$ 0.00</h2>
                 {% endif %}
             </div>
             {% if kpis.saldo_pendiente > 0 %}
@@ -78,21 +78,21 @@
                 <i class="bi bi-exclamation-triangle-fill"></i>
             </div>
             {% else %}
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.12); color: #00e676; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
                 <i class="bi bi-check-circle-fill"></i>
             </div>
             {% endif %}
         </div>
 
         <!-- KPI 4: Estado Pago -->
-        <div class="panel" style="background: #121318; border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <span style="color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600;">Estado Pago</span>
                 <div style="margin-top: 4px;">
                     {% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %}
                     {% set total_cuotas_count = venta.cuotas|length %}
                     {% set cuotas_pagadas_count = venta.cuotas | selectattr('estado', 'equalto', 'PAGADA') | list | length %}
-                    <div style="font-size: 0.92rem; font-weight: 800; color: #00e676; margin-bottom: 4px;">
+                    <div style="font-size: 0.92rem; font-weight: 800; color: var(--color-primary); margin-bottom: 4px;">
                         Cuotas: {{ cuotas_pagadas_count }}/{{ total_cuotas_count }}
                     </div>
                     {% endif %}
@@ -113,10 +113,10 @@
     <!-- TABLA DE PLAN DE CUOTAS Y AMORTIZACIÓN -->
     <!-- ===================================== -->
     {% if venta.tipo_venta.value == 'CREDITO' and venta.cuotas %}
-    <div class="panel mb-4" style="padding: 0; overflow: hidden; background-color: #121318; border: 1px solid var(--color-border); border-radius: 16px;">
-        <div style="padding: 16px 24px; border-bottom: 1px solid var(--color-border); background-color: #0f1016; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div class="panel mb-4" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px;">
+        <div style="padding: 16px 24px; border-bottom: 1px solid var(--color-border); background-color: var(--color-bg-card); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
             <div>
-                <h5 style="margin: 0; color: #ffffff; font-weight: 700;">
+                <h5 style="margin: 0; color: var(--color-text-main); font-weight: 700;">
                     <i class="bi bi-calendar-range-fill text-warning me-2"></i> Calendario de Cuotas y Amortización
                 </h5>
                 <small style="color: var(--color-text-muted);">Seguimiento de las cuotas programadas con sus 2 días de gracia por vencimiento.</small>
@@ -150,10 +150,10 @@
                     <tr class="data-table__row">
                         <td class="data-table__cell text-center" style="font-weight: 800; color: var(--color-primary);">Cuota {{ cuota.numero_cuota }}</td>
                         <td class="data-table__cell">
-                            <span style="color: #ffffff; font-weight: 600;">{{ cuota.fecha_vencimiento.strftime('%d/%m/%Y') if cuota.fecha_vencimiento else '-' }}</span><br>
+                            <span style="color: var(--color-text-main); font-weight: 600;">{{ cuota.fecha_vencimiento.strftime('%d/%m/%Y') if cuota.fecha_vencimiento else '-' }}</span><br>
                             <small style="color: #ffb74d; font-size: 0.78rem;">Gracia: {{ cuota.fecha_vencimiento_gracia.strftime('%d/%m/%Y') if cuota.fecha_vencimiento_gracia else '-' }} (+{{ cuota.dias_gracia }}d)</small>
                         </td>
-                        <td class="data-table__cell text-end" style="font-weight: 700; color: #ffffff;">C$ {{ "%.2f"|format(cuota.monto_cuota) }}</td>
+                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">C$ {{ "%.2f"|format(cuota.monto_cuota) }}</td>
                         <td class="data-table__cell text-center">
                             {% if es_cuota_pagada %}
                             <span class="badge-pill-apex badge-pill-apex--active">PAGADA</span>
@@ -162,12 +162,12 @@
                             {% elif cuota.fecha_vencimiento and now.date() > cuota.fecha_vencimiento %}
                             <span class="badge-pill-apex" style="background: rgba(255,183,77,0.15); color: #ffb74d; border: 1px solid rgba(255,183,77,0.3);">EN GRACIA</span>
                             {% else %}
-                            <span class="badge-pill-apex" style="background: rgba(0,176,255,0.12); color: #00b0ff; border: 1px solid rgba(0,176,255,0.2);">PENDIENTE</span>
+                            <span class="badge-pill-apex" style="background: rgba(0,176,255,0.12); color: var(--color-secondary); border: 1px solid rgba(0,176,255,0.2);">PENDIENTE</span>
                             {% endif %}
                         </td>
                         <td class="data-table__cell text-center " style="font-size: 0.88rem;">
                             {% if ultimo_pago and ultimo_pago.tipo_pago %}
-                            <span class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff; border: 1px solid rgba(0, 176, 255, 0.2);">
+                            <span class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: var(--color-secondary); border: 1px solid rgba(0, 176, 255, 0.2);">
                                 {{ ultimo_pago.tipo_pago }}
                             </span>
                             {% else %}-{% endif %}
@@ -195,7 +195,7 @@
     <div class="modal-overlay" id="modalRegistrarAbono">
         <div class="modal-window" style="max-width: 580px;">
             <div class="modal-header">
-                <h5 class="modal-title" style="color: #ffffff;">
+                <h5 class="modal-title" style="color: var(--color-text-main);">
                     <i class="bi bi-cash-stack text-success me-2"></i> Registrar Abono a Factura #{{ venta.numero_factura }}
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalRegistrarAbono')">
@@ -231,7 +231,7 @@
                         <div class="form-group">
                             <label class="form-label form-label--required">Monto a Abonar (C$)</label>
                             <input type="number" step="0.01" class="form-input" id="abono_monto_pago" name="monto_pago" 
-                                max="{{ "%.2f"|format(kpis.saldo_pendiente) }}" value="{{ "%.2f"|format(kpis.saldo_pendiente) }}" required style="font-weight: 800; color: #00e676; font-size: 1.1rem;">
+                                max="{{ "%.2f"|format(kpis.saldo_pendiente) }}" value="{{ "%.2f"|format(kpis.saldo_pendiente) }}" required style="font-weight: 800; color: var(--color-primary); font-size: 1.1rem;">
                         </div>
                     </div>
 
@@ -253,7 +253,7 @@
                     </div>
 
                     <!-- SUB-CAMPOS PAGO MIXTO -->
-                    <div id="cajaPagoMixto" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; background: #181922; border-radius: 10px; border: 1px solid var(--color-border);">
+                    <div id="cajaPagoMixto" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; background: var(--color-bg-card-hover); border-radius: 10px; border: 1px solid var(--color-border);">
                         <div class="form-group">
                             <label class="form-label" style="font-size: 0.78rem;">Monto Efectivo (C$)</label>
                             <input type="number" step="0.01" class="form-input" id="abono_monto_efectivo" name="monto_efectivo" value="0.00">
@@ -305,7 +305,7 @@
     <div class="modal-overlay" id="modalNuevoBanco" style="z-index: 1200;">
         <div class="modal-window" style="max-width: 400px;">
             <div class="modal-header">
-                <h5 class="modal-title" style="color: #ffffff;">
+                <h5 class="modal-title" style="color: var(--color-text-main);">
                     <i class="bi bi-bank text-primary me-2"></i> Nuevo Banco
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalNuevoBanco')">
@@ -347,7 +347,7 @@
             </div>
             <div class="modal-footer" style="justify-content: flex-end; gap: 10px;">
                 <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalAnularPago')">Cancelar</button>
-                <button type="button" class="btn-neon-primary" id="btnConfirmarAnularPago" style="background: #ff5252; border-color: #ff5252; color: #ffffff;">
+                <button type="button" class="btn-neon-primary" id="btnConfirmarAnularPago" style="background: #ff5252; border-color: #ff5252; color: var(--color-text-main);">
                     Confirmar Anulación
                 </button>
             </div>

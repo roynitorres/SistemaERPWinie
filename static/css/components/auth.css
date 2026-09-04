@@ -2,25 +2,12 @@
    ESTILOS APEX DARK LOGIN — SISTEMA ERP WINIE
    ========================================================================== */
 
-:root {
-    --color-bg-main: #090a0f;
-    --color-bg-card: #13141c;
-    --color-bg-card-header: #0f1016;
-    --color-primary: #00e676;
-    --color-accent: #00b0ff;
-    --color-warning: #ffb74d;
-    --color-danger: #ff5252;
-    --color-text-main: #f8fafc;
-    --color-text-muted: #94a3b8;
-    --color-border: rgba(255, 255, 255, 0.08);
-    --fuente-principal: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-body {
+/* ─── FONDOS CON GLOW NEÓN ANIMADOS ────── */
+.page-auth {
     min-height: 100vh;
-    background-color: var(--color-bg-main);
+    background-color: var(--color-bg-app);
     color: var(--color-text-main);
-    font-family: var(--fuente-principal);
+    font-family: var(--font-family-base);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,8 +17,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ─── FONDOS CON GLOW NEÓN ANIMADOS ────── */
-body::before {
+.page-auth::before {
     content: '';
     position: absolute;
     top: -10%;
@@ -45,7 +31,7 @@ body::before {
     animation: orbFloat 10s ease-in-out infinite alternate;
 }
 
-body::after {
+.page-auth::after {
     content: '';
     position: absolute;
     bottom: -10%;
@@ -98,8 +84,8 @@ body::after {
     width: 62px;
     height: 62px;
     border-radius: 18px;
-    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
-    color: #090a0f;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-bg-app);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -111,7 +97,7 @@ body::after {
 .login-logo-text {
     font-size: 1.55rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--color-text-main);
     letter-spacing: -0.02em;
     margin-bottom: 2px;
 }
@@ -163,7 +149,7 @@ body::after {
     border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 10px 42px 10px 44px;
-    color: #ffffff;
+    color: var(--color-text-main);
     font-size: 0.95rem;
     font-weight: 600;
     outline: none;
@@ -176,7 +162,7 @@ body::after {
 }
 
 .login-input:focus {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-bg-card-hover);
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15);
 }
@@ -205,7 +191,7 @@ body::after {
 }
 
 .login-eye-btn:hover {
-    color: #ffffff;
+    color: var(--color-text-main);
 }
 
 /* Enlace Olvidaste Contraseña */
@@ -219,7 +205,7 @@ body::after {
 .login-forgot-link {
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--color-accent);
+    color: var(--color-secondary);
     text-decoration: none;
     transition: color 0.15s ease;
 }
@@ -233,10 +219,10 @@ body::after {
 .btn-login-apex {
     width: 100%;
     min-height: 48px;
-    background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
     border: none;
     border-radius: 12px;
-    color: #090a0f;
+    color: var(--color-bg-app);
     font-weight: 800;
     font-size: 0.95rem;
     letter-spacing: 0.04em;
@@ -278,7 +264,7 @@ body::after {
 .login-alert-success {
     background: rgba(0, 230, 118, 0.1);
     border: 1px solid rgba(0, 230, 118, 0.25);
-    color: #00e676;
+    color: var(--color-primary);
     padding: 12px 16px;
     border-radius: 12px;
     font-size: 0.85rem;

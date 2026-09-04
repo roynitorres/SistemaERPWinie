@@ -2,32 +2,12 @@
    ESTILOS APEX DARK PORTAL CLIENTE — SISTEMA ERP WINIE
    ========================================================================== */
 
-:root {
-    --color-bg-main: #090a0f;
-    --color-bg-card: #13141c;
-    --color-bg-header: #0f1016;
-    --color-primary: #00e676;
-    --color-accent: #00b0ff;
-    --color-warning: #ffb74d;
-    --color-danger: #ff5252;
-    --color-text-main: #f8fafc;
-    --color-text-muted: #94a3b8;
-    --color-border: rgba(255, 255, 255, 0.08);
-    --fuente-principal: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
 /* ─── SOBRESCRITURA DE SCROLLBAR Y LAYOUT GLOBAL ────── */
-html, body {
-    height: auto !important;
+.page-portal {
     min-height: 100vh !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-}
-
-body {
-    background-color: var(--color-bg-main) !important;
+    background-color: var(--color-bg-app) !important;
     color: var(--color-text-main);
-    font-family: var(--fuente-principal);
+    font-family: var(--font-family-base);
 }
 
 .cliente-portal-wrapper {
@@ -51,7 +31,7 @@ body {
 .alert-apex-success {
     background: rgba(0, 230, 118, 0.1);
     border-color: rgba(0, 230, 118, 0.25);
-    color: #00e676;
+    color: var(--color-primary);
 }
 
 .alert-apex-warning {
@@ -69,7 +49,7 @@ body {
 .alert-apex-info {
     background: rgba(0, 176, 255, 0.1);
     border-color: rgba(0, 176, 255, 0.25);
-    color: #00b0ff;
+    color: var(--color-secondary);
 }
 
 /* ─── BANNER DE PORTADA APEX DARK ────── */
@@ -84,7 +64,7 @@ body {
 
 .portal-cover-banner {
     height: 140px;
-    background: linear-gradient(135deg, #054f31 0%, #00e676 60%, #00b0ff 100%);
+    background: linear-gradient(135deg, #054f31 0%, var(--color-primary) 60%, var(--color-secondary) 100%);
     position: relative;
 }
 
@@ -105,7 +85,7 @@ body {
     height: 105px;
     border-radius: 50%;
     border: 4px solid var(--color-bg-card);
-    background: #1a1c26;
+    background: var(--color-bg-card);
     color: var(--color-primary);
     display: flex;
     align-items: center;
@@ -127,7 +107,7 @@ body {
 .portal-hero-name {
     font-size: 1.6rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--color-text-main);
     margin-bottom: 4px;
 }
 
@@ -173,7 +153,7 @@ body {
 
 .btn-logout-portal:hover {
     background: #ff5252;
-    color: #ffffff;
+    color: var(--color-text-main);
     border-color: #ff5252;
     box-shadow: 0 6px 20px rgba(255, 82, 82, 0.38);
     transform: translateY(-2px);
@@ -222,7 +202,7 @@ body {
 .portal-kpi-val {
     font-size: 1.35rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--color-text-main);
     line-height: 1.2;
 }
 
@@ -263,7 +243,7 @@ body {
 }
 
 .portal-tab-btn:hover {
-    color: #ffffff;
+    color: var(--color-text-main);
     background: rgba(255, 255, 255, 0.04);
 }
 
@@ -300,16 +280,16 @@ body {
     left: 14px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
-    color: #94a3b8 !important;
+    color: var(--color-text-muted) !important;
     font-size: 0.95rem !important;
     z-index: 5 !important;
 }
 
 .toolbar-input {
     width: 100% !important;
-    background-color: #121318 !important;
+    background-color: var(--color-bg-card) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #ffffff !important;
+    color: var(--color-text-main) !important;
     padding: 9px 14px 9px 38px !important;
     border-radius: 10px !important;
     font-size: 0.88rem !important;
@@ -318,11 +298,11 @@ body {
 }
 
 .toolbar-input::placeholder {
-    color: #94a3b8 !important;
+    color: var(--color-text-muted) !important;
 }
 
 .toolbar-input:focus {
-    border-color: #00e676 !important;
+    border-color: var(--color-primary) !important;
     box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15) !important;
 }
 
@@ -333,9 +313,9 @@ body {
 }
 
 .state-pill {
-    background-color: #121318 !important;
-    color: #94a3b8 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--color-bg-card) !important;
+    color: var(--color-text-muted) !important;
+    border: 1px solid var(--color-border) !important;
     padding: 7px 16px !important;
     border-radius: 20px !important;
     font-size: 0.84rem !important;
@@ -345,21 +325,21 @@ body {
 }
 
 .state-pill:hover {
-    color: #ffffff !important;
-    background-color: #181922 !important;
+    color: var(--color-text-main) !important;
+    background-color: var(--color-bg-card-hover) !important;
 }
 
 .state-pill.state-pill--active, .state-pill.active {
-    background-color: #1e202c !important;
-    color: #ffffff !important;
+    background-color: var(--color-bg-input) !important;
+    color: var(--color-text-main) !important;
     border-color: #2e3144 !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 
 .count-badge-apex {
-    background-color: #121318 !important;
+    background-color: var(--color-bg-card) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #00e676 !important;
+    color: var(--color-primary) !important;
     font-weight: 800 !important;
     font-size: 0.92rem !important;
     padding: 6px 14px !important;
@@ -368,9 +348,9 @@ body {
 
 /* ─── DROPDOWN DE TRES PUNTOS Y MENÚ DE ACCIONES APEX DARK ────── */
 .btn-three-dots {
-    background-color: #121318 !important;
-    color: #94a3b8 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--color-bg-card) !important;
+    color: var(--color-text-muted) !important;
+    border: 1px solid var(--color-border) !important;
     width: 34px !important;
     height: 34px !important;
     border-radius: 8px !important;
@@ -382,13 +362,13 @@ body {
 }
 
 .btn-three-dots:hover, .btn-three-dots:focus {
-    background-color: #181922 !important;
-    color: #00e676 !important;
+    background-color: var(--color-bg-card-hover) !important;
+    color: var(--color-primary) !important;
     border-color: rgba(0, 230, 118, 0.4) !important;
 }
 
 .dropdown-menu-dark-apex, .dropdown-menu {
-    background-color: #13141c !important;
+    background-color: var(--color-bg-card) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 12px !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
@@ -396,7 +376,7 @@ body {
 }
 
 .dropdown-menu-dark-apex .dropdown-item, .dropdown-menu .dropdown-item {
-    color: #ffffff !important;
+    color: var(--color-text-main) !important;
     font-size: 0.85rem !important;
     padding: 8px 14px !important;
     border-radius: 8px !important;
@@ -411,8 +391,8 @@ body {
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu-dark-apex .dropdown-item:focus, 
 .dropdown-menu .dropdown-item:focus {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #00e676 !important;
+    background-color: var(--color-border) !important;
+    color: var(--color-primary) !important;
 }
 
 .dropdown-header-apex {
@@ -421,8 +401,8 @@ body {
     font-weight: 800 !important;
     letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
-    color: #00e676 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--color-primary) !important;
+    border-bottom: 1px solid var(--color-border) !important;
     margin-bottom: 4px !important;
     display: flex !important;
     align-items: center !important;
@@ -453,8 +433,8 @@ body {
 }
 
 .portal-table-apex th {
-    background: #0f1016;
-    color: #cbd5e1;
+    background: transparent;
+    color: var(--color-text-main);
     font-size: 0.76rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -484,7 +464,7 @@ body {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--color-border);
     border-radius: 10px;
-    color: #ffffff;
+    color: var(--color-text-main);
     min-height: 44px;
     padding: 10px 44px 10px 14px;
     width: 100%;
@@ -524,7 +504,7 @@ body {
 }
 
 .login-eye-btn:hover {
-    color: #ffffff;
+    color: var(--color-text-main);
 }
 
 /* ─── BOTÓN NEÓN ÁMBAR APEX ────── */
@@ -532,7 +512,7 @@ body {
     background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%);
     border: none;
     border-radius: 12px;
-    color: #090a0f;
+    color: var(--color-bg-app);
     font-weight: 800;
     font-size: 0.92rem;
     padding: 10px 22px;
@@ -560,7 +540,7 @@ body {
     background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
     border: none;
     border-radius: 12px;
-    color: #ffffff !important;
+    color: var(--color-text-main) !important;
     font-weight: 800;
     font-size: 0.9rem;
     padding: 10px 18px;
@@ -571,7 +551,7 @@ body {
 .btn-logout-confirm:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(255, 82, 82, 0.5);
-    color: #ffffff !important;
+    color: var(--color-text-main) !important;
     filter: brightness(1.1);
 }
 

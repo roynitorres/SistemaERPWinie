@@ -12,9 +12,9 @@
     <!-- ===================================== -->
     <!-- ENCABEZADO HERO APEX DARK -->
     <!-- ===================================== -->
-    <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px 28px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div class="card-apex card-hero">
         <div>
-            <h2 style="font-weight: 800; color: #ffffff; margin-bottom: 4px; font-size: 1.6rem;">
+            <h2 style="font-weight: 800; color: var(--color-text-main); margin-bottom: 4px; font-size: 1.6rem;">
                 {{ saludo }}, <span style="color: var(--color-primary);">{{ current_user.username.title() }}</span>
             </h2>
             <div style="color: var(--color-text-muted); font-size: 0.88rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
@@ -27,7 +27,6 @@
         <div>
             <button type="button" class="btn-neon-primary" data-bs-toggle="modal" data-bs-target="#modalClientesCobrar" style="border-radius: 12px; padding: 10px 20px; font-weight: 700;">
                 <i class="bi bi-bell-fill me-1 text-warning"></i> Clientes a cobrar hoy
-                <span class="badge-pill-apex" style="background: rgba(255,82,82,0.2); color: #ff5252; margin-left: 8px;">{{ clientes_a_cobrar|length }}</span>
             </button>
         </div>
     </div>
@@ -38,61 +37,61 @@
     <div class="grid grid--4-cols" style="gap: 18px; margin-bottom: 24px;">
         
         <!-- KPI 1: Clientes -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="card-apex card-kpi">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-size: 0.82rem; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase;">Total Clientes</span>
-                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 176, 255, 0.12); color: #00b0ff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <span class="card-title-muted">Total Clientes</span>
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 176, 255, 0.12); color: var(--color-secondary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
                     <i class="bi bi-people-fill"></i>
                 </div>
             </div>
-            <div style="font-size: 2.1rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">{{ kpis.clientes.total }}</div>
-            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed rgba(255,255,255,0.08); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: #00e676; font-weight: 600;">Activos: {{ kpis.clientes.izquierda }}</span>
+            <div class="card-value-lg">{{ kpis.clientes.total }}</div>
+            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
+                <span style="color: var(--color-primary); font-weight: 600;">Activos: {{ kpis.clientes.izquierda }}</span>
                 <span style="color: var(--color-text-muted);">Inactivos: {{ kpis.clientes.derecha }}</span>
             </div>
         </div>
 
         <!-- KPI 2: Productos -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="card-apex card-kpi">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-size: 0.82rem; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase;">Total Productos</span>
-                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 230, 118, 0.12); color: #00e676; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <span class="card-title-muted">Total Productos</span>
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 230, 118, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
                     <i class="bi bi-box-seam-fill"></i>
                 </div>
             </div>
-            <div style="font-size: 2.1rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">{{ kpis.productos.total }}</div>
-            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed rgba(255,255,255,0.08); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: #ffffff;">Normal: {{ kpis.productos.izquierda }}</span>
+            <div class="card-value-lg">{{ kpis.productos.total }}</div>
+            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
+                <span style="color: var(--color-text-main);">Normal: {{ kpis.productos.izquierda }}</span>
                 <span style="color: #ff5252; font-weight: 600;">Crítico: {{ kpis.productos.derecha }}</span>
             </div>
         </div>
 
         <!-- KPI 3: Facturas -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="card-apex card-kpi">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-size: 0.82rem; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase;">Total Facturas</span>
+                <span class="card-title-muted">Total Facturas</span>
                 <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(255, 183, 77, 0.12); color: #ffb74d; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
                     <i class="bi bi-receipt"></i>
                 </div>
             </div>
-            <div style="font-size: 2.1rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">{{ kpis.ventas.total }}</div>
-            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed rgba(255,255,255,0.08); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: #00b0ff;">Contado: {{ kpis.ventas.izquierda }}</span>
+            <div class="card-value-lg">{{ kpis.ventas.total }}</div>
+            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
+                <span style="color: var(--color-secondary);">Contado: {{ kpis.ventas.izquierda }}</span>
                 <span style="color: #ffb74d;">Crédito: {{ kpis.ventas.derecha }}</span>
             </div>
         </div>
 
         <!-- KPI 4: Recaudación / Facturación -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="card-apex card-kpi">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-size: 0.82rem; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase;">Facturación Total</span>
+                <span class="card-title-muted">Facturación Total</span>
                 <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(124, 58, 237, 0.12); color: #a78bfa; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
                     <i class="bi bi-wallet2"></i>
                 </div>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: #00e676; letter-spacing: -0.02em;">C$ {{ "%.2f"|format(kpis.pagos.total) }}</div>
-            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed rgba(255,255,255,0.08); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: #00e676; font-weight: 600;">Cobrado: C$ {{ "%.2f"|format(kpis.pagos.izquierda) }}</span>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--color-primary); letter-spacing: -0.02em;">C$ {{ "%.2f"|format(kpis.pagos.total) }}</div>
+            <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
+                <span style="color: var(--color-primary); font-weight: 600;">Cobrado: C$ {{ "%.2f"|format(kpis.pagos.izquierda) }}</span>
                 <span style="color: #ff5252;">Deuda: C$ {{ "%.2f"|format(kpis.pagos.derecha) }}</span>
             </div>
         </div>
@@ -105,11 +104,11 @@
     <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-bottom: 24px; align-items: stretch;">
         
         <!-- Crecimiento Anual -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; display: flex; flex-direction: column;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h5 style="margin: 0; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-graph-up-arrow text-success"></i> Crecimiento de Ventas del Año <span style="color: #00e676;" id="lblAnioCrecimiento">{{ chart_data.crecimiento_anual.anio }}</span>
+                    <h5 style="margin: 0; font-weight: 800; color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-graph-up-arrow text-success"></i> Crecimiento de Ventas del Año <span style="color: var(--color-primary);" id="lblAnioCrecimiento">{{ chart_data.crecimiento_anual.anio }}</span>
                     </h5>
                     <small style="color: var(--color-text-muted);">Evolución mensual de facturación (Enero a Diciembre). Se actualiza automáticamente cada año.</small>
                 </div>
@@ -126,9 +125,9 @@
         </div>
 
         <!-- Clientes a Crédito Principales (Modelo Países Principales Apex) -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; display: flex; flex-direction: column;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column;">
             <div style="margin-bottom: 20px;">
-                <h5 style="margin: 0; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                <h5 style="margin: 0; font-weight: 800; color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
                     <i class="bi bi-people-fill text-success"></i> Clientes a Crédito Principales
                 </h5>
                 <small style="color: var(--color-text-muted);">Distribución y porcentaje de facturas a crédito pendientes por cliente</small>
@@ -138,11 +137,11 @@
                 {% for item in top_clientes_credito %}
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.9rem;">
-                        <span style="font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+                        <span style="font-weight: 700; color: var(--color-text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
                             {{ item.nombre }}
                         </span>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-weight: 700; color: #ffffff; font-size: 0.88rem;">
+                            <span style="font-weight: 700; color: var(--color-text-main); font-size: 0.88rem;">
                                 {{ item.facturas_cant }} <span style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 500;">fact.</span>
                             </span>
                             <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.88rem; width: 40px; text-align: right;">
@@ -150,8 +149,8 @@
                             </span>
                         </div>
                     </div>
-                    <div style="width: 100%; background: rgba(255,255,255,0.06); height: 8px; border-radius: 10px; overflow: hidden;">
-                        <div style="width: {{ item.porcentaje }}%; background: #00e676; height: 100%; border-radius: 10px; transition: width 0.6s ease;"></div>
+                    <div class="progress-track-apex">
+                        <div class="progress-bar-apex" style="width: {{ item.porcentaje }}%;"></div>
                     </div>
                 </div>
                 {% else %}
@@ -169,8 +168,8 @@
     <!-- ===================================== -->
     <div class="grid grid--4-cols" style="gap: 18px; margin-bottom: 24px;">
         
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: #ffffff; margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
+            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-pie-chart text-primary"></i> Facturas por Tipo
             </h6>
             <div style="flex: 1; position: relative;">
@@ -178,8 +177,8 @@
             </div>
         </div>
 
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: #ffffff; margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
+            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-pie-chart-fill text-success"></i> Estado de Pagos
             </h6>
             <div style="flex: 1; position: relative;">
@@ -187,8 +186,8 @@
             </div>
         </div>
 
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: #ffffff; margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
+            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-activity text-info"></i> Ventas Últimos 7 Días
             </h6>
             <div style="flex: 1; position: relative;">
@@ -196,8 +195,8 @@
             </div>
         </div>
 
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: #ffffff; margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
+            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-bar-chart-line text-warning"></i> Top Productos
             </h6>
             <div style="flex: 1; position: relative;">
@@ -212,9 +211,9 @@
     <!-- ===================================== -->
     <div class="modal fade" id="modalClientesCobrar" tabindex="-1" aria-labelledby="modalClientesCobrarLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" style="background: #13141c; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #ffffff;">
-                <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding: 18px 24px;">
-                    <h5 class="modal-title fw-bold" id="modalClientesCobrarLabel" style="color: #ffffff;">
+            <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; color: var(--color-text-main);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: 18px 24px;">
+                    <h5 class="modal-title fw-bold" id="modalClientesCobrarLabel" style="color: var(--color-text-main);">
                         <i class="bi bi-calendar-check me-2 text-warning"></i> Clientes a Cobrar Hoy
                         <span class="badge-pill-apex badge-pill-apex--active ms-2">{{ clientes_a_cobrar|length }} registros</span>
                     </h5>
@@ -223,7 +222,7 @@
                 <div class="modal-body p-0">
                     <div class="table-responsive">
                         <table class="data-table" style="margin-bottom: 0;">
-                            <thead class="data-table__head" style="background: #0f1016;">
+                            <thead class="data-table__head" style="background: var(--color-bg-card);">
                                 <tr>
                                     <th style="width: 50px;">#</th>
                                     <th>Cliente</th>
@@ -236,7 +235,7 @@
                                 {% for item in clientes_a_cobrar %}
                                 <tr class="data-table__row">
                                     <td class="data-table__cell text-muted" style="font-weight: 600;">#{{ loop.index }}</td>
-                                    <td class="data-table__cell" style="font-weight: 600; color: #ffffff;">{{ item.cliente }}</td>
+                                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main);">{{ item.cliente }}</td>
                                     <td class="data-table__cell text-center">
                                         {% if item.estado == 'Moroso' %}
                                         <span class="badge-pill-apex badge-pill-apex--inactive">Moroso</span>
@@ -263,7 +262,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.08); justify-content: flex-end;">
+                <div class="modal-footer" style="border-top: 1px solid var(--color-border); justify-content: flex-end;">
                     <button type="button" class="btn-apex-outline" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>

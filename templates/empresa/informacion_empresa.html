@@ -23,12 +23,12 @@
     <div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start;">
         
         <!-- PANEL IZQUIERDO: LOGO E IDENTIDAD -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="font-size: 0.9rem; font-weight: 800; color: #ffffff; margin-bottom: 16px; text-align: left; display: flex; align-items: center; gap: 8px;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; text-align: center;">
+            <div style="font-size: 0.9rem; font-weight: 800; color: var(--color-text-main); margin-bottom: 16px; text-align: left; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-image text-success"></i> Logo Institucional
             </div>
 
-            <div class="empresa-logo-preview mb-3" style="width: 160px; height: 160px; margin: 0 auto 16px; border-radius: 16px; border: 2px dashed rgba(255,255,255,0.15); overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #181922; transition: all 0.3s ease;">
+            <div class="empresa-logo-preview mb-3" style="width: 160px; height: 160px; margin: 0 auto 16px; border-radius: 16px; border: 2px dashed rgba(255,255,255,0.15); overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: var(--color-bg-card-hover); transition: all 0.3s ease;">
                 {% if empresa and empresa.logo %}
                 <img src="{{ url_for('static', filename=empresa.logo) }}" class="img-fluid" style="object-fit: contain; width: 100%; height: 100%;">
                 {% else %}
@@ -36,12 +36,12 @@
                 {% endif %}
             </div>
 
-            <h5 style="font-weight: 800; color: #ffffff; margin-bottom: 4px; font-size: 1.15rem;">
+            <h5 style="font-weight: 800; color: var(--color-text-main); margin-bottom: 4px; font-size: 1.15rem;">
                 {{ empresa.razon_social if empresa else 'Mi Empresa' }}
             </h5>
             
             <div style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 16px; font-weight: 600;">
-                RUC: <span style="color: #ffffff;">{{ empresa.ruc if empresa and empresa.ruc else 'No registrado' }}</span>
+                RUC: <span style="color: var(--color-text-main);">{{ empresa.ruc if empresa and empresa.ruc else 'No registrado' }}</span>
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -57,10 +57,10 @@
         </div>
 
         <!-- PANEL DERECHO: FORMULARIO PROPORCIONADO Y COMPACTO -->
-        <div class="panel" style="background: #13141c; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px;">
+        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px;">
             
             <!-- SECCIÓN 1: DATOS DE IDENTIFICACIÓN -->
-            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--color-text-main); border-bottom: 1px solid var(--color-border); padding-bottom: 10px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-buildings text-success"></i> Identificación y Razón Social
             </div>
 
@@ -87,7 +87,7 @@
             </div>
 
             <!-- SECCIÓN 2: UBICACIÓN Y CONTACTO -->
-            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--color-text-main); border-bottom: 1px solid var(--color-border); padding-bottom: 10px; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-geo-alt text-primary"></i> Ubicación y Contacto
             </div>
 
@@ -121,7 +121,7 @@
             </div>
 
             <!-- SECCIÓN 3: CONFIGURACIÓN TRIBUTARIA (ANCHOS COMPACTOS PROPORCIONADOS) -->
-            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--color-text-main); border-bottom: 1px solid var(--color-border); padding-bottom: 10px; margin-bottom: 18px; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
                 <i class="bi bi-receipt text-warning"></i> Régimen Fiscal y Parámetros de Facturación
             </div>
 
@@ -142,12 +142,12 @@
 
                 <div class="form-group">
                     <label class="form-label">Correlativo</label>
-                    <input type="text" class="form-input text-center" name="correlativo" value="{{ empresa.correlativo if empresa else '00034' }}" style="font-weight: 800; color: #ffffff;">
+                    <input type="text" class="form-input text-center" name="correlativo" value="{{ empresa.correlativo if empresa else '00034' }}" style="font-weight: 800; color: var(--color-text-main);">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">IVA (%)</label>
-                    <input type="number" step="0.01" class="form-input text-center" name="iva" value="{{ empresa.iva if empresa else 15 }}" style="font-weight: 800; color: #00e676;">
+                    <input type="number" step="0.01" class="form-input text-center" name="iva" value="{{ empresa.iva if empresa else 15 }}" style="font-weight: 800; color: var(--color-primary);">
                 </div>
 
                 <div class="form-group">
@@ -160,7 +160,7 @@
             </div>
 
             <!-- BOTONES DE ACCIÓN (PIE DEL PANEL DERECHO) -->
-            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 20px;">
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--color-border); padding-top: 20px; margin-top: 20px;">
                 <button type="button" class="btn-apex-outline" id="btnEditarEmpresa" style="color: #ffb74d; border-color: rgba(255,183,77,0.3);">
                     <i class="bi bi-pencil-square me-1"></i> Habilitar Edición
                 </button>
@@ -178,7 +178,7 @@
 <div class="modal-overlay" id="modalConfirmarEdicion">
     <div class="modal-window" style="max-width: 460px; text-align: center;">
         <div class="modal-header">
-            <h5 class="modal-title" style="color: #ffffff;">
+            <h5 class="modal-title" style="color: var(--color-text-main);">
                 <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> ¿Habilitar Edición?
             </h5>
             <button type="button" class="modal-close-btn" onclick="cerrarModal('modalConfirmarEdicion')">

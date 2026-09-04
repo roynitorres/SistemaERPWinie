@@ -4,8 +4,8 @@
 
 /* Botón Verde Neón Principal (Nuevo Cliente / Guardar / Registrar Pago) */
 .btn-neon-primary, #btnIrForm, #btnGuardar {
-    background-color: #00e676 !important;
-    color: #090a0f !important;
+    background-color: var(--color-primary) !important;
+    color: var(--color-bg-app) !important;
     font-weight: 800 !important;
     font-size: 0.88rem !important;
     padding: 10px 20px !important;
@@ -16,23 +16,23 @@
     align-items: center !important;
     justify-content: center !important;
     gap: 6px !important;
-    box-shadow: 0 4px 18px rgba(0, 230, 118, 0.3) !important;
+    box-shadow: 0 4px 18px var(--color-primary-glow) !important;
     cursor: pointer !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .btn-neon-primary:hover, #btnIrForm:hover, #btnGuardar:hover {
-    background-color: #00c853 !important;
-    color: #090a0f !important;
+    background-color: var(--color-primary-dark) !important;
+    color: var(--color-bg-app) !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 24px rgba(0, 230, 118, 0.45) !important;
+    box-shadow: 0 6px 24px var(--color-primary-glow) !important;
 }
 
 /* Botón Outline Oscuro Apex */
 .btn-apex-outline {
-    background-color: #121318 !important;
-    color: #ffffff !important;
-    border: 1px solid #1e2029 !important;
+    background-color: var(--color-bg-card) !important;
+    color: var(--color-text-main) !important;
+    border: 1px solid var(--color-border) !important;
     padding: 9px 18px !important;
     border-radius: 10px !important;
     font-weight: 600 !important;
@@ -47,7 +47,7 @@
 }
 
 .btn-apex-outline:hover {
-    border-color: #00e676 !important;
-    color: #00e676 !important;
-    background-color: #181922 !important;
+    border-color: var(--color-primary) !important;
+    color: var(--color-primary) !important;
+    background-color: var(--color-bg-card-hover) !important;
 }
