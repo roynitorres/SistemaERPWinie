@@ -151,7 +151,7 @@
                                 {{ categoria.estado.value }}
                             </span>
                         </td>
-                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">
+                        <td class="data-table__cell" >
                             {{ categoria.codigo or '-' }}
                         </td>
                         <td class="data-table__cell text-center" style="font-weight: 700;">
@@ -159,7 +159,7 @@
                                 {{ categoria.productos|length }}
                             </span>
                         </td>
-                        <td class="data-table__cell " style="color: var(--color-text-muted);">
+                        <td class="data-table__cell " >
                             {{ categoria.created_at.strftime('%d/%m/%Y') if categoria.created_at else '-' }}
                         </td>
                         <td class="data-table__cell text-end">

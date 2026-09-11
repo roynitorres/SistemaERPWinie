@@ -207,7 +207,7 @@
                                 </div>
                                 <div>
                                     <span class="customer-title-text">{{ proveedor.nombre_proveedor }}</span>
-                                    <span class="customer-sub-text">{{ proveedor.nombre_contacto }}</span>
+                                    <span class="customer-sub-text">{{ proveedor.departamento }}</span>
                                 </div>
                             </div>
                         </td>
@@ -216,7 +216,7 @@
                                 {{ proveedor.estado.value }}
                             </span>
                         </td>
-                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">
+                        <td class="data-table__cell">
                             {{ proveedor.codigo or "P" ~ "%03d"|format(proveedor.id) }}
                         </td>
                         <td class="data-table__cell">
@@ -229,7 +229,7 @@
                             {{ proveedor.departamento }}<br>
                             <small style="color: var(--color-text-muted);">{{ proveedor.municipio }}</small>
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-muted);">
+                        <td class="data-table__cell" >
                             {{ proveedor.ruc or '-' }}
                         </td>
                         <td class="data-table__cell text-end">
@@ -241,12 +241,12 @@
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
                                     <li>
                                         <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                            <i class="bi bi-lightning-charge-fill" style="color: var(--color-text-main); font-size: 0.8rem;"></i> ACCIONES
+                                             ACCIONES
                                         </div>
                                     </li>
                                     <li>
                                         <button type="button" class="dropdown-item btn-editar-fila">
-                                            <i class="bi bi-pencil me-2 text-primary"></i> Editar Proveedor
+                                             Editar 
                                         </button>
                                     </li>
                                 </ul>

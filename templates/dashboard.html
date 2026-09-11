@@ -18,9 +18,9 @@
                 {{ saludo }}, <span style="color: var(--color-primary);">{{ current_user.username.title() }}</span>
             </h2>
             <div style="color: var(--color-text-muted); font-size: 0.88rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <span><i class="bi bi-calendar3 text-success me-1"></i> {{ fecha_larga }}</span>
+                <span><i class="bi bi-calendar3  me-1"></i> {{ fecha_larga }}</span>
                 <span>|</span>
-                <span><i class="bi bi-clock text-info me-1"></i> <span id="horaActual">--:--:--</span></span>
+                <span><i class="bi bi-clock  me-1"></i> <span id="horaActual">--:--:--</span></span>
             </div>
         </div>
 
@@ -47,7 +47,7 @@
             <div class="card-value-lg">{{ kpis.clientes.total }}</div>
             <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
                 <span style="color: var(--color-primary); font-weight: 600;">Activos: {{ kpis.clientes.izquierda }}</span>
-                <span style="color: var(--color-text-muted);">Inactivos: {{ kpis.clientes.derecha }}</span>
+                <span style="color: var(--color-text-main);">Inactivos: {{ kpis.clientes.derecha }}</span>
             </div>
         </div>
 
@@ -61,8 +61,8 @@
             </div>
             <div class="card-value-lg">{{ kpis.productos.total }}</div>
             <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: var(--color-text-main);">Normal: {{ kpis.productos.izquierda }}</span>
-                <span style="color: #ff5252; font-weight: 600;">Crítico: {{ kpis.productos.derecha }}</span>
+                <span style="color: var(--color-primary); font-weight: 600;">Normal: {{ kpis.productos.izquierda }}</span>
+                <span style="color: var(--color-danger); font-weight: 600;">Crítico: {{ kpis.productos.derecha }}</span>
             </div>
         </div>
 
@@ -76,23 +76,23 @@
             </div>
             <div class="card-value-lg">{{ kpis.ventas.total }}</div>
             <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: var(--color-secondary);">Contado: {{ kpis.ventas.izquierda }}</span>
-                <span style="color: #ffb74d;">Crédito: {{ kpis.ventas.derecha }}</span>
+                <span style="color: var(--color-primary); font-weight: 600;">Contado: {{ kpis.ventas.izquierda }}</span>
+                <span style="color: var(--color-text-main);">Crédito: {{ kpis.ventas.derecha }}</span>
             </div>
         </div>
 
-        <!-- KPI 4: Recaudación / Facturación -->
+        <!-- KPI 4: Proveedores -->
         <div class="card-apex card-kpi">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="card-title-muted">Facturación Total</span>
+                <span class="card-title-muted">Total Proveedores</span>
                 <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(124, 58, 237, 0.12); color: #a78bfa; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                    <i class="bi bi-wallet2"></i>
+                    <i class="bi bi-truck"></i>
                 </div>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 800; color: var(--color-primary); letter-spacing: -0.02em;">C$ {{ "%.2f"|format(kpis.pagos.total) }}</div>
+            <div class="card-value-lg">{{ kpis.proveedores.total }}</div>
             <div class="d-flex justify-content-between align-items-center pt-2" style="border-top: 1px dashed var(--color-border); margin-top: 12px; font-size: 0.82rem;">
-                <span style="color: var(--color-primary); font-weight: 600;">Cobrado: C$ {{ "%.2f"|format(kpis.pagos.izquierda) }}</span>
-                <span style="color: #ff5252;">Deuda: C$ {{ "%.2f"|format(kpis.pagos.derecha) }}</span>
+                <span style="color: var(--color-primary); font-weight: 600;">Activos: {{ kpis.proveedores.izquierda }}</span>
+                <span style="color: var(--color-text-main);">Inactivos: {{ kpis.proveedores.derecha }}</span>
             </div>
         </div>
 
@@ -108,14 +108,9 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h5 style="margin: 0; font-weight: 800; color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-graph-up-arrow text-success"></i> Crecimiento de Ventas del Año <span style="color: var(--color-primary);" id="lblAnioCrecimiento">{{ chart_data.crecimiento_anual.anio }}</span>
+                        <i class="bi bi-graph-up-arrow text-success"></i> Crecimiento de Ventas del Año <span class="badge-pill-apex badge-pill-apex--active" style="padding: 6px 14px; font-size: 0.85rem;" id="lblAnioCrecimiento">{{ chart_data.crecimiento_anual.anio }}</span>
                     </h5>
                     <small style="color: var(--color-text-muted);">Evolución mensual de facturación (Enero a Diciembre). Se actualiza automáticamente cada año.</small>
-                </div>
-                <div>
-                    <span class="badge-pill-apex badge-pill-apex--active" style="padding: 6px 14px; font-size: 0.85rem;">
-                        Año en Curso: {{ chart_data.crecimiento_anual.anio }}
-                    </span>
                 </div>
             </div>
 
@@ -124,83 +119,48 @@
             </div>
         </div>
 
-        <!-- Clientes a Crédito Principales (Modelo Países Principales Apex) -->
+        <!-- Distribución del Mes (Modelo Fases de Reparto) -->
         <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column;">
             <div style="margin-bottom: 20px;">
-                <h5 style="margin: 0; font-weight: 800; color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-people-fill text-success"></i> Clientes a Crédito Principales
+                <h5 style="margin: 0; font-weight: 800; color: var(--color-text-main); font-size: 1.1rem;">
+                    Recaudación del Mes
                 </h5>
-                <small style="color: var(--color-text-muted);">Distribución y porcentaje de facturas a crédito pendientes por cliente</small>
+                <small style="color: var(--color-text-muted);">Distribución mensual por tipo de factura</small>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 18px; justify-content: center; flex: 1;">
-                {% for item in top_clientes_credito %}
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.9rem;">
-                        <span style="font-weight: 700; color: var(--color-text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
-                            {{ item.nombre }}
-                        </span>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-weight: 700; color: var(--color-text-main); font-size: 0.88rem;">
-                                {{ item.facturas_cant }} <span style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 500;">fact.</span>
-                            </span>
-                            <span style="font-weight: 700; color: var(--color-text-muted); font-size: 0.88rem; width: 40px; text-align: right;">
-                                {{ item.porcentaje }}%
-                            </span>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
+                <div style="position: relative; width: 180px; height: 180px; margin-bottom: 24px;">
+                    <!-- The donut chart canvas -->
+                    <canvas id="chartRecaudacionMes"></canvas>
+                    <!-- Centered text -->
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--color-text-main);">C$<br>{{ "%.0f"|format(ventas_mes_breakdown.total) }}</div>
+                    </div>
+                </div>
+                
+                <!-- Custom Legend -->
+                <div style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--color-primary);"></span>
+                            <span style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 600;">Contado</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <span style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-main);">C$ {{ "%.0f"|format(ventas_mes_breakdown.contado_monto) }}</span>
+                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--color-text-main); width: 35px; text-align: right;">{{ ventas_mes_breakdown.contado_pct }}%</span>
                         </div>
                     </div>
-                    <div class="progress-track-apex">
-                        <div class="progress-bar-apex" style="width: {{ item.porcentaje }}%;"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #f59e0b;"></span>
+                            <span style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 600;">Crédito</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <span style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-main);">C$ {{ "%.0f"|format(ventas_mes_breakdown.credito_monto) }}</span>
+                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--color-text-main); width: 35px; text-align: right;">{{ ventas_mes_breakdown.credito_pct }}%</span>
+                        </div>
                     </div>
                 </div>
-                {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-info-circle me-1"></i> No hay facturas de crédito registradas actualmente.
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ===================================== -->
-    <!-- DISTRIBUCIÓN Y GRÁFICOS SECUNDARIOS APEX -->
-    <!-- ===================================== -->
-    <div class="grid grid--4-cols" style="gap: 18px; margin-bottom: 24px;">
-        
-        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-pie-chart text-primary"></i> Facturas por Tipo
-            </h6>
-            <div style="flex: 1; position: relative;">
-                <canvas id="chartFacturasTipo"></canvas>
-            </div>
-        </div>
-
-        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-pie-chart-fill text-success"></i> Estado de Pagos
-            </h6>
-            <div style="flex: 1; position: relative;">
-                <canvas id="chartPagosEstado"></canvas>
-            </div>
-        </div>
-
-        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-activity text-info"></i> Ventas Últimos 7 Días
-            </h6>
-            <div style="flex: 1; position: relative;">
-                <canvas id="chartVentas7"></canvas>
-            </div>
-        </div>
-
-        <div class="panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; height: 300px; display: flex; flex-direction: column;">
-            <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-bar-chart-line text-warning"></i> Top Productos
-            </h6>
-            <div style="flex: 1; position: relative;">
-                <canvas id="chartTopProductos"></canvas>
             </div>
         </div>
 
@@ -214,17 +174,16 @@
             <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; color: var(--color-text-main);">
                 <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: 18px 24px;">
                     <h5 class="modal-title fw-bold" id="modalClientesCobrarLabel" style="color: var(--color-text-main);">
-                        <i class="bi bi-calendar-check me-2 text-warning"></i> Clientes a Cobrar Hoy
-                        <span class="badge-pill-apex badge-pill-apex--active ms-2">{{ clientes_a_cobrar|length }} registros</span>
+                        <i class="bi bi-calendar-check me-2 "></i> Clientes a Cobrar Hoy
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-0">
                     <div class="table-responsive">
                         <table class="data-table" style="margin-bottom: 0;">
                             <thead class="data-table__head" style="background: var(--color-bg-card);">
                                 <tr>
-                                    <th style="width: 50px;">#</th>
+                                    <th style="width: 50px;">N°</th>
                                     <th>Cliente</th>
                                     <th style="text-align: center;">Estado</th>
                                     <th style="text-align: center;">Días Mora</th>
@@ -234,19 +193,19 @@
                             <tbody>
                                 {% for item in clientes_a_cobrar %}
                                 <tr class="data-table__row">
-                                    <td class="data-table__cell text-muted" style="font-weight: 600;">#{{ loop.index }}</td>
+                                    <td class="data-table__cell " style="font-weight: 600;">{{ loop.index }}</td>
                                     <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main);">{{ item.cliente }}</td>
                                     <td class="data-table__cell text-center">
                                         {% if item.estado == 'Moroso' %}
                                         <span class="badge-pill-apex badge-pill-apex--inactive">Moroso</span>
                                         {% else %}
-                                        <span class="badge-pill-apex" style="background: rgba(255, 183, 77, 0.15); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.25);">Cobrar hoy</span>
+                                        <span class="badge-pill-apex" style="background: rgba(255, 183, 77, 0.15); color: var(--color-danger); border: 1px solid rgba(255, 183, 77, 0.25);">Cobrar hoy</span>
                                         {% endif %}
                                     </td>
-                                    <td class="data-table__cell text-center" style="font-weight: 700; color: #ff5252;">{{ item.dias }}</td>
-                                    <td class="data-table__cell text-end">
-                                        <a href="https://wa.me/{{ item.telefono|default('', true) }}?text=Hola%20{{ item.cliente | urlencode }},%20le%20recordamos%20que%20tiene%20un%20pago%20pendiente%20por%20realizar.%20Por%20favor,%20comuníquese%20con%20nosotros." class="btn-neon-primary" style="padding: 6px 14px; font-size: 0.82rem;" target="_blank">
-                                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                                    <td class="data-table__cell text-center" style="font-weight: 700; color: var(--color-danger);">{{ item.dias }}</td>
+                                    <td class="data-table__cell ">
+                                        <a href="https://wa.me/{{ item.telefono|default('', true) }}?text=Hola%20{{ item.cliente | urlencode }},%20le%20recordamos%20que%20tiene%20un%20pago%20pendiente%20por%20realizar.%20Por%20favor,%20comuníquese%20con%20nosotros." class="btn-neon-primary" style="padding: 5px 5px; font-size: 0.82rem;" target="_blank">
+                                            <i class="bi bi-whatsapp "></i>
                                         </a>
                                     </td>
                                 </tr>

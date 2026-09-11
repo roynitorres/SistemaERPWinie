@@ -113,79 +113,35 @@
                 });
             }
 
-            // 2. Gráfico Donut: Facturas por Tipo
-            var canvasTipo = document.getElementById("chartFacturasTipo");
-            if (canvasTipo && chartData.facturas_tipo) {
-                new Chart(canvasTipo, {
+
+
+            // 6. Gráfico Donut: Recaudación del Mes
+            var canvasRecaudacion = document.getElementById("chartRecaudacionMes");
+            if (canvasRecaudacion && chartData.recaudacion_mes) {
+                new Chart(canvasRecaudacion, {
                     type: "doughnut",
                     data: {
-                        labels: chartData.facturas_tipo.labels,
-                        datasets: [{ data: chartData.facturas_tipo.values, backgroundColor: [colors[0], colors[2]], borderWidth: 0 }]
+                        labels: chartData.recaudacion_mes.labels,
+                        datasets: [{ 
+                            data: chartData.recaudacion_mes.values, 
+                            backgroundColor: [colors[0], "#f59e0b"], 
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: "bottom", labels: { color: "#9496a1" } } },
-                        cutout: "68%"
-                    }
-                });
-            }
-
-            // 3. Gráfico Donut: Pagos por Estado
-            var canvasPagos = document.getElementById("chartPagosEstado");
-            if (canvasPagos && chartData.pagos_estado) {
-                new Chart(canvasPagos, {
-                    type: "doughnut",
-                    data: {
-                        labels: chartData.pagos_estado.labels,
-                        datasets: [{ data: chartData.pagos_estado.values, backgroundColor: [colors[1], colors[3]], borderWidth: 0 }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: "bottom", labels: { color: "#9496a1" } } },
-                        cutout: "68%"
-                    }
-                });
-            }
-
-            // 4. Gráfico Línea: Ventas últimos 7 días
-            var canvasVentas7 = document.getElementById("chartVentas7");
-            if (canvasVentas7 && chartData.ventas_7_dias) {
-                new Chart(canvasVentas7, {
-                    type: "line",
-                    data: {
-                        labels: chartData.ventas_7_dias.labels,
-                        datasets: [{ data: chartData.ventas_7_dias.values, borderColor: colors[0], backgroundColor: "rgba(0,176,255,.12)", fill: true, tension: .35, pointRadius: 4 }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: "rgba(255, 255, 255, 0.05)" }, ticks: { color: "#9496a1" } },
-                            x: { grid: { display: false }, ticks: { color: "#9496a1" } }
-                        }
-                    }
-                });
-            }
-
-            // 5. Gráfico Barras: Top Productos más vendidos
-            var canvasTopProd = document.getElementById("chartTopProductos");
-            if (canvasTopProd && chartData.top_productos) {
-                new Chart(canvasTopProd, {
-                    type: "bar",
-                    data: {
-                        labels: chartData.top_productos.labels,
-                        datasets: [{ data: chartData.top_productos.values, backgroundColor: colors[1], borderRadius: 6 }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: "rgba(255, 255, 255, 0.05)" }, ticks: { color: "#9496a1" } },
-                            x: { grid: { display: false }, ticks: { color: "#9496a1" } }
+                        cutout: "75%",
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': C$ ' + context.parsed.toFixed(2);
+                                    }
+                                }
+                            }
                         }
                     }
                 });

@@ -208,9 +208,9 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">${producto.codigo}</td>
+                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main);">${producto.codigo}</td>
                         <td class="data-table__cell ">${producto.categoria}</td>
-                        <td class="data-table__cell text-end" style="font-weight: 700; color: #00e676;">C$ ${producto.precio.toFixed(2)}</td>
+                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">C$ ${producto.precio.toFixed(2)}</td>
                         <td class="data-table__cell text-center">
                             <span class="badge-pill-apex ${producto.stock > 0 ? 'badge-pill-apex--active' : 'badge-pill-apex--inactive'}">
                                 ${producto.stock} en stock
@@ -274,7 +274,7 @@
             var selectedCountText = document.getElementById("selectedCountText");
             if (selectedCountText) {
                 if (count > 0) {
-                    selectedCountText.innerHTML = '<strong style="color: #00e676;">' + count + '</strong> producto' + (count > 1 ? 's' : '') + ' seleccionado' + (count > 1 ? 's' : '') + ' | Total estimado: <strong style="color: #00e676;">C$ ' + totalEstimado.toFixed(2) + '</strong>';
+                    selectedCountText.innerHTML = '<strong style="color: var(--color-text-main);">' + count + '</strong> producto' + (count > 1 ? 's' : '') + ' seleccionado' + (count > 1 ? 's' : '') + ' | Total estimado: <strong style="color: var(--color-text-main);">C$ ' + totalEstimado.toFixed(2) + '</strong>';
                 } else {
                     selectedCountText.textContent = "0 productos seleccionados";
                 }
@@ -393,8 +393,8 @@
                 var tr = document.createElement('tr');
                 tr.className = 'data-table__row';
                 tr.innerHTML = `
-                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-primary);">${producto.codigo}</td>
-                    <td class="data-table__cell" style="font-weight: 600; color: #ffffff;">${producto.nombre}</td>
+                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-primary);">${producto.codigo}</td>
+                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-primary);">${producto.nombre}</td>
                     <td class="data-table__cell text-center">
                         <div class="cantidad-control">
                             <button type="button" class="cantidad-btn btn-disminuir" data-index="${index}" title="Disminuir"><i class="bi bi-dash"></i></button>
@@ -402,14 +402,14 @@
                             <button type="button" class="cantidad-btn btn-aumentar" data-index="${index}" title="Aumentar"><i class="bi bi-plus"></i></button>
                         </div>
                     </td>
-                    <td class="data-table__cell text-end" style="color: #ffffff;">C$ ${producto.precio.toFixed(2)}</td>
+                    <td class="data-table__cell text-end" style="color:var(--color-text-primary);">C$ ${producto.precio.toFixed(2)}</td>
                     <td class="data-table__cell text-center">
                         <input type="number" class="form-input text-end input-descuento" data-index="${index}" style="width: 85px; padding: 4px 8px; font-weight: 600; background-color: rgba(255,255,255,0.04);" 
                         value="${producto.descuento_monto}" min="0">
                     </td>
-                    <td class="data-table__cell text-end" style="font-weight: 700; color: #00e676;">C$ ${producto.subtotal.toFixed(2)}</td>
+                    <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-primary);">C$ ${producto.subtotal.toFixed(2)}</td>
                     <td class="data-table__cell text-end">
-                        <button type="button" class="btn-three-dots btn-eliminar-item" data-index="${index}" title="Quitar producto" style="color: #ff5252; background: rgba(255, 82, 82, 0.1); border: 1px solid rgba(255, 82, 82, 0.2); width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
+                        <button type="button" class="btn-three-dots btn-eliminar-item" data-index="${index}" title="Quitar producto" style="color: var(--color-text-danger); background: rgba(255, 82, 82, 0.1); border: 1px solid rgba(255, 82, 82, 0.2); width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
                             <i class="bi bi-trash-fill"></i>
                         </button>
                     </td>
@@ -597,17 +597,17 @@
                 var tr = document.createElement("tr");
                 tr.className = "data-table__row";
                 tr.innerHTML = `
-                    <td class="data-table__cell text-center" style="font-weight: 700; color: var(--color-primary);">Cuota ${i}</td>
+                    <td class="data-table__cell text-center" style="font-weight: 700; color: var(--color-text-main);">Cuota ${i}</td>
                     <td class="data-table__cell">
                         <input type="date" class="form-input form-input-sm fecha-cuota-input" value="${fechaVencStr}" style="padding: 4px 8px; font-weight: 600;">
                     </td>
                     <td class="data-table__cell text-end">
-                        <input type="number" step="0.01" class="form-input form-input-sm monto-cuota-input text-end" value="${montoCuota.toFixed(2)}" style="width: 120px; font-weight: 800; color: #00e676;">
+                        <input type="number" step="0.01" class="form-input form-input-sm monto-cuota-input text-end" value="${montoCuota.toFixed(2)}" style="width: 120px; font-weight: 800; ">
                     </td>
                     <td class="data-table__cell text-center celda-dias-gracia" style="font-size: 0.88rem;">
                         +${diasGracia} días
                     </td>
-                    <td class="data-table__cell text-center celda-fecha-gracia" style="font-size: 0.88rem; font-weight: 700; color: #ffb74d;">
+                    <td class="data-table__cell text-center celda-fecha-gracia" style="font-size: 0.88rem; font-weight: 700;">
                         ${fechaGraciaStr}
                     </td>
                 `;
@@ -658,7 +658,7 @@
 
             if (resumenCuotasValidacion) {
                 if (dif < 0.05) {
-                    resumenCuotasValidacion.style.color = "#00e676";
+                    resumenCuotasValidacion.style.color = "var(--color-txt-main)";
                     resumenCuotasValidacion.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Suma de cuotas coincide con el Total: C$ ${suma.toFixed(2)}`;
                 } else {
                     resumenCuotasValidacion.style.color = "#ff5252";

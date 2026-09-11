@@ -67,6 +67,101 @@
 .form-input option {
     background-color: var(--color-bg-card-hover);
     color: var(--color-text-main);
+    padding: 8px 12px;
+}
+
+.form-input option:hover,
+.form-input option:focus,
+.form-input option:checked {
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+}
+
+/* Premium Custom Combobox (Reemplazo nativo) */
+.premium-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.premium-select-selected {
+    background-color: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.premium-select-selected::after {
+    content: "▼";
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease;
+}
+
+.premium-select-selected.premium-select-arrow-active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.premium-select-selected.premium-select-arrow-active::after {
+    transform: rotate(180deg);
+}
+
+.premium-select-items {
+    position: absolute;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.premium-select-hide {
+    display: none;
+}
+
+.premium-select-item {
+    color: var(--color-text-main);
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    background-color: transparent;
+}
+
+.premium-select-item:hover {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+.premium-select-item.same-as-selected {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.premium-select-item.same-as-selected:hover {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+.premium-disabled .premium-select-selected {
+    background-color: var(--color-bg-sidebar) !important;
+    color: var(--color-text-muted) !important;
+    cursor: not-allowed;
 }
 
 .form-input:focus {
@@ -276,7 +371,14 @@
     color: #ff5252 !important;
 }
 
-/* Fix calendar icon in dark mode */
-input[type='date']::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
+/* Fix calendar icon in both modes */
+input[type='date']::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; }
 input[type='date']::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
+[data-theme="dark"] input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+[data-theme="light"] input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+}

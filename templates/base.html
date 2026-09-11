@@ -191,14 +191,7 @@
             <!-- TOPBAR GLOBAL APEX DARK -->
             <!-- ===================================== -->
             {% block topbar %}
-            <header class="topbar">
-                <!-- IZQUIERDA: RELOJ DIGITAL Y FECHA EN VIVO -->
-                <div class="topbar__left-widget">
-                    <i class="bi bi-clock-fill text-success me-2 fs-5"></i>
-                    <span id="liveClockDate" class="topbar__date-text"></span>
-                    <strong id="liveClockTime" class="topbar__time-text"></strong>
-                </div>
-
+            <header style="display: flex; justify-content: flex-end; padding: 15px 24px; background: transparent; border-bottom: 1px solid var(--color-border);">
                 <!-- DERECHA: ALERTAS DE COBRO Y CONFIGURACIÓN EMPRESA -->
                 <div class="topbar__actions" style="display: flex; align-items: center; gap: 10px;">
                     <!-- Botón Modo Claro/Oscuro -->
@@ -315,21 +308,6 @@
                     // Let Bootstrap handle the collapse, just prevent the default jump
                 });
             });
-
-            // Reloj Digital en Vivo en Tiempo Real (Nicaragua / Español)
-            function updateLiveClock() {
-                const now = new Date();
-                const optionsDate = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
-                const dateStr = now.toLocaleDateString('es-ES', optionsDate).toUpperCase();
-                const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true });
-                
-                const dateEl = document.getElementById('liveClockDate');
-                const timeEl = document.getElementById('liveClockTime');
-                if (dateEl) dateEl.textContent = dateStr;
-                if (timeEl) timeEl.textContent = timeStr;
-            }
-            setInterval(updateLiveClock, 1000);
-            updateLiveClock();
 
             // Auto-hide Toasts
             const toasts = document.querySelectorAll('.alert-toast');

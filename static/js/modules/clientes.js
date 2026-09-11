@@ -235,7 +235,7 @@
                     if (!encontrada) formCiudad.value = '';
                 }
 
-                if (formTitle) formTitle.innerHTML = '<i class="bi bi-pencil-fill text-primary me-1"></i> EDITAR CLIENTE';
+                if (formTitle) formTitle.innerHTML = '<i class="bi bi-pencil-fill  me-1"></i> EDITAR CLIENTE';
                 window.ERP.UI.openModal('modalFormCliente');
             };
 

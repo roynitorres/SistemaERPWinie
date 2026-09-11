@@ -102,7 +102,7 @@
                     {% macro render_fila_venta(venta, saldo_pendiente, total_abonado, mostrar_saldos_abonos=True) %}
                     <!-- FILA PRINCIPAL -->
                     <tr class="data-table__row fila-factura">
-                        <td class="data-table__cell" style="font-weight: 700; color: var(--color-primary);">
+                        <td class="data-table__cell" style="font-weight: 700; color: var(--color-text-main);">
                             #{{ venta.numero_factura }}
                         </td>
                         <td class="data-table__cell">
@@ -115,7 +115,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-muted);">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}
                         </td>
                         <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">
@@ -139,17 +139,28 @@
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
                                     <li>
                                         <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                            <i class="bi bi-lightning-charge-fill" style="color: var(--color-text-main); font-size: 0.8rem;"></i> ACCIONES
+                                            ACCIONES
                                         </div>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank">
-                                            <i class="bi bi-printer me-2 text-info"></i> Imprimir Factura
+                                            Imprimir Factura
                                         </a>
                                     </li>
+                                    {% if es_activa %}
+                                    <li>
+                                        <button type="button" class="dropdown-item btn-abonar text-success"
+                                            data-venta-id="{{ venta.id }}"
+                                            data-factura="{{ venta.numero_factura }}"
+                                            data-cliente="{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}"
+                                            data-saldo-pendiente="{{ saldo_pendiente }}">
+                                            Registrar Abono
+                                        </button>
+                                    </li>
+                                    {% endif %}
                                     <li>
                                          <a class="dropdown-item" href="{{ url_for('pagos.historial_factura', venta_id=venta.id) }}">
-                                             <i class="bi bi-clock-history me-2 text-primary"></i> Ver Historial
+                                            Ver Historial
                                          </a>
                                      </li>
                                     {% if total_abonado.valor == 0 and venta.estado.value == "ACTIVA" %}
@@ -158,7 +169,7 @@
                                             data-venta-id="{{ venta.id }}"
                                             data-factura="{{ venta.numero_factura }}"
                                             data-action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}">
-                                            <i class="bi bi-trash me-2"></i> Anular Factura
+                                             Anular Factura
                                         </button>
                                     </li>
                                     {% endif %}
@@ -228,9 +239,6 @@
 
 
     <!-- ===================================== -->
-    <!-- MODAL ABONAR FACTURA (CUSTOM) -->
-    <!-- ===================================== -->
-    <!-- ===================================== -->
     <!-- MODAL ABONAR FACTURA APEX DARK -->
     <!-- ===================================== -->
     <div class="modal-overlay" id="modalAbonarFactura">
@@ -255,9 +263,9 @@
                     <input type="hidden" name="venta_id" id="abonarVentaId">
                     <input type="hidden" id="abonarSaldoPendiente">
 
-                    <div style="background-color: rgba(255, 82, 82, 0.08); border-left: 4px solid #ff5252; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="background-color: rgba(255, 82, 82, 0.08); border-left: 4px solid var(--color-text-danger); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: var(--color-text-muted); font-size: 0.9rem;">Saldo pendiente actual:</span>
-                        <strong id="lblSaldoPendiente" style="font-size: 1.25rem; color: #ff5252; font-weight: 800;">C$ 0.00</strong>
+                        <strong id="lblSaldoPendiente" style="font-size: 1.25rem; color: var(--color-text-danger); font-weight: 800;">C$ 0.00</strong>
                     </div>
 
                     <!-- Fila 1: Monto y Fecha -->
@@ -314,7 +322,7 @@
         <div class="modal-window" style="max-width: 400px; text-align: center;">
             <div class="modal-header" style="background-color: var(--color-danger);">
                 <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle"></i> ANULAR PAGO
+                     ANULAR PAGO
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAnularPago')">
                     <i class="bi bi-x"></i>
@@ -377,16 +385,14 @@
         <div class="modal-window" style="max-width: 420px;">
             <div class="modal-header" style="background-color: var(--color-danger);">
                 <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle-fill" style="margin-right: 8px;"></i> ANULAR FACTURA
+                    ANULAR FACTURA
                 </h5>
                 <button type="button" class="modal-close-btn" onclick="cerrarModal('modalAnularFactura')">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
             <div class="modal-body" style="text-align: center; padding-top: var(--spacing-xl);">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(220,53,69,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-md);">
-                    <i class="bi bi-trash3-fill" style="font-size: 1.8rem; color: var(--color-danger);"></i>
-                </div>
+                
                 <h6 style="font-weight: 700; color: var(--color-text-main); margin-bottom: var(--spacing-xs);">¿Anular la factura <span id="lblAnularFactura" style="color: var(--color-danger);"></span>?</h6>
                 <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">Esta acción anulará la factura y devolverá el stock. <strong>No podrás revertirlo.</strong></p>
             </div>
@@ -394,7 +400,7 @@
                 <button type="button" class="btn btn--outline" onclick="cerrarModal('modalAnularFactura')">Cancelar</button>
                 <form id="formAnularFactura" method="POST" style="margin: 0;">
                     <button type="submit" class="btn" style="background-color: var(--color-danger); color: #fff; border: none;">
-                        <i class="bi bi-trash3" style="margin-right: 6px;"></i> Sí, anular
+                         Sí, anular
                     </button>
                 </form>
             </div>

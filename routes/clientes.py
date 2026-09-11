@@ -115,39 +115,18 @@ def historial_cliente(cliente_id):
         joinedload(Venta.cuotas)
     ).order_by(Venta.fecha_venta.desc()).all()
 
-    total_facturado = 0.0
-    total_recaudado = 0.0
-    saldo_pendiente_total = 0.0
-    total_facturas = 0
-    facturas_contado = 0
-    facturas_credito = 0
-    facturas_pendientes = 0
-
     ventas_procesadas = []
     for venta in ventas:
         if venta.estado != EstadoVenta.ACTIVA:
             continue
 
-        total_facturas += 1
         monto_venta = float(venta.total_venta)
-        total_facturado += monto_venta
-
-        if venta.tipo_venta == TipoVenta.CONTADO:
-            facturas_contado += 1
-        elif venta.tipo_venta == TipoVenta.CREDITO:
-            facturas_credito += 1
-
         total_abonado = sum(
             float(pago.monto_pago)
             for pago in venta.pagos
             if pago.estado == "ACTIVO"
         )
-        total_recaudado += total_abonado
-
         saldo = monto_venta - total_abonado
-        if saldo > 0.01:
-            saldo_pendiente_total += saldo
-            facturas_pendientes += 1
 
         ventas_procesadas.append({
             "venta": venta,
@@ -156,20 +135,9 @@ def historial_cliente(cliente_id):
             "es_pagada": saldo <= 0.01
         })
 
-    kpis = {
-        "total_facturado": total_facturado,
-        "total_recaudado": total_recaudado,
-        "saldo_pendiente": saldo_pendiente_total,
-        "total_facturas": total_facturas,
-        "facturas_contado": facturas_contado,
-        "facturas_credito": facturas_credito,
-        "facturas_pendientes": facturas_pendientes
-    }
-
     return render_template(
         "clientes/historial_cliente.html",
         cliente=cliente,
         ventas_procesadas=ventas_procesadas,
-        kpis=kpis,
         now=datetime.now()
     )

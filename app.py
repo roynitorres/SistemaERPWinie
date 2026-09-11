@@ -20,7 +20,7 @@ from models.banco import Banco
 from models.cuota_venta import CuotaVenta
 from models.empresa import Empresa
 from models.proveedor import Proveedor
-from models.enums import EstadoVenta, TipoVenta, EstadoProducto, EstadoCliente
+from models.enums import EstadoVenta, TipoVenta, EstadoProducto, EstadoCliente, EstadoProveedor
 from sqlalchemy.orm import joinedload
        
 # BLUEPRINTS
@@ -167,6 +167,10 @@ def dashboard():
     clientes_inactivos = Cliente.query.filter_by(estado=EstadoCliente.INACTIVO).count()
     clientes_pct = round((clientes_activos / clientes_total) * 100) if clientes_total else 0
 
+    proveedores_total = Proveedor.query.count()
+    proveedores_activos = Proveedor.query.filter_by(estado=EstadoProveedor.ACTIVO).count()
+    proveedores_inactivos = Proveedor.query.filter_by(estado=EstadoProveedor.INACTIVO).count()
+
     productos_total = Producto.query.count()
     productos_stock_normal = Producto.query.filter(
         Producto.estado == EstadoProducto.ACTIVO,
@@ -231,35 +235,27 @@ def dashboard():
 
     pagos_pct = round((pagos_pagado_monto / pagos_total_monto) * 100) if pagos_total_monto else 0
 
-    ventas_ultimos_7 = []
-    for i in range(6, -1, -1):
-        dia = hoy - timedelta(days=i)
-        total_dia = sum(
-            float(v.total_venta)
-            for v in ventas_activas
-            if v.fecha_venta.date() == dia
-        )
-        ventas_ultimos_7.append({
-            "label": dia.strftime("%d/%m"),
-            "total": total_dia
-        })
-
-    productos_mas_vendidos = db.session.query(
-        Producto.nombre.label("nombre"),
-        func.sum(DetalleVenta.cantidad).label("cantidad")
-    ).join(
-        DetalleVenta,
-        DetalleVenta.producto_id == Producto.id
-    ).join(
-        Venta,
-        Venta.id == DetalleVenta.venta_id
-    ).filter(
-        Venta.estado == EstadoVenta.ACTIVA
-    ).group_by(
-        Producto.id
-    ).order_by(
-        func.sum(DetalleVenta.cantidad).desc()
-    ).limit(5).all()
+    # Ventas del mes actual (Contado vs Crédito)
+    ventas_mes_actual = [v for v in ventas_activas if v.fecha_venta.month == hoy.month and v.fecha_venta.year == hoy.year]
+    total_mes_actual = sum(float(v.total_venta) for v in ventas_mes_actual)
+    total_mes_contado = sum(
+        float(v.total_venta) for v in ventas_mes_actual 
+        if v.tipo_venta == TipoVenta.CONTADO or (hasattr(v.tipo_venta, 'value') and v.tipo_venta.value == 'CONTADO') or str(v.tipo_venta) == 'CONTADO'
+    )
+    total_mes_credito = sum(
+        float(v.total_venta) for v in ventas_mes_actual 
+        if v.tipo_venta == TipoVenta.CREDITO or (hasattr(v.tipo_venta, 'value') and v.tipo_venta.value == 'CREDITO') or str(v.tipo_venta) == 'CREDITO'
+    )
+    pct_contado = round((total_mes_contado / total_mes_actual) * 100) if total_mes_actual > 0 else 0
+    pct_credito = round((total_mes_credito / total_mes_actual) * 100) if total_mes_actual > 0 else 0
+    
+    ventas_mes_breakdown = {
+        "total": total_mes_actual,
+        "contado_monto": total_mes_contado,
+        "credito_monto": total_mes_credito,
+        "contado_pct": pct_contado,
+        "credito_pct": pct_credito
+    }
 
     kpis = {
         "clientes": {
@@ -294,6 +290,13 @@ def dashboard():
             "derecha": pagos_pendiente_monto,
             "porcentaje": pagos_pct,
         },
+        "proveedores": {
+            "total": proveedores_total,
+            "izquierda_label": "Activos",
+            "izquierda": proveedores_activos,
+            "derecha_label": "Inactivos",
+            "derecha": proveedores_inactivos,
+        },
     }
 
     anio_actual = hoy.year
@@ -313,26 +316,14 @@ def dashboard():
         })
 
     chart_data = {
-        "facturas_tipo": {
-            "labels": ["Contado", "Credito"],
-            "values": [facturas_contado, facturas_credito],
-        },
-        "pagos_estado": {
-            "labels": ["Pagadas", "Pendientes"],
-            "values": [facturas_pagadas, facturas_pendientes],
-        },
-        "ventas_7_dias": {
-            "labels": [item["label"] for item in ventas_ultimos_7],
-            "values": [item["total"] for item in ventas_ultimos_7],
-        },
-        "top_productos": {
-            "labels": [p.nombre for p in productos_mas_vendidos],
-            "values": [int(p.cantidad or 0) for p in productos_mas_vendidos],
-        },
         "crecimiento_anual": {
             "anio": anio_actual,
             "labels": [m["mes"] for m in ventas_por_mes],
             "values": [m["total"] for m in ventas_por_mes],
+        },
+        "recaudacion_mes": {
+            "labels": ["Contado", "Crédito"],
+            "values": [total_mes_contado, total_mes_credito]
         }
     }
 
@@ -377,7 +368,8 @@ def dashboard():
         clientes_a_cobrar=clientes_a_cobrar,
         top_clientes_credito=top_clientes_credito,
         kpis=kpis,
-        chart_data=chart_data
+        chart_data=chart_data,
+        ventas_mes_breakdown=ventas_mes_breakdown
     )
 
 

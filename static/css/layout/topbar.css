@@ -71,7 +71,17 @@
     cursor: pointer;
 }
 
-.topbar-icon-btn { color: var(--color-text-muted); font-size: 1.2rem; transition: color 0.2s; position: relative; }
+.topbar-icon-btn { color: var(--color-text-muted); font-size: 1.2rem; transition: color 0.2s; position: relative; cursor: pointer; background: transparent; border: none; padding: 0; }
 .topbar-icon-btn:hover { color: var(--color-primary); }
-.topbar-badge-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background-color: var(--color-danger); border-radius: 50%; }
+.topbar-badge-dot { color: var(--color-text-muted);position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background-color: var(--color-danger); border-radius: 50%; }
 
+/* Estilos dinámicos para los botones de acción (Tema, Alertas, Configuración) */
+[data-theme="light"] .topbar-icon-btn,
+[data-theme="light"] .topbar-icon-btn i {
+    color: var(--color-primary); /* Verde en modo claro */
+}
+
+[data-theme="dark"] .topbar-icon-btn,
+[data-theme="dark"] .topbar-icon-btn i {
+    color: #ffffff; /* Blanco en modo oscuro */
+}
