@@ -15,19 +15,27 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    padding-left: 76px !important;
-    padding-right: 28px !important;
-    padding-top: 16px !important;
-    padding-bottom: 40px !important;
+    padding-left: 60px !important; /* Pegado al sidebar de 60px */
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
     box-sizing: border-box !important;
+    transition: padding-left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* El contenido se empuja a la derecha cuando el sidebar se expande */
+.sidebar:hover ~ .main-content,
+.sidebar.is-open ~ .main-content {
+    padding-left: 265px !important; /* Pegado al sidebar expandido de 265px */
 }
 
 /* Contenedor central con ancho máximo y padding */
 .content-wrapper {
     flex-grow: 1;
-    padding: 0;
+    padding: 16px 28px 40px 16px !important;
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box !important;
 }
 
 /* Tarjetas contenedoras blancas */

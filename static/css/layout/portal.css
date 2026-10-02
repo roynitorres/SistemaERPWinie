@@ -288,7 +288,7 @@
 .toolbar-input {
     width: 100% !important;
     background-color: var(--color-bg-card) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid var(--color-primary) !important;
     color: var(--color-text-main) !important;
     padding: 9px 14px 9px 38px !important;
     border-radius: 10px !important;
@@ -330,10 +330,10 @@
 }
 
 .state-pill.state-pill--active, .state-pill.active {
-    background-color: var(--color-bg-input) !important;
-    color: var(--color-text-main) !important;
-    border-color: #2e3144 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    background-color: transparent !important;
+    color: var(--color-primary) !important;
+    border: 1px solid var(--color-primary) !important;
+    box-shadow: none !important;
 }
 
 .count-badge-apex {

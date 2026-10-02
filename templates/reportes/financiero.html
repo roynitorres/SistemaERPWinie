@@ -2,13 +2,17 @@
 
 {% block title %}Reportes Financieros{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-bar-chart-line-fill"></i> Resumen Financiero
-{% endblock %}
+{% block topbar_title %}Resumen Financiero{% endblock %}
 
 
 
 {% block content %}
+    <!-- HEADER DE PÁGINA -->
+    <div class="page-header-apex">
+        <h1 class="page-title-apex">
+            <i class="bi bi-graph-up-arrow px-2"></i>Reportes Financieros</h1>
+        <p class="page-subtitle-apex">Métricas, resúmenes y análisis financiero de tu negocio.</p>
+    </div>
 
     <!-- ===================================== -->
     <!-- BARRA DE NAVEGACIÓN Y FILTROS APEX DARK -->
@@ -52,7 +56,7 @@
                     </div>
                 </div>
                 <div class="rpt-kpi-apex__value" id="kpi-inversion">C$ 0.00</div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: #ffb74d; margin-top: 4px;" id="kpi-inversion-proy">
+                <div style="font-size: 0.85rem; font-weight: 700; color: var(--color-secondary); margin-top: 4px;" id="kpi-inversion-proy">
                     Proyección Venta: C$ 0.00
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.8rem; border-top: 1px solid var(--color-border); padding-top: 10px;">
@@ -158,25 +162,22 @@
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead class="data-table__head"><tr>
-                            <th style="color: #cbd5e1 !important; font-weight: 700;">Factura</th>
-                            <th style="color: #cbd5e1 !important; font-weight: 700;">Cliente</th>
-                            <th style="color: #cbd5e1 !important; font-weight: 700;">Fecha</th>
-                            <th style="text-align:center; color: #cbd5e1 !important; font-weight: 700;">Tipo</th>
-                            <th style="text-align:center; color: #cbd5e1 !important; font-weight: 700;">Cantidad</th>
-                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">Total</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Factura</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Cliente</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Fecha</th>
+                            <th style="text-align:center; color: var(--color-text-main) !important; font-weight: 700;">Tipo</th>
+                            <th style="text-align:center; color:var(--color-text-main) !important; font-weight: 700;">Cantidad</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">Total</th>
                         </tr></thead>
                         <tbody id="tabla-ventas-body"></tbody>
+                        <tfoot style="border-top: 2px solid var(--color-border); background-color: var(--color-bg-stripe);">
+                            <tr>
+                                <td colspan="4" style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main); font-size: 0.95rem;">TOTALES</td>
+                                <td style="text-align: center; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-ventas-cant">0</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-ventas">C$ 0.00</td>
+                            </tr>
+                        </tfoot>
                     </table>
-                </div>
-            </div>
-            <div class="rpt-panel-apex__footer">
-                <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Total Unidades: <span id="subtotal-ventas-cant" style="color:var(--color-secondary); font-weight:700;">0</span></span>
-                    <span class="rpt-total-label">Total Ventas Filtradas: <span id="subtotal-ventas" style="color:var(--color-primary); font-weight:700;">C$ 0.00</span></span>
-                </div>
-                <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Contado: <span id="subtotal-ventas-contado" style="color:var(--color-text-main);">C$ 0.00</span></span>
-                    <span class="rpt-total-label">Crédito: <span id="subtotal-ventas-credito" style="color:#ffb74d;">C$ 0.00</span></span>
                 </div>
             </div>
         </div>
@@ -187,59 +188,30 @@
     <!-- SECCIÓN: CLIENTES (SÓLO TABLAS) -->
     <!-- ===================================== -->
     <div id="seccion-clientes" class="seccion-reporte oculto">
-        <div class="grid grid--2-cols">
-            <!-- Mejores clientes -->
-            <div class="rpt-panel-apex">
-                <div class="rpt-panel-apex__header">
-                    <h5 class="rpt-panel-apex__title"><i class="bi bi-star-fill text-warning"></i> Quien Compró Más (Top Clientes)</h5>
-                    <span class="badge-pill-apex" style="background: rgba(255,183,77,0.12); color:#ffb74d;" id="badge-mejores-clientes">0</span>
-                </div>
-                <div class="rpt-panel-apex__body">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead class="data-table__head"><tr>
-                                <th>#</th>
-                                <th>Cliente</th>
-                                <th>Teléfono</th>
-                                <th style="text-align:center;">Compras</th>
-                                <th style="text-align:right;">Total Comprado</th>
-                            </tr></thead>
-                            <tbody id="tabla-mejores-clientes-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="rpt-panel-apex__footer">
-                    <div class="rpt-footer-row">
-                        <span class="rpt-total-label">Total Vendido a Clientes</span>
-                        <span class="rpt-total-value rpt-total-value--warning" id="subtotal-mejores-clientes">C$ 0.00</span>
-                    </div>
-                </div>
+        <div class="rpt-panel-apex">
+            <div class="rpt-panel-apex__header">
+                <h5 class="rpt-panel-apex__title"><i class="bi bi-people-fill text-success"></i> Listado General de Clientes (Ordenado por Compras)</h5>
+                <span class="badge-pill-apex badge-pill-apex--active" id="badge-clientes-unificado">0</span>
             </div>
-
-            <!-- Clientes nuevos -->
-            <div class="rpt-panel-apex">
-                <div class="rpt-panel-apex__header">
-                    <h5 class="rpt-panel-apex__title"><i class="bi bi-person-plus-fill text-success"></i> Clientes Nuevos del Mes</h5>
-                    <span class="badge-pill-apex badge-pill-apex--active" id="badge-clientes-nuevos">0</span>
-                </div>
-                <div class="rpt-panel-apex__body">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead class="data-table__head"><tr>
-                                <th>#</th>
-                                <th>Nombre</th>
-                                <th>Teléfono</th>
-                                <th style="text-align:right;">Fecha Registro</th>
-                            </tr></thead>
-                            <tbody id="tabla-clientes-nuevos-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="rpt-panel-apex__footer">
-                    <div class="rpt-footer-row">
-                        <span class="rpt-total-label">Total Clientes Nuevos</span>
-                        <span class="rpt-total-value rpt-total-value--success" id="subtotal-clientes-nuevos">0</span>
-                    </div>
+            <div class="rpt-panel-apex__body" style="max-height: 440px;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead class="data-table__head"><tr>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">N°</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Cliente</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Teléfono</th>
+                            <th style="text-align:center; color: var(--color-text-main) !important; font-weight: 700;">Compras</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">Total Comprado</th>
+                        </tr></thead>
+                        <tbody id="tabla-clientes-unificado-body"></tbody>
+                        <tfoot style="border-top: 2px solid var(--color-border); background-color: var(--color-bg-stripe);">
+                            <tr>
+                                <td colspan="3" style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main); font-size: 0.95rem;">TOTALES</td>
+                                <td style="text-align: center; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-clientes-compras">0</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-clientes-unificado">C$ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
@@ -259,37 +231,27 @@
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead class="data-table__head"><tr>
-                            <th style="color: #cbd5e1 !important; font-weight: 700;">#</th>
-                            <th style="color: #cbd5e1 !important; font-weight: 700;">Código / Producto</th>
-                            <th style="color: #cbd5e1 !important; font-weight: 700;">Proveedor</th>
-                            <th style="text-align:center; color: #cbd5e1 !important; font-weight: 700;">Cant. Comprada</th>
-                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">P. Compra</th>
-                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">P. Venta</th>
-                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">Inversión Total</th>
-                            <th style="text-align:right; color: #cbd5e1 !important; font-weight: 700;">Proyección Venta</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">N°</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Código / Producto</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Proveedor</th>
+                            <th style="text-align:center; color: var(--color-text-main) !important; font-weight: 700;">Cant. Comprada</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">P. Compra</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">P. Venta</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">Inversión Total</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">Proyección Venta</th>
                         </tr></thead>
                         <tbody id="tabla-productos-comprados-body"></tbody>
-                        <tfoot class="data-table__foot" style="background: rgba(255,255,255,0.03); font-weight: 800; border-top: 2px solid var(--color-border); color: var(--color-text-main);">
+                        <tfoot style="border-top: 2px solid var(--color-border); background-color: var(--color-bg-stripe);">
                             <tr>
-                                <td colspan="3" class="data-table__cell text-end" style="color: var(--color-text-muted); font-size: 0.85rem; letter-spacing: 0.05em;">TOTALES</td>
-                                <td class="data-table__cell text-center" style="color: var(--color-primary); font-size: 0.95rem;" id="foot-total-cant">0</td>
-                                <td class="data-table__cell" style="color: var(--color-text-muted);"></td>
-                                <td class="data-table__cell" style="color: var(--color-text-muted);"></td>
-                                <td class="data-table__cell text-end" style="color: var(--color-primary); font-size: 0.95rem;" id="foot-total-inversion">C$ 0.00</td>
-                                <td class="data-table__cell text-end" style="color: var(--color-secondary); font-size: 0.95rem;" id="foot-total-proyeccion">C$ 0.00</td>
+                                <td colspan="3" style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main); font-size: 0.95rem;">TOTALES</td>
+                                <td style="text-align: center; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-unidades-compradas">0</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-precio-compra">C$ 0.00</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-precio-venta">C$ 0.00</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-inversion-compras">C$ 0.00</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-proyeccion-ventas">C$ 0.00</td>
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-            </div>
-            <div class="rpt-panel-apex__footer">
-                <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Total Unidades Compradas</span>
-                    <span class="rpt-total-value rpt-total-value--primary" id="subtotal-unidades-compradas">0</span>
-                </div>
-                <div class="rpt-footer-row">
-                    <span class="rpt-total-label">Total Inversión: <span id="subtotal-inversion-compras" style="color:var(--color-primary);">C$ 0.00</span></span>
-                    <span class="rpt-total-label">Proyección Venta: <span id="subtotal-proyeccion-ventas" style="color:#ffb74d;">C$ 0.00</span></span>
                 </div>
             </div>
         </div>
@@ -300,52 +262,33 @@
     <!-- SECCIÓN: PAGOS (SÓLO TABLAS DE ABONO Y PAGOS DE CONTADO) -->
     <!-- ===================================== -->
     <div id="seccion-pagos" class="seccion-reporte oculto">
-        <div class="grid grid--2-cols">
-            <!-- Pagos Contado -->
-            <div class="rpt-panel-apex">
-                <div class="rpt-panel-apex__header">
-                    <h5 class="rpt-panel-apex__title"><i class="bi bi-cash text-success"></i> Pagos de Contado</h5>
-                    <span class="badge-pill-apex badge-pill-apex--active" id="badge-pagos-contado">0</span>
-                </div>
-                <div class="rpt-panel-apex__body">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead class="data-table__head"><tr>
-                                <th>Factura</th><th>Cliente</th><th>Fecha</th><th style="text-align:right;">Monto</th>
-                            </tr></thead>
-                            <tbody id="tabla-pagos-contado-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="rpt-panel-apex__footer">
-                    <div class="rpt-footer-row">
-                        <span class="rpt-total-label">Total Cobrado Contado</span>
-                        <span class="rpt-total-value rpt-total-value--success" id="subtotal-pagos-contado">C$ 0.00</span>
-                    </div>
+        <div class="rpt-panel-apex">
+            <div class="rpt-panel-apex__header">
+                <h5 class="rpt-panel-apex__title"><i class="bi bi-wallet2 text-success"></i> Recepción de Pagos del Mes</h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn--small active" id="btn-p-todas"   onclick="filtrarPagos('TODAS')">Todos</button>
+                    <button class="btn btn--outline btn--small" id="btn-p-contado" onclick="filtrarPagos('CONTADO')">Contado</button>
+                    <button class="btn btn--outline btn--small" id="btn-p-credito" onclick="filtrarPagos('CREDITO')">Crédito</button>
                 </div>
             </div>
-
-            <!-- Abonos a Crédito -->
-            <div class="rpt-panel-apex">
-                <div class="rpt-panel-apex__header">
-                    <h5 class="rpt-panel-apex__title"><i class="bi bi-cash-stack text-teal"></i> Abonos a Crédito</h5>
-                    <span class="badge-pill-apex" style="background:rgba(0,176,255,0.12); color:var(--color-secondary);" id="badge-pagos-credito">0</span>
-                </div>
-                <div class="rpt-panel-apex__body">
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead class="data-table__head"><tr>
-                                <th>Factura</th><th>Cliente</th><th>Fecha</th><th style="text-align:right;">Monto</th>
-                            </tr></thead>
-                            <tbody id="tabla-pagos-credito-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="rpt-panel-apex__footer">
-                    <div class="rpt-footer-row">
-                        <span class="rpt-total-label">Total Abonos Crédito</span>
-                        <span class="rpt-total-value rpt-total-value--primary" id="subtotal-pagos-credito">C$ 0.00</span>
-                    </div>
+            <div class="rpt-panel-apex__body" style="max-height: 440px;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead class="data-table__head"><tr>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Factura</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Cliente</th>
+                            <th style="color: var(--color-text-main) !important; font-weight: 700;">Fecha</th>
+                            <th style="text-align:center; color: var(--color-text-main) !important; font-weight: 700;">Tipo</th>
+                            <th style="text-align:right; color: var(--color-text-main) !important; font-weight: 700;">Monto</th>
+                        </tr></thead>
+                        <tbody id="tabla-pagos-body"></tbody>
+                        <tfoot style="border-top: 2px solid var(--color-border); background-color: var(--color-bg-stripe);">
+                            <tr>
+                                <td colspan="4" style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main); font-size: 0.95rem;">TOTAL RECIBIDO</td>
+                                <td style="text-align: right; padding: 16px; font-weight: 800; color: var(--color-text-main);" id="subtotal-pagos-unificado">C$ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>

@@ -105,7 +105,7 @@ def crear_o_actualizar_cliente(cliente_id, nombre, telefono, ciudad, estado):
                 usuario_cliente.set_password(password_temporal)
                 db.session.add(usuario_cliente)
                 db.session.commit()
-                return True, f"Cliente guardado. Credenciales de acceso al portal — Usuario: {telefono} | Contraseña temporal: {password_temporal}"
+                return True, f"Cliente guardado Correctamente."
 
         db.session.commit()
         return True, "Cliente guardado correctamente"

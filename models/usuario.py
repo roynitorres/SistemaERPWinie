@@ -57,6 +57,23 @@ class Usuario(UserMixin, db.Model):
         nullable=True
     )
     
+    @property
+    def nombre_mostrar(self):
+        if not self.nombre_completo:
+            return self.username
+        
+        partes = self.nombre_completo.strip().split()
+        if len(partes) == 0:
+            return self.username
+        elif len(partes) == 1:
+            return partes[0].capitalize()
+        elif len(partes) == 2:
+            # Nombre y primer apellido (ej: Juan Perez -> Juan P.)
+            return f"{partes[0].capitalize()} {partes[1][0].upper()}."
+        else:
+            # Nombre, primer apellido, inicial del segundo apellido (ej: Juan Perez Gomez -> Juan Perez G.)
+            return f"{partes[0].capitalize()} {partes[1].capitalize()} {partes[2][0].upper()}."
+
     direccion = db.Column(
         db.String(255),
         nullable=True

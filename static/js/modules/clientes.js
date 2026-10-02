@@ -12,6 +12,7 @@
         textoCopiarCredenciales: '',
         filtroActual: 'TODOS',
         estadoFiltroActual: 'TODOS',
+        mesFiltroActual: 'TODOS',
         currentPage: 1,
         itemsPerPage: 10,
         allRows: [],
@@ -46,7 +47,61 @@
                 });
             });
 
+            this.initFiltroMeses();
             this.renderTable();
+        },
+
+        /**
+         * Extrae los meses únicos de las filas y pobla el menú desplegable
+         */
+        initFiltroMeses: function() {
+            var self = this;
+            var mesesUnicos = new Set();
+            this.allRows.forEach(function(row) {
+                var fecha = row.dataset.fecha;
+                if (fecha) {
+                    mesesUnicos.add(fecha);
+                }
+            });
+
+            var arrayMeses = Array.from(mesesUnicos).sort().reverse();
+            var dropdown = document.getElementById('filtroMesDropdown');
+            if (!dropdown) return;
+
+            dropdown.innerHTML = '';
+            
+            var liTodos = document.createElement('li');
+            liTodos.innerHTML = '<button type="button" class="dropdown-item active" data-mes="TODOS">Todas las fechas</button>';
+            dropdown.appendChild(liTodos);
+
+            var nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            arrayMeses.forEach(function(yyyy_mm) {
+                var partes = yyyy_mm.split('-');
+                if (partes.length === 2) {
+                    var mesIndex = parseInt(partes[1], 10) - 1;
+                    var nombreMes = nombresMeses[mesIndex] + " " + partes[0];
+                    
+                    var li = document.createElement('li');
+                    li.innerHTML = '<button type="button" class="dropdown-item" data-mes="' + yyyy_mm + '">' + nombreMes + '</button>';
+                    dropdown.appendChild(li);
+                }
+            });
+
+            dropdown.querySelectorAll('.dropdown-item').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    dropdown.querySelectorAll('.dropdown-item').forEach(function(b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                    
+                    self.mesFiltroActual = this.dataset.mes || 'TODOS';
+                    var textoBoton = document.getElementById('textoFiltroMes');
+                    if (textoBoton) {
+                        textoBoton.textContent = this.textContent;
+                    }
+                    self.aplicarFiltrosClientes();
+                });
+            });
         },
 
         /**
@@ -62,6 +117,7 @@
                 var telefono = (row.dataset.telefono || '').toLowerCase();
                 var ciudad = (row.dataset.ciudad || '').toLowerCase();
                 var estadoRow = row.dataset.estado || '';
+                var fechaRow = row.dataset.fecha || '';
 
                 var cumpleTexto = !query ||
                     codigo.includes(query) ||
@@ -70,8 +126,10 @@
                     ciudad.includes(query);
 
                 var cumpleEstado = this.estadoFiltroActual === 'TODOS' || estadoRow === this.estadoFiltroActual;
+                
+                var cumpleMes = this.mesFiltroActual === 'TODOS' || fechaRow === this.mesFiltroActual;
 
-                return cumpleTexto && cumpleEstado;
+                return cumpleTexto && cumpleEstado && cumpleMes;
             }, this);
 
             this.currentPage = 1;

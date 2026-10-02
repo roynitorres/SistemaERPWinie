@@ -2,20 +2,14 @@
 
 {% block title %}Productos{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-box-seam"></i> Productos
-{% endblock %}
+{% block topbar_title %}Productos{% endblock %}
 
 {% block content %}
-    <!-- ===================================== -->
-    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
-    <!-- ===================================== -->
+    <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
-        <div class="breadcrumbs-apex">
-            Salpicadero &gt; <span>Productos</span>
-        </div>
-        <h1 class="page-title-apex">Productos</h1>
-        <p class="page-subtitle-apex">Visualiza y gestiona tu catálogo de productos.</p>
+        <h1 class="page-title-apex">
+            <i class="bi bi-box-seam px-2"></i>Catálogo de Productos</h1>
+        <p class="page-subtitle-apex">Administra, busca y registra el inventario de productos de tu negocio.</p>
     </div>
 
     <!-- ===================================== -->
@@ -155,9 +149,9 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer" style="margin-top: 24px;">
+                    <div class="modal-footer">
                         <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalFormProducto')">Cancelar</button>
-                        <button type="button" class="btn-apex-outline" id="btnLimpiar" style="color: var(--color-text-muted);">Limpiar</button>
+                        <button type="button" class="btn-apex-primary-outline" id="btnLimpiar">Limpiar</button>
                         <button type="submit" class="btn-neon-primary" id="btnGuardar">
                             <i class="bi bi-check-lg me-1"></i> Guardar
                         </button>
@@ -175,14 +169,14 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th>Producto</th>
-                        <th>Estado</th>
-                        <th>Código</th>
-                        <th>Categoría</th>
-                        <th>Fecha Compra</th>
-                        <th style="text-align: right;">P. Venta</th>
-                        <th style="text-align: center;">Stock</th>
-                        <th style="text-align: right;">Acciones</th>
+                        <th style="width: 30%;">Producto</th>
+                        <th style="width: 10%;">Estado</th>
+                        <th style="width: 10%;">Código</th>
+                        <th style="width: 12%;">Categoría</th>
+                        <th style="width: 10%;">Fecha Compra</th>
+                        <th style="text-align: right; width: 10%;">P. Venta</th>
+                        <th style="text-align: center; width: 8%;">Stock</th>
+                        <th style="text-align: right; width: 10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaProductos">
@@ -204,7 +198,7 @@
 
                         <td class="data-table__cell">
                             <div class="customer-cell-wrapper">
-                                <div class="avatar-circle-apex" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: var(--color-bg-app);">
+                                <div class="avatar-circle-apex">
                                     <i class="bi bi-box-seam-fill"></i>
                                 </div>
                                 <div>

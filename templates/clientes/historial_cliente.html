@@ -2,9 +2,7 @@
 
 {% block title %}Historial de Compras - {{ cliente.nombres }}{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-clock-history"></i> Historial de Compras
-{% endblock %}
+{% block topbar_title %}{{ cliente.nombres }}{% endblock %}
 
 {% block content %}
     <!-- ===================================== -->
@@ -13,14 +11,10 @@
     <div class="page-header-apex" style="display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
             <div class="breadcrumbs-apex">
-                Salpicadero &gt; <a href="{{ url_for('clientes.clientes') }}" style="color: var(--color-text-muted); text-decoration: none;">Clientes</a> &gt; <span>Historial</span>
+                Dashboard &gt; <a href="{{ url_for('clientes.clientes') }}" style="color: var(--color-text-muted); text-decoration: none;">Clientes</a> &gt; <span>Historial</span>
             </div>
-            <h1 class="page-title-apex">{{ cliente.nombres }}</h1>
-            <p class="page-subtitle-apex">
-                Código: <strong style="color: var(--color-primary);">{{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}</strong> | 
-                Teléfono: <strong style="color: var(--color-text-main);">{{ cliente.telefono or 'Sin teléfono' }}</strong> | 
-                Ciudad: <strong style="color: var(--color-text-main);">{{ cliente.ciudad or 'N/D' }}</strong>
-            </p>
+            <h1 class="page-title-apex">Historial de Facturas</h1>
+            <p class="page-subtitle-apex">Historial de compras y movimientos del cliente.</p>
         </div>
         <div>
             <a href="{{ url_for('clientes.clientes') }}" class="btn-apex-outline">
@@ -63,7 +57,7 @@
     <div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px;">
         <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); background-color: var(--color-bg-card);">
             <h5 style="margin: 0; color: var(--color-text-main); font-weight: 700;">
-                <i class="bi bi-receipt-cutoff text-success me-2"></i> Historial de Facturas
+                <i class="bi bi-person-fill me-2"></i> {{ cliente.nombres }}
             </h5>
             <small style="color: var(--color-text-muted);">Listado detallado de todas las ventas y pagos de este cliente.</small>
         </div>
@@ -90,28 +84,28 @@
                         data-tipo="{{ v.tipo_venta.value }}"
                         data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}">
 
-                        <td class="data-table__cell" style="font-weight: 700; color: var(--color-primary);">
+                        <td class="data-table__cell" style=" color: var(--color-text-main);">
                             #{{ v.numero_factura }}
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-muted);">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
                         </td>
                         <td class="data-table__cell">
-                            <span class="badge-pill-apex" style="background: var(--color-border); color: var(--color-text-main); border: 1px solid var(--color-border);">
+                            <span class="badge-pill-apex" style="background: var(--color-primary-glow); color: var(--color-text-main); ">
                                 {{ v.tipo_venta.value }}
                             </span>
                         </td>
-                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">
+                        <td class="data-table__cell text-end" style=" color: var(--color-text-main);">
                             C$ {{ "%.2f"|format(v.total_venta) }}
                         </td>
-                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-primary);">
+                        <td class="data-table__cell text-end" style=" color: var(--color-text-main);">
                             C$ {{ "%.2f"|format(item.total_abonado) }}
                         </td>
-                        <td class="data-table__cell text-end" style="font-weight: 700;">
+                        <td class="data-table__cell text-end" >
                             {% if item.saldo_pendiente > 0.01 %}
                             <span style="color: var(--color-danger);">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</span>
                             {% else %}
-                            <span style="color: var(--color-text-muted);">C$ 0.00</span>
+                            <span style="color: var(--color-text-main);">C$ 0.00</span>
                             {% endif %}
                         </td>
                         <td class="data-table__cell">

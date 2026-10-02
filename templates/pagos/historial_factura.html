@@ -2,9 +2,7 @@
 
 {% block title %}Historial Factura #{{ venta.numero_factura }}{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-clock-history"></i> Historial de Pago de Factura
-{% endblock %}
+{% block topbar_title %}Factura #{{ venta.numero_factura }}{% endblock %}
 
 {% block content %}
     <!-- ===================================== -->
@@ -12,15 +10,9 @@
     <!-- ===================================== -->
     <div class="page-header-apex" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
         <div>
-            <div class="breadcrumbs-apex">
-                Salpicadero &gt; <a href="{{ url_for('pagos.facturas', tipo=venta.tipo_venta.value.lower()) }}" style="color: var(--color-text-muted); text-decoration: none;">Pagos {{ venta.tipo_venta.value|capitalize }}</a> &gt; <span>Factura #{{ venta.numero_factura }}</span>
-            </div>
-            <h1 class="page-title-apex">Factura #{{ venta.numero_factura }}</h1>
-            <p class="page-subtitle-apex">
-                Cliente: <strong style="color: var(--color-text-main);">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</strong> | 
-                Tipo: <strong style="color: var(--color-primary);">{{ venta.tipo_venta.value }}</strong> | 
-                Fecha: <strong style="color: var(--color-text-main);">{{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}</strong>
-            </p>
+            <h1 class="page-title-apex">
+                <i class="bi bi-receipt-cutoff px-2"></i>Factura #{{ venta.numero_factura }}</h1>
+            <p class="page-subtitle-apex">Detalles, abonos y estado de esta factura.</p>
         </div>
         <div style="display: flex; gap: 10px;">
             <a href="{{ url_for('pagos.facturas', tipo='credito') if venta.tipo_venta.value == 'CREDITO' else url_for('pagos.facturas', tipo='contado') }}" class="btn-apex-outline">

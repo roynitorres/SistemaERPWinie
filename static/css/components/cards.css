@@ -17,9 +17,7 @@
     transform: translateY(-2px);
 }
 
-.card-apex-body {
-    padding: 24px;
-}
+
 
 /* Variantes para KPI y Dashboards */
 .card-kpi {
@@ -57,29 +55,3 @@
 }
 
 /* Iconos de contenedor */
-.icon-box {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-}
-/* ==========================================================================
-   COMPONENTES: PROGRESS BARS (BARRAS DE PROGRESO) APEX
-   ========================================================================== */
-.progress-track-apex {
-    width: 100%;
-    background-color: var(--color-border);
-    height: 8px;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.progress-bar-apex {
-    background-color: var(--color-primary);
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.6s ease;
-}

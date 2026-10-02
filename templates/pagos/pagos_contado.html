@@ -2,20 +2,14 @@
 
 {% block title %}Facturas de Contado{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-receipt"></i> Facturas de Contado
-{% endblock %}
+{% block topbar_title %}Facturas de Contado{% endblock %}
 
 {% block content %}
-    <!-- ===================================== -->
-    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
-    <!-- ===================================== -->
+    <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
-        <div class="breadcrumbs-apex">
-            Salpicadero &gt; Pagos &gt; <span>Contado</span>
-        </div>
-        <h1 class="page-title-apex">Facturas de Contado</h1>
-        <p class="page-subtitle-apex">Consulta y administra tus ventas pagadas al contado.</p>
+        <h1 class="page-title-apex">
+            <i class="bi bi-cash-stack px-2"></i>Facturas de Contado</h1>
+        <p class="page-subtitle-apex">Visualiza y administra todas las ventas pagadas al contado.</p>
     </div>
 
     <!-- ===================================== -->
@@ -59,11 +53,11 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th>Factura</th>
-                        <th>Cliente</th>
-                        <th>Fecha de Facturación</th>
-                        <th style="text-align: right;">Total</th>
-                        <th style="text-align: right;">Acciones</th>
+                        <th style="width: 15%;">Factura</th>
+                        <th style="width: 45%;">Cliente</th>
+                        <th style="width: 15%;">Fecha de Facturación</th>
+                        <th style="text-align: right; width: 15%;">Total</th>
+                        <th style="text-align: right; width: 10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaPagos">

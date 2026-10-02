@@ -197,36 +197,6 @@
     flex-wrap: wrap;
 }
 
-.state-pills-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 0;
-}
-
-.state-pill {
-    background-color: var(--color-bg-card);
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border);
-    padding: 7px 16px;
-    border-radius: var(--border-radius-pill);
-    font-size: 0.84rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.state-pill:hover {
-    color: var(--color-text-main);
-    background-color: var(--color-bg-card-hover);
-}
-
-.state-pill--active {
-    background-color: var(--color-bg-input) !important;
-    color: var(--color-text-main) !important;
-    border-color: #2e3144 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
 
 /* Toolbar (Search Box & Action Controls) */
 .toolbar-apex {

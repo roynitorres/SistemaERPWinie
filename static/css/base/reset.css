@@ -13,8 +13,8 @@ body {
     color: var(--color-text-main);
     background-color: var(--color-bg-app);
     line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased; /* Chrome, Safari, Opera, Edge */
+    -moz-osx-font-smoothing: grayscale; /* Firefox en macOS */
 }
 
 a {
@@ -34,7 +34,7 @@ ul, ol {
 
 /* Reset básico de botones e inputs */
 button, input, select, textarea {
-    font-family: inherit;
+    font-family: inherit; /*Obliga a los botones y campos de texto a usar la misma tipografía global que hayas definido en el body o en su contenedor padre.*/
     font-size: inherit;
     border: none;
     outline: none;
@@ -51,17 +51,17 @@ img {
    SCROLLBAR PERSONALIZADO APEX SHADCN DARK
    (Invisible por defecto, solo se muestra en hover)
    ========================================== */
-
+/* 1. Definimos el tamaño */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
-::-webkit-scrollbar-track {
+::-webkit-scrollbar-track { /* 2. El fondo de la barra (Pista) */
     background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {  /* 3. La barra que se mueve (Arrastrable) */
     background-color: transparent;
     border-radius: 10px;
     transition: background-color 0.25s ease;

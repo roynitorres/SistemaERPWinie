@@ -21,8 +21,8 @@
                 var ahora = new Date();
                 horaActualEl.textContent = ahora.toLocaleTimeString("es-NI", {
                     hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
+                    minute: "2-digit"
+                   
                 });
             };
 

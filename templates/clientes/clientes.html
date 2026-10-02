@@ -2,18 +2,16 @@
 
 {% block title %}Clientes{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-people"></i> Clientes
-{% endblock %}
+{% block topbar_title %}Clientes{% endblock %}
 
 {% block content %}
-
-    <!-- ===================================== -->
-    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
-    <!-- ===================================== -->
+    <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
-        <h1 class="page-title-apex">Clientes</h1>
-        <p class="page-subtitle-apex">Visualiza y gestiona tu base de clientes.</p>
+        <h1 class="page-title-apex">
+            <i class="bi bi-people px-2" ></i>Catálogo de Clientes</h1>
+        <p class="page-subtitle-apex">Administra, busca y registra a todos los clientes de tu negocio.</p>
+    </div>
+
     <!-- ===================================== -->
     <!-- BARRA DE HERRAMIENTAS, BÚSQUEDA Y PILLS APEX -->
     <!-- ===================================== -->
@@ -30,6 +28,16 @@
                 <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
                 <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
                 <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
+            </div>
+
+            <!-- FILTRO DE MESES DINÁMICO -->
+            <div class="dropdown d-inline-block ms-2">
+                <button class="btn-apex-outline" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Filtrar por Mes" style="padding: 7px 12px; border-radius: 10px;">
+                    <i class="bi bi-funnel"></i> <span id="textoFiltroMes">Todos los meses</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark-apex shadow" id="filtroMesDropdown">
+                    <!-- Opciones inyectadas por JS -->
+                </ul>
             </div>
         </div>
 
@@ -122,9 +130,9 @@
                         </div>
                     </div>
 
-                    <div class="modal-footer" style="margin-top: 24px;">
+                    <div class="modal-footer">
                         <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalFormCliente')">Cancelar</button>
-                        <button type="button" class="btn-apex-outline" id="btnLimpiar" style="color: var(--color-text-muted);">Limpiar</button>
+                        <button type="button" class="btn-apex-primary-outline" id="btnLimpiar">Limpiar</button>
                         <button type="submit" class="btn-neon-primary" id="btnGuardar">
                             <i class="bi bi-check-lg me-1"></i> Guardar
                         </button>
@@ -142,13 +150,13 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th>Cliente</th>
-                        <th>Estado</th>
-                        <th>Código</th>
-                        <th>Teléfono</th>
-                        <th>Ciudad</th>
-                        <th>Incorporado</th>
-                        <th style="text-align: right;">Acciones</th>
+                        <th style="width: 35%;">Cliente</th>
+                        <th style="width: 10%;">Estado</th>
+                        <th style="width: 10%;">Código</th>
+                        <th style="width: 12%;">Teléfono</th>
+                        <th style="width: 13%;">Ciudad</th>
+                        <th style="width: 10%;">Incorporado</th>
+                        <th style="text-align: right; width: 10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaClientes">
@@ -159,7 +167,8 @@
                         data-nombres="{{ cliente.nombres }}" 
                         data-telefono="{{ cliente.telefono }}"
                         data-ciudad="{{ cliente.ciudad or '' }}"
-                        data-estado="{{ cliente.estado.value }}">
+                        data-estado="{{ cliente.estado.value }}"
+                        data-fecha="{{ cliente.created_at.strftime('%Y-%m') if cliente.created_at else '' }}">
 
                         <td class="data-table__cell">
                             <div class="customer-cell-wrapper">
@@ -171,8 +180,8 @@
                                     {% if cliente.usuario %}
                                         {% if cliente.usuario.debe_cambiar_password %}
                                         <div style="margin-top: 2px;">
-                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; color: #ffb74d; background: rgba(255, 183, 77, 0.1); border-radius: 4px; padding: 1px 6px;" title="Clave temporal activa: restablecimiento bloqueado">
-                                                <i class="bi bi-lock-fill" style="font-size: 0.68rem; color: var(--color-warning);"></i>
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; color: #44423f; background: rgba(255, 183, 77, 0.1); border-radius: 4px; padding: 1px 6px;" title="Clave temporal activa: restablecimiento bloqueado">
+                                                <i class="bi bi-lock-fill" style="font-size: 0.68rem; color: var(--color-text-muted);"></i>
                                             </span>
                                         </div>
                                         {% else %}
@@ -191,16 +200,16 @@
                                 {{ cliente.estado.value }}
                             </span>
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-main);">
+                        <td class="data-table__cell" style="color: var(--color-text-muted);">
                             {{ cliente.codigo or "C" ~ "%03d"|format(cliente.id) }}
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-main);">
+                        <td class="data-table__cell" style="color: var(--color-text-muted);">
                             {{ cliente.telefono or '-' }}
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-main);">
+                        <td class="data-table__cell" style="color: var(--color-text-muted);">
                             {{ cliente.ciudad or '-' }}
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-main);">
+                        <td class="data-table__cell" style="color: var(--color-text-muted);">
                             {{ cliente.created_at.strftime('%d/%m/%Y') if cliente.created_at else '-' }}
                         </td>
                         <td class="data-table__cell text-end">

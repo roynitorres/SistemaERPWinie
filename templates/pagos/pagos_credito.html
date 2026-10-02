@@ -2,9 +2,7 @@
 
 {% block title %}Cuentas por Cobrar{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-wallet2"></i> Cuentas por Cobrar
-{% endblock %}
+{% block topbar_title %}Cuentas por Cobrar (Crédito){% endblock %}
 
 {% block content %}
     <style>
@@ -37,11 +35,9 @@
     <!-- ENCABEZADO DE PÁGINA APEX DARK -->
     <!-- ===================================== -->
     <div class="page-header-apex">
-        <div class="breadcrumbs-apex">
-            Salpicadero &gt; Pagos &gt; <span>Crédito</span>
-        </div>
-        <h1 class="page-title-apex">Cuentas por Cobrar (Crédito)</h1>
-        <p class="page-subtitle-apex">Gestión de facturas a crédito, saldos pendientes y abonos de clientes.</p>
+        <h1 class="page-title-apex">
+            <i class="bi bi-clock-history px-2"></i>Cuentas por Cobrar (Crédito)</h1>
+        <p class="page-subtitle-apex">Visualiza las facturas emitidas a crédito y registra sus abonos.</p>
     </div>
 
     <!-- ===================================== -->
@@ -90,12 +86,12 @@
             <table id="tablaContainerPendientes" class="data-table tabla-activa">
                 <thead class="data-table__head">
                     <tr>
-                        <th>Factura</th>
-                        <th>Cliente</th>
-                        <th>Vencimiento</th>
-                        <th style="text-align: right;">Total</th>
-                        <th style="text-align: center;">Cuotas</th>
-                        <th style="text-align: right;">Acciones</th>
+                        <th style="width: 15%;">Factura</th>
+                        <th style="width: 40%;">Cliente</th>
+                        <th style="width: 15%;">Vencimiento</th>
+                        <th style="text-align: right; width: 10%;">Total</th>
+                        <th style="text-align: center; width: 10%;">Cuotas</th>
+                        <th style="text-align: right; width: 10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaPagosPendientes">
@@ -199,12 +195,12 @@
             <table id="tablaContainerPagadas" class="data-table" style="display: none;">
                 <thead class="data-table__head">
                     <tr>
-                        <th style="width: 120px;">FACTURA</th>
-                        <th>CLIENTE</th>
-                        <th>VENCIMIENTO</th>
-                        <th style="text-align: right;">TOTAL</th>
-                        <th style="text-align: center;">CUOTAS</th>
-                        <th style="text-align: right;">ACCIONES</th>
+                        <th style="width: 15%;">Factura</th>
+                        <th style="width: 40%;">Cliente</th>
+                        <th style="width: 15%;">Vencimiento</th>
+                        <th style="text-align: right; width: 10%;">Total</th>
+                        <th style="text-align: center; width: 10%;">Cuotas</th>
+                        <th style="text-align: right; width: 10%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaPagosPagadas">
@@ -405,3 +401,4 @@
                 </form>
             </div>
 {% endblock %}
+

@@ -3,7 +3,7 @@
    ========================================================================== */
 
 /* Contenedor Panel de Tablas */
-.panel, .table-card-container {
+.panel {
     background-color: var(--color-bg-card);
     border-radius: var(--border-radius-md);
     border: 1px solid var(--color-border);
@@ -15,7 +15,7 @@
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    min-height: 280px;
+    min-height: 650px;
 }
 
 /* Tabla Principal */
@@ -26,11 +26,15 @@
     background-color: transparent;
     text-align: left;
     margin: 0;
+    table-layout: fixed;
 }
 
 /* Encabezados */
 .data-table__head th, .table thead th, .table th {
-    background-color: transparent !important;
+    background-color: var(--color-bg-card) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
     padding: 1rem 1.2rem !important;
     color: var(--color-text-main) !important;
     font-weight: 700 !important;
@@ -110,9 +114,9 @@
 }
 
 .badge-pill-apex--inactive {
-    background-color: rgba(255, 82, 82, 0.18);
-    color: var(--color-danger);
-    border: 1px solid rgba(255, 82, 82, 0.3);
+    background-color: rgba(94, 100, 87, 0.18);
+    color: var(--color-text-main);
+    border: 1px solid rgba(97, 77, 77, 0.3);
 }
 
 .badge-pill-apex--warning {
@@ -143,25 +147,4 @@
     border-color: var(--color-primary);
 }
 
-.dropdown-menu-dark-apex {
-    background-color: var(--color-bg-card-hover) !important;
-    border: 1px solid var(--color-border) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-    padding: 6px !important;
-}
 
-.dropdown-menu-dark-apex .dropdown-item {
-    color: var(--color-text-main) !important;
-    font-size: 0.85rem !important;
-    padding: 8px 14px !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-.dropdown-menu-dark-apex .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.06) !important;
-    color: var(--color-primary) !important;
-}

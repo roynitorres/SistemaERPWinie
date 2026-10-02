@@ -30,17 +30,3 @@ img.avatar {
     border: none;
 }
 
-.avatar-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.avatar-text__title {
-    font-weight: var(--font-weight-bold);
-    color: var(--color-primary); /* Texto azul como en la imagen */
-}
-
-.avatar-text__subtitle {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-}

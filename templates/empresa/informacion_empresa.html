@@ -2,9 +2,7 @@
 
 {% block title %}Información de la Empresa{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-building"></i> Información de la Empresa
-{% endblock %}
+{% block topbar_title %}Información de la Empresa{% endblock %}
 
 {% block content %}
 
@@ -15,8 +13,8 @@
     <div class="breadcrumbs-apex">
         Salpicadero &gt; <span>Información de la Empresa</span>
     </div>
-    <h1 class="page-title-apex">Información de la Empresa</h1>
-    <p class="page-subtitle-apex">Configura la razón social, RUC, datos de contacto, régimen fiscal y parámetros de facturación.</p>
+    
+    
 </div>
 
 <form method="POST" enctype="multipart/form-data" id="formEmpresa" data-tiene-empresa="{{ 'true' if empresa else 'false' }}" novalidate>

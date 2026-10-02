@@ -7,11 +7,11 @@
     // 1. Obtener preferencia guardada
     const savedTheme = localStorage.getItem('theme');
     
-    // 2. Aplicar el tema (Si no hay guardado, por defecto es 'dark')
-    if (savedTheme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-    } else {
+    // 2. Aplicar el tema (Si no hay guardado, por defecto es 'light')
+    if (savedTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
     }
 })();
 
@@ -43,6 +43,6 @@ function updateThemeIcon(theme) {
 
 // Actualizar el icono al cargar la página si el DOM ya está listo
 document.addEventListener('DOMContentLoaded', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     updateThemeIcon(currentTheme);
 });
