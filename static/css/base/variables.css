@@ -54,10 +54,10 @@
 
 [data-theme='dark'] {
     /* Fondos y Superficies Dark */
-    --color-bg-app: #161616;         /* Lienzo negro Slate profundo */
-    --color-bg-card: #04182d;        /* Tarjetas y paneles oscuros */
-    --color-bg-card-hover: #181920;  /* Hover en tarjetas */
-    --color-bg-input: #18181b;       /* Inputs oscuros */
+    --color-bg-app: #0A0F1A;         /* Lienzo negro Slate profundo */
+    --color-bg-card: #101726;        /* Tarjetas y paneles oscuros */
+    --color-bg-card-hover: #162032;  /* Hover en tarjetas */
+    --color-bg-input: #0D1320;       /* Inputs oscuros */
     
     /* Colores Principales y Acentos */
     --color-primary: #0047AB;        /* Azul cobalto/celeste solicitado */
@@ -67,14 +67,16 @@
     
     /* Textos */
     --color-text-main: #ffffff;      /* Blanco puro para títulos y cifras */
-    --color-text-muted: #faf9f9;     /* Gris tenue para subtítulos */
+    --color-text-muted: #94A3B8;     /* Gris tenue para subtítulos */
     --color-text-subtle: #71717a;    /* Gris atenuado para notas */
     
     /* Bordes y Líneas */
-    --color-border: #1e2029;         /* Líneas finas oscuras */
-    --color-border-hover: #27272a;   /* Borde hover */
+    --color-border: #1E293B;         /* Líneas finas oscuras */
+    --color-border-hover: #334155;   /* Borde hover */
     
     --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
     --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.85);
 }
+
+
 
