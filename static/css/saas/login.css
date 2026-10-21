@@ -1,0 +1,293 @@
+/* ==========================================================================
+   SAAS CONSOLA MAESTRA - LOGIN SUPER ADMIN
+   ========================================================================== */
+
+@import url('variables.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-canvas);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ==================================================
+   TARJETA DE ACCESO
+   ================================================== */
+.login-box {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 44px 38px;
+    width: 100%;
+    max-width: 410px;
+    box-shadow: var(--card-shadow);
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-content {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.login-content.fade-out {
+    opacity: 0;
+    transform: scale(0.92);
+    pointer-events: none;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.shield-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    background: var(--icon-shield-bg);
+    border: 1px solid var(--icon-shield-border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    color: var(--color-accent);
+}
+
+h1 {
+    font-size: 1.4rem;
+    margin: 0 0 6px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+/* ==================================================
+   FLOATING LABELS (ANIMACIÓN DE CAMPOS)
+   ================================================== */
+.floating-group {
+    position: relative;
+    margin-bottom: 22px;
+}
+
+.floating-group i.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.15rem;
+    transition: color 0.2s ease;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.floating-input {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px 44px 15px 44px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.floating-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.2);
+    background-color: var(--bg-card);
+}
+
+.floating-input:focus ~ i.input-icon {
+    color: var(--color-primary);
+}
+
+.floating-label {
+    position: absolute;
+    left: 42px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 6px;
+    z-index: 2;
+}
+
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+    top: 0;
+    transform: translateY(-50%) scale(0.85);
+    background-color: var(--bg-card);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.btn-toggle-eye {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.15rem;
+    padding: 0;
+    z-index: 3;
+    transition: color 0.2s;
+}
+
+.btn-toggle-eye:hover {
+    color: var(--color-primary);
+}
+
+/* ==================================================
+   BOTÓN PRINCIPAL Y ALERTAS
+   ================================================== */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #0047AB, #003682);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(0, 71, 171, 0.35);
+}
+
+.btn-submit:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 71, 171, 0.45);
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #EF4444;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+    text-align: center;
+}
+
+/* Shake en error */
+@keyframes shakeBox {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+.shake {
+    animation: shakeBox 0.4s ease-in-out;
+}
+
+/* ==================================================
+   ANIMACIÓN DEL CHECK VERDE DE ÉXITO
+   ================================================== */
+.login-success-state {
+    text-align: center;
+    padding: 30px 10px;
+    animation: popInSuccess 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popInSuccess {
+    0% {
+        opacity: 0;
+        transform: scale(0.65);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-checkmark-wrapper {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.12);
+    box-shadow: 0 0 35px var(--check-glow);
+    position: relative;
+}
+
+.checkmark-svg {
+    width: 68px;
+    height: 68px;
+    display: block;
+    stroke-width: 3.5;
+    stroke: #10B981;
+    stroke-miterlimit: 10;
+}
+
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3.2;
+    stroke: #10B981;
+    animation: drawCircle 0.55s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 4;
+    animation: drawCheck 0.35s cubic-bezier(0.65, 0, 0.45, 1) 0.45s forwards;
+}
+
+@keyframes drawCircle {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes drawCheck {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.success-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text-main);
+    letter-spacing: -0.3px;
+}
+
+.success-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 0;
+}

@@ -1,0 +1,621 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consola Maestra SaaS - Gestión de Espacios de Trabajo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/dashboard.css') }}">
+    <script>
+        // Anti-FOUC: Carga inmediata del tema aislado del Super Admin
+        (function() {
+            const savedTheme = localStorage.getItem('saas_master_theme') || 'dark';
+            document.documentElement.setAttribute('data-saas-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="saas-topbar">
+        <div class="saas-brand">
+            <div class="saas-brand-icon">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <span>Panel Administrador</span>
+        </div>
+
+        <div class="saas-user-meta">
+            <!-- Selector Aislado Modo Claro / Oscuro -->
+            <button type="button" class="btn-theme-toggle" onclick="toggleSaasTheme()" id="btnThemeToggle" title="Cambiar Modo Claro / Oscuro">
+                <i class="bi bi-sun-fill" id="saasThemeIcon"></i>
+            </button>
+
+            <div class="user-badge">
+                <i class="bi bi-person-badge text-primary"></i>
+                <span>Super Admin: <strong>{{ superadmin_name }}</strong></span>
+            </div>
+
+            <button type="button" class="btn-logout" onclick="abrirModalLogout()" title="Cerrar sesión">
+                <i class="bi bi-power"></i> Salir
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WRAPPER -->
+    <main class="saas-container">
+
+        <!-- PAGE HEADER -->
+        <div class="saas-page-header">
+            <div class="saas-title">
+                <h1>Gestión de Clientes y Dominios</h1>
+                <p>Monitorea suscripciones, accesos instantáneos de los clientes.</p>
+            </div>
+            <button class="btn-glow-primary" onclick="abrirModalCrear()">
+                <i class="bi bi-plus-circle"></i>  Nueva Empresa
+            </button>
+        </div>
+
+        <!-- 4 KPI CARDS -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap kpi-icon-green">
+                    <i class="bi bi-building-check"></i>
+                </div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Empresas Activas</div>
+                    <div class="kpi-val">{{ kpis.activas }}</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap kpi-icon-red">
+                    <i class="bi bi-building-slash"></i>
+                </div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Empresas Suspendidas</div>
+                    <div class="kpi-val">{{ kpis.suspendidas }}</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap kpi-icon-blue">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Ingresos Mensuales</div>
+                    <div class="kpi-val">${{ "%.2f"|format(kpis.ingresos) }}</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap kpi-icon-amber">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Próximos a Vencer (7d)</div>
+                    <div class="kpi-val">{{ kpis.por_vencer }}</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABLE SECTION -->
+        <section class="saas-table-card">
+            <div class="table-toolbar">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="filtroBuscar" placeholder="Buscar por empresa o subdominio..." onkeyup="filtrarTabla()">
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Total registrados: <strong>{{ tenants|length }}</strong>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="tablaTenants">
+                    <thead>
+                        <tr>
+                            <th>Empresa / Subdominio</th>
+                            <th>Titular / Contacto</th>
+                            <th>Plan</th>
+                            <th>Fecha Corte</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tenants %}
+                        <tr id="row-tenant-{{ t.id }}" data-search="{{ t.nombre_comercial }} {{ t.slug }} {{ t.propietario_nombre }}">
+                            <td>
+                                <div class="tenant-name-box">
+                                    <span class="tenant-title">{{ t.nombre_comercial }}</span>
+                                    <a href="http://{{ t.slug }}.{{ base_domain }}" target="_blank" class="subdomain-tag">
+                                        <i class="bi bi-box-arrow-up-right"></i> {{ t.slug }}.{{ base_domain }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600;">{{ t.propietario_nombre }}</div>
+                                {% if t.propietario_telefono %}
+                                <a href="https://wa.me/{{ t.propietario_telefono|replace(' ', '')|replace('+', '')|replace('-', '') }}" target="_blank" style="color: var(--color-whatsapp); font-size: 0.84rem; text-decoration: none;">
+                                    <i class="bi bi-whatsapp"></i> {{ t.propietario_telefono }}
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span style="background: rgba(0, 71, 171, 0.15); border: 1px solid rgba(0, 176, 255, 0.3); color: var(--color-accent); padding: 3px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;">
+                                    {{ t.plan }}
+                                </span>
+                            </td>
+                            <td>
+                                <div>{{ t.fecha_corte.strftime('%d/%m/%Y') }}</div>
+                                {% if t.esta_vencido %}
+                                <div style="font-size: 0.78rem; color: #EF4444;">
+                                    {{ t.dias_restantes }} días restantes
+                                </div>
+                                {% else %}
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                                    {{ t.dias_restantes }} días restantes
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if t.esta_activo %}
+                                <span id="badge-status-{{ t.id }}" class="badge-pill badge-active">
+                                    <span class="dot dot-green"></span>
+                                    {{ t.estado }}
+                                </span>
+                                {% else %}
+                                <span id="badge-status-{{ t.id }}" class="badge-pill badge-suspended">
+                                    <span class="dot dot-red"></span>
+                                    {{ t.estado }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions-group">
+                                    <!-- Switch Activar / Suspender -->
+                                    {% if t.esta_activo %}
+                                    <label class="switch" title="Activar / Suspender acceso">
+                                        <input type="checkbox" checked data-tenant-id="{{ t.id }}" onchange="toggleEstado(this)">
+                                        <span class="slider"></span>
+                                    </label>
+                                    {% else %}
+                                    <label class="switch" title="Activar / Suspender acceso">
+                                        <input type="checkbox" data-tenant-id="{{ t.id }}" onchange="toggleEstado(this)">
+                                        <span class="slider"></span>
+                                    </label>
+                                    {% endif %}
+
+                                    <!-- Restablecer Contraseña -->
+                                    <button type="button" class="btn-icon-action" title="Restablecer Contraseña" data-tenant-id="{{ t.id }}" data-nombre="{{ t.nombre_comercial }}" data-slug="{{ t.slug }}" onclick="abrirModalResetBtn(this)">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+
+                                    <!-- Descargar Respaldo .db -->
+                                    <a href="{{ url_for('saas_admin.descargar_backup', tenant_id=t.id) }}" class="btn-icon-action" title="Descargar Respaldo .db">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+
+                                    <!-- Abrir Sistema -->
+                                    <a href="http://{{ t.slug }}.{{ base_domain }}" target="_blank" class="btn-icon-action" title="Abrir espacio de trabajo">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                <i class="bi bi-buildings" style="font-size: 2.5rem; display: block; margin-bottom: 10px; opacity: 0.4;"></i>
+                                Aún no has registrado ninguna empresa en la plataforma.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL CREAR NUEVA EMPRESA -->
+    <div class="modal-overlay" id="modalCrearEmpresa">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3><i class="bi bi-building-add"></i> Crear Nueva Empresa</h3>
+                <button class="modal-close-btn" onclick="cerrarModalCrear()" aria-label="Cerrar">&times;</button>
+            </div>
+
+            <form id="formCrearEmpresa" onsubmit="enviarCrearEmpresa(event)">
+                <div class="modal-body">
+                    <!-- SECCIÓN 1: IDENTIDAD -->
+                    <div class="form-section-title">
+                        <i class="bi bi-1-circle"></i> Identidad del Negocio
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre Comercial *</label>
+                            <input type="text" name="nombre_comercial" id="inpNombre" class="form-control" placeholder="Ej: Comercial Royni" required onkeyup="autoGenerarSlug()">
+                        </div>
+                        <div class="form-group">
+                            <label>RUC / Cédula Fiscal</label>
+                            <input type="text" name="ruc" class="form-control" placeholder="Ej: J0310000123456">
+                        </div>
+                    </div>
+
+                    <div class="form-grid single">
+                        <div class="form-group">
+                            <label>Subdominio de Acceso *</label>
+                            <div class="input-group-addon">
+                                <span>http://</span>
+                                <input type="text" name="slug" id="inpSlug" class="form-control" placeholder="royni" required>
+                                <span>.{{ base_domain }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 2: ACCESO -->
+                    <div class="form-section-title">
+                        <i class="bi bi-2-circle"></i> Acceso del Administrador
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Propietario *</label>
+                            <input type="text" name="propietario_nombre" class="form-control" placeholder="Ej: Royni Torrez" required>
+                        </div>
+                        <div class="form-group">
+                            <label>WhatsApp / Teléfono *</label>
+                            <input type="text" name="propietario_telefono" class="form-control" placeholder="Ej: +505 8888-9999" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Usuario Inicial</label>
+                            <input type="text" name="username_admin" class="form-control" value="admin" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña Temporal *</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" name="password_temporal" id="inpPassword" class="form-control" value="Admin2026!" required>
+                                <button type="button" class="btn-secondary" onclick="generarPassword()" title="Generar clave aleatoria">
+                                    <i class="bi bi-magic"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 3: PLAN -->
+                    <div class="form-section-title">
+                        <i class="bi bi-3-circle"></i> Plan y Facturación
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Plan Contratado</label>
+                            <select name="plan" class="form-control">
+                                {% for p in planes %}
+                                {% if p == 'PRO' %}
+                                <option value="{{ p }}" selected>Plan {{ p }}</option>
+                                {% else %}
+                                <option value="{{ p }}">Plan {{ p }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensualidad ($ USD)</label>
+                            <input type="number" step="0.01" name="precio_mensual" class="form-control" value="35.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="security-badge">
+                        <i class="bi bi-shield-check"></i> Base aislada .db lista para aprovisionar
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="cerrarModalCrear()">Cancelar</button>
+                    <button type="submit" id="btnCrearSubmit" class="btn-glow-primary">
+                        <i class="bi bi-rocket-takeoff"></i> Crear y Activar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL RESTABLECER CONTRASEÑA -->
+    <div class="modal-overlay" id="modalResetPassword">
+        <div class="modal-container" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3><i class="bi bi-key-fill"></i> Restablecer Contraseña</h3>
+                <button class="modal-close-btn" onclick="cerrarModalReset()" aria-label="Cerrar">&times;</button>
+            </div>
+            <form id="formResetPassword" onsubmit="enviarResetPassword(event)">
+                <input type="hidden" id="resetTenantId" name="tenant_id">
+                <div class="modal-body">
+                    <div style="margin-bottom: 16px; font-size: 0.95rem;">
+                        Empresa: <strong id="resetTenantNombre" style="color: #00B0FF;">---</strong>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label>Usuario a modificar</label>
+                        <input type="text" name="username" id="resetUsername" class="form-control" value="admin" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label>Nueva Clave Temporal *</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" name="password_temporal" id="resetPasswordTemporal" class="form-control" required>
+                            <button type="button" class="btn-secondary" onclick="generarClaveReset()" title="Generar otra clave">
+                                <i class="bi bi-magic"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+                        <input type="checkbox" name="forzar_cambio" id="resetForzarCambio" value="1" checked style="accent-color: var(--color-primary); width: 16px; height: 16px;">
+                        <label for="resetForzarCambio" style="margin: 0; cursor: pointer;">Obligar al cliente a cambiar la clave al entrar</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="cerrarModalReset()">Cancelar</button>
+                    <button type="submit" id="btnResetSubmit" class="btn-glow-primary">
+                        <i class="bi bi-check2-circle"></i> Restablecer y Copiar WhatsApp
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ÉXITO Y MENSAJE DE WHATSAPP -->
+    <div class="modal-overlay" id="modalExitoWhatsapp">
+        <div class="modal-container" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3 style="color: #10B981;"><i class="bi bi-check-circle-fill"></i> ¡Empresa Creada!</h3>
+                <button class="modal-close-btn" onclick="cerrarModalExito()" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin: 0 0 16px; color: var(--text-muted); font-size: 0.95rem;">
+                    La base de datos fue creada y el espacio de trabajo ya está activo. Copia el siguiente mensaje listo para enviar al cliente por WhatsApp:
+                </p>
+                <div class="whatsapp-preview-box" id="textoWhatsappPreview"></div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn-secondary" onclick="cerrarModalExito()">Cerrar</button>
+                <button type="button" class="btn-glow-primary" onclick="copiarMensajeWhatsapp()">
+                    <i class="bi bi-whatsapp"></i> Copiar Mensaje
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- MODAL CONFIRMACIÓN CERRAR SESIÓN -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalConfirmarLogout" onclick="if(event.target === this) cerrarModalLogout()">
+        <div class="modal-container modal-compact">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </h3>
+                <button type="button" class="modal-close-btn" onclick="cerrarModalLogout()" aria-label="Cerrar" title="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    ¿Estás seguro de que deseas salir del sistema?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-compact-cancel" onclick="cerrarModalLogout()">Cancelar</button>
+                <a href="{{ url_for('saas_admin.logout') }}" class="btn-compact-confirm">
+                    Sí, salir
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function abrirModalLogout() {
+            document.getElementById('modalConfirmarLogout').classList.add('active');
+        }
+        function cerrarModalLogout() {
+            document.getElementById('modalConfirmarLogout').classList.remove('active');
+        }
+        function confirmarCerrarSesion() {
+            abrirModalLogout();
+        }
+
+        function abrirModalCrear() {
+            document.getElementById('modalCrearEmpresa').classList.add('active');
+        }
+        function cerrarModalCrear() {
+            document.getElementById('modalCrearEmpresa').classList.remove('active');
+        }
+
+        function abrirModalExito(msg) {
+            document.getElementById('textoWhatsappPreview').innerText = msg;
+            document.getElementById('modalExitoWhatsapp').classList.add('active');
+        }
+        function cerrarModalExito() {
+            document.getElementById('modalExitoWhatsapp').classList.remove('active');
+            window.location.reload();
+        }
+
+        function autoGenerarSlug() {
+            const nombre = document.getElementById('inpNombre').value;
+            const slug = nombre.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/[\s_]+/g, "-")
+                .replace(/-+/g, "-")
+                .trim();
+            document.getElementById('inpSlug').value = slug;
+        }
+
+        function generarPassword() {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#$!";
+            let pwd = "SaaS";
+            for (let i = 0; i < 6; i++) {
+                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('inpPassword').value = pwd;
+        }
+
+        function filtrarTabla() {
+            const query = document.getElementById('filtroBuscar').value.toLowerCase();
+            const rows = document.querySelectorAll('#tablaTenants tbody tr');
+            rows.forEach(r => {
+                const text = r.getAttribute('data-search') ? r.getAttribute('data-search').toLowerCase() : '';
+                r.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        async function toggleEstado(target) {
+            const tenantId = (typeof target === 'object' && target !== null && target.getAttribute)
+                ? target.getAttribute('data-tenant-id')
+                : target;
+            try {
+                const res = await fetch(`/saas-master/toggle-estado/${tenantId}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    const badge = document.getElementById(`badge-status-${tenantId}`);
+                    if (data.esta_activo) {
+                        badge.className = 'badge-pill badge-active';
+                        badge.innerHTML = '<span class="dot dot-green"></span> ACTIVO';
+                    } else {
+                        badge.className = 'badge-pill badge-suspended';
+                        badge.innerHTML = '<span class="dot dot-red"></span> SUSPENDIDO';
+                    }
+                }
+            } catch (err) {
+                alert('Error al cambiar el estado del inquilino');
+            }
+        }
+
+        function abrirModalResetBtn(btn) {
+            const tenantId = btn.getAttribute('data-tenant-id');
+            const nombre = btn.getAttribute('data-nombre');
+            const slug = btn.getAttribute('data-slug');
+            abrirModalReset(tenantId, nombre, slug);
+        }
+
+        async function enviarCrearEmpresa(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnCrearSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Aprovisionando...';
+
+            const form = document.getElementById('formCrearEmpresa');
+            const formData = new FormData(form);
+
+            try {
+                const res = await fetch('/saas-master/crear-empresa', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cerrarModalCrear();
+                    abrirModalExito(data.mensaje_whatsapp);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Fallo de conexión al aprovisionar la empresa.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-rocket-takeoff"></i> Crear y Activar';
+            }
+        }
+
+        function copiarMensajeWhatsapp() {
+            const texto = document.getElementById('textoWhatsappPreview').innerText;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('¡Mensaje copiado al portapapeles! Ya puedes pegarlo en WhatsApp.');
+            });
+        }
+
+        let currentResetSlug = '';
+        function abrirModalReset(tenantId, nombre, slug) {
+            document.getElementById('resetTenantId').value = tenantId;
+            document.getElementById('resetTenantNombre').innerText = nombre;
+            currentResetSlug = slug;
+            generarClaveReset();
+            document.getElementById('modalResetPassword').classList.add('active');
+        }
+
+        function cerrarModalReset() {
+            document.getElementById('modalResetPassword').classList.remove('active');
+        }
+
+        function generarClaveReset() {
+            const prefix = currentResetSlug ? (currentResetSlug.charAt(0).toUpperCase() + currentResetSlug.slice(1, 4)) : 'Temp';
+            const num = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('resetPasswordTemporal').value = `${prefix}#${num}`;
+        }
+
+        async function enviarResetPassword(e) {
+            e.preventDefault();
+            const tenantId = document.getElementById('resetTenantId').value;
+            const btn = document.getElementById('btnResetSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Restableciendo...';
+
+            const form = document.getElementById('formResetPassword');
+            const formData = new FormData(form);
+
+            try {
+                const res = await fetch(`/saas-master/reset-password/${tenantId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cerrarModalReset();
+                    abrirModalExito(data.mensaje_whatsapp);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Fallo de conexión al restablecer la contraseña.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check2-circle"></i> Restablecer y Copiar WhatsApp';
+            }
+        }
+
+        // ==========================================
+        // CONTROL DE TEMA AISLADO DEL SUPER ADMIN
+        // ==========================================
+        function toggleSaasTheme() {
+            const current = document.documentElement.getAttribute('data-saas-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-saas-theme', next);
+            localStorage.setItem('saas_master_theme', next);
+            actualizarIconoTema(next);
+        }
+
+        function actualizarIconoTema(theme) {
+            const icon = document.getElementById('saasThemeIcon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = document.documentElement.getAttribute('data-saas-theme') || 'dark';
+            actualizarIconoTema(currentTheme);
+        });
+
+        // Cerrar modales con tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModalLogout();
+                cerrarModalCrear();
+                cerrarModalReset();
+                cerrarModalExito();
+            }
+        });
+    </script>
+</body>
+</html>

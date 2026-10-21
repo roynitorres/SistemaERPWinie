@@ -1,0 +1,96 @@
+/* ==========================================================================
+   SAAS CONSOLA MAESTRA - VARIABLES DE DISEÑO (ISOLATED THEME TOKENS)
+   ========================================================================== */
+
+/* ==================================================
+   TEMA OSCURO (PREDETERMINADO MIDNIGHT NAVY)
+   ================================================== */
+:root, [data-saas-theme="dark"] {
+    --bg-canvas: #0A0F1A;
+    --bg-card: #101726;
+    --bg-card-hover: #162032;
+    --bg-input: #0D1320;
+    --border-color: #1E293B;
+    --color-primary: #0047AB;
+    --color-accent: #00B0FF;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;
+    --text-main: #FFFFFF;
+    --text-muted: #94A3B8;
+    --table-header-bg: rgba(0, 0, 0, 0.25);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --btn-theme-bg: rgba(255, 255, 255, 0.08);
+    --btn-theme-color: #F59E0B;
+    --btn-icon-bg: rgba(255, 255, 255, 0.05);
+    --addon-bg: #1E293B;
+    --icon-shield-bg: rgba(0, 71, 171, 0.15);
+    --icon-shield-border: rgba(0, 176, 255, 0.3);
+    --check-glow: rgba(16, 185, 129, 0.35);
+}
+
+/* ==================================================
+   TEMA CLARO (EJECUTIVO, LIMPIO Y AISLADO)
+   ================================================== */
+[data-saas-theme="light"] {
+    --bg-canvas: #F1F5F9;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #F8FAFC;
+    --bg-input: #F8FAFC;
+    --border-color: #CBD5E1;
+    --color-primary: #0047AB;
+    --color-accent: #0066CC;
+    --color-success: #059669;
+    --color-warning: #D97706;
+    --color-danger: #DC2626;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --table-header-bg: #F8FAFC;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --btn-theme-bg: #E2E8F0;
+    --btn-theme-color: #0047AB;
+    --btn-icon-bg: #F1F5F9;
+    --addon-bg: #E2E8F0;
+    --icon-shield-bg: rgba(0, 71, 171, 0.08);
+    --icon-shield-border: rgba(0, 71, 171, 0.2);
+    --check-glow: rgba(16, 185, 129, 0.2);
+}
+
+/* ==================================================
+   SCROLLBAR GLOBAL PERSONALIZADO (APEX SHADCN DARK/LIGHT)
+   ================================================== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent);
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+[data-saas-theme="light"] ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-saas-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-primary);
+}
+
+[data-saas-theme="light"] * {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}

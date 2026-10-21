@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta Pausada - {{ tenant.nombre_comercial }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/errors.css') }}">
+</head>
+<body>
+    <div class="card-suspended">
+        <div class="icon-lock">
+            <i class="bi bi-shield-lock"></i>
+        </div>
+        <h1>Suscripción Temporalmente Pausada</h1>
+        <div class="company-name">
+            <i class="bi bi-building me-1"></i> {{ tenant.nombre_comercial }}
+        </div>
+        <p>El acceso a este espacio de trabajo ha sido pausado debido a una renovación pendiente de tu servicio. Tus datos e información se encuentran 100% seguros y respaldados.</p>
+        
+        <div class="info-box">
+            <i class="bi bi-info-circle text-primary me-1"></i> Comunícate con el soporte de la plataforma para reactivar tu acceso de inmediato.
+        </div>
+
+        <a href="https://wa.me/" target="_blank" class="btn-whatsapp">
+            <i class="bi bi-whatsapp"></i> Contactar al Administrador
+        </a>
+    </div>
+</body>
+</html>

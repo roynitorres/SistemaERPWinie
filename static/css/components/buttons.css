@@ -2,7 +2,7 @@
    COMPONENTES: BOTONES APEX SHADCN DARK
    ========================================================================== */
 
-/* Botón Verde Neón Principal (Nuevo Cliente / Guardar / Registrar Pago) */
+/* BotÃ³n Verde NeÃ³n Principal (Nuevo Cliente / Guardar / Registrar Pago) */
 .btn-neon-primary, #btnIrForm, #btnGuardar {
     background-color: var(--color-primary) !important;
     color: #ffffff !important;
@@ -28,7 +28,7 @@
     box-shadow: 0 6px 24px var(--color-primary-glow) !important;
 }
 
-/* Botón Outline Oscuro Apex */
+/* BotÃ³n Outline Oscuro Apex */
 .btn-apex-outline {
     background-color: var(--color-bg-card) !important;
     color: var(--color-text-main) !important;
@@ -52,7 +52,7 @@
     background-color: var(--color-bg-card-hover) !important;
 }
 
-/* Bot�n Outline Primario (Limpiar) */
+/* Botón Outline Primario (Limpiar) */
 .btn-apex-primary-outline, #btnLimpiar {
     background-color: transparent !important;
     color: var(--color-primary) !important;
@@ -74,4 +74,93 @@
     background-color: var(--color-primary-glow) !important;
     color: var(--color-primary-dark) !important;
     border-color: var(--color-primary-dark) !important;
+}
+
+
+/* ==========================================================================
+   BOTONES DE CANTIDAD Y CONTROL STEPPER (VENTAS)
+   ========================================================================== */
+.cantidad-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-bg-card-hover);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 3px 6px;
+}
+.cantidad-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-border);
+    color: var(--color-text-main);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+.cantidad-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-bg-app);
+    border-color: var(--color-primary);
+}
+.cantidad-num {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--color-text-main);
+    font-size: 0.9rem;
+}
+.stepper-tab-btn {
+    padding: 8px 18px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.stepper-tab-btn.active {
+    background: var(--color-primary);
+    color: var(--color-bg-app);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+}
+
+/* ==========================================================================
+   SEGMENTED CONTROL (PAGOS CRÉDITO)
+   ========================================================================== */
+.segmented-control {
+    display: flex;
+    background-color: var(--color-bg-stripe);
+    border-radius: var(--border-radius-md);
+    padding: 4px;
+    border: 1px solid var(--color-border);
+}
+.segmented-control__btn {
+    padding: 8px 16px;
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    transition: all 0.2s ease;
+}
+.segmented-control__btn.is-active {
+    background-color: var(--color-primary-dark);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

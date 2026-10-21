@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consola Maestra - Acceso Super Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/login.css') }}">
+    <script>
+        // Carga inmediata del tema configurado en el panel (aislado del cliente)
+        (function() {
+            const savedTheme = localStorage.getItem('saas_master_theme') || 'dark';
+            document.documentElement.setAttribute('data-saas-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+    <div class="login-box" id="loginBox">
+
+        <!-- ESTADO 1: FORMULARIO DE ACCESO -->
+        <div class="login-content" id="loginContent">
+            <div class="login-header">
+                <div class="shield-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h1>Sistema Winie</h1>
+                <p>Acceso exclusivo de administración</p>
+            </div>
+
+            {% if error %}
+            <div class="alert-error" id="alertError">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="errorMsgText">{{ error }}</span>
+            </div>
+            {% else %}
+            <div class="alert-error" id="alertError" style="display: none;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="errorMsgText"></span>
+            </div>
+            {% endif %}
+
+            <form id="formMasterLogin" onsubmit="handleMasterLogin(event)">
+                <!-- Campo Usuario Flotante -->
+                <div class="floating-group">
+                    <i class="bi bi-person input-icon"></i>
+                    <input type="text" id="username" name="username" class="floating-input" placeholder=" " required autofocus autocomplete="username">
+                    <label for="username" class="floating-label">Superusuario </label>
+                </div>
+
+                <!-- Campo Contraseña Flotante -->
+                <div class="floating-group">
+                    <i class="bi bi-key input-icon"></i>
+                    <input type="password" id="password" name="password" class="floating-input" placeholder=" " required autocomplete="current-password">
+                    <label for="password" class="floating-label">Contraseña</label>
+                    <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility()" title="Mostrar u ocultar contraseña">
+                        <i class="bi bi-eye-fill" id="eyeIcon"></i>
+                    </button>
+                </div>
+
+                <button type="submit" id="btnSubmitLogin" class="btn-submit">
+                    <i class="bi bi-box-arrow-in-right"></i> Ingresar al Sistema
+                </button>
+            </form>
+        </div>
+
+        <!-- ESTADO 2: CHECK VERDE ANIMADO (ÉXITO) -->
+        <div class="login-success-state" id="loginSuccessState" style="display: none;">
+            <div class="success-checkmark-wrapper">
+                <svg class="checkmark-svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h2 class="success-title">¡Acceso Autorizado!</h2>
+            <p class="success-subtitle">Iniciando el Sistema...</p>
+        </div>
+
+    </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeIcon.className = 'bi bi-eye-slash-fill';
+            } else {
+                passInput.type = 'password';
+                eyeIcon.className = 'bi bi-eye-fill';
+            }
+        }
+
+        async function handleMasterLogin(e) {
+            e.preventDefault();
+            const box = document.getElementById('loginBox');
+            const content = document.getElementById('loginContent');
+            const successState = document.getElementById('loginSuccessState');
+            const btn = document.getElementById('btnSubmitLogin');
+            const alertErr = document.getElementById('alertError');
+            const errorMsg = document.getElementById('errorMsgText');
+
+            // Feedback en botón
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Verificando...';
+            alertErr.style.display = 'none';
+            box.classList.remove('shake');
+
+            const form = document.getElementById('formMasterLogin');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("{{ url_for('saas_admin.login') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // 1. Transición: Ocultar formulario
+                    content.classList.add('fade-out');
+
+                    // 2. Transición: Mostrar check verde animado
+                    setTimeout(() => {
+                        content.style.display = 'none';
+                        successState.style.display = 'block';
+                    }, 240);
+
+                    // 3. Redirección suave al dashboard tras completar la animación
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 1200);
+
+                } else {
+                    // Error: Sacudir caja y mostrar mensaje
+                    box.classList.add('shake');
+                    errorMsg.innerText = data.error || 'Credenciales maestras inválidas.';
+                    alertErr.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Ingresar a la Consola';
+                }
+            } catch (err) {
+                box.classList.add('shake');
+                errorMsg.innerText = 'Error de conexión con el servidor maestro.';
+                alertErr.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Ingresar a la Consola';
+            }
+        }
+    </script>
+</body>
+</html>

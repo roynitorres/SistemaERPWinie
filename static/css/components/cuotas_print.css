@@ -1,0 +1,148 @@
+/* ==========================================================================
+   PLAN DE CUOTAS - IMPRESIÓN (PAGOS CRÉDITO)
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    color: #111111;
+    background: #ffffff;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    border-bottom: 2px solid #222222;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.header h1 {
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444444;
+    margin-bottom: 2px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+}
+
+.info-item {
+    font-size: 12px;
+}
+
+.info-item label {
+    font-weight: bold;
+    color: #555555;
+    text-transform: uppercase;
+    font-size: 10px;
+    display: block;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.data-table th {
+    background-color: #1a252f;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    text-align: left;
+    border: 1px solid #1a252f;
+}
+
+.data-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.text-center { text-align: center; }
+.text-end { text-align: right; }
+.text-bold { font-weight: bold; }
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+.badge-pagada { background: #d4edda; color: #155724; }
+.badge-pendiente { background: #cce5ff; color: #004085; }
+.badge-gracia { background: #fff3cd; color: #856404; }
+.badge-vencida { background: #f8d7da; color: #721c24; }
+
+.footer-notes {
+    margin-top: 24px;
+    font-size: 11px;
+    color: #666666;
+    border-top: 1px dashed #ccc;
+    padding-top: 12px;
+    text-align: center;
+}
+
+.no-print {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-print {
+    background: #00E676;
+    color: #0b0f19;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-back {
+    background: #6c757d;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+@media print {
+    body { padding: 0; }
+    .no-print { display: none; }
+}

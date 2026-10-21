@@ -39,6 +39,7 @@ from routes.roles import roles_bp
 
 from routes.reportes import reportes_bp
 from routes.perfil import perfil_bp
+from routes.saas_admin import saas_admin_bp
 
 # APP
 
@@ -126,6 +127,7 @@ app.register_blueprint(perfil_bp)
 # app.register_blueprint(usuarios_bp)
 # app.register_blueprint(roles_bp)
 app.register_blueprint(reportes_bp)
+app.register_blueprint(saas_admin_bp)
 # =========================
 # USER LOADER
 # =========================
@@ -136,6 +138,16 @@ def load_user(user_id):
 
 
 
+
+
+# =========================
+# TENANT ROUTING MIDDLEWARE
+# =========================
+from services.saas.tenant_resolver import resolve_tenant_middleware
+
+@app.before_request
+def enrutar_inquilino():
+    return resolve_tenant_middleware()
 
 
 # =========================
