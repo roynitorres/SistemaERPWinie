@@ -1,0 +1,591 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if producto %}Editar Producto{% else %}Nuevo Producto{% endif %} — Catálogo
+{% endblock %}
+
+{% block topbar_title %}
+    {% if producto %}Editar Producto{% else %}Nuevo Producto{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="content-container" style="max-width: 1040px; margin: 0 auto; padding-bottom: 50px;">
+
+    <!-- ===================================== -->
+    <!-- ENCABEZADO Y BREADCRUMB -->
+    <!-- ===================================== -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <div class="breadcrumbs-apex mb-1">
+                <a href="{{ url_for('productos.productos') }}" class="text-decoration-none text-muted">
+                    <i class="bi bi-box-seam me-1"></i> Catálogo de Productos
+                </a>
+                <span class="mx-2">/</span>
+                <span class="text-primary font-weight-bold">
+                    {% if producto %}Editar: {{ producto.nombre }}{% else %}Registrar Nuevo{% endif %}
+                </span>
+            </div>
+            <h1 class="page-title-apex mb-1" style="font-size: 1.65rem;">
+                {% if producto %}
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Editar Producto
+                {% else %}
+                    <i class="bi bi-plus-circle-fill text-primary me-2"></i>Registrar Nuevo Producto
+                {% endif %}
+            </h1>
+            <p class="page-subtitle-apex">
+                Ingresa la información general, existencias de inventario, márgenes de ganancia y alertas de stock.
+            </p>
+        </div>
+
+        <a href="{{ url_for('productos.productos') }}" class="btn-apex-outline d-inline-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left"></i> Volver al Catálogo
+        </a>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- FORMULARIO DE PRODUCTO -->
+    <!-- ===================================== -->
+    <form method="POST" id="formProductos" novalidate>
+        <input type="hidden" id="producto_id" name="producto_id" value="{{ producto.id if producto else '' }}">
+
+        <!-- ========================================== -->
+        <!-- TARJETA UNIFICADA DE FORMULARIO           -->
+        <!-- ========================================== -->
+        <div class="card-apex p-4 p-md-4 mb-4">
+
+            <!-- ========================================== -->
+            <!-- SECCIÓN 1: IDENTIFICACIÓN Y DATOS GENERALES -->
+            <!-- ========================================== -->
+            <div class="form-section-apex mb-4 pb-2">
+                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--color-border) !important;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 71, 171, 0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">1. Información Principal</h5>
+                        <small class="text-muted">Código, clasificación y proveedores del producto</small>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- CÓDIGO -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">CÓDIGO / SKU</label>
+                            <div class="position-relative">
+                                <input type="text" 
+                                       class="form-input" 
+                                       id="form_codigo" 
+                                       name="codigo_producto" 
+                                       placeholder="Ej. P001" 
+                                       value="{{ producto.codigo_producto if producto else '' }}"
+                                       oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Código único de inventario o barras.</small>
+                        </div>
+                    </div>
+
+                    <!-- NOMBRE -->
+                    <div class="col-md-8">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">NOMBRE DEL PRODUCTO</label>
+                            <input type="text" 
+                                   class="form-input" 
+                                   id="form_nombre" 
+                                   name="nombre" 
+                                   placeholder="Nombre descriptivo del producto" 
+                                   value="{{ producto.nombre if producto else '' }}"
+                                   oninput="this.value = this.value.toUpperCase()">
+                        </div>
+                    </div>
+
+                    <!-- MARCA -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">MARCA</label>
+                            <input type="text" 
+                                   class="form-input" 
+                                   id="form_marca" 
+                                   name="marca" 
+                                   placeholder="Ej. Nike, Samsung, Genérico" 
+                                   value="{{ producto.marca if producto else '' }}"
+                                   oninput="this.value = this.value.toUpperCase()">
+                        </div>
+                    </div>
+
+                    <!-- CATEGORÍA -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">CATEGORÍA</label>
+                            <select class="form-input" id="form_categoria" name="categoria_id">
+                                <option value="">Seleccione una categoría...</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if producto and producto.categoria_id == categoria.id %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- PROVEEDOR -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">PROVEEDOR</label>
+                            <select class="form-input" id="form_proveedor" name="proveedor_id">
+                                <option value="">Seleccione un proveedor...</option>
+                                {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}" {% if producto and producto.proveedor_id == proveedor.id %}selected{% endif %}>
+                                    {{ proveedor.nombre_proveedor }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEPARADOR DE SECCIÓN -->
+            <hr class="my-4" style="border-color: var(--color-border); opacity: 0.6;">
+
+            <!-- ========================================== -->
+            <!-- SECCIÓN 2: INVENTARIO Y ALERTA DE STOCK   -->
+            <!-- ========================================== -->
+            <div class="form-section-apex mb-4 pb-2">
+                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--color-border) !important;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 121, 56, 0.1); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">2. Control de Inventario y Stock</h5>
+                        <small class="text-muted">Define existencias de compra y el punto de reposición</small>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- FECHA DE COMPRA -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">FECHA DE COMPRA</label>
+                            <input type="date" 
+                                   class="form-input" 
+                                   id="form_fecha_compra" 
+                                   name="fecha_compra" 
+                                   value="{{ fecha_hoy }}">
+                        </div>
+                    </div>
+
+                    <!-- CANTIDAD COMPRADA -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">CANTIDAD COMPRADA (UNIDADES)</label>
+                            <input type="number" 
+                                   class="form-input" 
+                                   id="form_cantidad_comprada" 
+                                   name="cantidad_comprada" 
+                                   placeholder="Ej. 10" 
+                                   min="1"
+                                   value="{{ producto.cantidad_comprada if producto else '' }}">
+                            <small class="text-muted" style="font-size: 0.72rem;">Stock actual: <strong>{{ producto.stock if producto else 'Nuevo lote' }}</strong></small>
+                        </div>
+                    </div>
+
+                    <!-- STOCK MÍNIMO (ALERTA DE REPOSICIÓN) -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">
+                                STOCK MÍNIMO (PUNTO DE ALERTA)
+                                <i class="bi bi-question-circle ms-1 text-primary" title="El sistema te avisará en amarillo cuando el stock sea menor o igual a este número"></i>
+                            </label>
+                            <input type="number" 
+                                   class="form-input" 
+                                   id="form_stock_minimo" 
+                                   name="stock_minimo" 
+                                   placeholder="Ej. 5" 
+                                   min="0"
+                                   value="{{ producto.stock_minimo if producto else 5 }}">
+                            <small class="text-muted" style="font-size: 0.72rem;">Aviso preventivo antes de agotar existencias.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEPARADOR DE SECCIÓN -->
+            <hr class="my-4" style="border-color: var(--color-border); opacity: 0.6;">
+
+            <!-- ========================================== -->
+            <!-- SECCIÓN 3: PRECIOS Y MARGEN INTELIGENTE    -->
+            <!-- ========================================== -->
+            <div class="form-section-apex">
+                <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom flex-wrap gap-2" style="border-color: var(--color-border) !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">3. Costos, Márgenes y Precios de Venta</h5>
+                            <small class="text-muted">Cálculo automático de ganancia y precio al contado</small>
+                        </div>
+                    </div>
+
+                    <!-- Badge Estado del Producto -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0">ESTADO:</label>
+                        <select class="form-input select-estado-apex py-1 px-3" name="estado" id="form_estado" data-estado="{{ producto.estado.value if producto else 'ACTIVO' }}" style="width: auto; min-width: 120px;">
+                            <option value="ACTIVO" {% if not producto or producto.estado.value == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                            <option value="INACTIVO" {% if producto and producto.estado.value == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- PRECIO COMPRA (COSTO) -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">PRECIO DE COSTO / COMPRA</label>
+                            <div class="input-group-apex">
+                                <span class="input-group-addon addon-prefix">C$</span>
+                                <input type="number" 
+                                       step="0.01" 
+                                       class="form-input-clean" 
+                                       id="form_precio_compra" 
+                                       name="precio_compra" 
+                                       placeholder="0.00" 
+                                       value="{{ '%.2f'|format(producto.precio_compra) if producto else '' }}">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Costo neto unitario de adquisición.</small>
+                        </div>
+                    </div>
+
+                    <!-- MARGEN DE GANANCIA (%) -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label">MARGEN DESEADO</label>
+                            <div class="input-group-apex">
+                                <input type="number" 
+                                       step="0.1" 
+                                       class="form-input-clean" 
+                                       id="form_margen" 
+                                       placeholder="30" 
+                                       min="0">
+                                <span class="input-group-addon addon-suffix">%</span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Margen sobre el costo para sugerir venta.</small>
+                        </div>
+                    </div>
+
+                    <!-- PRECIO VENTA (CONTADO) -->
+                    <div class="col-md-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">PRECIO VENTA AL CONTADO</label>
+                            <div class="input-group-apex">
+                                <span class="input-group-addon addon-prefix">C$</span>
+                                <input type="number" 
+                                       step="0.01" 
+                                       class="form-input-clean" 
+                                       id="form_precio_venta" 
+                                       name="precio_venta" 
+                                       placeholder="0.00" 
+                                       value="{{ '%.2f'|format(producto.precio_venta) if producto else '' }}">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Precio de mostrador para clientes de contado.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTONES RÁPIDOS DE MARGEN SUGERIDO (DESDE 10%, 15%, EN ADELANTE) -->
+                <div class="mt-3 pt-3 border-top" style="border-color: var(--color-border) !important;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="text-muted text-uppercase fw-bold" style="font-size: 0.73rem; letter-spacing: 0.03em;">
+                                <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Márgenes Sugeridos:
+                            </span>
+                            <div class="d-flex flex-wrap gap-1" id="quickMarginContainer">
+                                <button type="button" class="btn-quick-margin" data-margin="10">+10%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="15">+15%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="20">+20%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="25">+25%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="30">+30%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="35">+35%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="40">+40%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="50">+50%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="75">+75%</button>
+                                <button type="button" class="btn-quick-margin" data-margin="100">+100%</button>
+                            </div>
+                        </div>
+                        <small class="text-muted fst-italic" style="font-size: 0.72rem;">Haz clic para autocalcular el precio al instante</small>
+                    </div>
+                </div>
+
+                <!-- RESUMEN FINANCIERO DINÁMICO EN TIEMPO REAL -->
+                <div class="mt-4 p-3 rounded-3" style="background: var(--color-bg-card-hover, rgba(0, 0, 0, 0.03)); border: 1px dashed var(--color-border);">
+                    <div class="row text-center g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Ganancia x Unidad</div>
+                            <div class="fw-bold text-success fs-5" id="metricGananciaUnidad">C$ 0.00</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Margen Bruto Real</div>
+                            <div class="fw-bold text-primary fs-5" id="metricMargenPct">0.0%</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Inversión Total Lote</div>
+                            <div class="fw-bold text-muted fs-5" id="metricInversionTotal">C$ 0.00</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Utilidad Proyectada</div>
+                            <div class="fw-bold text-success fs-5" id="metricUtilidadTotal">C$ 0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================== -->
+        <!-- ACCIONES INFERIORES                   -->
+        <!-- ===================================== -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2">
+            <div>
+                <a href="{{ url_for('productos.productos') }}" class="btn-apex-outline">
+                    <i class="bi bi-x-lg me-1"></i> Cancelar
+                </a>
+                {% if not producto %}
+                <button type="button" class="btn-apex-primary-outline ms-2" id="btnLimpiar">
+                    <i class="bi bi-eraser me-1"></i> Limpiar
+                </button>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-neon-primary px-4 py-2" id="btnGuardar">
+                <i class="bi bi-check-lg me-1 fs-5"></i> 
+                {% if producto %}Actualizar Producto{% else %}Guardar Producto{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("formProductos");
+    const inputCodigo = document.getElementById("form_codigo");
+    const inputNombre = document.getElementById("form_nombre");
+    const inputMarca = document.getElementById("form_marca");
+    const inputCategoria = document.getElementById("form_categoria");
+    const inputProveedor = document.getElementById("form_proveedor");
+    const inputFecha = document.getElementById("form_fecha_compra");
+    const inputCantidad = document.getElementById("form_cantidad_comprada");
+    const inputStockMin = document.getElementById("form_stock_minimo");
+    const inputCosto = document.getElementById("form_precio_compra");
+    const inputMargen = document.getElementById("form_margen");
+    const inputVenta = document.getElementById("form_precio_venta");
+    const selectEstado = document.getElementById("form_estado");
+
+    const metricGanancia = document.getElementById("metricGananciaUnidad");
+    const metricMargen = document.getElementById("metricMargenPct");
+    const metricInversion = document.getElementById("metricInversionTotal");
+    const metricUtilidad = document.getElementById("metricUtilidadTotal");
+
+    // Sincronizar estilo de select estado
+    if (selectEstado && window.ERP && window.ERP.UI) {
+        window.ERP.UI.updateSelectEstado(selectEstado);
+        selectEstado.addEventListener("change", function () {
+            window.ERP.UI.updateSelectEstado(this);
+        });
+    }
+
+    // Cálculo dinámico bidireccional
+    function calcularDesdeCostoOMargen() {
+        const costo = parseFloat(inputCosto.value) || 0;
+        const margen = parseFloat(inputMargen.value) || 0;
+        const cantidad = parseInt(inputCantidad.value) || 0;
+
+        if (costo > 0 && margen >= 0) {
+            const precioCalculado = costo * (1 + (margen / 100));
+            inputVenta.value = precioCalculado.toFixed(2);
+        }
+        actualizarMetricas();
+    }
+
+    function calcularDesdePrecioVenta() {
+        const costo = parseFloat(inputCosto.value) || 0;
+        const venta = parseFloat(inputVenta.value) || 0;
+
+        if (costo > 0 && venta >= costo) {
+            const margenCalculado = ((venta - costo) / costo) * 100;
+            inputMargen.value = margenCalculado.toFixed(1);
+            syncActiveQuickMargin(inputMargen.value);
+        } else if (costo > 0 && venta < costo) {
+            inputMargen.value = "0";
+            syncActiveQuickMargin(0);
+        }
+        actualizarMetricas();
+    }
+
+    function actualizarMetricas() {
+        const costo = parseFloat(inputCosto.value) || 0;
+        const venta = parseFloat(inputVenta.value) || 0;
+        const cantidad = parseInt(inputCantidad.value) || 0;
+
+        const gananciaUnidad = Math.max(0, venta - costo);
+        const margenPct = costo > 0 ? ((gananciaUnidad / costo) * 100) : 0;
+        const inversion = costo * cantidad;
+        const utilidadTotal = gananciaUnidad * cantidad;
+
+        metricGanancia.textContent = `C$ ${gananciaUnidad.toFixed(2)}`;
+        metricMargen.textContent = `${margenPct.toFixed(1)}%`;
+        metricInversion.textContent = `C$ ${inversion.toFixed(2)}`;
+        metricUtilidad.textContent = `C$ ${utilidadTotal.toFixed(2)}`;
+    }
+
+    inputCosto.addEventListener("input", calcularDesdeCostoOMargen);
+    inputMargen.addEventListener("input", function() {
+        syncActiveQuickMargin(this.value);
+        calcularDesdeCostoOMargen();
+    });
+    inputVenta.addEventListener("input", calcularDesdePrecioVenta);
+    inputCantidad.addEventListener("input", actualizarMetricas);
+
+    // Sincronizar estado visual activo en los botones de margen
+    function syncActiveQuickMargin(margenVal) {
+        const val = parseFloat(margenVal);
+        document.querySelectorAll(".btn-quick-margin").forEach(btn => {
+            const btnVal = parseFloat(btn.dataset.margin);
+            if (!isNaN(val) && Math.abs(val - btnVal) < 0.05) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+    }
+
+    // Botones rápidos de margen
+    document.querySelectorAll(".btn-quick-margin").forEach(btn => {
+        btn.addEventListener("click", function () {
+            inputMargen.value = this.dataset.margin;
+            syncActiveQuickMargin(this.dataset.margin);
+            calcularDesdeCostoOMargen();
+        });
+    });
+
+    // Calcular margen inicial si ya hay costo y precio de venta (ej. modo edición)
+    if (parseFloat(inputCosto.value) > 0 && parseFloat(inputVenta.value) > 0) {
+        calcularDesdePrecioVenta();
+    }
+
+    // Autocompletado AJAX por código de barras / SKU
+    if (inputCodigo) {
+        inputCodigo.addEventListener("blur", async function () {
+            const codigo = this.value.trim();
+            const productoId = document.getElementById("producto_id").value;
+            if (codigo && !productoId) {
+                try {
+                    const res = await fetch(`/buscar/${codigo}`);
+                    const data = await res.json();
+                    if (data.encontrado) {
+                        if (inputNombre && !inputNombre.value) inputNombre.value = data.nombre;
+                        if (inputMarca && !inputMarca.value) inputMarca.value = data.marca;
+                        if (inputCategoria && !inputCategoria.value) inputCategoria.value = data.categoria_id;
+                        if (inputProveedor && !inputProveedor.value) inputProveedor.value = data.proveedor_id;
+                        if (inputCosto && !inputCosto.value) inputCosto.value = data.precio_compra.toFixed(2);
+                        if (inputVenta && !inputVenta.value) inputVenta.value = data.precio_venta.toFixed(2);
+                        if (inputStockMin && data.stock_minimo) inputStockMin.value = data.stock_minimo;
+                        calcularDesdePrecioVenta();
+                    }
+                } catch (err) {
+                    console.error("Error al buscar código:", err);
+                }
+            }
+        });
+    }
+
+    // Limpieza de errores en tiempo real
+    [inputCodigo, inputFecha, inputNombre, inputMarca, inputCantidad, inputStockMin, inputCategoria, inputProveedor, inputCosto, inputVenta].forEach(el => {
+        if (el && window.ERP && window.ERP.Validators) {
+            el.addEventListener("input", () => window.ERP.Validators.clearError(el));
+            el.addEventListener("change", () => window.ERP.Validators.clearError(el));
+        }
+    });
+
+    // Validaciones estrictas antes de guardar
+    form.addEventListener("submit", function (e) {
+        let esValido = true;
+        let primerInvalido = null;
+
+        const val = window.ERP ? window.ERP.Validators : null;
+
+        function setError(input, msg) {
+            esValido = false;
+            if (val) {
+                val.setError(input, null, msg);
+            } else {
+                alert(msg);
+            }
+            if (!primerInvalido) primerInvalido = input;
+        }
+
+        if (val) {
+            [inputCodigo, inputFecha, inputNombre, inputMarca, inputCantidad, inputStockMin, inputCategoria, inputProveedor, inputCosto, inputVenta].forEach(i => {
+                if (i) val.clearError(i);
+            });
+        }
+
+        if (!inputCodigo.value.trim()) {
+            setError(inputCodigo, "El código del producto es obligatorio.");
+        }
+        if (!inputFecha.value) {
+            setError(inputFecha, "La fecha de compra es obligatoria.");
+        }
+        if (!inputNombre.value.trim() || inputNombre.value.trim().length < 3) {
+            setError(inputNombre, "El nombre del producto debe tener al menos 3 caracteres.");
+        }
+        if (!inputMarca.value.trim()) {
+            setError(inputMarca, "La marca es obligatoria.");
+        }
+        const cant = parseInt(inputCantidad.value);
+        if (isNaN(cant) || cant <= 0) {
+            setError(inputCantidad, "Ingrese una cantidad comprada válida mayor a 0.");
+        }
+        const stockMin = parseInt(inputStockMin.value);
+        if (isNaN(stockMin) || stockMin < 0) {
+            setError(inputStockMin, "El stock mínimo debe ser 0 o superior.");
+        }
+        if (!inputCategoria.value) {
+            setError(inputCategoria, "Seleccione una categoría.");
+        }
+        if (!inputProveedor.value) {
+            setError(inputProveedor, "Seleccione un proveedor.");
+        }
+        const costo = parseFloat(inputCosto.value);
+        if (isNaN(costo) || costo <= 0) {
+            setError(inputCosto, "Ingrese un precio de costo mayor a 0.");
+        }
+        const venta = parseFloat(inputVenta.value);
+        if (isNaN(venta) || venta <= 0) {
+            setError(inputVenta, "Ingrese un precio de venta mayor a 0.");
+        }
+
+        if (!esValido) {
+            e.preventDefault();
+            if (primerInvalido) primerInvalido.focus();
+        }
+    });
+
+    // Botón limpiar
+    const btnLimpiar = document.getElementById("btnLimpiar");
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener("click", function () {
+            form.reset();
+            inputCosto.value = "";
+            inputVenta.value = "";
+            inputMargen.value = "";
+            actualizarMetricas();
+            inputNombre.focus();
+        });
+    }
+});
+</script>
+{% endblock %}

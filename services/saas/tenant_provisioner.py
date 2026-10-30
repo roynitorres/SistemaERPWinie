@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from database import db
 from models.saas.tenant import Tenant
+from models.saas.renovacion_tenant import RenovacionTenant
 from models.saas.enums import EstadoTenant, PlanSaaS
 from models.rol import Rol
 from models.usuario import Usuario
@@ -198,6 +199,22 @@ def aprovisionar_nuevo_tenant(
         db.session.add(tenant)
         db.session.commit()
 
+        # Registrar primer pago de alta en el historial de renovaciones
+        meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        hoy = date.today()
+        periodo_inicial = f"{meses_nombres[hoy.month - 1]} {hoy.year}"
+        primera_renovacion = RenovacionTenant(
+            tenant_id=tenant.id,
+            periodo_mes=periodo_inicial,
+            monto=precio_mensual,
+            fecha_pago=hoy,
+            fecha_corte_resultante=fecha_corte,
+            dias_agregados=dias_vigencia,
+            notas="Pago inicial de alta de empresa"
+        )
+        db.session.add(primera_renovacion)
+        db.session.commit()
+
         # 4. Generar mensaje de bienvenida
         mensaje_wsp = generar_mensaje_bienvenida(tenant, username_admin, password_temporal, base_domain)
 
@@ -218,3 +235,21 @@ def aprovisionar_nuevo_tenant(
             except OSError:
                 pass
         return {"success": False, "error": f"Fallo al aprovisionar empresa: {str(e)}"}
+
+
+def crear_superadmin_inicial(username: str = "admin", password: str = "SuperAdmin2026!", nombre: str = "Super Administrador") -> str:
+    """Crea o actualiza el usuario Super Admin en master.db."""
+    from models.saas.super_usuario import SuperUsuario
+    admin = SuperUsuario.query.filter_by(username=username).first()
+    if not admin:
+        admin = SuperUsuario(username=username, nombre_completo=nombre, estado=True)
+        admin.set_password(password)
+        db.session.add(admin)
+        db.session.commit()
+        return f"SuperAdmin '{username}' creado exitosamente con clave '{password}'."
+    else:
+        admin.set_password(password)
+        admin.estado = True
+        db.session.commit()
+        return f"SuperAdmin '{username}' ya existía. Clave actualizada a '{password}'."
+

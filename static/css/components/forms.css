@@ -352,3 +352,116 @@ input[type='date']::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 [data-theme="light"] input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(0);
 }
+
+/* ========================================================
+   APEX INPUT GROUP (Unificado para Moneda C$ y Porcentaje %)
+   Soluciona cortes y desalineaciones de prefijos y sufijos
+   ======================================================== */
+.input-group-apex {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    background-color: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    height: 42px;
+    box-sizing: border-box;
+}
+
+.input-group-apex:focus-within {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px var(--color-primary-glow) !important;
+}
+
+.input-group-apex.is-invalid-apex,
+.input-group-apex:has(.is-invalid-apex) {
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.25) !important;
+    background-color: rgba(255, 82, 82, 0.04) !important;
+}
+
+.input-group-apex .input-group-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    background-color: rgba(0, 0, 0, 0.03);
+    user-select: none;
+    border: none;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+[data-theme='dark'] .input-group-apex .input-group-addon {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.input-group-apex .input-group-addon.addon-prefix {
+    border-right: 1px solid var(--color-border);
+}
+
+.input-group-apex .input-group-addon.addon-suffix {
+    border-left: 1px solid var(--color-border);
+}
+
+.input-group-apex .form-input-clean {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--color-text-main);
+    padding: 0 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 40px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.input-group-apex .form-input-clean::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.6;
+}
+
+/* ========================================================
+   BOTONES DE MARGEN RÁPIDO (+10%, +15%, etc.)
+   ======================================================== */
+.btn-quick-margin {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    user-select: none;
+}
+
+.btn-quick-margin:hover {
+    background: rgba(0, 71, 171, 0.12);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.btn-quick-margin.active {
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px var(--color-primary-glow) !important;
+    transform: translateY(-1px);
+}

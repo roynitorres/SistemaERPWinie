@@ -14,7 +14,8 @@
 .topbar__actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 16px; /* Espacio de separación entre cada botón/ícono */
+    margin-right: 28px; /* Mueve todo el grupo de controles a la izquierda alejándolo del borde derecho */
 }
 
 .topbar-icon-btn {
@@ -41,4 +42,283 @@
     height: 8px;
     background-color: var(--color-danger);
     border-radius: 50%;
+}
+
+/* ==========================================================================
+   BOTÓN NUEVA VENTA EN TOPBAR
+   ========================================================================== */
+
+.topbar-btn-nueva-venta {
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.84rem !important;
+    padding: 7px 14px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    box-shadow: 0 2px 8px var(--color-primary-glow, rgba(0, 71, 171, 0.25)) !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+}
+
+.topbar-btn-nueva-venta:hover {
+    background-color: var(--color-primary-dark, #003682) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px var(--color-primary-glow, rgba(0, 71, 171, 0.35)) !important;
+}
+
+.topbar-btn-nueva-venta:active {
+    transform: translateY(0) !important;
+}
+
+.topbar-btn-nueva-venta i {
+    font-size: 0.95rem !important;
+}
+
+@media (max-width: 576px) {
+    .topbar-btn-nueva-venta span {
+        display: none;
+    }
+    .topbar-btn-nueva-venta {
+        padding: 7px 10px !important;
+    }
+}
+
+/* ==========================================================================
+   TOPBAR: BUSCADOR DE NAVEGACIÓN RÁPIDA (COMMAND PALETTE / SEARCH BAR)
+   ========================================================================== */
+
+.topbar-search-container {
+    position: relative;
+    width: 300px; /* Controla el ancho del buscador (reducido para no verse tan estirado) */
+    max-width: 100%;
+    margin-left: 10px; /* Mueve el buscador un poco a la derecha */
+}
+
+.topbar-search-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md, 10px);
+    padding: 6px 12px;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.topbar-search-wrapper:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-glow, rgba(0, 71, 171, 0.18));
+    background: var(--color-bg-card);
+}
+
+.topbar-search-icon {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.topbar-search-wrapper:focus-within .topbar-search-icon {
+    color: var(--color-primary);
+}
+
+.topbar-search-input {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    color: var(--color-text-main) !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+.topbar-search-input::placeholder {
+    color: var(--color-text-subtle, #9ca3af);
+    font-size: 0.84rem;
+    font-weight: 400;
+}
+
+.topbar-search-clear-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0 2px;
+    font-size: 1.15rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: color 0.15s ease;
+}
+
+.topbar-search-clear-btn:hover {
+    color: var(--color-danger, #ef4444);
+}
+
+.topbar-search-shortcut {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(125, 125, 125, 0.1);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    flex-shrink: 0;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+}
+
+/* MENÚ DESPLEGABLE DE RESULTADOS */
+.topbar-search-results {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 330px; /* Ancho del menú desplegable */
+    max-width: 90vw;
+    max-height: 380px;
+    overflow-y: auto;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md, 12px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.topbar-search-header-group {
+    padding: 6px 10px 4px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--color-text-muted);
+}
+
+.topbar-search-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none !important;
+    color: var(--color-text-main);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    background: transparent;
+}
+
+.topbar-search-item:hover,
+.topbar-search-item.is-selected {
+    background: var(--color-bg-card-hover, rgba(0, 71, 171, 0.08));
+    color: var(--color-primary);
+}
+
+[data-theme='dark'] .topbar-search-item:hover,
+[data-theme='dark'] .topbar-search-item.is-selected {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.topbar-search-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(0, 71, 171, 0.1);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.topbar-search-item:hover .topbar-search-item-icon,
+.topbar-search-item.is-selected .topbar-search-item-icon {
+    background: var(--color-primary);
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+.topbar-search-item-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.topbar-search-item-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: inherit;
+}
+
+.topbar-search-item-desc {
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-search-item-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background: rgba(125, 125, 125, 0.1);
+    color: var(--color-text-muted);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.topbar-search-empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.topbar-search-empty i {
+    font-size: 1.8rem;
+    color: var(--color-text-subtle);
+}
+
+.topbar-search-match {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .topbar-search-container {
+        width: 200px;
+    }
+    .topbar-search-shortcut {
+        display: none;
+    }
 }

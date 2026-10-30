@@ -6,7 +6,7 @@ from datetime import datetime
 def crear_o_actualizar_producto(
     producto_id, codigo_producto, nombre, marca, estado, 
     categoria_id, proveedor_id, precio_compra, precio_venta, 
-    cantidad_comprada, fecha_compra
+    cantidad_comprada, fecha_compra, stock_minimo=5
 ):
     """
     Crea o actualiza un producto con las validaciones de negocio.
@@ -34,6 +34,12 @@ def crear_o_actualizar_producto(
     if precio_venta <= 0:
         return False, "El precio de venta debe ser mayor a cero"
 
+    if stock_minimo is not None and stock_minimo < 0:
+        return False, "El stock mínimo no puede ser negativo"
+
+    if stock_minimo is None:
+        stock_minimo = 5
+
     # Lógica de Actualización
     if producto_id:
         producto = db.session.get(Producto, int(producto_id))
@@ -48,10 +54,9 @@ def crear_o_actualizar_producto(
         producto.proveedor_id = proveedor_id
         producto.precio_compra = precio_compra
         producto.precio_venta = precio_venta
+        producto.stock_minimo = stock_minimo
         
         # En una actualización simple, asumimos que el stock se mantiene o se recalcula
-        # (Si se agrega nueva compra, debería haber módulo de compras aparte, 
-        # pero aquí actualizamos cantidad_comprada directamente como pidió el diseño original)
         diferencia = cantidad_comprada - producto.cantidad_comprada
         producto.stock = producto.stock + diferencia
         producto.cantidad_comprada = cantidad_comprada
@@ -81,6 +86,7 @@ def crear_o_actualizar_producto(
             producto_existente.proveedor_id = proveedor_id
             producto_existente.precio_compra = precio_compra
             producto_existente.precio_venta = precio_venta
+            producto_existente.stock_minimo = stock_minimo
             
             try:
                 db.session.commit()
@@ -100,6 +106,7 @@ def crear_o_actualizar_producto(
                 precio_venta=precio_venta,
                 stock=cantidad_comprada,
                 cantidad_comprada=cantidad_comprada,
+                stock_minimo=stock_minimo,
                 fecha_compra=fecha_compra
             )
             db.session.add(nuevo_producto)
@@ -110,4 +117,3 @@ def crear_o_actualizar_producto(
             except Exception as e:
                 db.session.rollback()
                 return False, f"Error al guardar el producto: {str(e)}"
-

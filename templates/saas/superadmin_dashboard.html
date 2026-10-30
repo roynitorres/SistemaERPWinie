@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -149,16 +149,23 @@
                                 </span>
                             </td>
                             <td>
-                                <div>{{ t.fecha_corte.strftime('%d/%m/%Y') }}</div>
-                                {% if t.esta_vencido %}
-                                <div style="font-size: 0.78rem; color: #EF4444;">
-                                    {{ t.dias_restantes }} días restantes
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                    <div>
+                                        <div id="fecha-corte-{{ t.id }}">{{ t.fecha_corte.strftime('%d/%m/%Y') }}</div>
+                                        {% if t.esta_vencido %}
+                                        <div id="dias-restantes-{{ t.id }}" style="font-size: 0.78rem; color: #EF4444;">
+                                            {{ t.dias_restantes }} días restantes
+                                        </div>
+                                        {% else %}
+                                        <div id="dias-restantes-{{ t.id }}" style="font-size: 0.78rem; color: var(--text-muted);">
+                                            {{ t.dias_restantes }} días restantes
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <button type="button" class="btn-renovar-quick" title="Renovar suscripción (+30 días)" data-tenant-id="{{ t.id }}" data-nombre="{{ t.nombre_comercial }}" data-precio="{{ t.precio_mensual }}" onclick="renovarRapidoBtn(this)">
+                                        <i class="bi bi-plus-circle-fill"></i> +30d
+                                    </button>
                                 </div>
-                                {% else %}
-                                <div style="font-size: 0.78rem; color: var(--text-muted);">
-                                    {{ t.dias_restantes }} días restantes
-                                </div>
-                                {% endif %}
                             </td>
                             <td>
                                 {% if t.esta_activo %}
@@ -187,6 +194,11 @@
                                         <span class="slider"></span>
                                     </label>
                                     {% endif %}
+
+                                    <!-- Historial de Renovaciones -->
+                                    <a href="{{ url_for('saas_admin.historial_renovaciones', tenant_id=t.id) }}" class="btn-icon-action" title="Ver Historial de Renovaciones">
+                                        <i class="bi bi-clock-history"></i>
+                                    </a>
 
                                     <!-- Restablecer Contraseña -->
                                     <button type="button" class="btn-icon-action" title="Restablecer Contraseña" data-tenant-id="{{ t.id }}" data-nombre="{{ t.nombre_comercial }}" data-slug="{{ t.slug }}" onclick="abrirModalResetBtn(this)">
@@ -581,6 +593,53 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-check2-circle"></i> Restablecer y Copiar WhatsApp';
+            }
+        }
+
+        // ==========================================
+        // GESTIÓN DE RENOVACIONES Y SUSCRIPCIONES
+        // ==========================================
+        async function renovarRapidoBtn(btn) {
+            const tenantId = btn.getAttribute('data-tenant-id');
+            const nombre = btn.getAttribute('data-nombre');
+            const precio = btn.getAttribute('data-precio');
+
+            const confirmar = confirm(`¿Confirmas registrar la renovación de +30 días para "${nombre}" por un monto de $${precio} USD?`);
+            if (!confirmar) return;
+
+            btn.disabled = true;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+            try {
+                const res = await fetch(`/saas-master/renovar/${tenantId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dias: 30, monto: precio })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const elFecha = document.getElementById(`fecha-corte-${tenantId}`);
+                    const elDias = document.getElementById(`dias-restantes-${tenantId}`);
+                    if (elFecha) elFecha.innerText = data.nueva_fecha_corte;
+                    if (elDias) {
+                        elDias.innerText = `${data.dias_restantes} días restantes`;
+                        elDias.style.color = 'var(--text-muted)';
+                    }
+                    const badge = document.getElementById(`badge-status-${tenantId}`);
+                    if (badge && data.esta_activo) {
+                        badge.className = 'badge-pill badge-active';
+                        badge.innerHTML = '<span class="dot dot-green"></span> ACTIVO';
+                    }
+                    alert(`¡Renovación exitosa! Nueva fecha de corte: ${data.nueva_fecha_corte}`);
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo aplicar la renovación'));
+                }
+            } catch (err) {
+                alert('Fallo de conexión al renovar.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
             }
         }
 

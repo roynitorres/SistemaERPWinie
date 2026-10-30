@@ -24,8 +24,8 @@
 }
 
 /* El contenido se empuja a la derecha cuando el sidebar se expande */
-.sidebar:hover ~ .main-content,
-.sidebar.is-open ~ .main-content {
+.sidebar.is-open ~ .main-content,
+html.sidebar-is-open .main-content {
     padding-left: 265px !important; /* Pegado al sidebar expandido de 265px */
 }
 

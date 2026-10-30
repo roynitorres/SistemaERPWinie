@@ -15,6 +15,8 @@
         setError: function (inputEl, errorEl, message) {
             if (inputEl) {
                 inputEl.classList.add('is-invalid-apex');
+                var group = inputEl.closest('.input-group-apex');
+                if (group) group.classList.add('is-invalid-apex');
                 var parent = inputEl.closest('.form-group') || inputEl.parentElement;
                 if (parent && message) {
                     var feedback = parent.querySelector('.invalid-feedback-apex');
@@ -44,6 +46,8 @@
         clearError: function (inputEl, errorEl) {
             if (inputEl) {
                 inputEl.classList.remove('is-invalid-apex');
+                var group = inputEl.closest('.input-group-apex');
+                if (group) group.classList.remove('is-invalid-apex');
                 var parent = inputEl.closest('.form-group') || inputEl.parentElement;
                 if (parent) {
                     var feedback = parent.querySelector('.invalid-feedback-apex');

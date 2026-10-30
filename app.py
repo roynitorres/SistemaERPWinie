@@ -186,12 +186,12 @@ def dashboard():
     productos_total = Producto.query.count()
     productos_stock_normal = Producto.query.filter(
         Producto.estado == EstadoProducto.ACTIVO,
-        Producto.stock > 5
+        Producto.stock > Producto.stock_minimo
     ).count()
     productos_stock_critico = Producto.query.filter(
         Producto.estado == EstadoProducto.ACTIVO,
         Producto.stock > 0,
-        Producto.stock <= 5
+        Producto.stock <= Producto.stock_minimo
     ).count()
     productos_pct = round((productos_stock_normal / productos_total) * 100) if productos_total else 0
 

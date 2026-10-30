@@ -10,6 +10,7 @@ from sqlalchemy import func
 from database import db
 from models.saas.super_usuario import SuperUsuario
 from models.saas.tenant import Tenant
+from models.saas.renovacion_tenant import RenovacionTenant
 from models.saas.enums import EstadoTenant, PlanSaaS
 from services.saas.tenant_provisioner import aprovisionar_nuevo_tenant, sanitize_slug
 from services.saas.tenant_engine import get_tenant_db_path, dispose_tenant_engine
@@ -277,3 +278,187 @@ def reset_password(tenant_id):
         "success": True,
         "mensaje_whatsapp": mensaje_wsp
     })
+
+
+# ==================================================
+# HISTORIAL DE RENOVACIONES Y SUSCRIPCIONES
+# ==================================================
+
+@saas_admin_bp.route("/renovaciones/<int:tenant_id>", methods=["GET"])
+@superadmin_required
+def obtener_renovaciones(tenant_id):
+    tenant = Tenant.query.get_or_404(tenant_id)
+    renovaciones = tenant.renovaciones.all()
+
+    # Si no tiene renovaciones previas (empresas creadas antes de este módulo), sembramos la primera
+    if not renovaciones:
+        meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        fecha_alta = tenant.created_at.date() if tenant.created_at else date.today()
+        periodo_base = f"{meses_nombres[fecha_alta.month - 1]} {fecha_alta.year}"
+        primera = RenovacionTenant(
+            tenant_id=tenant.id,
+            periodo_mes=periodo_base,
+            monto=tenant.precio_mensual or 0,
+            fecha_pago=fecha_alta,
+            fecha_corte_resultante=tenant.fecha_corte,
+            dias_agregados=30,
+            notas="Pago inicial registrado al crear empresa"
+        )
+        db.session.add(primera)
+        db.session.commit()
+        renovaciones = [primera]
+
+    lista = []
+    for r in renovaciones:
+        lista.append({
+            "id": r.id,
+            "periodo_mes": r.periodo_mes,
+            "monto": f"{float(r.monto or 0):.2f}",
+            "fecha_pago": r.fecha_pago.strftime("%d/%m/%Y"),
+            "fecha_corte_resultante": r.fecha_corte_resultante.strftime("%d/%m/%Y"),
+            "dias_agregados": r.dias_agregados,
+            "notas": r.notas or ""
+        })
+
+    meses_suscrito = max(len(lista), 1)
+
+    return jsonify({
+        "success": True,
+        "tenant": {
+            "id": tenant.id,
+            "nombre_comercial": tenant.nombre_comercial,
+            "slug": tenant.slug,
+            "precio_mensual": f"{float(tenant.precio_mensual or 0):.2f}",
+            "fecha_corte": tenant.fecha_corte.strftime("%d/%m/%Y"),
+            "dias_restantes": tenant.dias_restantes,
+            "esta_vencido": tenant.esta_vencido,
+            "total_recaudado": f"{tenant.total_recaudado:.2f}",
+            "total_renovaciones": meses_suscrito,
+            "esta_activo": tenant.esta_activo
+        },
+        "renovaciones": lista
+    })
+
+
+@saas_admin_bp.route("/renovar/<int:tenant_id>", methods=["POST"])
+@superadmin_required
+def registrar_renovacion(tenant_id):
+    tenant = Tenant.query.get_or_404(tenant_id)
+
+    data = request.get_json(silent=True) or request.form
+
+    dias = int(data.get("dias", 30))
+    monto_val = data.get("monto")
+    monto = float(monto_val) if (monto_val is not None and str(monto_val).strip() != "") else float(tenant.precio_mensual or 0)
+
+    hoy = date.today()
+    meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+
+    fecha_base = tenant.fecha_corte if (tenant.fecha_corte and tenant.fecha_corte >= hoy) else hoy
+    nueva_fecha_corte = fecha_base + timedelta(days=dias)
+
+    periodo_mes = data.get("periodo_mes")
+    if not periodo_mes or not str(periodo_mes).strip():
+        periodo_mes = f"{meses_nombres[fecha_base.month - 1]} {fecha_base.year}"
+
+    # Auto-reactivar si estaba suspendida
+    if tenant.estado == EstadoTenant.SUSPENDIDO.value:
+        tenant.estado = EstadoTenant.ACTIVO.value
+
+    tenant.fecha_corte = nueva_fecha_corte
+    notas = data.get("notas", "").strip() or f"Renovación rápida +{dias} días"
+
+    renovacion = RenovacionTenant(
+        tenant_id=tenant.id,
+        periodo_mes=str(periodo_mes).strip(),
+        monto=monto,
+        fecha_pago=hoy,
+        fecha_corte_resultante=nueva_fecha_corte,
+        dias_agregados=dias,
+        notas=notas
+    )
+
+    db.session.add(renovacion)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "mensaje": f"Renovación exitosa para {tenant.nombre_comercial}.",
+        "nueva_fecha_corte": nueva_fecha_corte.strftime("%d/%m/%Y"),
+        "dias_restantes": tenant.dias_restantes,
+        "esta_activo": tenant.esta_activo,
+        "total_recaudado": f"{tenant.total_recaudado:.2f}",
+        "total_renovaciones": tenant.total_renovaciones
+    })
+
+
+@saas_admin_bp.route("/historial/<int:tenant_id>", methods=["GET", "POST"])
+@superadmin_required
+def historial_renovaciones(tenant_id):
+    tenant = Tenant.query.get_or_404(tenant_id)
+    base_domain = current_app.config.get("SAAS_BASE_DOMAIN", "localhost:5000")
+
+    if request.method == "POST":
+        dias = int(request.form.get("dias", 30))
+        monto_val = request.form.get("monto")
+        monto = float(monto_val) if (monto_val and monto_val.strip()) else float(tenant.precio_mensual or 0)
+
+        hoy = date.today()
+        meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        fecha_base = tenant.fecha_corte if (tenant.fecha_corte and tenant.fecha_corte >= hoy) else hoy
+        nueva_fecha_corte = fecha_base + timedelta(days=dias)
+
+        periodo_mes = request.form.get("periodo_mes", "").strip()
+        if not periodo_mes:
+            periodo_mes = f"{meses_nombres[fecha_base.month - 1]} {fecha_base.year}"
+
+        if tenant.estado == EstadoTenant.SUSPENDIDO.value:
+            tenant.estado = EstadoTenant.ACTIVO.value
+
+        tenant.fecha_corte = nueva_fecha_corte
+        notas = request.form.get("notas", "").strip() or f"Renovación +{dias} días"
+
+        nueva_renovacion = RenovacionTenant(
+            tenant_id=tenant.id,
+            periodo_mes=periodo_mes,
+            monto=monto,
+            fecha_pago=hoy,
+            fecha_corte_resultante=nueva_fecha_corte,
+            dias_agregados=dias,
+            notas=notas
+        )
+        db.session.add(nueva_renovacion)
+        db.session.commit()
+        return redirect(url_for("saas_admin.historial_renovaciones", tenant_id=tenant.id))
+
+    # Asegurar que si no tiene ninguna renovación (empresas antiguas), se siembre la inicial
+    renovaciones = tenant.renovaciones.all()
+    if not renovaciones:
+        meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        fecha_alta = tenant.created_at.date() if tenant.created_at else date.today()
+        periodo_base = f"{meses_nombres[fecha_alta.month - 1]} {fecha_alta.year}"
+        primera = RenovacionTenant(
+            tenant_id=tenant.id,
+            periodo_mes=periodo_base,
+            monto=tenant.precio_mensual or 0,
+            fecha_pago=fecha_alta,
+            fecha_corte_resultante=tenant.fecha_corte,
+            dias_agregados=30,
+            notas="Pago inicial registrado al crear empresa"
+        )
+        db.session.add(primera)
+        db.session.commit()
+        renovaciones = [primera]
+
+    meses_nombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    hoy = date.today()
+    siguiente_mes_sugerido = f"{meses_nombres[hoy.month - 1]} {hoy.year}"
+
+    return render_template(
+        "saas/superadmin_historial.html",
+        tenant=tenant,
+        renovaciones=renovaciones,
+        base_domain=base_domain,
+        superadmin_name=session.get("superadmin_name", "Super Admin"),
+        siguiente_mes_sugerido=siguiente_mes_sugerido
+    )

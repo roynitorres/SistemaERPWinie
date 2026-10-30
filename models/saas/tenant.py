@@ -37,6 +37,15 @@ class Tenant(db.Model):
     # Notas internas del Super Admin
     notas = db.Column(db.Text, nullable=True)
 
+    # Relación con el historial de renovaciones SaaS
+    renovaciones = db.relationship(
+        "RenovacionTenant",
+        backref="tenant",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+        order_by="desc(RenovacionTenant.fecha_pago)"
+    )
+
     # Auditoría
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC))
     updated_at = db.Column(
@@ -44,6 +53,15 @@ class Tenant(db.Model):
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC)
     )
+
+    @property
+    def total_recaudado(self) -> float:
+        total = sum(float(r.monto or 0) for r in self.renovaciones.all())
+        return round(total, 2)
+
+    @property
+    def total_renovaciones(self) -> int:
+        return self.renovaciones.count()
 
     @property
     def esta_activo(self) -> bool:

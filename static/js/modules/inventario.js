@@ -11,214 +11,28 @@
     window.ERP.Inventario = {
 
         /**
-         * Módulo de Productos (`productos.html`)
+         * Inicializa la lógica de Productos (Tabla de catálogo o Formulario de página dedicada)
          */
         initProductos: function () {
-            var formulario = document.getElementById("formProductos");
-            if (!formulario) return;
+            this.initProductosTabla();
+            this.initProductosForm();
+        },
 
-            var formTitle = document.getElementById("formTitle");
-            var productoId = document.getElementById("producto_id");
-            var formCodigo = document.getElementById("form_codigo");
-            var formNombre = document.getElementById("form_nombre");
-            var formCategoria = document.getElementById("form_categoria");
-            var formProveedor = document.getElementById("form_proveedor");
-            var formPrecioCompra = document.getElementById("form_precio_compra");
-            var formPrecioVenta = document.getElementById("form_precio_venta");
-            var formFechaCompra = document.getElementById("form_fecha_compra");
-            var formCantidad = document.getElementById("form_cantidad_comprada");
-            var formMarca = document.getElementById("form_marca");
-            var formEstadoProd = document.getElementById("form_estado");
+        /**
+         * Inicializa la Tabla de Productos (`productos.html`)
+         */
+        initProductosTabla: function () {
+            var tabla = document.getElementById("tablaProductos");
+            if (!tabla) return;
 
-            var btnLimpiar = document.getElementById("btnLimpiar");
-            var btnIrForm = document.getElementById("btnIrForm");
             var buscarProducto = document.getElementById("buscarProducto");
 
-            formulario.addEventListener("keydown", function (e) {
-                if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
-                    e.preventDefault();
-                }
-            });
-
-            // Autocompletado por Código de Barras / SKU
-            if (formCodigo) {
-                formCodigo.addEventListener("blur", async function () {
-                    var codigo = this.value.trim();
-                    if (codigo && productoId && !productoId.value) {
-                        try {
-                            var response = await fetch(`/buscar/${codigo}`);
-                            var data = await response.json();
-
-                            if (data.encontrado) {
-                                if (formNombre) formNombre.value = data.nombre;
-                                if (formMarca) formMarca.value = data.marca;
-                                if (formCategoria) formCategoria.value = data.categoria_id;
-                                if (formProveedor) formProveedor.value = data.proveedor_id;
-                                if (formPrecioCompra) formPrecioCompra.value = data.precio_compra;
-                                if (formPrecioVenta) formPrecioVenta.value = data.precio_venta;
-
-                                var btnGuardar = document.getElementById("btnGuardar");
-                                if (btnGuardar) {
-                                    var iconHtml = btnGuardar.innerHTML;
-                                    btnGuardar.innerHTML = `<i class="bi bi-magic"></i> ¡Autocompletado!`;
-                                    btnGuardar.classList.remove("btn--primary");
-                                    btnGuardar.classList.add("btn--success");
-                                    btnGuardar.style.backgroundColor = "var(--color-success)";
-                                    btnGuardar.style.color = "white";
-
-                                    setTimeout(function () {
-                                        btnGuardar.innerHTML = iconHtml;
-                                        btnGuardar.classList.remove("btn--success");
-                                        btnGuardar.classList.add("btn--primary");
-                                        btnGuardar.style.backgroundColor = "";
-                                        btnGuardar.style.color = "";
-                                    }, 2500);
-                                }
-
-                                if (formCantidad) formCantidad.focus();
-                            }
-                        } catch (error) {
-                            console.error("Error autocompletando:", error);
-                        }
-                    }
-                });
-            }
-
-            // Sync visual del Select Estado (Verde / Rojo)
-            if (formEstadoProd) {
-                window.ERP.UI.updateSelectEstado(formEstadoProd);
-                formEstadoProd.addEventListener("change", function () {
-                    window.ERP.UI.updateSelectEstado(this);
-                });
-            }
-
-            // Limpieza de feedback en tiempo real al escribir
-            [formCodigo, formFechaCompra, formNombre, formMarca, formCantidad, formCategoria, formProveedor, formPrecioCompra, formPrecioVenta].forEach(function (input) {
-                if (input) {
-                    input.addEventListener("input", function () { window.ERP.Validators.clearError(input); });
-                    input.addEventListener("change", function () { window.ERP.Validators.clearError(input); });
-                }
-            });
-
-            // Submit con Validación
-            formulario.addEventListener("submit", function (e) {
-                window.ERP.Validators.clearError(formCodigo);
-                window.ERP.Validators.clearError(formFechaCompra);
-                window.ERP.Validators.clearError(formNombre);
-                window.ERP.Validators.clearError(formMarca);
-                window.ERP.Validators.clearError(formCantidad);
-                window.ERP.Validators.clearError(formCategoria);
-                window.ERP.Validators.clearError(formProveedor);
-                window.ERP.Validators.clearError(formPrecioCompra);
-                window.ERP.Validators.clearError(formPrecioVenta);
-
-                var esValido = true;
-                var primerInvalido = null;
-
-                if (!formCodigo.value.trim()) {
-                    window.ERP.Validators.setError(formCodigo, null, "El código del producto es obligatorio.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formCodigo;
-                }
-
-                if (!formFechaCompra.value) {
-                    window.ERP.Validators.setError(formFechaCompra, null, "La fecha de compra es obligatoria.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formFechaCompra;
-                }
-
-                if (!formNombre.value.trim()) {
-                    window.ERP.Validators.setError(formNombre, null, "El nombre del producto es obligatorio.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formNombre;
-                }
-
-                if (!formMarca.value.trim()) {
-                    window.ERP.Validators.setError(formMarca, null, "La marca es obligatoria.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formMarca;
-                }
-
-                var cantVal = parseInt(formCantidad.value);
-                if (isNaN(cantVal) || cantVal <= 0) {
-                    window.ERP.Validators.setError(formCantidad, null, "Ingrese una cantidad válida mayor a 0.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formCantidad;
-                }
-
-                if (!formCategoria.value) {
-                    window.ERP.Validators.setError(formCategoria, null, "Seleccione una categoría.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formCategoria;
-                }
-
-                if (!formProveedor.value) {
-                    window.ERP.Validators.setError(formProveedor, null, "Seleccione un proveedor.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formProveedor;
-                }
-
-                var costVal = parseFloat(formPrecioCompra.value);
-                if (isNaN(costVal) || costVal <= 0) {
-                    window.ERP.Validators.setError(formPrecioCompra, null, "Ingrese un precio costo mayor a 0.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formPrecioCompra;
-                }
-
-                var ventVal = parseFloat(formPrecioVenta.value);
-                if (isNaN(ventVal) || ventVal <= 0) {
-                    window.ERP.Validators.setError(formPrecioVenta, null, "Ingrese un precio venta mayor a 0.");
-                    esValido = false; if (!primerInvalido) primerInvalido = formPrecioVenta;
-                }
-
-                if (!esValido) {
-                    e.preventDefault();
-                    if (primerInvalido) primerInvalido.focus();
-                    return false;
-                }
-            });
-
-            var resetForm = function () {
-                formulario.reset();
-                if (productoId) productoId.value = "";
-                if (formCodigo) formCodigo.value = "";
-                if (formEstadoProd) window.ERP.UI.updateSelectEstado(formEstadoProd);
-                if (formTitle) formTitle.innerHTML = `<i class="bi bi-box-seam"></i> NUEVO PRODUCTO`;
-                if (formNombre) formNombre.focus();
-            };
-
-            var cargarProducto = function (row) {
-                if (productoId) productoId.value = row.dataset.id;
-                if (formCodigo) formCodigo.value = row.dataset.codigo;
-                if (formNombre) formNombre.value = row.dataset.nombre;
-                if (formCategoria) formCategoria.value = row.dataset.categoria;
-                if (formProveedor) formProveedor.value = row.dataset.proveedor;
-
-                if (formPrecioCompra) formPrecioCompra.value = row.dataset.precioCompra;
-                if (formPrecioVenta) formPrecioVenta.value = row.dataset.precioVenta;
-                if (formFechaCompra) formFechaCompra.value = row.dataset.fechaCompra;
-                if (formCantidad) formCantidad.value = row.dataset.cantidadComprada;
-                if (formMarca) formMarca.value = row.dataset.marca;
-
-                if (formEstadoProd && row.dataset.estado) {
-                    formEstadoProd.value = row.dataset.estado;
-                    window.ERP.UI.updateSelectEstado(formEstadoProd);
-                }
-
-                if (formTitle) formTitle.innerHTML = `<i class="bi bi-pencil-fill text-success me-1"></i> EDITAR PRODUCTO`;
-                window.ERP.UI.openModal('modalFormProducto');
-            };
-
-            if (btnLimpiar) btnLimpiar.addEventListener("click", resetForm);
-            if (btnIrForm) {
-                btnIrForm.addEventListener("click", function () {
-                    resetForm();
-                    window.ERP.UI.openModal('modalFormProducto');
-                });
-            }
-
-            document.querySelectorAll(".btn-editar-fila").forEach(function (btn) {
-                btn.addEventListener("click", function (e) {
-                    e.stopPropagation();
-                    cargarProducto(this.closest("tr"));
-                });
-            });
-
+            // Doble clic en fila para editar en página dedicada
             document.querySelectorAll("#tablaProductos tr").forEach(function (row) {
                 row.addEventListener("dblclick", function () {
-                    cargarProducto(this);
+                    if (this.dataset.urlEditar) {
+                        window.location.href = this.dataset.urlEditar;
+                    }
                 });
             });
 
@@ -344,6 +158,152 @@
             }
 
             renderTable();
+        },
+
+        /**
+         * Inicializa el Formulario de Producto en Página Dedicada (`form_producto.html`)
+         */
+        initProductosForm: function () {
+            var formulario = document.getElementById("formProductos");
+            if (!formulario) return;
+
+            var formCodigo = document.getElementById("form_codigo");
+            var formNombre = document.getElementById("form_nombre");
+            var formMarca = document.getElementById("form_marca");
+            var formCategoria = document.getElementById("form_categoria");
+            var formProveedor = document.getElementById("form_proveedor");
+            var formFechaCompra = document.getElementById("form_fecha_compra");
+            var formCantidad = document.getElementById("form_cantidad_comprada");
+            var formStockMin = document.getElementById("form_stock_minimo");
+            var formPrecioCompra = document.getElementById("form_precio_compra");
+            var formMargen = document.getElementById("form_margen");
+            var formPrecioVenta = document.getElementById("form_precio_venta");
+            var formEstadoProd = document.getElementById("form_estado");
+            var productoId = document.getElementById("producto_id");
+
+            formulario.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
+                    e.preventDefault();
+                }
+            });
+
+            // Autocompletado por Código de Barras / SKU al desenfocar
+            if (formCodigo) {
+                formCodigo.addEventListener("blur", async function () {
+                    var codigo = this.value.trim();
+                    if (codigo && productoId && !productoId.value) {
+                        try {
+                            var response = await fetch(`/buscar/${codigo}`);
+                            var data = await response.json();
+
+                            if (data.encontrado) {
+                                if (formNombre && !formNombre.value) formNombre.value = data.nombre;
+                                if (formMarca && !formMarca.value) formMarca.value = data.marca;
+                                if (formCategoria && !formCategoria.value) formCategoria.value = data.categoria_id;
+                                if (formProveedor && !formProveedor.value) formProveedor.value = data.proveedor_id;
+                                if (formPrecioCompra && !formPrecioCompra.value) formPrecioCompra.value = parseFloat(data.precio_compra).toFixed(2);
+                                if (formPrecioVenta && !formPrecioVenta.value) formPrecioVenta.value = parseFloat(data.precio_venta).toFixed(2);
+                                if (formStockMin && data.stock_minimo) formStockMin.value = data.stock_minimo;
+
+                                if (formCantidad) formCantidad.focus();
+                            }
+                        } catch (error) {
+                            console.error("Error autocompletando:", error);
+                        }
+                    }
+                });
+            }
+
+            // Sync visual del Select Estado (Verde / Rojo)
+            if (formEstadoProd && window.ERP.UI) {
+                window.ERP.UI.updateSelectEstado(formEstadoProd);
+                formEstadoProd.addEventListener("change", function () {
+                    window.ERP.UI.updateSelectEstado(this);
+                });
+            }
+
+            // Limpieza de feedback de error en tiempo real al escribir
+            var inputsAValidar = [
+                formCodigo, formFechaCompra, formNombre, formMarca, 
+                formCantidad, formStockMin, formCategoria, formProveedor, 
+                formPrecioCompra, formPrecioVenta
+            ];
+
+            inputsAValidar.forEach(function (input) {
+                if (input && window.ERP.Validators) {
+                    input.addEventListener("input", function () { window.ERP.Validators.clearError(input); });
+                    input.addEventListener("change", function () { window.ERP.Validators.clearError(input); });
+                }
+            });
+
+            // Submit con Validación Estricta
+            formulario.addEventListener("submit", function (e) {
+                inputsAValidar.forEach(function (i) {
+                    if (i && window.ERP.Validators) window.ERP.Validators.clearError(i);
+                });
+
+                var esValido = true;
+                var primerInvalido = null;
+
+                function marcarError(input, mensaje) {
+                    if (!input) return;
+                    if (window.ERP.Validators) {
+                        window.ERP.Validators.setError(input, null, mensaje);
+                    }
+                    esValido = false;
+                    if (!primerInvalido) primerInvalido = input;
+                }
+
+                if (!formCodigo || !formCodigo.value.trim()) {
+                    marcarError(formCodigo, "El código del producto es obligatorio.");
+                }
+
+                if (!formFechaCompra || !formFechaCompra.value) {
+                    marcarError(formFechaCompra, "La fecha de compra es obligatoria.");
+                }
+
+                if (!formNombre || !formNombre.value.trim() || formNombre.value.trim().length < 3) {
+                    marcarError(formNombre, "El nombre del producto debe tener al menos 3 caracteres.");
+                }
+
+                if (!formMarca || !formMarca.value.trim()) {
+                    marcarError(formMarca, "La marca es obligatoria.");
+                }
+
+                var cantVal = parseInt(formCantidad ? formCantidad.value : 0);
+                if (isNaN(cantVal) || cantVal <= 0) {
+                    marcarError(formCantidad, "Ingrese una cantidad válida mayor a 0.");
+                }
+
+                var stockMinVal = parseInt(formStockMin ? formStockMin.value : 0);
+                if (isNaN(stockMinVal) || stockMinVal < 0) {
+                    marcarError(formStockMin, "El stock mínimo no puede ser negativo.");
+                }
+
+                if (!formCategoria || !formCategoria.value) {
+                    marcarError(formCategoria, "Seleccione una categoría.");
+                }
+
+                if (!formProveedor || !formProveedor.value) {
+                    marcarError(formProveedor, "Seleccione un proveedor.");
+                }
+
+                var costVal = parseFloat(formPrecioCompra ? formPrecioCompra.value : 0);
+                if (isNaN(costVal) || costVal <= 0) {
+                    marcarError(formPrecioCompra, "Ingrese un precio costo mayor a 0.");
+                }
+
+                var ventVal = parseFloat(formPrecioVenta ? formPrecioVenta.value : 0);
+                if (isNaN(ventVal) || ventVal <= 0) {
+                    marcarError(formPrecioVenta, "Ingrese un precio venta mayor a 0.");
+                }
+
+                if (!esValido) {
+                    e.preventDefault();
+                    if (primerInvalido) primerInvalido.focus();
+                    return false;
+                }
+            });
         },
 
         /**

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Renovaciones - {{ tenant.nombre_comercial }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/saas/dashboard.css') }}">
+    <script>
+        // Anti-FOUC: Carga inmediata del tema aislado del Super Admin
+        (function() {
+            const savedTheme = localStorage.getItem('saas_master_theme') || 'dark';
+            document.documentElement.setAttribute('data-saas-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="saas-topbar">
+        <div class="saas-brand">
+            <div class="saas-brand-icon">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <span>Panel Administrador</span>
+        </div>
+
+        <div class="saas-user-meta">
+            <!-- Selector Aislado Modo Claro / Oscuro -->
+            <button type="button" class="btn-theme-toggle" onclick="toggleSaasTheme()" id="btnThemeToggle" title="Cambiar Modo Claro / Oscuro">
+                <i class="bi bi-sun-fill" id="saasThemeIcon"></i>
+            </button>
+
+            <div class="user-badge">
+                <i class="bi bi-person-badge text-primary"></i>
+                <span>Super Admin: <strong>{{ superadmin_name }}</strong></span>
+            </div>
+
+            <button type="button" class="btn-logout" onclick="abrirModalLogout()" title="Cerrar sesión">
+                <i class="bi bi-power"></i> Salir
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WRAPPER -->
+    <main class="saas-container">
+
+        <!-- NAVEGACIÓN RETORNO -->
+        <div class="history-back-nav">
+            <a href="{{ url_for('saas_admin.dashboard') }}" class="history-back-link">
+                <i class="bi bi-arrow-left"></i> Volver a Empresas
+            </a>
+        </div>
+
+        <!-- ===================================== -->
+        <!-- ENCABEZADO RELACIONADO A LA CUENTA -->
+        <!-- ===================================== -->
+        <div class="account-header-card">
+            <div class="account-header-main">
+                <div class="account-avatar">
+                    <i class="bi bi-buildings"></i>
+                </div>
+                <div class="account-info">
+                    <div class="account-title-row">
+                        <h2>{{ tenant.nombre_comercial }}</h2>
+                        {% if tenant.esta_activo %}
+                        <span class="badge-pill badge-active">
+                            <span class="dot dot-green"></span> ACTIVO
+                        </span>
+                        {% else %}
+                        <span class="badge-pill badge-suspended">
+                            <span class="dot dot-red"></span> SUSPENDIDO
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="account-subdomain">
+                        <a href="http://{{ tenant.slug }}.{{ base_domain }}" target="_blank">
+                            <i class="bi bi-box-arrow-up-right"></i> {{ tenant.slug }}.{{ base_domain }}
+                        </a>
+                        <span class="account-separator">•</span>
+                        <span>Titular: <strong>{{ tenant.propietario_nombre }}</strong></span>
+                        {% if tenant.propietario_telefono %}
+                        <span class="account-separator">•</span>
+                        <a href="https://wa.me/{{ tenant.propietario_telefono|replace(' ', '')|replace('+', '')|replace('-', '') }}" target="_blank" style="color: #25D366; text-decoration: none;">
+                            <i class="bi bi-whatsapp"></i> {{ tenant.propietario_telefono }}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="account-meta-pills">
+                <div class="meta-pill-item">
+                    <span class="meta-label">Plan Contratado</span>
+                    <span class="meta-value" style="color: #00B0FF;">Plan {{ tenant.plan }}</span>
+                </div>
+                <div class="meta-pill-item">
+                    <span class="meta-label">Mensualidad</span>
+                    <span class="meta-value">${{ "%.2f"|format(tenant.precio_mensual) }} USD</span>
+                </div>
+                <div class="meta-pill-item">
+                    <span class="meta-label">Fecha de Corte</span>
+                    {% if tenant.esta_vencido %}
+                    <span class="meta-value" style="color: #EF4444;">{{ tenant.fecha_corte.strftime('%d/%m/%Y') }} (Vencido)</span>
+                    {% else %}
+                    <span class="meta-value">{{ tenant.fecha_corte.strftime('%d/%m/%Y') }} ({{ tenant.dias_restantes }} días)</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================== -->
+        <!-- TABLA DE INFORMACIÓN DE RENOVACIONES -->
+        <!-- ===================================== -->
+        <div class="history-panel">
+            <div class="history-panel-header">
+                <h3>
+                    <i class="bi bi-receipt-cutoff"></i> Historial de Renovaciones y Pagos
+                </h3>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-renovar-quick" style="padding: 7px 16px; font-size: 0.84rem;" onclick="toggleFormRenewal()">
+                        <i class="bi bi-plus-circle-fill"></i> + Registrar Renovación
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORMULARIO DESPLEGABLE REGISTRAR RENOVACIÓN -->
+            <div class="manual-renewal-panel" id="panelManualRenewal">
+                <div style="font-size: 0.88rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">
+                    <i class="bi bi-calendar-plus"></i> Extender Vigencia / Registrar Nueva Cuota
+                </div>
+                <form method="POST" action="{{ url_for('saas_admin.historial_renovaciones', tenant_id=tenant.id) }}">
+                    <div class="manual-renewal-grid">
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.78rem;">Mes / Período *</label>
+                            <input type="text" name="periodo_mes" class="form-control" value="{{ siguiente_mes_sugerido }}" placeholder="Ej: Noviembre 2026" required>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.78rem;">Monto ($ USD) *</label>
+                            <input type="number" step="0.01" name="monto" class="form-control" value="{{ "%.2f"|format(tenant.precio_mensual) }}" required>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.78rem;">Días de Vigencia</label>
+                            <input type="number" name="dias" class="form-control" value="30" required>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <button type="submit" class="btn-glow-primary" style="width: 100%; height: 38px; font-size: 0.84rem; padding: 0 10px;">
+                                <i class="bi bi-check-lg"></i> Guardar Cuota
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TABLA DE INFORMACIÓN -->
+            <div class="table-responsive">
+                <table class="saas-table" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 45px;">#</th>
+                            <th>Mes / Período</th>
+                            <th>Monto</th>
+                            <th>Fecha de Pago</th>
+                            <th>Vigencia Extendida</th>
+                            <th>Detalle / Notas</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in renovaciones %}
+                        <tr>
+                            <td style="color: var(--text-muted); font-size: 0.82rem;">{{ loop.index }}</td>
+                            <td>
+                                <strong style="color: var(--text-main); font-size: 0.92rem;">{{ r.periodo_mes }}</strong>
+                            </td>
+                            <td>
+                                <span style="font-weight: 700; color: #10B981; font-size: 0.92rem;">
+                                    ${{ "%.2f"|format(r.monto) }} USD
+                                </span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.86rem;">
+                                {{ r.fecha_pago.strftime('%d/%m/%Y') }}
+                            </td>
+                            <td>
+                                <span style="color: #00B0FF; font-weight: 600; font-size: 0.86rem;">
+                                    {{ r.fecha_corte_resultante.strftime('%d/%m/%Y') }}
+                                </span>
+                                <span style="font-size: 0.74rem; color: var(--text-muted);">(+{{ r.dias_agregados }}d)</span>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.82rem;">
+                                {{ r.notas or '-' }}
+                            </td>
+                            <td>
+                                <span class="badge-paid">
+                                    <i class="bi bi-check-circle-fill"></i> Pagado
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                <i class="bi bi-receipt" style="font-size: 2.2rem; display: block; margin-bottom: 10px; opacity: 0.4;"></i>
+                                No hay cuotas registradas aún para esta empresa.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===================================== -->
+    <!-- MODAL CONFIRMACIÓN CERRAR SESIÓN -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalConfirmarLogout" onclick="if(event.target === this) cerrarModalLogout()">
+        <div class="modal-container modal-compact">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </h3>
+                <button type="button" class="modal-close-btn" onclick="cerrarModalLogout()" aria-label="Cerrar" title="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    ¿Estás seguro de que deseas salir del sistema?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-compact-cancel" onclick="cerrarModalLogout()">Cancelar</button>
+                <a href="{{ url_for('saas_admin.logout') }}" class="btn-compact-confirm">
+                    Sí, salir
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function toggleFormRenewal() {
+            const panel = document.getElementById('panelManualRenewal');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        function abrirModalLogout() {
+            document.getElementById('modalConfirmarLogout').classList.add('active');
+        }
+        function cerrarModalLogout() {
+            document.getElementById('modalConfirmarLogout').classList.remove('active');
+        }
+
+        // CONTROL DE TEMA AISLADO DEL SUPER ADMIN
+        function toggleSaasTheme() {
+            const current = document.documentElement.getAttribute('data-saas-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-saas-theme', next);
+            localStorage.setItem('saas_master_theme', next);
+            actualizarIconoTema(next);
+        }
+
+        function actualizarIconoTema(theme) {
+            const icon = document.getElementById('saasThemeIcon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = document.documentElement.getAttribute('data-saas-theme') || 'dark';
+            actualizarIconoTema(currentTheme);
+        });
+
+        // Cerrar modales con tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModalLogout();
+            }
+        });
+    </script>
+</body>
+</html>

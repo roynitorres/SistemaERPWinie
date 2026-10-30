@@ -10,7 +10,16 @@
         Sistema de Cobro
         {% endblock %}
     </title>
-    <!-- Script de Tema (Cargado primero para evitar parpadeos) -->
+    <!-- Script de Tema y Anti-FOUC para Sidebar (Cargados primero para evitar parpadeos) -->
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('sidebar_expanded') === 'true') {
+                    document.documentElement.classList.add('sidebar-is-open');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <script src="{{ url_for('static', filename='js/core/theme.js') }}"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -26,8 +35,8 @@
 <body>
     {% set rol_actual = current_user.rol.nombre.upper() if current_user.is_authenticated and current_user.rol else '' %}
     <div id="app-container" class="app-container">
-        <!-- BOTÓN HAMBURGUESA FLOTANTE -->
-        <button id="btnHamburgerTrigger" class="hamburger-trigger-btn" title="Abrir Menú">
+        <!-- BOTÓN HAMBURGUESA FLOTANTE (opcional / responsive) -->
+        <button id="btnHamburgerTrigger" class="hamburger-trigger-btn" title="Abrir Menú" style="display: none;">
             <i class="bi bi-list"></i>
         </button>
        
@@ -180,6 +189,11 @@
             </div>
         </aside>
 
+        <!-- BOTÓN CONMUTADOR DE SIDEBAR (EXPANDIR / CONTRAER > / <) -->
+        <button type="button" id="btnSidebarCollapseToggle" class="sidebar-collapse-btn" title="Expandir menú" aria-label="Expandir o contraer menú lateral">
+            <i class="bi bi-chevron-right" id="sidebarCollapseIcon"></i>
+        </button>
+
         <!-- ===================================== -->
         <!-- CONTENIDO PRINCIPAL -->
         <!-- ===================================== -->
@@ -190,15 +204,37 @@
             {% block topbar %}
             <header style="position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 2px solid var(--color-border); background-color: var(--color-bg-app);">
                 
-                <!-- IZQUIERDA: ICONO DE MENÚ -->
-                <div style="display: flex; align-items: center;">
-                    <button type="button" class="topbar-icon-btn" title="Menú" style="font-size: 1.5rem;">
-                        <i class="bi bi-list"></i>
-                    </button>
+                <!-- BÚSQUEDA RÁPIDA DE NAVEGACIÓN EN TOPBAR -->
+                <div class="topbar-search-container" id="topbarSearchContainer">
+                    <div class="topbar-search-wrapper">
+                        <i class="bi bi-search topbar-search-icon"></i>
+                        <input type="text"
+                               id="topbarSearchInput"
+                               class="topbar-search-input no-uppercase"
+                               placeholder="Buscar módulo ..."
+                               autocomplete="off"
+                               spellcheck="false"
+                               aria-label="Buscar en el menú">
+                        <button type="button" id="topbarSearchClearBtn" class="topbar-search-clear-btn" title="Limpiar búsqueda" style="display: none;">
+                            <i class="bi bi-x"></i>
+                        </button>
+                        <span class="topbar-search-shortcut" title="Atajo de teclado">Ctrl K</span>
+                    </div>
+
+                    <!-- Menú desplegable con los resultados filtrados -->
+                    <div class="topbar-search-results" id="topbarSearchResults" style="display: none;"></div>
                 </div>
 
                 <!-- DERECHA: ALERTAS DE COBRO Y CONFIGURACIÓN EMPRESA -->
-                <div class="topbar__actions" style="display: flex; align-items: center; gap: 14px;">
+                <div class="topbar__actions">
+                    <!-- Botón Nueva Venta -->
+                    {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
+                    <a href="{{ url_for('ventas.ventas') }}" class="topbar-btn-nueva-venta" title="Ir a Nueva Venta">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Nueva Venta</span>
+                    </a>
+                    {% endif %}
+
                     <!-- Botón Modo Claro/Oscuro -->
                     <button type="button" class="topbar-icon-btn" onclick="toggleTheme()" title="Cambiar Tema">
                         <i id="theme-icon" class="bi bi-sun"></i>
@@ -262,59 +298,60 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const sidebar = document.getElementById('sidebar');
+            const btnToggleCollapse = document.getElementById('btnSidebarCollapseToggle');
             const btnHamburger = document.getElementById('btnHamburgerTrigger');
-            const btnToggle = document.getElementById('btnToggleSidebar');
 
-            function abrirSidebar() {
+            // Sincronizar estado inicial desde localStorage
+            const isInitiallyOpen = localStorage.getItem('sidebar_expanded') === 'true';
+            if (isInitiallyOpen) {
                 if (sidebar) sidebar.classList.add('is-open');
-            }
-
-            function cerrarSidebar() {
-                if (sidebar) {
-                    sidebar.classList.remove('is-open');
-                    document.querySelectorAll('.sidebar-submenu').forEach(el => {
-                        el.classList.remove('is-open');
-                    });
+                document.documentElement.classList.add('sidebar-is-open');
+                if (btnToggleCollapse) {
+                    btnToggleCollapse.setAttribute('title', 'Contraer menú');
+                    btnToggleCollapse.setAttribute('aria-label', 'Contraer menú');
+                }
+            } else {
+                if (sidebar) sidebar.classList.remove('is-open');
+                document.documentElement.classList.remove('sidebar-is-open');
+                if (btnToggleCollapse) {
+                    btnToggleCollapse.setAttribute('title', 'Expandir menú');
+                    btnToggleCollapse.setAttribute('aria-label', 'Expandir menú');
                 }
             }
 
+            function toggleSidebar() {
+                if (!sidebar) return;
+                const isOpen = sidebar.classList.toggle('is-open');
+                if (isOpen) {
+                    document.documentElement.classList.add('sidebar-is-open');
+                    localStorage.setItem('sidebar_expanded', 'true');
+                    if (btnToggleCollapse) {
+                        btnToggleCollapse.setAttribute('title', 'Contraer menú');
+                        btnToggleCollapse.setAttribute('aria-label', 'Contraer menú');
+                    }
+                } else {
+                    document.documentElement.classList.remove('sidebar-is-open');
+                    localStorage.setItem('sidebar_expanded', 'false');
+                    if (btnToggleCollapse) {
+                        btnToggleCollapse.setAttribute('title', 'Expandir menú');
+                        btnToggleCollapse.setAttribute('aria-label', 'Expandir menú');
+                    }
+                }
+            }
+
+            if (btnToggleCollapse) {
+                btnToggleCollapse.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
+
             if (btnHamburger) {
-                btnHamburger.addEventListener('mouseenter', abrirSidebar);
                 btnHamburger.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    if (sidebar) sidebar.classList.toggle('is-open');
+                    toggleSidebar();
                 });
             }
-
-            if (sidebar) {
-                sidebar.addEventListener('mouseenter', abrirSidebar);
-                sidebar.addEventListener('mouseleave', cerrarSidebar);
-            }
-
-            if (btnToggle) {
-                btnToggle.addEventListener('click', cerrarSidebar);
-            }
-
-            // Expand sidebar if clicking a nav-link when collapsed
-            document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    if (sidebar.classList.contains('collapsed')) {
-                        // If it's a dropdown toggle, expand sidebar
-                        if (this.hasAttribute('data-bs-toggle')) {
-                            sidebar.classList.remove('collapsed');
-                            localStorage.setItem('sidebarState', 'expanded');
-                        }
-                    }
-                });
-            });
-            
-            // Prevent default behavior for submenu toggles to prevent jumping
-            document.querySelectorAll('#sidebar .nav-link[data-bs-toggle="collapse"]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    // Let Bootstrap handle the collapse, just prevent the default jump
-                });
-            });
 
             // Auto-hide Toasts
             const toasts = document.querySelectorAll('.alert-toast');
@@ -515,6 +552,113 @@
     <script src="{{ url_for('static', filename='js/modules/proveedores.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/empresa.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/reportes.js') }}"></script>
+
+    <!-- DATOS DE NAVEGACIÓN PARA EL BUSCADOR DE MENÚ -->
+    {% set nav_items = [] %}
+    {% if rol_actual == 'ADMIN' %}
+        {% set _ = nav_items.append({
+            "title": "Salpicadero",
+            "url": url_for('dashboard'),
+            "icon": "bi-grid",
+            "category": "General",
+            "description": "Panel de control y resumen métrico",
+            "keywords": "dashboard salpicadero inicio panel kpis"
+        }) %}
+    {% endif %}
+    {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
+        {% set _ = nav_items.append({
+            "title": "Clientes",
+            "url": url_for('clientes.clientes'),
+            "icon": "bi-people",
+            "category": "Catálogos",
+            "description": "Directorio de clientes y saldos",
+            "keywords": "cliente clientes cartera saldos compradores personas"
+        }) %}
+        {% set _ = nav_items.append({
+            "title": "Productos",
+            "url": url_for('productos.productos'),
+            "icon": "bi-box-seam",
+            "category": "Catálogos",
+            "description": "Catálogo de productos, precios y stock",
+            "keywords": "producto productos inventario stock precios articulos"
+        }) %}
+        {% set _ = nav_items.append({
+            "title": "Categorías",
+            "url": url_for('categorias.categorias'),
+            "icon": "bi-tags",
+            "category": "Catálogos",
+            "description": "Clasificación y categorías de productos",
+            "keywords": "categoria categorias clasificacion grupos etiquetas"
+        }) %}
+    {% endif %}
+    {% if rol_actual == 'ADMIN' %}
+        {% set _ = nav_items.append({
+            "title": "Proveedores",
+            "url": url_for('proveedores.proveedores'),
+            "icon": "bi-truck",
+            "category": "Catálogos",
+            "description": "Gestión de proveedores y compras",
+            "keywords": "proveedor proveedores compras suministros suplidores"
+        }) %}
+    {% endif %}
+    {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
+        {% set _ = nav_items.append({
+            "title": "Ventas",
+            "url": url_for('ventas.ventas'),
+            "icon": "bi-cart-check",
+            "category": "Operaciones",
+            "description": "Punto de venta y nueva facturación",
+            "keywords": "venta ventas facturar facturacion cobrar vender caja pos tpv"
+        }) %}
+        {% set _ = nav_items.append({
+            "title": "Facturas de Contado",
+            "url": url_for('pagos.facturas', tipo='contado', estado='todas'),
+            "icon": "bi-cash-coin",
+            "category": "Facturas",
+            "description": "Historial de pagos y facturas al contado",
+            "keywords": "factura facturas contado pago de contado cobro efectivo recibos"
+        }) %}
+        {% set _ = nav_items.append({
+            "title": "Facturas a Crédito",
+            "url": url_for('pagos.facturas', tipo='credito', estado='todas'),
+            "icon": "bi-calendar2-check",
+            "category": "Facturas",
+            "description": "Cuentas por cobrar y cuotas de crédito",
+            "keywords": "factura facturas credito cuotas abonos pagos por cobrar plazos financiamiento"
+        }) %}
+    {% endif %}
+    {% if rol_actual == 'ADMIN' %}
+        {% set _ = nav_items.append({
+            "title": "Reportes Financieros",
+            "url": url_for('reportes.financiero'),
+            "icon": "bi-bar-chart-line",
+            "category": "Resumen",
+            "description": "Métricas financieras, ingresos y balances",
+            "keywords": "reporte reportes financiero finanzas balance estadisticas utilidades"
+        }) %}
+        {% set _ = nav_items.append({
+            "title": "Información de la Empresa",
+            "url": url_for('empresa.informacion_empresa'),
+            "icon": "bi-gear",
+            "category": "Configuración",
+            "description": "Configuración del negocio, logo y factura",
+            "keywords": "empresa negocio configuracion perfil ajustes razon social logo ruc"
+        }) %}
+    {% endif %}
+    {% if current_user.is_authenticated %}
+        {% set _ = nav_items.append({
+            "title": "Mi Perfil",
+            "url": url_for('perfil.editar_perfil'),
+            "icon": "bi-person-circle",
+            "category": "Cuenta",
+            "description": "Editar perfil de usuario y contraseña",
+            "keywords": "perfil usuario cuenta contraseña clave foto"
+        }) %}
+    {% endif %}
+    <script id="navSearchData" type="application/json">
+        {{ nav_items | tojson }}
+    </script>
+    <script src="{{ url_for('static', filename='js/core/nav_search.js') }}"></script>
 
     {% block extra_js %}{% endblock %}
     {% block scripts %}{% endblock %}
