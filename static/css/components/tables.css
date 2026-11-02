@@ -105,24 +105,104 @@
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.02em;
+    transition: all 0.2s ease;
 }
 
-.badge-pill-apex--active {
-    background-color: var(--color-primary);
-    color: var(--color-bg-app);
-    box-shadow: 0 0 12px var(--color-primary-glow);
+/* ========================================================
+   ESTADOS DE TABLAS: ACTIVO (Verde Sólido #00741d) / INACTIVO (Gris)
+   Exacto al diseño de referencia Apex Shadcn
+   ======================================================== */
+.badge-pill-apex--active,
+.badge-status-active {
+    background-color: #00741d !important;
+    color: #ffffff !important;
+    border: 1px solid #006018 !important;
+    box-shadow: 0 1px 4px rgba(0, 116, 29, 0.25) !important;
+    font-weight: 700 !important;
 }
 
-.badge-pill-apex--inactive {
-    background-color: rgba(94, 100, 87, 0.18);
-    color: var(--color-text-main);
-    border: 1px solid rgba(97, 77, 77, 0.3);
+[data-theme="light"] .badge-pill-apex--active,
+[data-theme="light"] .badge-status-active {
+    background-color: #00741d !important;
+    color: #ffffff !important;
+    border: 1px solid #006018 !important;
+    box-shadow: 0 1px 3px rgba(0, 116, 29, 0.2) !important;
+}
+
+.badge-pill-apex--inactive,
+.badge-status-inactive {
+    background-color: rgba(100, 116, 139, 0.18) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(100, 116, 139, 0.35) !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+[data-theme="light"] .badge-pill-apex--inactive,
+[data-theme="light"] .badge-status-inactive {
+    background-color: #eef2f4 !important;
+    color: #475569 !important;
+    border: 1px solid #d8e0e5 !important;
+    box-shadow: none !important;
 }
 
 .badge-pill-apex--warning {
-    background-color: rgba(255, 171, 0, 0.18);
-    color: var(--color-warning);
-    border: 1px solid rgba(255, 171, 0, 0.3);
+    background-color: rgba(255, 171, 0, 0.18) !important;
+    color: var(--color-warning) !important;
+    border: 1px solid rgba(255, 171, 0, 0.3) !important;
+}
+
+/* ========================================================
+   SEMÁFORO DE STOCK (TABLA DE PRODUCTOS)
+   Rojo (Agotado), Amarillo (Bajo), Verde (Saludable)
+   Colores sólidos de alta visibilidad independientes del tema
+   ======================================================== */
+/* 1. AGOTADO (0 unidades o menor) */
+.badge-stock-out {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    border: 1px solid #b91c1c !important;
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.25) !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .badge-stock-out {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    border: 1px solid #b91c1c !important;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2) !important;
+}
+
+/* 2. STOCK BAJO (menor o igual a stock mínimo) */
+.badge-stock-low {
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+    border: 1px solid #b45309 !important;
+    box-shadow: 0 1px 4px rgba(217, 119, 6, 0.25) !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .badge-stock-low {
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+    border: 1px solid #b45309 !important;
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.2) !important;
+}
+
+/* 3. STOCK SALUDABLE (mayor a stock mínimo - Verde #00741d) */
+.badge-stock-ok {
+    background-color: #00741d !important;
+    color: #ffffff !important;
+    border: 1px solid #006018 !important;
+    box-shadow: 0 1px 4px rgba(0, 116, 29, 0.25) !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .badge-stock-ok {
+    background-color: #00741d !important;
+    color: #ffffff !important;
+    border: 1px solid #006018 !important;
+    box-shadow: 0 1px 3px rgba(0, 116, 29, 0.2) !important;
 }
 
 /* Menú de Tres Puntos (⋮) */
@@ -147,4 +227,31 @@
     border-color: var(--color-primary);
 }
 
+/* Filtros de Toolbar: Activo (#00741d) e Inactivo (Gris) */
+.state-pill[data-estado="ACTIVO"].active,
+.state-pill[data-estado="ACTIVO"].state-pill--active {
+    color: #ffffff !important;
+    border-color: #00741d !important;
+    background-color: #00741d !important;
+}
 
+[data-theme="light"] .state-pill[data-estado="ACTIVO"].active,
+[data-theme="light"] .state-pill[data-estado="ACTIVO"].state-pill--active {
+    color: #ffffff !important;
+    border-color: #00741d !important;
+    background-color: #00741d !important;
+}
+
+.state-pill[data-estado="INACTIVO"].active,
+.state-pill[data-estado="INACTIVO"].state-pill--active {
+    color: #ffffff !important;
+    border-color: #64748b !important;
+    background-color: #64748b !important;
+}
+
+[data-theme="light"] .state-pill[data-estado="INACTIVO"].active,
+[data-theme="light"] .state-pill[data-estado="INACTIVO"].state-pill--active {
+    color: #ffffff !important;
+    border-color: #64748b !important;
+    background-color: #64748b !important;
+}
