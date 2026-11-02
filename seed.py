@@ -1,18 +1,17 @@
 from app import app
-
-# Importamos base datos
 from database import db
-
-# Importamos modelos
 from models.rol import Rol
 from models.usuario import Usuario
+from models.categoria import Categoria
+from models.enums import EstadoCategoria
 
 with app.app_context():
+    # Asegurar que todas las tablas existan
+    db.create_all()
 
-        # ==============================================
-    # CREAR / ACTUALIZAR ROLES BASE
     # ==============================================
-
+    # 1. CREAR / ACTUALIZAR ROLES BASE
+    # ==============================================
     roles_base = [
         {
             "nombre": "ADMIN",
@@ -33,17 +32,14 @@ with app.app_context():
 
     for item in roles_base:
         rol = Rol.query.filter_by(nombre=item["nombre"]).first()
-
         if not rol:
             rol = Rol(
                 nombre=item["nombre"],
                 descripcion=item["descripcion"],
                 descuento_maximo=item["descuento_maximo"]
             )
-
             db.session.add(rol)
             print(f"Rol {item['nombre']} creado")
-
         else:
             rol.descripcion = item["descripcion"]
             rol.descuento_maximo = item["descuento_maximo"]
@@ -54,26 +50,51 @@ with app.app_context():
     rol_admin = Rol.query.filter_by(nombre="ADMIN").first()
 
     # ==============================================
-    # CREAR USUARIO ADMIN
+    # 2. CREAR / RESTABLECER USUARIOS ADMINISTRADORES
     # ==============================================
+    # Habilitamos tanto ADMINISTRADOR como admin con la clave admin123
+    usuarios_admin = [
+        {"username": "ADMINISTRADOR", "nombre": "Winie Laurissa Garcia Sandoval"},
+        {"username": "admin", "nombre": "Administrador Principal"}
+    ]
 
-    # Buscar usuario admin
-    usuario_admin = Usuario.query.filter_by(
-        username="admin"
-    ).first()
+    for u in usuarios_admin:
+        usr = Usuario.query.filter_by(username=u["username"]).first()
+        if not usr:
+            usr = Usuario(
+                username=u["username"],
+                rol_id=rol_admin.id,
+                nombre_completo=u["nombre"],
+                estado=True
+            )
+            usr.set_password("admin123")
+            db.session.add(usr)
+            print(f"Usuario {u['username']} creado (Password: admin123)")
+        else:
+            usr.rol_id = rol_admin.id
+            usr.estado = True
+            usr.set_password("admin123")
+            print(f"Usuario {u['username']} actualizado y contrasena restablecida a: admin123")
 
-    # Si no existe lo creamos
-    if not usuario_admin:
-        usuario_admin = Usuario(
-            username="admin",
-            rol_id=rol_admin.id
+    db.session.commit()
+
+    # ==============================================
+    # 3. CREAR CATEGORIA BASE (SI ESTA VACIA)
+    # ==============================================
+    if Categoria.query.count() == 0:
+        cat_general = Categoria(
+            codigo="CAT-001",
+            nombre="GENERAL",
+            descripcion="Categoria general de productos",
+            estado=EstadoCategoria.ACTIVO
         )
-
-    
-        usuario_admin.set_password("admin123")
-        db.session.add(usuario_admin)
+        db.session.add(cat_general)
         db.session.commit()
-        print("Usuario admin creado")
-    else:
-        print("Usuario admin ya existe")
-    print("SEED COMPLETADO")
+        print("Categoria base 'GENERAL' creada")
+
+    print("\n" + "="*50)
+    print("BASE DE DATOS INICIALIZADA CON EXITO")
+    print("Credenciales de acceso:")
+    print("  - Usuario:    ADMINISTRADOR (o admin)")
+    print("  - Contrasena: admin123")
+    print("="*50 + "\n")
