@@ -153,19 +153,44 @@
 }
 
 /* ========================================================
-   SEMÁFORO DE STOCK (TABLA DE PRODUCTOS)
-   Rojo (Agotado), Amarillo (Bajo), Verde (Saludable)
-   Colores sólidos de alta visibilidad independientes del tema
+   PÍLDORAS DE STOCK EN TABLA (COMPACTAS Y UNIFORMES)
+   Solo ícono + cantidad (Sin palabras, alineadas y consistentes)
    ======================================================== */
-/* 1. AGOTADO (0 unidades o menor) */
+.badge-stock-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    min-width: 46px !important;
+    height: 24px !important;
+    padding: 0 9px !important;
+    border-radius: 9999px !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+}
+
+.badge-stock-pill i {
+    font-size: 0.78rem !important;
+    line-height: 1 !important;
+}
+
+/* 1. AGOTADO (Rojo sólido #dc2626) */
+.badge-stock-pill.badge-stock-out,
 .badge-stock-out {
     background-color: #dc2626 !important;
     color: #ffffff !important;
     border: 1px solid #b91c1c !important;
-    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.25) !important;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25) !important;
     font-weight: 700 !important;
 }
 
+[data-theme="light"] .badge-stock-pill.badge-stock-out,
 [data-theme="light"] .badge-stock-out {
     background-color: #dc2626 !important;
     color: #ffffff !important;
@@ -173,15 +198,17 @@
     box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2) !important;
 }
 
-/* 2. STOCK BAJO (menor o igual a stock mínimo) */
+/* 2. STOCK BAJO (Ámbar / Naranja sólido #d97706) */
+.badge-stock-pill.badge-stock-low,
 .badge-stock-low {
     background-color: #d97706 !important;
     color: #ffffff !important;
     border: 1px solid #b45309 !important;
-    box-shadow: 0 1px 4px rgba(217, 119, 6, 0.25) !important;
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.25) !important;
     font-weight: 700 !important;
 }
 
+[data-theme="light"] .badge-stock-pill.badge-stock-low,
 [data-theme="light"] .badge-stock-low {
     background-color: #d97706 !important;
     color: #ffffff !important;
@@ -189,15 +216,17 @@
     box-shadow: 0 1px 3px rgba(217, 119, 6, 0.2) !important;
 }
 
-/* 3. STOCK SALUDABLE (mayor a stock mínimo - Verde #00741d) */
+/* 3. STOCK SALUDABLE (Verde bosque sólido #00741d) */
+.badge-stock-pill.badge-stock-ok,
 .badge-stock-ok {
     background-color: #00741d !important;
     color: #ffffff !important;
     border: 1px solid #006018 !important;
-    box-shadow: 0 1px 4px rgba(0, 116, 29, 0.25) !important;
+    box-shadow: 0 1px 3px rgba(0, 116, 29, 0.25) !important;
     font-weight: 700 !important;
 }
 
+[data-theme="light"] .badge-stock-pill.badge-stock-ok,
 [data-theme="light"] .badge-stock-ok {
     background-color: #00741d !important;
     color: #ffffff !important;
