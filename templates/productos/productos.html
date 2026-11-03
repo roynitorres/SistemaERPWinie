@@ -119,14 +119,20 @@
                             C$ {{ "%.2f"|format(producto.precio_venta) }}
                         </td>
 
-                        <!-- STOCK CON SEMÁFORO INTELIGENTE: SOLO ÍCONO Y CANTIDAD -->
-                        <td class="data-table__cell text-center" style="font-weight: 700;">
+                                                <!-- STOCK CON SEMAFORO: PILDORA CAPSULA (SOLO ICONO Y CANTIDAD) -->
+                        <td class="data-table__cell text-center">
                             {% if producto.stock <= 0 %}
-                            <span class="badge-stock-pill badge-stock-out" title="Agotado (0 unidades)"><i class="bi bi-x-circle-fill"></i>{{ producto.stock }}</span>
+                            <span class="badge-pill-apex badge-stock-pill badge-stock-out" title="Agotado (0 unidades)">
+                                <i class="bi bi-x-circle-fill"></i>{{ producto.stock }}
+                            </span>
                             {% elif producto.stock <= producto.stock_minimo %}
-                            <span class="badge-stock-pill badge-stock-low" title="Stock Bajo (Existencia: {{ producto.stock }}, Mínimo: {{ producto.stock_minimo }})"><i class="bi bi-exclamation-triangle-fill"></i>{{ producto.stock }}</span>
+                            <span class="badge-pill-apex badge-stock-pill badge-stock-low" title="Stock Bajo (Existencia: {{ producto.stock }}, Minimo: {{ producto.stock_minimo }})">
+                                <i class="bi bi-exclamation-triangle-fill"></i>{{ producto.stock }}
+                            </span>
                             {% else %}
-                            <span class="badge-stock-pill badge-stock-ok" title="Stock Saludable (Existencia: {{ producto.stock }}, Mínimo: {{ producto.stock_minimo }})"><i class="bi bi-check-circle-fill"></i>{{ producto.stock }}</span>
+                            <span class="badge-pill-apex badge-stock-pill badge-stock-ok" title="Stock Saludable (Existencia: {{ producto.stock }}, Minimo: {{ producto.stock_minimo }})">
+                                <i class="bi bi-check-circle-fill"></i>{{ producto.stock }}
+                            </span>
                             {% endif %}
                         </td>
 
