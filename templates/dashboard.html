@@ -22,11 +22,7 @@
             </div>
         </div>
 
-        <div>
-            <button type="button" class="btn-neon-primary" data-bs-toggle="modal" data-bs-target="#modalClientesCobrar" style="border-radius: 12px; padding: 10px 20px; font-weight: 700;">
-                <i class="bi bi-bell-fill me-1 text-warning"></i> Clientes a cobrar hoy
-            </button>
-        </div>
+        
     </div>
 
     <!-- ===================================== -->
@@ -164,70 +160,7 @@
 
     </div>
 
-    <!-- ===================================== -->
-    <!-- MODAL CLIENTES A COBRAR HOY (APEX DARK) -->
-    <!-- ===================================== -->
-    <div class="modal fade" id="modalClientesCobrar" tabindex="-1" aria-labelledby="modalClientesCobrarLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; color: var(--color-text-main);">
-                <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: 18px 24px;">
-                    <h5 class="modal-title fw-bold" id="modalClientesCobrarLabel" style="color: var(--color-text-main);">
-                        <i class="bi bi-calendar-check me-2 "></i> Clientes a Cobrar Hoy
-                    </h5>
-                    <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="table-responsive">
-                        <table class="data-table" style="margin-bottom: 0;">
-                            <thead class="data-table__head" style="background: var(--color-bg-card);">
-                                <tr>
-                                    <th style="width: 50px;">N°</th>
-                                    <th>Cliente</th>
-                                    <th style="text-align: center;">Estado</th>
-                                    <th style="text-align: center;">Días Mora</th>
-                                    <th style="text-align: right;">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in clientes_a_cobrar %}
-                                <tr class="data-table__row">
-                                    <td class="data-table__cell " style="font-weight: 600;">{{ loop.index }}</td>
-                                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main);">{{ item.cliente }}</td>
-                                    <td class="data-table__cell text-center">
-                                        {% if item.estado == 'Moroso' %}
-                                        <span class="badge-pill-apex badge-pill-apex--inactive">Moroso</span>
-                                        {% else %}
-                                        <span class="badge-pill-apex" style="background: rgba(255, 183, 77, 0.15); color: var(--color-danger); border: 1px solid rgba(255, 183, 77, 0.25);">Cobrar hoy</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="data-table__cell text-center" style="font-weight: 700; color: var(--color-danger);">{{ item.dias }}</td>
-                                    <td class="data-table__cell ">
-                                        <a href="https://wa.me/{{ item.telefono|default('', true) }}?text=Hola%20{{ item.cliente | urlencode }},%20le%20recordamos%20que%20tiene%20un%20pago%20pendiente%20por%20realizar.%20Por%20favor,%20comuníquese%20con%20nosotros." class="btn-neon-primary" style="padding: 5px 5px; font-size: 0.82rem;" target="_blank">
-                                            <i class="bi bi-whatsapp "></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
-                                        <i class="bi bi-emoji-smile fs-1 d-block mb-2 text-success"></i>
-                                        ¡Sin clientes pendientes por cobrar el día de hoy!
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--color-border); justify-content: flex-end;">
-                    <button type="button" class="btn-apex-outline" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- INCLUSIÓN DE CHART.JS -->
+    <!-- INCLUSIÓN DE CHART.JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script id="dashboardChartData" type="application/json">{{ chart_data|tojson }}</script>
 {% endblock %}

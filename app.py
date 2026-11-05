@@ -1,6 +1,5 @@
 from flask import Flask, render_template, redirect, url_for
-from flask_login import LoginManager
-from flask_login import login_required
+from flask_login import LoginManager, login_required, current_user
 from config import Config
 from database import db, migrate
 from datetime import datetime, date, timedelta
@@ -148,6 +147,37 @@ from services.saas.tenant_resolver import resolve_tenant_middleware
 @app.before_request
 def enrutar_inquilino():
     return resolve_tenant_middleware()
+
+
+# =========================
+# NOTIFICACIONES GLOBALES (TOPBAR SHEET)
+# =========================
+from services.notificacion_service import obtener_resumen_notificaciones
+
+@app.context_processor
+def inyectar_notificaciones():
+    if current_user and current_user.is_authenticated:
+        try:
+            return {"notificaciones": obtener_resumen_notificaciones()}
+        except Exception:
+            return {
+                "notificaciones": {
+                    "total_alertas": 0,
+                    "total_cobranzas": 0,
+                    "total_stock": 0,
+                    "cobranzas": [],
+                    "stock": []
+                }
+            }
+    return {
+        "notificaciones": {
+            "total_alertas": 0,
+            "total_cobranzas": 0,
+            "total_stock": 0,
+            "cobranzas": [],
+            "stock": []
+        }
+    }
 
 
 # =========================
