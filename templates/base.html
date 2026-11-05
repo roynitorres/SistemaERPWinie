@@ -755,7 +755,7 @@
                             <i class="bi bi-whatsapp"></i> WhatsApp
                         </a>
                         {% endif %}
-                        <a href="{{ url_for('pagos.pagos') }}" class="sheet-btn-action sheet-btn-action--cobrar" title="Ir a Cobrar">
+                        <a href="{{ url_for('pagos.facturas', tipo='credito', estado='pendientes') }}" class="sheet-btn-action sheet-btn-action--cobrar" title="Ir a Cobrar">
                             <i class="bi bi-arrow-right"></i> Cobrar
                         </a>
                     </div>

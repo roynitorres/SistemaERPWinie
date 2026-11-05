@@ -1,6 +1,6 @@
 """
 services/notificacion_service.py
-Gestión centralizada de notificaciones del sistema (Cobranzas y Stock).
+Gestión centralizada de notificaciones del sistema (Cobranzas de Crédito y Stock).
 Provee datos estructurados para el Sheet (panel lateral) global en el Topbar.
 """
 from datetime import date
@@ -15,14 +15,18 @@ from models.enums import EstadoVenta, TipoVenta, EstadoProducto
 
 def obtener_alertas_cobranza(hoy=None):
     """
-    Retorna la lista de alertas de cobranzas activas:
-    - Cuotas o ventas vencidas (morosos).
-    - Cuotas o ventas que vencen hoy.
+    Retorna la lista de alertas de cobranzas activas (exclusivo para ventas a CRÉDITO):
+    - Cuotas o facturas de crédito vencidas (morosos).
+    - Cuotas o facturas de crédito que vencen hoy.
     """
     if hoy is None:
         hoy = date.today()
 
-    ventas_activas = Venta.query.filter_by(estado=EstadoVenta.ACTIVA).options(
+    # Únicamente ventas a CRÉDITO activas generan cuentas por cobrar
+    ventas_credito = Venta.query.filter(
+        Venta.estado == EstadoVenta.ACTIVA,
+        Venta.tipo_venta == TipoVenta.CREDITO
+    ).options(
         joinedload(Venta.pagos),
         joinedload(Venta.cliente),
         joinedload(Venta.cuotas)
@@ -30,7 +34,7 @@ def obtener_alertas_cobranza(hoy=None):
 
     alertas = []
 
-    for venta in ventas_activas:
+    for venta in ventas_credito:
         if not venta.cliente:
             continue
 
@@ -45,7 +49,7 @@ def obtener_alertas_cobranza(hoy=None):
         if saldo_total <= 0:
             continue
 
-        # 1. Si la venta tiene cuotas registradas
+        # 1. Si la venta a crédito tiene cuotas detalladas
         if venta.cuotas and len(venta.cuotas) > 0:
             for cuota in venta.cuotas:
                 monto_c = float(cuota.monto_cuota)
@@ -75,7 +79,7 @@ def obtener_alertas_cobranza(hoy=None):
 
                     msg = (
                         f"Hola {venta.cliente.nombres}, le recordamos que tiene la cuota #{cuota.numero_cuota} "
-                        f"por un saldo de C$ {saldo_c:.2f} con fecha {cuota.fecha_vencimiento.strftime('%d/%m/%Y')}. "
+                        f"por un saldo de C$ {saldo_c:.2f} con fecha de vencimiento {cuota.fecha_vencimiento.strftime('%d/%m/%Y')}. "
                         f"Por favor comuníquese con nosotros para registrar su pago."
                     )
 
@@ -95,11 +99,8 @@ def obtener_alertas_cobranza(hoy=None):
                         "tipo_alerta": tipo_alerta,
                     })
         else:
-            # 2. Venta directa a crédito o contado sin cuotas detalladas
-            if venta.tipo_venta == TipoVenta.CONTADO or str(venta.tipo_venta) == "CONTADO":
-                fecha_cobro = venta.fecha_venta.date()
-            else:
-                fecha_cobro = venta.fecha_limite_credito or venta.fecha_venta.date()
+            # 2. Venta a crédito sin desglose de cuotas
+            fecha_cobro = venta.fecha_limite_credito or venta.fecha_venta.date()
 
             if fecha_cobro <= hoy:
                 dias_mora = (hoy - fecha_cobro).days
@@ -113,7 +114,7 @@ def obtener_alertas_cobranza(hoy=None):
                 msg = (
                     f"Hola {venta.cliente.nombres}, le recordamos que tiene un saldo pendiente de "
                     f"C$ {saldo_total:.2f} correspondiente a la factura {venta.numero_factura}. "
-                    f"Por favor comuníquese con nosotros para registrar su pago."
+                    f"Por favor comuníquese con nosotros para coordinar su pago."
                 )
 
                 alertas.append({
