@@ -6,6 +6,7 @@
 from datetime import datetime, UTC
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_user, logout_user, current_user
+from sqlalchemy import func
 from database import db
 from models.usuario import Usuario
 from models.saas.super_usuario import SuperUsuario
@@ -81,9 +82,10 @@ def login():
 
         # ==========================================
         # BUSCAR USUARIO DEL NEGOCIO / TENANT
+        # Búsqueda insensible a mayúsculas/minúsculas
         # ==========================================
-        usuario = Usuario.query.filter_by(
-            username=username
+        usuario = Usuario.query.filter(
+            func.lower(Usuario.username) == username.lower()
         ).first()
 
         if usuario:
@@ -155,8 +157,12 @@ def login():
 
         # ==========================================
         # VALIDAR SI ES SUPER ADMINISTRADOR SAAS
+        # Búsqueda insensible a mayúsculas/minúsculas
         # ==========================================
-        super_user = SuperUsuario.query.filter_by(username=username).first()
+        super_user = SuperUsuario.query.filter(
+            func.lower(SuperUsuario.username) == username.lower()
+        ).first()
+
         if super_user and super_user.check_password(password) and super_user.is_active:
             ip_limiter.limpiar_ip(ip_cliente)
             session["superadmin_id"] = super_user.id

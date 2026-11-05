@@ -50,7 +50,7 @@
             {% endwith %}
 
             <!-- FORMULARIO DE ACCESO -->
-            <form id="formLogin" method="POST" action="{{ url_for('auth.login') }}" novalidate onsubmit="return validarLoginForm(event)">
+            <form id="formLogin" method="POST" action="{{ url_for('auth.login') }}" novalidate>
                 
                 <!-- CAMPO USUARIO -->
                 <div class="form-group mb-3">

@@ -57,6 +57,9 @@ class IPRateLimiter:
         """Determina si la IP ha excedido el límite de solicitudes por ventana."""
         if not ip:
             return False
+        # No bloquear localhost/127.0.0.1 para no interrumpir pruebas de login locales
+        if ip in ("127.0.0.1", "::1", "localhost"):
+            return False
         now = time.time()
         with self.lock:
             self._limpiar_antiguos(now)
