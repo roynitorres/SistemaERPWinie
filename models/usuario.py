@@ -2,7 +2,7 @@
 from database import db
 
 # Importamos fechas automáticas
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 
 # Herramientas para manejo seguro contraseñas
 from werkzeug.security import (
@@ -11,7 +11,7 @@ from werkzeug.security import (
 )
 
 # Flask-Login
-#Le da automáticamente: is_authenticated, is_active, get_id
+# Le da automáticamente: is_authenticated, is_active, get_id
 from flask_login import UserMixin
 
 
@@ -140,6 +140,23 @@ class Usuario(UserMixin, db.Model):
         nullable=True
     )
 
+    # =========================
+    # SEGURIDAD Y FUERZA BRUTA
+    # =========================
+
+    # Contador de intentos fallidos consecutivos
+    intentos_fallidos = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False
+    )
+
+    # Fecha y hora hasta la cual la cuenta permanece bloqueada
+    bloqueado_hasta = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+
     # Fecha creación registro
     created_at = db.Column(
         db.DateTime,
@@ -189,16 +206,59 @@ class Usuario(UserMixin, db.Model):
 
     # Generar hash contraseña
     def set_password(self, password):
-
         self.password_hash = generate_password_hash(password)
 
     # Verificar contraseña
     def check_password(self, password):
-
         return check_password_hash(
             self.password_hash,
             password
         )
+
+    # =========================
+    # MÉTODOS DE FUERZA BRUTA
+    # =========================
+
+    @property
+    def esta_bloqueado(self):
+        """Indica si la cuenta se encuentra bloqueada temporalmente."""
+        if not self.bloqueado_hasta:
+            return False
+        
+        bloq = self.bloqueado_hasta
+        if bloq.tzinfo is None:
+            bloq = bloq.replace(tzinfo=UTC)
+        
+        return bloq > datetime.now(UTC)
+
+    def minutos_restantes_bloqueo(self):
+        """Retorna los minutos restantes que le quedan a la cuenta bloqueada."""
+        if not self.esta_bloqueado:
+            return 0
+        
+        bloq = self.bloqueado_hasta
+        if bloq.tzinfo is None:
+            bloq = bloq.replace(tzinfo=UTC)
+            
+        delta = bloq - datetime.now(UTC)
+        minutos = int((delta.total_seconds() + 59) // 60)
+        return max(1, minutos)
+
+    def registrar_fallo_login(self, max_intentos=5, bloqueo_minutos=15):
+        """
+        Incrementa los intentos fallidos. Si alcanza el máximo, bloquea la cuenta.
+        Retorna True si la cuenta fue bloqueada en esta llamada.
+        """
+        self.intentos_fallidos = (self.intentos_fallidos or 0) + 1
+        if self.intentos_fallidos >= max_intentos:
+            self.bloqueado_hasta = datetime.now(UTC) + timedelta(minutes=bloqueo_minutos)
+            return True
+        return False
+
+    def limpiar_intentos_fallidos(self):
+        """Reinicia el contador de intentos fallidos y levanta el bloqueo."""
+        self.intentos_fallidos = 0
+        self.bloqueado_hasta = None
 
     # =========================
     # REPRESENTACIÓN OBJETO
@@ -206,5 +266,4 @@ class Usuario(UserMixin, db.Model):
 
     # Representación amigable consola
     def __repr__(self):
-
         return f"<Usuario {self.username}>"

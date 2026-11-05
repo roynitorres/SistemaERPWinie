@@ -1,0 +1,44 @@
+<!-- ======================================================== -->
+<!-- MODAL PREVENTIVO DE INACTIVIDAD (IDLE SESSION TIMEOUT)   -->
+<!-- ======================================================== -->
+<div class="modal fade" id="modalInactividad" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" style="z-index: 1095;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content shadow-lg border-0" style="border-radius: 18px; overflow: hidden; background: var(--color-bg-card, #ffffff); border: 1px solid var(--color-border, #e2e8f0);">
+            <div class="modal-body p-4 text-center">
+                
+                <!-- ICONO PULSANTE DE ADVERTENCIA -->
+                <div class="idle-modal-icon-wrapper mb-3 mx-auto" id="idleIconWrapper">
+                    <div class="idle-pulse-ring"></div>
+                    <i class="bi bi-shield-lock-fill idle-icon" id="idleIcon"></i>
+                </div>
+
+                <!-- TÍTULO Y DESCRIPCIÓN -->
+                <h5 class="fw-bold mb-2" style="color: var(--color-text-main, #1e293b); font-size: 1.25rem;">
+                    ¿Sigues trabajando?
+                </h5>
+                <p class="small mb-3" style="color: var(--color-text-muted, #64748b); line-height: 1.5;">
+                    Por motivos de seguridad, tu sesión se cerrará automáticamente por inactividad en:
+                </p>
+
+                <!-- CONTADOR MONOESPACIADO -->
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="idle-countdown-box" id="idleCountdownBox">
+                        <i class="bi bi-clock-history fs-5 me-2 text-warning" id="idleCountdownIcon"></i>
+                        <span id="idleCountdownDisplay" class="fw-bold fs-3" style="font-variant-numeric: tabular-nums;">02:00</span>
+                    </div>
+                </div>
+
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{{ url_for('auth.logout', motivo='manual') }}" class="btn btn-outline-secondary px-3 py-2 fw-medium rounded-3" style="font-size: 0.9rem;">
+                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                    </a>
+                    <button type="button" id="btnMantenerSesion" class="btn btn-primary px-4 py-2 fw-semibold rounded-3 shadow-sm" style="font-size: 0.9rem; background: var(--color-primary, #004aad); border-color: var(--color-primary, #004aad);">
+                        <i class="bi bi-arrow-repeat me-1"></i> Seguir conectado
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

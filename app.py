@@ -1,8 +1,12 @@
-from flask import Flask, render_template, redirect, url_for
-from flask_login import LoginManager, login_required, current_user
+from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify
+from flask_login import LoginManager, login_required, current_user, logout_user
 from config import Config
 from database import db, migrate
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, UTC
+from services.security_service import (
+    migrar_todas_las_bases_seguridad,
+    SESSION_IDLE_TIMEOUT_SECONDS
+)
 from sqlalchemy import func, extract
 
 # MODELOS
@@ -53,6 +57,10 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+    try:
+        migrar_todas_las_bases_seguridad()
+    except Exception as _e_sec:
+        print('Nota migración de seguridad:', _e_sec)
     try:
         from sqlalchemy import inspect, text
         inspector = inspect(db.engine)
@@ -145,6 +153,51 @@ def load_user(user_id):
 # TENANT ROUTING MIDDLEWARE
 # =========================
 from services.saas.tenant_resolver import resolve_tenant_middleware
+
+# =========================
+# SEGURIDAD: TIMEOUT DE SESIÓN POR INACTIVIDAD
+# =========================
+@app.before_request
+def verificar_inactividad_sesion():
+    if request.path.startswith('/static'):
+        return None
+
+    rutas_excluidas = (
+        'auth.login',
+        'auth.logout',
+        'auth.ping_session',
+        'saas_admin.login',
+        'saas_admin.logout',
+    )
+    if request.endpoint in rutas_excluidas:
+        return None
+
+    es_autenticado = (current_user and current_user.is_authenticated) or session.get('superadmin_id')
+    if es_autenticado:
+        ultimo_acceso = session.get('ultimo_acceso')
+        ahora = datetime.now(UTC).timestamp()
+
+        if ultimo_acceso:
+            tiempo_inactivo = ahora - ultimo_acceso
+            if tiempo_inactivo > SESSION_IDLE_TIMEOUT_SECONDS:
+                logout_user()
+                session.clear()
+
+                is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+                if is_ajax:
+                    return jsonify({
+                        'session_expired': True,
+                        'redirect_url': url_for('auth.login', motivo='inactividad')
+                    }), 401
+
+                flash('Tu sesión ha expirado por inactividad por tu seguridad. Por favor, inicia sesión nuevamente.', 'warning')
+                return redirect(url_for('auth.login', motivo='inactividad'))
+
+        if not ultimo_acceso or (ahora - ultimo_acceso) > 15:
+            session['ultimo_acceso'] = ahora
+
+    return None
+
 
 @app.before_request
 def enrutar_inquilino():

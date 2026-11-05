@@ -1,0 +1,94 @@
+/* ==========================================================================
+   COMPONENTES: MODAL DE INACTIVIDAD (IDLE SESSION TIMEOUT)
+   ========================================================================== */
+
+/* Envoltorio del icono con animación de pulso */
+.idle-modal-icon-wrapper {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.idle-modal-icon-wrapper .idle-icon {
+    font-size: 2rem;
+    color: #f59e0b; /* Color ámbar/dorado de precaución */
+    transition: color 0.3s ease;
+}
+
+/* Anillo exterior pulsante */
+.idle-pulse-ring {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    animation: idlePulseAnim 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes idlePulseAnim {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0.15;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}
+
+/* Caja del contador regresivo monoespaciado */
+.idle-countdown-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-body, #f8fafc);
+    border: 1px solid var(--color-border, #e2e8f0);
+    padding: 10px 24px;
+    border-radius: 14px;
+    color: var(--color-text-main, #0f172a);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: 1.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Estado de urgencia (últimos 30 segundos) */
+.idle-countdown-box.is-urgent {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    animation: idleUrgentBlink 1s infinite alternate;
+}
+
+.idle-modal-icon-wrapper.is-urgent {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.idle-modal-icon-wrapper.is-urgent .idle-icon {
+    color: #ef4444;
+}
+
+.idle-modal-icon-wrapper.is-urgent .idle-pulse-ring {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+@keyframes idleUrgentBlink {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.35);
+    }
+}

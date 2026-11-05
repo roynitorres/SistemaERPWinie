@@ -23,6 +23,7 @@
 @import url('components/alerts.css');
 @import url('components/auth.css');
 @import url('components/reports.css');
+@import url('components/idle_timer.css');
 @import url('layout/portal.css');
 
 /* Google Fonts (Inter) - Se importa aquí o en HTML directamente */

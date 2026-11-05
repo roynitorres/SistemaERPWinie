@@ -579,6 +579,13 @@
     </script>
 
     <!-- ===================================== -->
+    <!-- MODAL PREVENTIVO DE INACTIVIDAD -->
+    <!-- ===================================== -->
+    {% if current_user.is_authenticated or session.get('superadmin_id') %}
+        {% include 'components/idle_modal.html' %}
+    {% endif %}
+
+    <!-- ===================================== -->
     <!-- MODAL CONFIRMACIÓN CERRAR SESIÓN -->
     <!-- ===================================== -->
     <div class="modal fade modal-compact" id="modalConfirmarLogout" tabindex="-1" aria-hidden="true">
@@ -617,6 +624,9 @@
     <script src="{{ url_for('static', filename='js/modules/proveedores.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/empresa.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/reportes.js') }}"></script>
+    {% if current_user.is_authenticated or session.get('superadmin_id') %}
+    <script src="{{ url_for('static', filename='js/core/idle_timer.js') }}"></script>
+    {% endif %}
 
     <!-- DATOS DE NAVEGACIÓN PARA EL BUSCADOR DE MENÚ -->
     {% set nav_items = [] %}

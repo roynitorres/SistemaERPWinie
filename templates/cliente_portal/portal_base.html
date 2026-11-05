@@ -28,12 +28,19 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% if current_user.is_authenticated %}
+        {% include "components/idle_modal.html" %}
+    {% endif %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- MÓDULOS JAVASCRIPT CLEAN CODE -->
     <script src="{{ url_for('static', filename='js/core/ui.js') }}"></script>
     <script src="{{ url_for('static', filename='js/core/validators.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/portal-cliente.js') }}"></script>
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/core/idle_timer.js') }}"></script>
+    {% endif %}
 
     {% block scripts %}{% endblock %}
 </body>
