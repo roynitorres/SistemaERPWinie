@@ -39,6 +39,7 @@ from routes.roles import roles_bp
 from routes.reportes import reportes_bp
 from routes.perfil import perfil_bp
 from routes.saas_admin import saas_admin_bp
+from routes.notificaciones import notificaciones_bp
 
 # APP
 
@@ -127,6 +128,7 @@ app.register_blueprint(perfil_bp)
 # app.register_blueprint(roles_bp)
 app.register_blueprint(reportes_bp)
 app.register_blueprint(saas_admin_bp)
+app.register_blueprint(notificaciones_bp)
 # =========================
 # USER LOADER
 # =========================

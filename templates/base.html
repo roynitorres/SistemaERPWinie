@@ -23,7 +23,7 @@
     <script src="{{ url_for('static', filename='js/core/theme.js') }}"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2.2">
     {% block extra_css %}
     {% endblock %}
 
@@ -240,13 +240,76 @@
                         <i id="theme-icon" class="bi bi-sun"></i>
                     </button>
 
-                    <!-- Control de alertas / Notificaciones (Sheet Lateral) -->
-                    <button type="button" class="topbar-icon-btn position-relative" data-bs-toggle="offcanvas" data-bs-target="#sheetNotificaciones" aria-controls="sheetNotificaciones" title="Centro de Notificaciones">
-                        <i class="bi bi-bell"></i>
-                        {% if notificaciones and notificaciones.total_alertas > 0 %}
-                        <span class="topbar-badge-count">{{ notificaciones.total_alertas if notificaciones.total_alertas < 100 else '99+' }}</span>
-                        {% endif %}
-                    </button>
+                    <!-- Control de alertas / Notificaciones (Dropdown Apex Shadcn) -->
+                    <div class="dropdown d-inline-block">
+                        <button type="button" class="topbar-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="Centro de Notificaciones" id="dropdownNotifBtn">
+                            <i class="bi bi-bell"></i>
+                            {% if notificaciones and notificaciones.total_alertas > 0 %}
+                            <span class="topbar-badge-count">{{ notificaciones.total_alertas if notificaciones.total_alertas < 100 else '99+' }}</span>
+                            {% endif %}
+                        </button>
+                        
+                        <div class="dropdown-menu dropdown-menu-end notif-dropdown-menu" aria-labelledby="dropdownNotifBtn">
+                            <!-- HEADER DEL DROPDOWN -->
+                            <div class="notif-dropdown-header">
+                                <span class="notif-dropdown-title">Notificaciones</span>
+                                {% if notificaciones and notificaciones.total_alertas > 0 %}
+                                <span class="badge bg-danger rounded-pill px-2 py-1" style="font-size: 0.72rem; font-weight: 700;">{{ notificaciones.total_alertas }} pendientes</span>
+                                {% else %}
+                                <span class="badge bg-secondary rounded-pill px-2 py-1" style="font-size: 0.72rem; font-weight: 600;">0 pendientes</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="notif-dropdown-items">
+                                <!-- OPCION 1: COBRANZAS -->
+                                <a href="{{ url_for('notificaciones.index', filtro='cobranzas') }}" class="notif-dropdown-item">
+                                    <div class="notif-item-icon notif-item-icon--cobro">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                    <div class="notif-item-content">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="notif-item-title">Cobranzas Pendientes</span>
+                                            <span class="badge bg-danger rounded-pill" style="font-size: 0.68rem;">{{ notificaciones.total_cobranzas if notificaciones else 0 }}</span>
+                                        </div>
+                                        <span class="notif-item-desc">
+                                            {% if notificaciones and notificaciones.total_cobranzas > 0 %}
+                                                {{ notificaciones.total_cobranzas }} cliente(s) con cuotas a cobrar hoy o vencidas
+                                            {% else %}
+                                                Sin cuotas pendientes de cobro
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </a>
+
+                                <!-- OPCION 2: STOCK -->
+                                <a href="{{ url_for('notificaciones.index', filtro='stock') }}" class="notif-dropdown-item">
+                                    <div class="notif-item-icon notif-item-icon--stock">
+                                        <i class="bi bi-box-seam-fill"></i>
+                                    </div>
+                                    <div class="notif-item-content">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="notif-item-title">Stock Crítico</span>
+                                            <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.68rem; font-weight: 700;">{{ notificaciones.total_stock if notificaciones else 0 }}</span>
+                                        </div>
+                                        <span class="notif-item-desc">
+                                            {% if notificaciones and notificaciones.total_stock > 0 %}
+                                                {{ notificaciones.total_stock }} producto(s) agotados o con existencia baja
+                                            {% else %}
+                                                Inventario en niveles saludables
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- FOOTER: BOTON A HOJA COMPLETA -->
+                            <div class="notif-dropdown-footer">
+                                <a href="{{ url_for('notificaciones.index') }}" class="notif-dropdown-view-all">
+                                    Ver todas las notificaciones <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Configuración de Empresa (Engranaje) -->
                     {% if rol_actual == 'ADMIN' %}
@@ -665,188 +728,6 @@
     {% block extra_js %}{% endblock %}
     {% block scripts %}{% endblock %}
 
-    <!-- ===================================== -->
-    <!-- HOJA LATERAL: CENTRO DE NOTIFICACIONES (SHADCN SHEET) -->
-    <!-- ===================================== -->
-    <div class="offcanvas offcanvas-end sheet-apex" tabindex="-1" id="sheetNotificaciones" aria-labelledby="sheetNotificacionesLabel">
-        <!-- SHEET HEADER -->
-        <div class="sheet-apex__header">
-            <div class="d-flex align-items-center gap-2">
-                <div class="sheet-apex__icon-badge">
-                    <i class="bi bi-bell-fill"></i>
-                </div>
-                <div>
-                    <h5 class="sheet-apex__title" id="sheetNotificacionesLabel">Notificaciones</h5>
-                    <span class="sheet-apex__subtitle">
-                        {% if notificaciones and notificaciones.total_alertas > 0 %}
-                            Tienes <strong class="text-danger">{{ notificaciones.total_alertas }}</strong> asuntos que requieren atención
-                        {% else %}
-                            Todo al día, sin alertas pendientes
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-            <button type="button" class="sheet-apex__close" data-bs-dismiss="offcanvas" aria-label="Cerrar">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-
-        <!-- TABS DE FILTRO RÁPIDO EN EL SHEET -->
-        <div class="sheet-apex__tabs">
-            <button type="button" class="sheet-tab-btn active" data-sheet-tab="todas">
-                Todas <span class="sheet-tab-badge">{{ notificaciones.total_alertas if notificaciones else 0 }}</span>
-            </button>
-            <button type="button" class="sheet-tab-btn" data-sheet-tab="cobranzas">
-                Cobranzas <span class="sheet-tab-badge">{{ notificaciones.total_cobranzas if notificaciones else 0 }}</span>
-            </button>
-            <button type="button" class="sheet-tab-btn" data-sheet-tab="stock">
-                Stock <span class="sheet-tab-badge">{{ notificaciones.total_stock if notificaciones else 0 }}</span>
-            </button>
-        </div>
-
-        <!-- SHEET BODY (LISTA DE ALERTAS) -->
-        <div class="offcanvas-body sheet-apex__body">
-            {% if notificaciones and notificaciones.total_alertas > 0 %}
-                
-                <!-- SECCIÓN COBRANZAS -->
-                {% for cobro in notificaciones.cobranzas %}
-                <div class="sheet-item-card sheet-item-card--cobranza" data-sheet-item="cobranzas">
-                    <div class="sheet-item-card__header">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="sheet-icon-pill sheet-icon-pill--{{ cobro.tipo_alerta }}">
-                                <i class="bi bi-cash-stack"></i>
-                            </span>
-                            <div>
-                                <h6 class="sheet-item-card__title">{{ cobro.cliente }}</h6>
-                                <span class="sheet-item-card__meta">
-                                    Factura: {{ cobro.factura }}{% if cobro.numero_cuota %} • Cuota #{{ cobro.numero_cuota }}{% endif %}
-                                </span>
-                            </div>
-                        </div>
-                        <span class="badge-pill-apex badge-pill-apex--{{ 'inactive' if cobro.estado == 'Moroso' else 'warning' if cobro.estado == 'En Gracia' else 'active' }}" style="font-size: 0.72rem; padding: 2px 8px;">
-                            {{ cobro.estado }}
-                        </span>
-                    </div>
-
-                    <div class="sheet-item-card__body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted" style="font-size: 0.8rem;">Saldo Pendiente:</span>
-                            <span class="sheet-item-card__amount">C$ {{ "%.2f"|format(cobro.monto_pendiente) }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
-                            <span class="text-muted">
-                                <i class="bi bi-calendar-event me-1"></i> Vencimiento: {{ cobro.fecha_vencimiento }}
-                            </span>
-                            {% if cobro.dias_mora > 0 %}
-                            <span class="text-danger fw-bold">
-                                <i class="bi bi-clock-history me-1"></i> {{ cobro.dias_mora }} d de retraso
-                            </span>
-                            {% else %}
-                            <span class="text-success fw-bold">
-                                <i class="bi bi-calendar-check me-1"></i> Vence hoy
-                            </span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="sheet-item-card__footer">
-                        {% if cobro.whatsapp_url %}
-                        <a href="{{ cobro.whatsapp_url }}" target="_blank" class="sheet-btn-action sheet-btn-action--wa" title="Enviar recordatorio por WhatsApp">
-                            <i class="bi bi-whatsapp"></i> WhatsApp
-                        </a>
-                        {% endif %}
-                        <a href="{{ url_for('pagos.facturas', tipo='credito', estado='pendientes') }}" class="sheet-btn-action sheet-btn-action--cobrar" title="Ir a Cobrar">
-                            <i class="bi bi-arrow-right"></i> Cobrar
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-
-                <!-- SECCIÓN STOCK -->
-                {% for st in notificaciones.stock %}
-                <div class="sheet-item-card sheet-item-card--stock" data-sheet-item="stock">
-                    <div class="sheet-item-card__header">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="sheet-icon-pill sheet-icon-pill--{{ st.tipo_alerta }}">
-                                <i class="bi bi-box-seam-fill"></i>
-                            </span>
-                            <div>
-                                <h6 class="sheet-item-card__title">{{ st.nombre }}</h6>
-                                <span class="sheet-item-card__meta">
-                                    {{ st.marca or 'Sin marca' }} • {{ st.categoria }}
-                                </span>
-                            </div>
-                        </div>
-                        {% if st.estado_stock == 'AGOTADO' %}
-                        <span class="badge-pill-apex badge-stock-pill badge-stock-out" style="font-size: 0.72rem; height: 20px; min-width: 46px;">
-                            <i class="bi bi-x-circle-fill"></i>0
-                        </span>
-                        {% else %}
-                        <span class="badge-pill-apex badge-stock-pill badge-stock-low" style="font-size: 0.72rem; height: 20px; min-width: 46px;">
-                            <i class="bi bi-exclamation-triangle-fill"></i>{{ st.stock }}
-                        </span>
-                        {% endif %}
-                    </div>
-
-                    <div class="sheet-item-card__body">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-muted" style="font-size: 0.8rem;">Inventario:</span>
-                            <span class="fw-bold {{ 'text-danger' if st.estado_stock == 'AGOTADO' else 'text-warning' }}" style="font-size: 0.82rem;">
-                                {{ st.mensaje }}
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.78rem;">
-                            <span>Código: <code>{{ st.codigo }}</code></span>
-                            <span>Mínimo: {{ st.stock_minimo }}</span>
-                        </div>
-                    </div>
-
-                    <div class="sheet-item-card__footer">
-                        <a href="{{ url_for('productos.productos') }}" class="sheet-btn-action sheet-btn-action--stock">
-                            <i class="bi bi-box-arrow-up-right me-1"></i> Ir al Catálogo
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-
-            {% else %}
-                <!-- ESTADO VACÍO ELEGANTE -->
-                <div class="sheet-empty-state">
-                    <div class="sheet-empty-state__icon">
-                        <i class="bi bi-check2-circle"></i>
-                    </div>
-                    <h6 class="sheet-empty-state__title">¡Todo está al día!</h6>
-                    <p class="sheet-empty-state__text">
-                        No hay cuotas vencidas ni productos con stock bajo en este momento.
-                    </p>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Script Selector de Tabs en Sheet -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var sheetTabs = document.querySelectorAll('.sheet-tab-btn');
-            if (!sheetTabs.length) return;
-            sheetTabs.forEach(function (tab) {
-                tab.addEventListener('click', function () {
-                    sheetTabs.forEach(function (t) { t.classList.remove('active'); });
-                    this.classList.add('active');
-                    var target = this.dataset.sheetTab;
-                    var items = document.querySelectorAll('.sheet-item-card');
-                    items.forEach(function (item) {
-                        if (target === 'todas' || item.dataset.sheetItem === target) {
-                            item.style.display = '';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
-            });
-        });
-    </script>
-
-</body>
+    </body>
 
 </html>

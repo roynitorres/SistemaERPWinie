@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Centro de Notificaciones{% endblock %}
+
+{% block topbar_title %}Notificaciones{% endblock %}
+
+{% block content %}
+    <!-- HEADER DE PÁGINA APEX -->
+    <div class="page-header-apex">
+        <h1 class="page-title-apex">
+            <i class="bi bi-bell-fill px-2"></i>Centro de Notificaciones
+        </h1>
+        <p class="page-subtitle-apex">
+            Monitorea, gestiona y silencia las alertas prioritarias de cobranza y existencias de inventario.
+        </p>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- BARRA DE HERRAMIENTAS, BÚSQUEDA Y TABS -->
+    <!-- ===================================== -->
+    <div class="toolbar-apex">
+        <!-- Grupo Izquierdo: Buscador + Pills de Filtro -->
+        <div class="toolbar-left-group">
+            <div class="toolbar-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="toolbar-input" id="buscarNotificacion" placeholder="Buscar por cliente, producto o factura...">
+            </div>
+
+            <!-- TABS PILLS DE FILTRO -->
+            <div class="state-pills-bar">
+                <button type="button" class="state-pill {{ 'state-pill--active' if filtro_inicial == 'todas' else '' }}" id="pillTodas" data-filtro="todas">
+                    Todas ({{ notificaciones.total_alertas if notificaciones else 0 }})
+                </button>
+                <button type="button" class="state-pill {{ 'state-pill--active' if filtro_inicial == 'cobranzas' else '' }}" id="pillCobranzas" data-filtro="cobranzas">
+                    Cobranzas ({{ notificaciones.total_cobranzas if notificaciones else 0 }})
+                </button>
+                <button type="button" class="state-pill {{ 'state-pill--active' if filtro_inicial == 'stock' else '' }}" id="pillStock" data-filtro="stock">
+                    Stock Crítico ({{ notificaciones.total_stock if notificaciones else 0 }})
+                </button>
+                <button type="button" class="state-pill {{ 'state-pill--active' if filtro_inicial == 'silenciados' else '' }}" id="pillSilenciados" data-filtro="silenciados">
+                    Silenciados ({{ notificaciones.total_silenciados if notificaciones else 0 }})
+                </button>
+            </div>
+        </div>
+
+        <!-- Acciones Derecha -->
+        <div class="toolbar-actions-right">
+            <span id="badgeTotalVisibles" class="count-badge-apex" title="Alertas visibles">0</span>
+            
+            <a href="{{ url_for('pagos.facturas', tipo='credito', estado='pendientes') }}" class="btn-apex-outline" title="Ir a Cuentas por Cobrar">
+                <i class="bi bi-cash-stack"></i> Cobranzas
+            </a>
+
+            <a href="{{ url_for('productos.productos') }}" class="btn-apex-outline" title="Ir al Catálogo">
+                <i class="bi bi-box-seam"></i> Inventario
+            </a>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- PANEL PRINCIPAL DE NOTIFICACIONES -->
+    <!-- ===================================== -->
+    <div class="notif-page-panel">
+        <div id="listaNotificaciones">
+
+            <!-- 1. ALERTAS DE COBRANZA -->
+            {% for cobro in notificaciones.cobranzas %}
+            <div class="notif-card-row notif-item" data-categoria="cobranzas" data-search="{{ cobro.cliente|lower }} {{ cobro.factura|lower }} {{ cobro.estado|lower }}">
+                <div class="notif-card-left">
+                    <div class="notif-card-avatar notif-card-avatar--{{ cobro.tipo_alerta }}">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <h6 class="notif-card-title">{{ cobro.cliente }}</h6>
+                        <div class="notif-card-meta">
+                            <span><i class="bi bi-receipt me-1"></i>Factura: <strong>{{ cobro.factura }}</strong></span>
+                            {% if cobro.numero_cuota %}
+                            <span>• Cuota #{{ cobro.numero_cuota }}</span>
+                            {% endif %}
+                            <span>• Vencimiento: {{ cobro.fecha_vencimiento }}</span>
+                            <span class="badge-pill-apex badge-pill-apex--{{ 'inactive' if cobro.estado == 'Moroso' else 'warning' if cobro.estado == 'En Gracia' else 'active' }}" style="font-size: 0.72rem; padding: 2px 8px;">
+                                {{ cobro.estado }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notif-card-details">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Saldo Pendiente</span>
+                        <span class="notif-card-amount">C$ {{ "%.2f"|format(cobro.monto_pendiente) }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Estado de Mora</span>
+                        {% if cobro.dias_mora > 0 %}
+                        <span class="text-danger fw-bold" style="font-size: 0.86rem;">
+                            <i class="bi bi-clock-history me-1"></i>{{ cobro.dias_mora }} día(s) de atraso
+                        </span>
+                        {% else %}
+                        <span class="text-success fw-bold" style="font-size: 0.86rem;">
+                            <i class="bi bi-calendar-check me-1"></i>Vence hoy
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="notif-card-actions">
+                    {% if cobro.whatsapp_url %}
+                    <a href="{{ cobro.whatsapp_url }}" target="_blank" class="btn-notif-action btn-notif-wa" title="Enviar recordatorio por WhatsApp">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('pagos.facturas', tipo='credito', estado='pendientes') }}" class="btn-notif-action btn-notif-outline" title="Gestionar cobro en facturación">
+                        <i class="bi bi-arrow-right"></i> Cobrar
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 2. ALERTAS DE STOCK CRÍTICO (ACTIVAS) -->
+            {% for st in notificaciones.stock %}
+            <div class="notif-card-row notif-item" data-categoria="stock" data-search="{{ st.nombre|lower }} {{ st.marca|lower }} {{ st.codigo|lower }} {{ st.categoria|lower }}">
+                <div class="notif-card-left">
+                    <div class="notif-card-avatar notif-card-avatar--{{ st.tipo_alerta }}">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="notif-card-title">{{ st.nombre }}</h6>
+                        <div class="notif-card-meta">
+                            <span><i class="bi bi-tag me-1"></i>{{ st.marca or 'Sin marca' }}</span>
+                            <span>• {{ st.categoria }}</span>
+                            <span>• Código: <code>{{ st.codigo }}</code></span>
+                            {% if st.estado_stock == 'AGOTADO' %}
+                            <span class="badge-pill-apex badge-stock-pill badge-stock-out" style="font-size: 0.72rem; height: 20px; min-width: 48px;">
+                                <i class="bi bi-x-circle-fill"></i>0
+                            </span>
+                            {% else %}
+                            <span class="badge-pill-apex badge-stock-pill badge-stock-low" style="font-size: 0.72rem; height: 20px; min-width: 48px;">
+                                <i class="bi bi-exclamation-triangle-fill"></i>{{ st.stock }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notif-card-details">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Existencia Actual</span>
+                        <span class="fw-bold {{ 'text-danger' if st.estado_stock == 'AGOTADO' else 'text-warning' }}" style="font-size: 0.95rem;">
+                            {{ st.mensaje }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Stock Mínimo de Alerta</span>
+                        <span style="font-weight: 700; color: var(--color-text-main);">{{ st.stock_minimo }} unidades</span>
+                    </div>
+                </div>
+
+                <div class="notif-card-actions">
+                    <a href="{{ url_for('productos.editar_producto', id=st.producto_id) }}" class="btn-notif-action btn-notif-outline" title="Editar producto o reponer stock">
+                        <i class="bi bi-pencil-fill"></i> Editar
+                    </a>
+
+                    <!-- BOTÓN DROPDOWN PARA SILENCIAR -->
+                    <div class="dropdown d-inline-block">
+                        <button class="btn-notif-silenciar" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones para silenciar esta alerta">
+                            <i class="bi bi-bell-slash me-1"></i> Silenciar <i class="bi bi-chevron-down ms-1" style="font-size: 0.7rem;"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex" style="font-size: 0.82rem; min-width: 210px;">
+                            <li>
+                                <div class="dropdown-header-apex" style="padding: 6px 14px; font-size: 0.7rem; font-weight: 800; color: var(--color-text-muted); text-transform: uppercase;">
+                                    Silenciar Alerta
+                                </div>
+                            </li>
+                            <li>
+                                <form action="{{ url_for('notificaciones.silenciar_producto') }}" method="POST">
+                                    <input type="hidden" name="producto_id" value="{{ st.producto_id }}">
+                                    <input type="hidden" name="dias" value="15">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-clock me-2 text-warning"></i> Por 15 días
+                                    </button>
+                                </form>
+                            </li>
+                            <li>
+                                <form action="{{ url_for('notificaciones.silenciar_producto') }}" method="POST">
+                                    <input type="hidden" name="producto_id" value="{{ st.producto_id }}">
+                                    <input type="hidden" name="dias" value="30">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-calendar2-range me-2 text-warning"></i> Por 30 días
+                                    </button>
+                                </form>
+                            </li>
+                            <li><hr class="dropdown-divider" style="border-color: var(--color-border); margin: 4px 0;"></li>
+                            <li>
+                                <form action="{{ url_for('notificaciones.silenciar_producto') }}" method="POST">
+                                    <input type="hidden" name="producto_id" value="{{ st.producto_id }}">
+                                    <input type="hidden" name="dias" value="">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-slash-circle me-2"></i> No volver a avisar (Descontinuado)
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 3. PRODUCTOS SILENCIADOS -->
+            {% for sil in notificaciones.silenciados %}
+            <div class="notif-card-row notif-item" data-categoria="silenciados" data-search="{{ sil.nombre|lower }} {{ sil.codigo|lower }} {{ sil.marca|lower }}">
+                <div class="notif-card-left">
+                    <div class="notif-card-avatar notif-card-avatar--muted">
+                        <i class="bi bi-bell-slash"></i>
+                    </div>
+                    <div>
+                        <h6 class="notif-card-title text-muted">{{ sil.nombre }}</h6>
+                        <div class="notif-card-meta">
+                            <span>Código: <code>{{ sil.codigo }}</code></span>
+                            <span>• {{ sil.categoria }}</span>
+                            <span class="badge bg-secondary rounded-pill px-2" style="font-size: 0.7rem;">Silenciado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notif-card-details">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Existencia</span>
+                        <span class="text-muted fw-bold">{{ sil.stock }} unidades</span>
+                    </div>
+
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.75rem;">Silenciado hasta</span>
+                        <span class="text-muted fw-bold">
+                            <i class="bi bi-calendar-event me-1"></i>{{ sil.silenciado_hasta }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="notif-card-actions">
+                    <form action="{{ url_for('notificaciones.reactivar_producto') }}" method="POST" class="d-inline">
+                        <input type="hidden" name="producto_id" value="{{ sil.producto_id }}">
+                        <button type="submit" class="btn-notif-action btn-notif-outline" title="Reactivar alertas para este producto">
+                            <i class="bi bi-bell me-1 text-primary"></i> Reactivar Alertas
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- ESTADO VACÍO GENERAL -->
+            <div id="notifEmptyState" class="notif-empty-state" style="display: none;">
+                <div class="notif-empty-state__icon">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <h5 class="notif-empty-state__title">¡Todo está al día!</h5>
+                <p class="notif-empty-state__text">
+                    No se encontraron alertas para este filtro. Todo el inventario y las cuentas por cobrar se encuentran en orden.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT DE FILTRADO Y BÚSQUEDA EN TIEMPO REAL -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('buscarNotificacion');
+            const pills = document.querySelectorAll('.state-pills-bar .state-pill');
+            const items = document.querySelectorAll('#listaNotificaciones .notif-item');
+            const emptyState = document.getElementById('notifEmptyState');
+            const badgeCount = document.getElementById('badgeTotalVisibles');
+
+            let currentFiltro = "{{ filtro_inicial }}";
+
+            function applyFilter() {
+                const query = (searchInput.value || '').trim().toLowerCase();
+                let visibles = 0;
+
+                items.forEach(function (item) {
+                    const cat = item.dataset.categoria;
+                    const searchData = item.dataset.search || '';
+
+                    const matchesCat = (currentFiltro === 'todas') 
+                        ? (cat === 'cobranzas' || cat === 'stock') 
+                        : (cat === currentFiltro);
+
+                    const matchesSearch = !query || searchData.includes(query);
+
+                    if (matchesCat && matchesSearch) {
+                        item.style.display = 'flex';
+                        visibles++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (badgeCount) {
+                    badgeCount.innerText = visibles;
+                }
+
+                if (emptyState) {
+                    emptyState.style.display = (visibles === 0) ? 'block' : 'none';
+                }
+            }
+
+            pills.forEach(function (pill) {
+                pill.addEventListener('click', function () {
+                    pills.forEach(function (p) { p.classList.remove('state-pill--active'); });
+                    this.classList.add('state-pill--active');
+                    currentFiltro = this.dataset.filtro;
+                    applyFilter();
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilter);
+            }
+
+            // Aplicar filtro inicial
+            applyFilter();
+        });
+    </script>
+{% endblock %}
