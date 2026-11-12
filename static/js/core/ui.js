@@ -87,7 +87,7 @@
                     if (esPassword) {
                         icon.classList.remove('bi-eye-fill');
                         icon.classList.add('bi-eye-slash-fill');
-                        icon.style.color = '#ffb74d';
+                        icon.style.color = 'var(--color-primary)';
                     } else {
                         icon.classList.remove('bi-eye-slash-fill');
                         icon.classList.add('bi-eye-fill');
