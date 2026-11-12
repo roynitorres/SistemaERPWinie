@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LAYOUT: SIDEBAR APEX SHADCN DARK (CARRIL DE ÍCONOS DE 64PX)
+   LAYOUT: SIDEBAR APEX SHADCN DARK (CARRIL DE ÍCONOS DE 60PX / 265PX)
    ========================================================================== */
 
 .sidebar {
@@ -28,12 +28,16 @@ html.sidebar-is-open .sidebar {
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
 }
 
+/* ==========================================================================
+   HEADER / LOGO
+   ========================================================================== */
 .sidebar__header {
     height: 70px !important;
     display: flex !important;
     align-items: center !important;
     padding: 0 14px !important;
     border-bottom: 1px solid rgba(209, 208, 208, 0.226) !important;
+    flex-shrink: 0 !important;
 }
 
 .sidebar__logo-badge {
@@ -67,11 +71,40 @@ html.sidebar-is-open .sidebar .sidebar__subtext {
     opacity: 1 !important;
 }
 
+/* ==========================================================================
+   NAVEGACIÓN CON SCROLL INTERNO INDEPENDIENTE
+   ========================================================================== */
 .sidebar__nav {
-    flex-grow: 1 !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    padding: 12px 6px !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.sidebar.is-open .sidebar__nav,
+html.sidebar-is-open .sidebar .sidebar__nav {
     padding: 16px 10px !important;
+}
+
+/* Scrollbar estilizada y discreta */
+.sidebar__nav::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.sidebar__nav::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.sidebar__nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+}
+
+.sidebar__nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4) !important;
 }
 
 .sidebar__menu {
@@ -83,32 +116,9 @@ html.sidebar-is-open .sidebar .sidebar__subtext {
     gap: 8px !important;
 }
 
-.sidebar__link {
-    display: flex !important;
-    align-items: center !important;
-    gap: 14px !important;
-    padding: 10px 11px !important;
-    color: var(--sidebar-text) !important;
-    text-decoration: none !important;
-    border-radius: 10px !important;
-    font-size: 0.98rem !important;
-    font-weight: 500 !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* ==========================================
-   TÍTULOS AGRUPADORES (Catalogos, Operaciones, etc.)
-   ========================================== */
-.sidebar__group-title {
-    font-weight: 700 !important;
-    font-size: 0.75rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-    margin-left: 0 !important;
-    color: var(--sidebar-text-muted) !important;
-}
-
-/* LOS ÍCONOS DEL SIDEBAR SIEMPRE VISIBLES Y DESTACADOS */
+/* ==========================================================================
+   ÍCONOS GENERALES
+   ========================================================================== */
 .sidebar__icon {
     font-size: 1.12rem !important;
     min-width: 22px !important;
@@ -120,32 +130,18 @@ html.sidebar-is-open .sidebar .sidebar__subtext {
     transition: color 0.2s ease, transform 0.2s ease !important;
 }
 
-.sidebar__link:hover {
-    color: var(--sidebar-text) !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-.sidebar__link:hover .sidebar__icon {
-    color: var(--sidebar-text) !important;
-    transform: scale(1.15) !important;
-}
-
-.sidebar__link--active {
-    color: var(--sidebar-text) !important;
-    background-color: transparent !important;
+/* ==========================================================================
+   TÍTULOS AGRUPADORES (Catalogos, Ventas, Facturas, Resumen)
+   ========================================================================== */
+.sidebar__group-title {
     font-weight: 700 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-left: 0 !important;
+    color: var(--sidebar-text-muted) !important;
 }
 
-.sidebar__link--active .sidebar__icon {
-    color: var(--sidebar-text) !important;
-    transform: scale(1.15) !important;
-}
-
-/* ==========================================
-   SUBMENÚ COLAPSABLE APEX DARK (PAGOS)
-   ========================================== */
 .sidebar__dropdown-toggle {
     cursor: pointer;
     justify-content: space-between;
@@ -163,22 +159,26 @@ html.sidebar-is-open .sidebar .sidebar__subtext {
     color: var(--sidebar-text) !important;
 }
 
-.sidebar__submenu {
-    list-style: none !important;
-    padding: 4px 0 4px 0 !important;
-    margin: 0 !important;
-    display: none;
-    flex-direction: column;
-    gap: 4px !important;
-}
-
-.sidebar__dropdown.is-expanded .sidebar__submenu {
+/* ==========================================================================
+   ESTADO 1: SIDEBAR EXPANDIDO (MODO DESPLEGADO / ACORDEÓN)
+   ========================================================================== */
+.sidebar.is-open .sidebar__link,
+html.sidebar-is-open .sidebar .sidebar__link {
     display: flex !important;
-}
-
-/* Ocultar encabezados de texto sin ícono cuando el sidebar está colapsado */
-.sidebar:not(.is-open) .sidebar__text-only-header {
-    display: none !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 10px 11px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    justify-content: flex-start !important;
+    color: var(--sidebar-text) !important;
+    text-decoration: none !important;
+    border-radius: 10px !important;
+    font-size: 0.98rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .sidebar.is-open .sidebar__text-only-header,
@@ -186,11 +186,32 @@ html.sidebar-is-open .sidebar .sidebar__text-only-header {
     display: flex !important;
 }
 
-.sidebar__sublink {
+.sidebar.is-open .sidebar__submenu,
+html.sidebar-is-open .sidebar .sidebar__submenu {
+    list-style: none !important;
+    padding: 4px 0 4px 0 !important;
+    margin: 0 !important;
+    display: none;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+.sidebar.is-open .sidebar__dropdown.is-expanded .sidebar__submenu,
+html.sidebar-is-open .sidebar .sidebar__dropdown.is-expanded .sidebar__submenu {
+    display: flex !important;
+}
+
+.sidebar.is-open .sidebar__sublink,
+html.sidebar-is-open .sidebar .sidebar__sublink {
     display: flex !important;
     align-items: center !important;
     gap: 14px !important;
-    padding: 8px 12px !important;
+    padding: 8px 12px 8px 16px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    justify-content: flex-start !important;
     font-size: 0.98rem !important;
     font-weight: 500 !important;
     color: var(--sidebar-text) !important;
@@ -199,12 +220,35 @@ html.sidebar-is-open .sidebar .sidebar__text-only-header {
     transition: all 0.2s ease !important;
 }
 
-.sidebar__sublink:hover {
+.sidebar.is-open .sidebar__link:hover,
+html.sidebar-is-open .sidebar .sidebar__link:hover {
+    color: var(--sidebar-text) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sidebar.is-open .sidebar__link:hover .sidebar__icon,
+html.sidebar-is-open .sidebar .sidebar__link:hover .sidebar__icon {
+    color: var(--sidebar-text) !important;
+    transform: scale(1.15) !important;
+}
+
+.sidebar.is-open .sidebar__sublink:hover,
+html.sidebar-is-open .sidebar .sidebar__sublink:hover {
     color: var(--sidebar-text) !important;
     background-color: var(--sidebar-hover) !important;
 }
 
-.sidebar__sublink--active {
+.sidebar.is-open .sidebar__link--active,
+html.sidebar-is-open .sidebar .sidebar__link--active {
+    color: var(--sidebar-text) !important;
+    background-color: transparent !important;
+    font-weight: 700 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.sidebar.is-open .sidebar__sublink--active,
+html.sidebar-is-open .sidebar .sidebar__sublink--active {
     color: var(--sidebar-text) !important;
     font-weight: 700 !important;
     background-color: transparent !important;
@@ -212,7 +256,125 @@ html.sidebar-is-open .sidebar .sidebar__text-only-header {
     border-radius: 0 !important;
 }
 
-/* USER PROFILE EN EL PIE */
+/* ==========================================================================
+   ESTADO 2: SIDEBAR COLAPSADO (CARRIL DE ÍCONOS DE 60PX)
+   - Todos los subítems se aplanan verticalmente mostrando todos sus íconos.
+   - Encabezados solo-texto ocultos.
+   - Cada ítem es un botón cuadrado de 44x44px centrado en el carril.
+   ========================================================================== */
+
+/* Ocultar encabezados de texto sin ícono en modo colapsado */
+.sidebar:not(.is-open) .sidebar__text-only-header,
+html:not(.sidebar-is-open) .sidebar .sidebar__text-only-header {
+    display: none !important;
+}
+
+/* Desplegar todos los submenús de todos los grupos para ver todos los íconos */
+.sidebar:not(.is-open) .sidebar__dropdown,
+html:not(.sidebar-is-open) .sidebar .sidebar__dropdown {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+.sidebar:not(.is-open) .sidebar__submenu,
+html:not(.sidebar-is-open) .sidebar .sidebar__submenu {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+.sidebar:not(.is-open) .sidebar__submenu > li,
+html:not(.sidebar-is-open) .sidebar .sidebar__submenu > li {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+/* Estilo unificado de botones de ícono centrados (44x44px) */
+.sidebar:not(.is-open) .sidebar__link,
+.sidebar:not(.is-open) .sidebar__sublink,
+html:not(.sidebar-is-open) .sidebar .sidebar__link,
+html:not(.sidebar-is-open) .sidebar .sidebar__sublink {
+    width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    border-bottom: none !important;
+    color: var(--sidebar-text) !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.sidebar:not(.is-open) .sidebar__icon,
+html:not(.sidebar-is-open) .sidebar .sidebar__icon {
+    font-size: 1.25rem !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease, color 0.2s ease !important;
+}
+
+/* Hover de íconos en modo colapsado */
+.sidebar:not(.is-open) .sidebar__link:hover,
+.sidebar:not(.is-open) .sidebar__sublink:hover,
+html:not(.sidebar-is-open) .sidebar .sidebar__link:hover,
+html:not(.sidebar-is-open) .sidebar .sidebar__sublink:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+.sidebar:not(.is-open) .sidebar__link:hover .sidebar__icon,
+.sidebar:not(.is-open) .sidebar__sublink:hover .sidebar__icon,
+html:not(.sidebar-is-open) .sidebar .sidebar__link:hover .sidebar__icon,
+html:not(.sidebar-is-open) .sidebar .sidebar__sublink:hover .sidebar__icon {
+    color: #ffffff !important;
+    transform: scale(1.15) !important;
+}
+
+/* Pastilla activa (iluminación) en modo colapsado */
+.sidebar:not(.is-open) .sidebar__link--active,
+.sidebar:not(.is-open) .sidebar__sublink--active,
+html:not(.sidebar-is-open) .sidebar .sidebar__link--active,
+html:not(.sidebar-is-open) .sidebar .sidebar__sublink--active {
+    background-color: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    border-bottom: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+.sidebar:not(.is-open) .sidebar__link--active .sidebar__icon,
+.sidebar:not(.is-open) .sidebar__sublink--active .sidebar__icon,
+html:not(.sidebar-is-open) .sidebar .sidebar__link--active .sidebar__icon,
+html:not(.sidebar-is-open) .sidebar .sidebar__sublink--active .sidebar__icon {
+    color: #ffffff !important;
+    transform: scale(1.1) !important;
+}
+
+/* ==========================================================================
+   USER PROFILE EN EL PIE (FIJO)
+   ========================================================================== */
 .sidebar__user-profile {
     margin-top: auto !important;
     padding: 14px 11px !important;
@@ -220,6 +382,7 @@ html.sidebar-is-open .sidebar .sidebar__text-only-header {
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
+    flex-shrink: 0 !important;
 }
 
 .sidebar__user-avatar {
@@ -305,8 +468,6 @@ html.sidebar-is-open .sidebar .sidebar__logout-btn {
     transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
     outline: none !important;
 }
-
-
 
 .sidebar-collapse-btn:focus-visible {
     outline: 2px solid var(--color-primary, #004aad) !important;

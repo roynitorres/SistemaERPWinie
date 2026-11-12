@@ -62,7 +62,7 @@
                     <!-- 1. DASHBOARD -->
                     {% if rol_actual == 'ADMIN' %}
                     <li>
-                        <a class="sidebar__link {% if request.endpoint == 'dashboard' %}sidebar__link--active{% endif %}" href="{{ url_for('dashboard') }}">
+                        <a class="sidebar__link {% if request.endpoint == 'dashboard' %}sidebar__link--active{% endif %}" href="{{ url_for('dashboard') }}" title="Salpicadero">
                             <i class="bi bi-grid sidebar__icon"></i>
                             <span class="sidebar__text">Salpicadero</span>
                         </a>
@@ -78,26 +78,26 @@
                         </div>
                         <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint and 'clientes' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('clientes.clientes') }}">
+                                <a class="sidebar__sublink {% if request.endpoint and 'clientes' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('clientes.clientes') }}" title="Clientes">
                                     <i class="bi bi-people sidebar__icon"></i>
                                     <span class="sidebar__subtext">Clientes</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint and 'productos' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('productos.productos') }}">
+                                <a class="sidebar__sublink {% if request.endpoint and 'productos' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('productos.productos') }}" title="Productos">
                                     <i class="bi bi-box-seam sidebar__icon"></i>
                                     <span class="sidebar__subtext">Productos</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint and 'categorias' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('categorias.categorias') }}">
+                                <a class="sidebar__sublink {% if request.endpoint and 'categorias' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('categorias.categorias') }}" title="Categorías">
                                     <i class="bi bi-tags sidebar__icon"></i>
                                     <span class="sidebar__subtext">Categorías</span>
                                 </a>
                             </li>
                             {% if rol_actual == 'ADMIN' %}
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint and 'proveedores' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('proveedores.proveedores') }}">
+                                <a class="sidebar__sublink {% if request.endpoint and 'proveedores' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('proveedores.proveedores') }}" title="Proveedores">
                                     <i class="bi bi-truck sidebar__icon"></i>
                                     <span class="sidebar__subtext">Proveedores</span>
                                 </a>
@@ -116,7 +116,7 @@
                         </div>
                         <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint and 'ventas' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('ventas.ventas') }}">
+                                <a class="sidebar__sublink {% if request.endpoint and 'ventas' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('ventas.ventas') }}" title="Ventas">
                                     <i class="bi bi-cart-check sidebar__icon"></i>
                                     <span class="sidebar__subtext">Ventas</span>
                                 </a>
@@ -131,13 +131,13 @@
                         </div>
                         <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__sublink {% if request.path and '/facturas/contado' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}">
+                                <a class="sidebar__sublink {% if request.path and '/facturas/contado' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}" title="Facturas de Contado">
                                     <i class="bi bi-cash-coin sidebar__icon"></i>
                                     <span class="sidebar__subtext">De Contado</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="sidebar__sublink {% if request.path and '/facturas/credito' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}">
+                                <a class="sidebar__sublink {% if request.path and '/facturas/credito' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}" title="Facturas a Crédito">
                                     <i class="bi bi-calendar2-check sidebar__icon"></i>
                                     <span class="sidebar__subtext">A Crédito</span>
                                 </a>
@@ -155,7 +155,7 @@
                         </div>
                         <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint == 'reportes.financiero' %}sidebar__sublink--active{% endif %}" href="{{ url_for('reportes.financiero') }}">
+                                <a class="sidebar__sublink {% if request.endpoint == 'reportes.financiero' %}sidebar__sublink--active{% endif %}" href="{{ url_for('reportes.financiero') }}" title="Reportes Financieros">
                                     <i class="bi bi-bar-chart-line sidebar__icon"></i>
                                     <span class="sidebar__subtext">Reportes</span>
                                 </a>
