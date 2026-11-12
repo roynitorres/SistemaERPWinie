@@ -16,15 +16,17 @@
          */
         initFiltrosTabla: function () {
             var self = this;
-            var inputBuscar = document.getElementById('buscarVenta');
+            var inputBuscar = document.getElementById('buscarFactura') || document.getElementById('buscarVenta');
             var pills = document.querySelectorAll('.state-pill');
 
             pills.forEach(function (pill) {
                 pill.addEventListener('click', function () {
                     pills.forEach(function (p) {
                         p.classList.remove('state-pill--active');
+                        p.classList.remove('active');
                     });
                     this.classList.add('state-pill--active');
+                    this.classList.add('active');
 
                     self.filtroActual = this.dataset.filtro || 'TODOS';
                     self.aplicarFiltros();
@@ -40,11 +42,12 @@
 
         /**
          * Aplica los filtros de búsqueda por texto y por pill activo a las filas de la tabla
+         * y sincroniza las filas de acordeón de pagos asociadas.
          */
         aplicarFiltros: function () {
-            var inputBuscar = document.getElementById('buscarVenta');
+            var inputBuscar = document.getElementById('buscarFactura') || document.getElementById('buscarVenta');
             var query = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
-            var filas = document.querySelectorAll('#tablaVentasPortal tr.fila-venta');
+            var filas = document.querySelectorAll('#tablaHistorial tr.fila-historial, #tablaVentasPortal tr.fila-venta');
             var visibles = 0;
 
             filas.forEach(function (row) {
@@ -63,11 +66,24 @@
                     cumpleFiltro = !esPagada;
                 }
 
+                // Fila de acordeón asociada que está inmediatamente después
+                var nextRow = row.nextElementSibling;
+                var esAcordeon = nextRow && nextRow.classList.contains('fila-acordeon-pagos');
+
                 if (cumpleBusqueda && cumpleFiltro) {
                     row.style.display = '';
+                    if (esAcordeon && nextRow.dataset.wasVisible === '1') {
+                        nextRow.style.display = '';
+                    }
                     visibles++;
                 } else {
                     row.style.display = 'none';
+                    if (esAcordeon) {
+                        if (nextRow.style.display !== 'none') {
+                            nextRow.dataset.wasVisible = '1';
+                        }
+                        nextRow.style.display = 'none';
+                    }
                 }
             }, this);
 
@@ -220,10 +236,11 @@
 
 
     /**
-     * Modal interactivo de Detalle de Factura: Productos cobrados y Abonos recepcionados
-     * (Sin tarjetas KPI por solicitud del usuario)
+     * Modal interactivo de Productos Facturados (SOLO PRODUCTOS)
+     * Diseñado especialmente para visualización clara y responsive en móviles y escritorio.
+     * Los pagos se visualizan de manera independiente mediante el acordeón en la lista.
      */
-    window.verDetalleFacturaPortal = function (ventaId) {
+    window.verProductosFacturaPortal = function (ventaId) {
         var scriptTag = document.getElementById('factura-detalle-json-' + ventaId);
         if (!scriptTag) return;
         var data = JSON.parse(scriptTag.textContent);
@@ -236,7 +253,7 @@
 
         if (tituloEl) tituloEl.textContent = 'Factura #' + data.numero_factura;
         if (subtituloEl) {
-            subtituloEl.innerHTML = '<i class="bi bi-calendar3 me-1"></i> Emitida: ' + data.fecha_venta;
+            subtituloEl.innerHTML = '<i class="bi bi-calendar3 me-1"></i> Emitida: ' + (data.fecha_venta || '-');
         }
         if (btnImprimirEl) {
             btnImprimirEl.href = data.url_imprimir;
@@ -269,7 +286,7 @@
             }
         }
 
-        // 1. Llenar tabla de productos cobrados
+        // Llenar tabla de productos cobrados en la factura
         var prodTbody = document.getElementById('detFacturaProductosTbody');
         var cantArtEl = document.getElementById('detFacturaCantArticulos');
         var totalProdEl = document.getElementById('detFacturaTotalProductos');
@@ -278,79 +295,35 @@
             if (data.productos && data.productos.length > 0) {
                 data.productos.forEach(function (p) {
                     var tr = document.createElement('tr');
-                    var codHtml = p.codigo ? '<div class="small text-muted">Cód: ' + p.codigo + '</div>' : '';
+                    var codHtml = p.codigo ? '<div class="small text-muted" style="font-size: 0.76rem;">Cód: ' + p.codigo + '</div>' : '';
                     tr.innerHTML = 
                         '<td style="padding: 10px 14px;">' +
-                            '<div class="fw-bold" style="color: var(--color-text-main);">' + p.nombre + '</div>' +
+                            '<div class="fw-bold" style="color: var(--color-text-main); font-size: 0.88rem;">' + p.nombre + '</div>' +
                             codHtml +
                         '</td>' +
-                        '<td class="text-center fw-medium" style="padding: 10px 14px;">' + p.cantidad + ' ud.</td>' +
-                        '<td class="text-end" style="padding: 10px 14px;">C$ ' + p.precio_unitario.toFixed(2) + '</td>' +
-                        '<td class="text-end fw-bold" style="padding: 10px 14px;">C$ ' + p.subtotal.toFixed(2) + '</td>';
+                        '<td class="text-center fw-medium" style="padding: 10px 12px; font-size: 0.86rem;">' + p.cantidad + ' ud.</td>' +
+                        '<td class="text-end" style="padding: 10px 14px; font-size: 0.86rem; color: var(--color-text-muted);">C$ ' + p.precio_unitario.toFixed(2) + '</td>' +
+                        '<td class="text-end fw-bold" style="padding: 10px 14px; font-size: 0.9rem; color: var(--color-text-main);">C$ ' + p.subtotal.toFixed(2) + '</td>';
                     prodTbody.appendChild(tr);
                 });
                 if (cantArtEl) cantArtEl.textContent = data.productos.length + (data.productos.length === 1 ? ' Artículo' : ' Artículos');
                 if (totalProdEl) totalProdEl.textContent = 'C$ ' + data.total_venta.toFixed(2);
             } else {
-                prodTbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No hay productos registrados en el detalle.</td></tr>';
+                prodTbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-box me-1"></i> No hay productos registrados en el detalle.</td></tr>';
                 if (cantArtEl) cantArtEl.textContent = '0 Artículos';
                 if (totalProdEl) totalProdEl.textContent = 'C$ ' + data.total_venta.toFixed(2);
             }
         }
 
-        // 2. Llenar tabla de pagos y abonos recepcionados
-        var pagosTbody = document.getElementById('detFacturaPagosTbody');
-        var pagosTfoot = document.getElementById('detFacturaPagosTfoot');
-        var cantPagosEl = document.getElementById('detFacturaCantPagos');
-        if (pagosTbody) {
-            pagosTbody.innerHTML = '';
-            if (data.pagos && data.pagos.length > 0) {
-                data.pagos.forEach(function (pg) {
-                    var tr = document.createElement('tr');
-                    var detalleMetodo = (pg.banco ? pg.banco + ' • ' : '') + (pg.referencia ? 'Ref: ' + pg.referencia : '');
-                    if (!detalleMetodo) detalleMetodo = 'Abono Registrado';
-
-                    tr.innerHTML = 
-                        '<td style="padding: 10px 14px;">' +
-                            '<span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.74rem;">#PAG-' + String(pg.id).padStart(4, '0') + '</span>' +
-                        '</td>' +
-                        '<td style="padding: 10px 14px;">' +
-                            '<div class="fw-medium">' + pg.fecha + '</div>' +
-                        '</td>' +
-                        '<td style="padding: 10px 14px;">' +
-                            '<div class="fw-semibold" style="color: var(--color-text-main);">' + pg.tipo + '</div>' +
-                            '<div class="small text-muted">' + detalleMetodo + '</div>' +
-                        '</td>' +
-                        '<td class="text-end fw-bold" style="padding: 10px 14px; color: var(--color-success);">' +
-                            '+ C$ ' + pg.monto.toFixed(2) +
-                        '</td>';
-                    pagosTbody.appendChild(tr);
-                });
-                if (cantPagosEl) cantPagosEl.textContent = data.pagos.length + (data.pagos.length === 1 ? ' Abono' : ' Abonos');
-            } else {
-                pagosTbody.innerHTML = 
-                    '<tr>' +
-                        '<td colspan="4" class="text-center text-muted py-4">' +
-                            '<i class="bi bi-info-circle me-1"></i> Aún no se han recepcionado pagos para esta factura.' +
-                        '</td>' +
-                    '</tr>';
-                if (cantPagosEl) cantPagosEl.textContent = '0 Abonos';
-            }
-
-            // Pie con Total Recepcionado y Saldo Pendiente
-            if (pagosTfoot) {
-                var saldoColor = data.saldo_pendiente > 0.01 ? '#dc2626' : 'var(--color-text-muted)';
-                pagosTfoot.innerHTML = 
-                    '<tr>' +
-                        '<td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Total Recepcionado:</td>' +
-                        '<td class="text-end fw-bold" style="color: var(--color-success); font-size: 0.95rem;">C$ ' + data.total_abonado.toFixed(2) + '</td>' +
-                    '</tr>' +
-                    '<tr>' +
-                        '<td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Saldo Pendiente:</td>' +
-                        '<td class="text-end fw-bold" style="color: ' + saldoColor + '; font-size: 0.95rem;">C$ ' + data.saldo_pendiente.toFixed(2) + '</td>' +
-                    '</tr>';
-            }
+        var modalEl = document.getElementById('modalDetalleFacturaPortal');
+        if (modalEl && window.bootstrap) {
+            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
         }
+    };
+
+    // Alias para compatibilidad
+    window.verDetalleFacturaPortal = window.verProductosFacturaPortal;
 
         var modalEl = document.getElementById('modalDetalleFacturaPortal');
         if (modalEl && window.bootstrap) {

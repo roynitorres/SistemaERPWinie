@@ -2,24 +2,23 @@
 
 {% block title %}Portal del Cliente | SistemaERP Winie
 <!-- ============================================================== -->
-<!-- MODAL APEX SHADCN: DETALLE DE FACTURA (PRODUCTOS Y PAGOS)     -->
-<!-- SIN KPIS A PEDIDO EXPRESO DEL USUARIO                          -->
+<!-- MODAL APEX SHADCN: PRODUCTOS FACTURADOS (SOLO PRODUCTOS)      -->
+<!-- ADAPTADO 100% PARA DISPOSITIVOS MÓVILES (TELÉFONOS)            -->
 <!-- ============================================================== -->
 <div class="modal fade" id="modalDetalleFacturaPortal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 840px;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-products-responsive">
         <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 20px; box-shadow: var(--shadow-modal); overflow: hidden;">
             
-            <!-- CABECERA DE LA FACTURA -->
-            <div class="modal-header d-flex align-items-center justify-content-between" style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);">
+            <!-- CABECERA DEL MODAL DE PRODUCTOS -->
+            <div class="modal-header d-flex align-items-center justify-content-between" style="padding: 16px 22px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);">
                 <div class="d-flex align-items-center gap-3">
                     <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 71, 171, 0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
-                        <i class="bi bi-receipt-cutoff"></i>
+                        <i class="bi bi-box-seam"></i>
                     </div>
                     <div>
-                        <div class="d-flex align-items-center gap-2">
-                            <h5 class="fw-bold mb-0" id="detFacturaTitulo" style="color: var(--color-text-main); font-size: 1.15rem; letter-spacing: -0.01em;">Factura</h5>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h5 class="fw-bold mb-0" id="detFacturaTitulo" style="color: var(--color-text-main); font-size: 1.12rem;">Productos Facturados</h5>
                             <span id="detFacturaBadgeTipo" class="badge-pill-apex"></span>
-                            <span id="detFacturaBadgeEstado" class="badge-pill-apex"></span>
                         </div>
                         <div class="text-muted small mt-1" id="detFacturaSubtitulo"></div>
                     </div>
@@ -27,70 +26,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--bs-btn-close-filter);"></button>
             </div>
 
-            <!-- CUERPO: SECCIÓN PRODUCTOS Y SECCIÓN PAGOS -->
-            <div class="modal-body" style="padding: 22px 24px; max-height: 72vh; overflow-y: auto;">
-                
-                <!-- SECCIÓN 1: PRODUCTOS COBRADOS EN LA FACTURA -->
+            <!-- CUERPO: TABLA RESPONSIVE DE PRODUCTOS -->
+            <div class="modal-body" style="padding: 18px 22px;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="fw-bold m-0" style="color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-box-seam" style="color: var(--color-primary);"></i> Productos Cobrados en esta Factura
-                    </h6>
+                    <span class="small text-muted fw-bold text-uppercase" style="letter-spacing: 0.05em;">Artículos de la Compra</span>
                     <span id="detFacturaCantArticulos" class="badge" style="background: var(--color-bg-input); color: var(--color-text-muted); border: 1px solid var(--color-border); font-size: 0.75rem;"></span>
                 </div>
 
-                <div class="table-responsive mb-4" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
+                <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
                     <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
                         <thead style="background: var(--color-bg-input); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted);">
                             <tr>
                                 <th style="padding: 10px 14px;">Producto / Descripción</th>
-                                <th class="text-center" style="padding: 10px 14px; width: 15%;">Cantidad</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Precio Unitario</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Subtotal</th>
+                                <th class="text-center" style="padding: 10px 12px; width: 16%;">Cant.</th>
+                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Precio Unit.</th>
+                                <th class="text-end" style="padding: 10px 14px; width: 24%;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody id="detFacturaProductosTbody">
-                            <!-- Filas de productos inyectadas por JS -->
+                            <!-- Inyectado dinámicamente por JS -->
                         </tbody>
                         <tfoot style="background: var(--color-bg-input); border-top: 1px solid var(--color-border); font-weight: 700;">
                             <tr>
                                 <td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Total de Productos:</td>
-                                <td class="text-end" id="detFacturaTotalProductos" style="color: var(--color-primary); font-size: 0.95rem;"></td>
+                                <td class="text-end" id="detFacturaTotalProductos" style="color: var(--color-primary); font-size: 1rem;"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
-
-                <!-- SECCIÓN 2: PAGOS Y ABONOS RECEPCIONADOS -->
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="fw-bold m-0" style="color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-cash-stack" style="color: var(--color-success);"></i> Pagos y Abonos Recepcionados
-                    </h6>
-                    <span id="detFacturaCantPagos" class="badge" style="background: var(--color-bg-input); color: var(--color-text-muted); border: 1px solid var(--color-border); font-size: 0.75rem;"></span>
-                </div>
-
-                <div class="table-responsive mb-2" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
-                    <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
-                        <thead style="background: var(--color-bg-input); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted);">
-                            <tr>
-                                <th style="padding: 10px 14px; width: 20%;">N° Recibo</th>
-                                <th style="padding: 10px 14px; width: 25%;">Fecha y Hora</th>
-                                <th style="padding: 10px 14px; width: 33%;">Método / Referencia</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Monto Abonado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detFacturaPagosTbody">
-                            <!-- Filas de pagos inyectadas por JS -->
-                        </tbody>
-                        <tfoot id="detFacturaPagosTfoot" style="background: var(--color-bg-input); border-top: 1px solid var(--color-border); font-weight: 700;">
-                            <!-- Resumen total abonado y saldo pendiente inyectado por JS -->
-                        </tfoot>
-                    </table>
-                </div>
-
             </div>
 
             <!-- PIE DE ACCIONES -->
-            <div class="modal-footer d-flex align-items-center justify-content-between" style="padding: 14px 24px; border-top: 1px solid var(--color-border); background: var(--color-bg-input);">
+            <div class="modal-footer d-flex align-items-center justify-content-between" style="padding: 14px 22px; border-top: 1px solid var(--color-border); background: var(--color-bg-input);">
                 <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="padding: 8px 18px;">
                     <i class="bi bi-x-circle me-1"></i> Cerrar
                 </button>
@@ -102,7 +69,6 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block content %}
@@ -249,77 +215,180 @@
                         {% for item in ventas_procesadas %}
                         {% set v = item.venta %}
                         {% set tipo_val = v.tipo_venta.value if v.tipo_venta.value is defined else v.tipo_venta %}
+                        
+                        <!-- FILA PRINCIPAL DE FACTURA (ADAPTABLE A TARJETA EN MÓVIL) -->
                         <tr class="fila-historial" 
                             data-factura="{{ v.numero_factura|lower }}"
                             data-tipo="{{ tipo_val }}"
                             data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}">
 
-                            <td class="fw-bold text-success">
-                                #{{ v.numero_factura }}
+                            <!-- Columna 1: Factura # y badges móviles -->
+                            <td class="col-factura">
+                                <div class="cell-factura-header">
+                                    <span class="fw-bold text-success fs-6">#{{ v.numero_factura }}</span>
+                                    <div class="d-md-none d-flex gap-1 align-items-center">
+                                        <span class="badge-pill-apex" style="font-size: 0.72rem; padding: 2px 8px;">{{ tipo_val }}</span>
+                                        {% if item.es_pagada %}
+                                        <span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.72rem; padding: 2px 8px;">PAGADA</span>
+                                        {% else %}
+                                        <span class="badge-pill-apex" style="font-size: 0.72rem; padding: 2px 8px; background: rgba(217,119,6,0.12); color: #b45309; border: 1px solid rgba(217,119,6,0.25);">PENDIENTE</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </td>
-                            <td style="color: var(--color-text-muted);">
-                                {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
+
+                            <!-- Columna 2: Fecha de Emisión -->
+                            <td class="col-fecha text-muted">
+                                <span class="d-md-none small text-muted"><i class="bi bi-calendar3 me-1"></i></span>{{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
                             </td>
-                            <td>
+
+                            <!-- Columna 3: Tipo Venta (Desktop) -->
+                            <td class="col-tipo d-none d-md-table-cell">
                                 <span class="badge-pill-apex" style="background: var(--color-border); color: var(--color-text-main); border: 1px solid var(--color-border);">
                                     {{ tipo_val }}
                                 </span>
                             </td>
-                            <td class="text-end fw-bold">
-                                C$ {{ "%.2f"|format(v.total_venta) }}
+
+                            <!-- Columna 4: Total Facturado -->
+                            <td class="col-total text-md-end fw-bold">
+                                <span class="d-md-none mobile-lbl">Total:</span>
+                                <span class="mobile-val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
                             </td>
-                            <td class="text-end fw-bold text-success">
-                                C$ {{ "%.2f"|format(item.total_abonado) }}
+
+                            <!-- Columna 5: Abonado Recepcionado -->
+                            <td class="col-abonado text-md-end fw-bold text-success">
+                                <span class="d-md-none mobile-lbl">Abonado:</span>
+                                <span class="mobile-val">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
                             </td>
-                            <td class="text-end fw-bold">
-                                {% if item.saldo_pendiente > 0.01 %}
-                                <span style="color: #ff5252;">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</span>
-                                {% else %}
-                                <span style="color: var(--color-text-muted);">C$ 0.00</span>
-                                {% endif %}
+
+                            <!-- Columna 6: Saldo Pendiente -->
+                            <td class="col-saldo text-md-end fw-bold">
+                                <span class="d-md-none mobile-lbl">Saldo:</span>
+                                <span class="mobile-val">
+                                    {% if item.saldo_pendiente > 0.01 %}
+                                    <span style="color: #dc2626;">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</span>
+                                    {% else %}
+                                    <span style="color: var(--color-text-muted);">C$ 0.00</span>
+                                    {% endif %}
+                                </span>
                             </td>
-                            <td>
+
+                            <!-- Columna 7: Estado Pago (Desktop) -->
+                            <td class="col-estado d-none d-md-table-cell">
                                 {% if item.es_pagada %}
                                 <span class="badge-pill-apex badge-pill-apex--active">PAGADA</span>
                                 {% else %}
-                                <span class="badge-pill-apex" style="background: rgba(255,183,77,0.15); color: #ffb74d; border: 1px solid rgba(255,183,77,0.3);">PENDIENTE</span>
+                                <span class="badge-pill-apex" style="background: rgba(217,119,6,0.12); color: #b45309; border: 1px solid rgba(217,119,6,0.25);">PENDIENTE</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end">
-                                <!-- BOTÓN ACCESO RÁPIDO: VER DETALLE (OJO) -->
-                                <button type="button" class="btn-icon-subtle me-1" onclick="verDetalleFacturaPortal({{ v.id }})" title="Ver productos y pagos recepcionados">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
-                                <div class="dropdown d-inline-block">
-                                    <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones">
-                                        <i class="bi bi-three-dots-vertical"></i>
+
+                            <!-- Columna 8: Acciones y Botones -->
+                            <td class="col-acciones text-end">
+                                <div class="portal-actions-group">
+                                    <!-- Botón Ver Productos (Abre Modal solo de productos) -->
+                                    <button type="button" class="btn-portal-item btn-ver-productos" onclick="verProductosFacturaPortal({{ v.id }})" title="Ver artículos y productos cobrados">
+                                        <i class="bi bi-box-seam me-1"></i> <span>Productos</span> <span class="badge-count-pill">{{ item.json_data.productos|length }}</span>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
-                                        <li>
-                                            <div class="dropdown-header-apex">
-                                                <i class="bi bi-lightning-charge-fill" style="color: var(--color-text-main); font-size: 0.8rem;"></i> ACCIONES
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="javascript:void(0)" onclick="verDetalleFacturaPortal({{ v.id }})">
-                                                <i class="bi bi-eye me-2 text-primary"></i> Ver Detalle y Pagos
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ url_for('pagos.factura', venta_id=v.id) }}" target="_blank">
-                                                <i class="bi bi-printer me-2 text-info"></i> Imprimir Factura
-                                            </a>
-                                        </li>
-                                    </ul>
+
+                                    <!-- Botón Acordeón de Pagos (Despliega abonos de esta factura) -->
+                                    <button type="button" class="btn-portal-item btn-ver-pagos" data-bs-toggle="collapse" data-bs-target="#acordeonPagos{{ v.id }}" aria-expanded="false" aria-controls="acordeonPagos{{ v.id }}" title="Ver pagos recepcionados">
+                                        <i class="bi bi-cash-stack me-1 text-success"></i> <span>Pagos</span> <span class="badge-count-pill">{{ item.json_data.pagos|length }}</span> <i class="bi bi-chevron-down chevron-arrow ms-1"></i>
+                                    </button>
+
+                                    <!-- Botón Imprimir Factura Oficial -->
+                                    <a href="{{ url_for('pagos.factura', venta_id=v.id) }}" target="_blank" class="btn-portal-item btn-imprimir" title="Imprimir Comprobante Oficial">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
                                 </div>
 
-                                <!-- DATA JSON EMBEBIDA SE SEGURIDAD -->
+                                <!-- DATA JSON DE PRODUCTOS EMBEBIDA PARA EL MODAL -->
                                 <script type="application/json" id="factura-detalle-json-{{ v.id }}">
                                     {{ item.json_data | tojson | safe }}
                                 </script>
                             </td>
                         </tr>
+
+                        <!-- FILA ACORDEÓN TIPO COLLAPSE: PAGOS RECEPCIONADOS -->
+                        <tr class="fila-acordeon-pagos collapse" id="acordeonPagos{{ v.id }}" data-parent-factura="{{ v.numero_factura|lower }}">
+                            <td colspan="8" class="p-0 border-0">
+                                <div class="acordeon-pagos-wrapper">
+                                    <div class="acordeon-pagos-card">
+                                        
+                                        <!-- Cabecera del Acordeón -->
+                                        <div class="acordeon-pagos-top">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="badge-icon-pagos">
+                                                    <i class="bi bi-cash-coin"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold" style="color: var(--color-text-main); font-size: 0.95rem;">
+                                                        Abonos y Pagos Recepcionados
+                                                    </div>
+                                                    <div class="small text-muted">
+                                                        Factura #{{ v.numero_factura }} • {{ item.json_data.pagos|length }} {% if item.json_data.pagos|length == 1 %}abono registrado{% else %}abonos registrados{% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Lista de Pagos Recepcionados -->
+                                        {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
+                                        <div class="acordeon-pagos-list">
+                                            {% for pg in item.json_data.pagos %}
+                                            <div class="acordeon-pago-row">
+                                                <div class="acordeon-pago-left">
+                                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                                        <span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.72rem; padding: 2px 8px;">
+                                                            #PAG-{{ "%04d"|format(pg.id) }}
+                                                        </span>
+                                                        <span class="fw-bold" style="color: var(--color-text-main); font-size: 0.88rem;">{{ pg.tipo }}</span>
+                                                    </div>
+                                                    <div class="small text-muted">
+                                                        <i class="bi bi-clock me-1"></i>{{ pg.fecha }}
+                                                        {% if pg.banco or pg.referencia %}
+                                                        • {{ pg.banco if pg.banco else '' }}{% if pg.banco and pg.referencia %} - {% endif %}{{ 'Ref: ' ~ pg.referencia if pg.referencia else '' }}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="acordeon-pago-right text-end">
+                                                    <span class="small text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Monto Recepcionado</span>
+                                                    <span class="fw-bold text-success fs-6">+ C$ {{ "%.2f"|format(pg.monto) }}</span>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+
+                                        <!-- Barra Resumen Financiero del Acordeón -->
+                                        <div class="acordeon-pagos-bottom">
+                                            <div class="summary-pill-item">
+                                                <span class="lbl">Total Factura:</span>
+                                                <span class="val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
+                                            </div>
+                                            <div class="summary-pill-item">
+                                                <span class="lbl">Total Recepcionado:</span>
+                                                <span class="val text-success">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
+                                            </div>
+                                            <div class="summary-pill-item">
+                                                <span class="lbl">Saldo Pendiente:</span>
+                                                <span class="val {% if item.saldo_pendiente > 0.01 %}text-danger{% else %}text-muted{% endif %}">
+                                                    C$ {{ "%.2f"|format(item.saldo_pendiente) }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {% else %}
+                                        <!-- Estado Vacío sin Pagos -->
+                                        <div class="acordeon-empty-state">
+                                            <i class="bi bi-info-circle text-muted fs-4 mb-1 d-block"></i>
+                                            <span class="small">Aún no se han recepcionado pagos o abonos para esta factura.</span>
+                                        </div>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
                         {% else %}
                         <tr>
                             <td colspan="8" class="text-center py-5 text-muted">
@@ -445,24 +514,23 @@
 
 
 <!-- ============================================================== -->
-<!-- MODAL APEX SHADCN: DETALLE DE FACTURA (PRODUCTOS Y PAGOS)     -->
-<!-- SIN KPIS A PEDIDO EXPRESO DEL USUARIO                          -->
+<!-- MODAL APEX SHADCN: PRODUCTOS FACTURADOS (SOLO PRODUCTOS)      -->
+<!-- ADAPTADO 100% PARA DISPOSITIVOS MÓVILES (TELÉFONOS)            -->
 <!-- ============================================================== -->
 <div class="modal fade" id="modalDetalleFacturaPortal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 840px;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-products-responsive">
         <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 20px; box-shadow: var(--shadow-modal); overflow: hidden;">
             
-            <!-- CABECERA DE LA FACTURA -->
-            <div class="modal-header d-flex align-items-center justify-content-between" style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);">
+            <!-- CABECERA DEL MODAL DE PRODUCTOS -->
+            <div class="modal-header d-flex align-items-center justify-content-between" style="padding: 16px 22px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);">
                 <div class="d-flex align-items-center gap-3">
                     <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 71, 171, 0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
-                        <i class="bi bi-receipt-cutoff"></i>
+                        <i class="bi bi-box-seam"></i>
                     </div>
                     <div>
-                        <div class="d-flex align-items-center gap-2">
-                            <h5 class="fw-bold mb-0" id="detFacturaTitulo" style="color: var(--color-text-main); font-size: 1.15rem; letter-spacing: -0.01em;">Factura</h5>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h5 class="fw-bold mb-0" id="detFacturaTitulo" style="color: var(--color-text-main); font-size: 1.12rem;">Productos Facturados</h5>
                             <span id="detFacturaBadgeTipo" class="badge-pill-apex"></span>
-                            <span id="detFacturaBadgeEstado" class="badge-pill-apex"></span>
                         </div>
                         <div class="text-muted small mt-1" id="detFacturaSubtitulo"></div>
                     </div>
@@ -470,70 +538,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--bs-btn-close-filter);"></button>
             </div>
 
-            <!-- CUERPO: SECCIÓN PRODUCTOS Y SECCIÓN PAGOS -->
-            <div class="modal-body" style="padding: 22px 24px; max-height: 72vh; overflow-y: auto;">
-                
-                <!-- SECCIÓN 1: PRODUCTOS COBRADOS EN LA FACTURA -->
+            <!-- CUERPO: TABLA RESPONSIVE DE PRODUCTOS -->
+            <div class="modal-body" style="padding: 18px 22px;">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="fw-bold m-0" style="color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-box-seam" style="color: var(--color-primary);"></i> Productos Cobrados en esta Factura
-                    </h6>
+                    <span class="small text-muted fw-bold text-uppercase" style="letter-spacing: 0.05em;">Artículos de la Compra</span>
                     <span id="detFacturaCantArticulos" class="badge" style="background: var(--color-bg-input); color: var(--color-text-muted); border: 1px solid var(--color-border); font-size: 0.75rem;"></span>
                 </div>
 
-                <div class="table-responsive mb-4" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
+                <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
                     <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
                         <thead style="background: var(--color-bg-input); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted);">
                             <tr>
                                 <th style="padding: 10px 14px;">Producto / Descripción</th>
-                                <th class="text-center" style="padding: 10px 14px; width: 15%;">Cantidad</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Precio Unitario</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Subtotal</th>
+                                <th class="text-center" style="padding: 10px 12px; width: 16%;">Cant.</th>
+                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Precio Unit.</th>
+                                <th class="text-end" style="padding: 10px 14px; width: 24%;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody id="detFacturaProductosTbody">
-                            <!-- Filas de productos inyectadas por JS -->
+                            <!-- Inyectado dinámicamente por JS -->
                         </tbody>
                         <tfoot style="background: var(--color-bg-input); border-top: 1px solid var(--color-border); font-weight: 700;">
                             <tr>
                                 <td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Total de Productos:</td>
-                                <td class="text-end" id="detFacturaTotalProductos" style="color: var(--color-primary); font-size: 0.95rem;"></td>
+                                <td class="text-end" id="detFacturaTotalProductos" style="color: var(--color-primary); font-size: 1rem;"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
-
-                <!-- SECCIÓN 2: PAGOS Y ABONOS RECEPCIONADOS -->
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="fw-bold m-0" style="color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-cash-stack" style="color: var(--color-success);"></i> Pagos y Abonos Recepcionados
-                    </h6>
-                    <span id="detFacturaCantPagos" class="badge" style="background: var(--color-bg-input); color: var(--color-text-muted); border: 1px solid var(--color-border); font-size: 0.75rem;"></span>
-                </div>
-
-                <div class="table-responsive mb-2" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
-                    <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
-                        <thead style="background: var(--color-bg-input); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted);">
-                            <tr>
-                                <th style="padding: 10px 14px; width: 20%;">N° Recibo</th>
-                                <th style="padding: 10px 14px; width: 25%;">Fecha y Hora</th>
-                                <th style="padding: 10px 14px; width: 33%;">Método / Referencia</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Monto Abonado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detFacturaPagosTbody">
-                            <!-- Filas de pagos inyectadas por JS -->
-                        </tbody>
-                        <tfoot id="detFacturaPagosTfoot" style="background: var(--color-bg-input); border-top: 1px solid var(--color-border); font-weight: 700;">
-                            <!-- Resumen total abonado y saldo pendiente inyectado por JS -->
-                        </tfoot>
-                    </table>
-                </div>
-
             </div>
 
             <!-- PIE DE ACCIONES -->
-            <div class="modal-footer d-flex align-items-center justify-content-between" style="padding: 14px 24px; border-top: 1px solid var(--color-border); background: var(--color-bg-input);">
+            <div class="modal-footer d-flex align-items-center justify-content-between" style="padding: 14px 22px; border-top: 1px solid var(--color-border); background: var(--color-bg-input);">
                 <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="padding: 8px 18px;">
                     <i class="bi bi-x-circle me-1"></i> Cerrar
                 </button>
@@ -545,5 +581,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
