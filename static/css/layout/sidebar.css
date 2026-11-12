@@ -182,8 +182,22 @@ html.sidebar-is-open .sidebar .sidebar__link {
 }
 
 .sidebar.is-open .sidebar__text-only-header,
-html.sidebar-is-open .sidebar .sidebar__text-only-header {
+.sidebar.is-open .sidebar__dropdown-toggle,
+html.sidebar-is-open .sidebar .sidebar__text-only-header,
+html.sidebar-is-open .sidebar .sidebar__dropdown-toggle {
     display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    min-height: 42px !important;
+    pointer-events: auto !important;
+}
+
+.sidebar.is-open .sidebar__chevron,
+html.sidebar-is-open .sidebar .sidebar__chevron {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .sidebar.is-open .sidebar__submenu,
@@ -263,10 +277,24 @@ html.sidebar-is-open .sidebar .sidebar__sublink--active {
    - Cada ítem es un botón cuadrado de 44x44px centrado en el carril.
    ========================================================================== */
 
-/* Ocultar encabezados de texto sin ícono en modo colapsado */
+/* Ocultar completamente encabezados de categoría y sus flechas (chevrons) al cerrar el sidebar */
 .sidebar:not(.is-open) .sidebar__text-only-header,
-html:not(.sidebar-is-open) .sidebar .sidebar__text-only-header {
+.sidebar:not(.is-open) .sidebar__dropdown-toggle,
+.sidebar:not(.is-open) .sidebar__chevron,
+html:not(.sidebar-is-open) .sidebar .sidebar__text-only-header,
+html:not(.sidebar-is-open) .sidebar .sidebar__dropdown-toggle,
+html:not(.sidebar-is-open) .sidebar .sidebar__chevron {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
 }
 
 /* Desplegar todos los submenús de todos los grupos para ver todos los íconos */
@@ -300,9 +328,9 @@ html:not(.sidebar-is-open) .sidebar .sidebar__submenu > li {
 }
 
 /* Estilo unificado de botones de ícono centrados (44x44px) */
-.sidebar:not(.is-open) .sidebar__link,
+.sidebar:not(.is-open) .sidebar__link:not(.sidebar__text-only-header),
 .sidebar:not(.is-open) .sidebar__sublink,
-html:not(.sidebar-is-open) .sidebar .sidebar__link,
+html:not(.sidebar-is-open) .sidebar .sidebar__link:not(.sidebar__text-only-header),
 html:not(.sidebar-is-open) .sidebar .sidebar__sublink {
     width: 44px !important;
     height: 44px !important;
@@ -336,9 +364,9 @@ html:not(.sidebar-is-open) .sidebar .sidebar__icon {
 }
 
 /* Hover de íconos en modo colapsado */
-.sidebar:not(.is-open) .sidebar__link:hover,
+.sidebar:not(.is-open) .sidebar__link:not(.sidebar__text-only-header):hover,
 .sidebar:not(.is-open) .sidebar__sublink:hover,
-html:not(.sidebar-is-open) .sidebar .sidebar__link:hover,
+html:not(.sidebar-is-open) .sidebar .sidebar__link:not(.sidebar__text-only-header):hover,
 html:not(.sidebar-is-open) .sidebar .sidebar__sublink:hover {
     background-color: rgba(255, 255, 255, 0.12) !important;
     color: #ffffff !important;
@@ -353,9 +381,9 @@ html:not(.sidebar-is-open) .sidebar .sidebar__sublink:hover .sidebar__icon {
 }
 
 /* Pastilla activa (iluminación) en modo colapsado */
-.sidebar:not(.is-open) .sidebar__link--active,
+.sidebar:not(.is-open) .sidebar__link--active:not(.sidebar__text-only-header),
 .sidebar:not(.is-open) .sidebar__sublink--active,
-html:not(.sidebar-is-open) .sidebar .sidebar__link--active,
+html:not(.sidebar-is-open) .sidebar .sidebar__link--active:not(.sidebar__text-only-header),
 html:not(.sidebar-is-open) .sidebar .sidebar__sublink--active {
     background-color: rgba(255, 255, 255, 0.22) !important;
     color: #ffffff !important;
