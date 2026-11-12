@@ -218,4 +218,145 @@
         window.ERP.PortalCliente.init();
     });
 
+
+    /**
+     * Modal interactivo de Detalle de Factura: Productos cobrados y Abonos recepcionados
+     * (Sin tarjetas KPI por solicitud del usuario)
+     */
+    window.verDetalleFacturaPortal = function (ventaId) {
+        var scriptTag = document.getElementById('factura-detalle-json-' + ventaId);
+        if (!scriptTag) return;
+        var data = JSON.parse(scriptTag.textContent);
+
+        var tituloEl = document.getElementById('detFacturaTitulo');
+        var badgeTipoEl = document.getElementById('detFacturaBadgeTipo');
+        var badgeEstadoEl = document.getElementById('detFacturaBadgeEstado');
+        var subtituloEl = document.getElementById('detFacturaSubtitulo');
+        var btnImprimirEl = document.getElementById('detFacturaBtnImprimir');
+
+        if (tituloEl) tituloEl.textContent = 'Factura #' + data.numero_factura;
+        if (subtituloEl) {
+            subtituloEl.innerHTML = '<i class="bi bi-calendar3 me-1"></i> Emitida: ' + data.fecha_venta;
+        }
+        if (btnImprimirEl) {
+            btnImprimirEl.href = data.url_imprimir;
+        }
+
+        if (badgeTipoEl) {
+            badgeTipoEl.textContent = data.tipo_venta;
+            badgeTipoEl.className = 'badge-pill-apex';
+            if (data.tipo_venta === 'CREDITO') {
+                badgeTipoEl.style.background = 'rgba(2, 132, 199, 0.12)';
+                badgeTipoEl.style.color = '#0284c7';
+                badgeTipoEl.style.border = '1px solid rgba(2, 132, 199, 0.25)';
+            } else {
+                badgeTipoEl.style.background = 'var(--color-border)';
+                badgeTipoEl.style.color = 'var(--color-text-main)';
+                badgeTipoEl.style.border = '1px solid var(--color-border)';
+            }
+        }
+
+        if (badgeEstadoEl) {
+            if (data.es_pagada) {
+                badgeEstadoEl.textContent = 'PAGADA';
+                badgeEstadoEl.className = 'badge-pill-apex badge-pill-apex--active';
+            } else {
+                badgeEstadoEl.textContent = 'PENDIENTE';
+                badgeEstadoEl.className = 'badge-pill-apex';
+                badgeEstadoEl.style.background = 'rgba(217, 119, 6, 0.12)';
+                badgeEstadoEl.style.color = '#b45309';
+                badgeEstadoEl.style.border = '1px solid rgba(217, 119, 6, 0.25)';
+            }
+        }
+
+        // 1. Llenar tabla de productos cobrados
+        var prodTbody = document.getElementById('detFacturaProductosTbody');
+        var cantArtEl = document.getElementById('detFacturaCantArticulos');
+        var totalProdEl = document.getElementById('detFacturaTotalProductos');
+        if (prodTbody) {
+            prodTbody.innerHTML = '';
+            if (data.productos && data.productos.length > 0) {
+                data.productos.forEach(function (p) {
+                    var tr = document.createElement('tr');
+                    var codHtml = p.codigo ? '<div class="small text-muted">Cód: ' + p.codigo + '</div>' : '';
+                    tr.innerHTML = 
+                        '<td style="padding: 10px 14px;">' +
+                            '<div class="fw-bold" style="color: var(--color-text-main);">' + p.nombre + '</div>' +
+                            codHtml +
+                        '</td>' +
+                        '<td class="text-center fw-medium" style="padding: 10px 14px;">' + p.cantidad + ' ud.</td>' +
+                        '<td class="text-end" style="padding: 10px 14px;">C$ ' + p.precio_unitario.toFixed(2) + '</td>' +
+                        '<td class="text-end fw-bold" style="padding: 10px 14px;">C$ ' + p.subtotal.toFixed(2) + '</td>';
+                    prodTbody.appendChild(tr);
+                });
+                if (cantArtEl) cantArtEl.textContent = data.productos.length + (data.productos.length === 1 ? ' Artículo' : ' Artículos');
+                if (totalProdEl) totalProdEl.textContent = 'C$ ' + data.total_venta.toFixed(2);
+            } else {
+                prodTbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No hay productos registrados en el detalle.</td></tr>';
+                if (cantArtEl) cantArtEl.textContent = '0 Artículos';
+                if (totalProdEl) totalProdEl.textContent = 'C$ ' + data.total_venta.toFixed(2);
+            }
+        }
+
+        // 2. Llenar tabla de pagos y abonos recepcionados
+        var pagosTbody = document.getElementById('detFacturaPagosTbody');
+        var pagosTfoot = document.getElementById('detFacturaPagosTfoot');
+        var cantPagosEl = document.getElementById('detFacturaCantPagos');
+        if (pagosTbody) {
+            pagosTbody.innerHTML = '';
+            if (data.pagos && data.pagos.length > 0) {
+                data.pagos.forEach(function (pg) {
+                    var tr = document.createElement('tr');
+                    var detalleMetodo = (pg.banco ? pg.banco + ' • ' : '') + (pg.referencia ? 'Ref: ' + pg.referencia : '');
+                    if (!detalleMetodo) detalleMetodo = 'Abono Registrado';
+
+                    tr.innerHTML = 
+                        '<td style="padding: 10px 14px;">' +
+                            '<span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.74rem;">#PAG-' + String(pg.id).padStart(4, '0') + '</span>' +
+                        '</td>' +
+                        '<td style="padding: 10px 14px;">' +
+                            '<div class="fw-medium">' + pg.fecha + '</div>' +
+                        '</td>' +
+                        '<td style="padding: 10px 14px;">' +
+                            '<div class="fw-semibold" style="color: var(--color-text-main);">' + pg.tipo + '</div>' +
+                            '<div class="small text-muted">' + detalleMetodo + '</div>' +
+                        '</td>' +
+                        '<td class="text-end fw-bold" style="padding: 10px 14px; color: var(--color-success);">' +
+                            '+ C$ ' + pg.monto.toFixed(2) +
+                        '</td>';
+                    pagosTbody.appendChild(tr);
+                });
+                if (cantPagosEl) cantPagosEl.textContent = data.pagos.length + (data.pagos.length === 1 ? ' Abono' : ' Abonos');
+            } else {
+                pagosTbody.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="4" class="text-center text-muted py-4">' +
+                            '<i class="bi bi-info-circle me-1"></i> Aún no se han recepcionado pagos para esta factura.' +
+                        '</td>' +
+                    '</tr>';
+                if (cantPagosEl) cantPagosEl.textContent = '0 Abonos';
+            }
+
+            // Pie con Total Recepcionado y Saldo Pendiente
+            if (pagosTfoot) {
+                var saldoColor = data.saldo_pendiente > 0.01 ? '#dc2626' : 'var(--color-text-muted)';
+                pagosTfoot.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Total Recepcionado:</td>' +
+                        '<td class="text-end fw-bold" style="color: var(--color-success); font-size: 0.95rem;">C$ ' + data.total_abonado.toFixed(2) + '</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                        '<td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Saldo Pendiente:</td>' +
+                        '<td class="text-end fw-bold" style="color: ' + saldoColor + '; font-size: 0.95rem;">C$ ' + data.saldo_pendiente.toFixed(2) + '</td>' +
+                    '</tr>';
+            }
+        }
+
+        var modalEl = document.getElementById('modalDetalleFacturaPortal');
+        if (modalEl && window.bootstrap) {
+            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    };
+
 })(window, document);

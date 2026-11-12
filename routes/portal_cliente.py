@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from models.venta import Venta
+from models.detalle_venta import DetalleVenta
+from models.pago import Pago
 from models.enums import EstadoVenta, TipoVenta
 from database import db
 from sqlalchemy.orm import joinedload
@@ -59,8 +61,9 @@ def portal():
     ventas = Venta.query.filter_by(
         cliente_id=current_user.cliente_id
     ).options(
-        joinedload(Venta.pagos),
-        joinedload(Venta.cuotas)
+        joinedload(Venta.pagos).joinedload(Pago.banco),
+        joinedload(Venta.cuotas),
+        joinedload(Venta.detalle_ventas).joinedload(DetalleVenta.producto)
     ).order_by(Venta.fecha_venta.desc()).all()
 
     total_facturado = 0.0
@@ -100,11 +103,47 @@ def portal():
             saldo_pendiente_total += saldo
             cnt_facturas_pendientes += 1
 
+        json_data = {
+            "id": venta.id,
+            "numero_factura": venta.numero_factura,
+            "fecha_venta": venta.fecha_venta.strftime('%d/%m/%Y %I:%M %p') if venta.fecha_venta else '',
+            "tipo_venta": tipo_val,
+            "total_venta": monto_venta,
+            "total_abonado": total_abonado,
+            "saldo_pendiente": float(max(0.0, saldo)),
+            "es_pagada": saldo <= 0.01,
+            "productos": [
+                {
+                    "nombre": d.producto.nombre if d.producto else "Producto",
+                    "codigo": d.producto.codigo_producto if d.producto else "",
+                    "cantidad": d.cantidad,
+                    "precio_unitario": float(d.precio_unitario),
+                    "descuento_monto": float(d.descuento_monto or 0.0),
+                    "subtotal": float(d.subtotal)
+                }
+                for d in venta.detalle_ventas
+            ],
+            "pagos": [
+                {
+                    "id": p.id,
+                    "fecha": p.fecha_pago.strftime('%d/%m/%Y %I:%M %p') if p.fecha_pago else '',
+                    "monto": float(p.monto_pago),
+                    "tipo": p.tipo_pago,
+                    "banco": p.banco.nombre if p.banco else '',
+                    "referencia": p.referencia or '',
+                    "estado": p.estado
+                }
+                for p in venta.pagos if p.estado == "ACTIVO"
+            ],
+            "url_imprimir": url_for('pagos.factura', venta_id=venta.id)
+        }
+
         ventas_procesadas.append({
             "venta": venta,
             "total_abonado": total_abonado,
             "saldo_pendiente": max(0.0, saldo),
-            "es_pagada": saldo <= 0.01
+            "es_pagada": saldo <= 0.01,
+            "json_data": json_data
         })
 
     kpis = {
