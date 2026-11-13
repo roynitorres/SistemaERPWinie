@@ -6,9 +6,23 @@ from models.pago import Pago
 from models.enums import EstadoVenta, TipoVenta
 from database import db
 from sqlalchemy.orm import joinedload
-from datetime import datetime
+from datetime import datetime, timedelta
 
 portal_cliente_bp = Blueprint("portal_cliente", __name__)
+
+
+def format_datetime_local(dt, created_at=None):
+    if not dt:
+        return ''
+    # Si la fecha/hora viene en 00:00 (por ejemplo ingresada como date YYYY-MM-DD sin hora)
+    if dt.hour == 0 and dt.minute == 0:
+        if created_at:
+            # created_at se guarda en UTC; zona local es UTC-6
+            local_time = (created_at - timedelta(hours=6)).time()
+            dt = datetime.combine(dt.date(), local_time)
+            return dt.strftime('%d/%m/%Y %I:%M %p')
+        return dt.strftime('%d/%m/%Y')
+    return dt.strftime('%d/%m/%Y %I:%M %p')
 
 
 def solo_cliente():
@@ -106,7 +120,7 @@ def portal():
         json_data = {
             "id": venta.id,
             "numero_factura": venta.numero_factura,
-            "fecha_venta": venta.fecha_venta.strftime('%d/%m/%Y %I:%M %p') if venta.fecha_venta else '',
+            "fecha_venta": format_datetime_local(venta.fecha_venta, venta.created_at),
             "tipo_venta": tipo_val,
             "total_venta": monto_venta,
             "total_abonado": total_abonado,
@@ -126,7 +140,7 @@ def portal():
             "pagos": [
                 {
                     "id": p.id,
-                    "fecha": p.fecha_pago.strftime('%d/%m/%Y %I:%M %p') if p.fecha_pago else '',
+                    "fecha": format_datetime_local(p.fecha_pago, p.created_at),
                     "monto": float(p.monto_pago),
                     "tipo": p.tipo_pago,
                     "banco": p.banco.nombre if p.banco else '',

@@ -290,9 +290,14 @@ def guardar_pago():
         else:
             monto_efectivo = monto_pago
 
-        fecha_pago = (datetime.strptime(fecha_pago_form, "%Y-%m-%d")
-            if fecha_pago_form
-            else datetime.now())
+        if fecha_pago_form:
+            try:
+                p_date = datetime.strptime(fecha_pago_form, "%Y-%m-%d").date()
+                fecha_pago = datetime.combine(p_date, datetime.now().time())
+            except Exception:
+                fecha_pago = datetime.now()
+        else:
+            fecha_pago = datetime.now()
 
         b_id = int(banco_id) if banco_id and banco_id.isdigit() else None
         c_id = int(cuota_id) if cuota_id and cuota_id.isdigit() else None

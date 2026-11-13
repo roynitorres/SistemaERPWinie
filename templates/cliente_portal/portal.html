@@ -211,6 +211,14 @@
                             <td class="col-factura">
                                 <div class="cell-factura-header">
                                     <span class="fw-bold text-success fs-6">#{{ v.numero_factura }}</span>
+                                    <div class="d-md-none d-flex gap-1 align-items-center">
+                                        <span class="badge-pill-apex" style="font-size: 0.72rem; padding: 2px 8px;">{{ tipo_val }}</span>
+                                        {% if item.es_pagada %}
+                                        <span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.72rem; padding: 2px 8px;">PAGADA</span>
+                                        {% else %}
+                                        <span class="badge-pill-apex" style="font-size: 0.72rem; padding: 2px 8px; background: rgba(217,119,6,0.12); color: #b45309; border: 1px solid rgba(217,119,6,0.25);">PENDIENTE</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </td>
 
@@ -311,21 +319,11 @@
                                             {% endfor %}
                                         </div>
 
-                                        <!-- Barra Resumen Financiero del Acordeón -->
+                                        <!-- Barra Resumen Financiero del Acordeón (Solo Total Suma de Abonos) -->
                                         <div class="acordeon-pagos-bottom">
                                             <div class="summary-pill-item">
-                                                <span class="lbl">Total Factura:</span>
-                                                <span class="val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
-                                            </div>
-                                            <div class="summary-pill-item">
-                                                <span class="lbl">Total Recepcionado:</span>
-                                                <span class="val text-success">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
-                                            </div>
-                                            <div class="summary-pill-item">
-                                                <span class="lbl">Saldo Pendiente:</span>
-                                                <span class="val {% if item.saldo_pendiente > 0.01 %}text-danger{% else %}text-muted{% endif %}">
-                                                    C$ {{ "%.2f"|format(item.saldo_pendiente) }}
-                                                </span>
+                                                <span class="lbl">Total Abonos:</span>
+                                                <span class="val text-success fs-6">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
                                             </div>
                                         </div>
 

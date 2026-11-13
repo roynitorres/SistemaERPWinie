@@ -83,7 +83,14 @@ def crear_venta(data, usuario_id, descuento_maximo):
         total = subtotal + iva
 
         # Formateo de fechas
-        fecha_venta = datetime.strptime(fecha_venta_str, "%Y-%m-%d") if fecha_venta_str else datetime.now()
+        if fecha_venta_str:
+            try:
+                v_date = datetime.strptime(fecha_venta_str, "%Y-%m-%d").date()
+                fecha_venta = datetime.combine(v_date, datetime.now().time())
+            except Exception:
+                fecha_venta = datetime.now()
+        else:
+            fecha_venta = datetime.now()
         fecha_limite_credito = datetime.strptime(fecha_limite_credito_str, "%Y-%m-%d").date() if fecha_limite_credito_str else None
 
         # Creación cabecera de la venta

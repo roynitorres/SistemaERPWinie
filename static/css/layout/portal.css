@@ -699,6 +699,8 @@
 .acordeon-pagos-wrapper {
     padding: 8px 18px 18px 18px;
     background: rgba(0, 71, 171, 0.02);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .acordeon-pagos-card {
@@ -708,6 +710,8 @@
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .acordeon-pagos-top {
@@ -947,6 +951,8 @@
         margin-bottom: 12px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
         gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .portal-table-apex tr.fila-historial td {
@@ -955,6 +961,7 @@
         border: none !important;
         background: transparent !important;
         width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Ocultar en pantallas móviles: Fecha, Tipo de Venta y Estado de Pago */
@@ -967,10 +974,12 @@
     .cell-factura-header {
         display: flex !important;
         align-items: center !important;
-        justify-content: flex-start !important;
+        justify-content: space-between !important;
         padding-bottom: 2px !important;
         border-bottom: none !important;
         margin-bottom: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .col-acciones {
@@ -1000,13 +1009,24 @@
         flex-shrink: 0 !important;
     }
 
-    /* Acordeón en móvil */
-    .fila-acordeon-pagos {
+    /* Acordeón en móvil - Ancho Completo */
+    .portal-table-apex tr.fila-acordeon-pagos {
         display: block !important;
         width: 100% !important;
         margin-top: -6px !important;
         margin-bottom: 14px !important;
         border: none !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .portal-table-apex tr.fila-acordeon-pagos td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        box-sizing: border-box !important;
     }
 
     .fila-acordeon-pagos.collapse:not(.show) {
@@ -1014,8 +1034,18 @@
     }
 
     .acordeon-pagos-wrapper {
+        display: block !important;
+        width: 100% !important;
         padding: 0 !important;
         background: transparent !important;
+        box-sizing: border-box !important;
+    }
+
+    .acordeon-pagos-card {
+        display: block !important;
+        width: 100% !important;
+        border-radius: 14px !important;
+        box-sizing: border-box !important;
     }
 
     .acordeon-pago-row {
