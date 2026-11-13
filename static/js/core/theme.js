@@ -1,10 +1,23 @@
 /**
  * theme.js - Manejo del Modo Claro / Oscuro (Light/Dark Theme)
- * Se ejecuta en el <head> para evitar FOUC (Flash of Unstyled Content).
+ * Exclusivo para el Panel Administrativo.
+ * Login y Portal del Cliente están blindados para permanecer siempre en modo Claro.
  */
 
 (function() {
-    // 1. Obtener preferencia guardada
+    // Si la página especifica tema fijo claro (Login o Portal del Cliente)
+    const pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    const isFixedLightPage = document.documentElement.getAttribute('data-theme-fixed') === 'light' ||
+                            pathname.startsWith('/login') ||
+                            pathname.includes('/auth') ||
+                            pathname.startsWith('/portal-cliente');
+
+    if (isFixedLightPage) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        return;
+    }
+
+    // 1. Obtener preferencia guardada para el dashboard
     const savedTheme = localStorage.getItem('theme');
     
     // 2. Aplicar el tema (Si no hay guardado, por defecto es 'light')
@@ -15,8 +28,15 @@
     }
 })();
 
-// Función global para alternar el tema (se llamará desde el botón en el topbar)
+// Función global para alternar el tema (se llamará desde el botón en el topbar administrativo)
 function toggleTheme() {
+    const pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    const isFixedLightPage = document.documentElement.getAttribute('data-theme-fixed') === 'light' ||
+                            pathname.startsWith('/login') ||
+                            pathname.includes('/auth') ||
+                            pathname.startsWith('/portal-cliente');
+    if (isFixedLightPage) return; // No permitir cambios de tema en login o portal cliente
+
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     
@@ -43,6 +63,16 @@ function updateThemeIcon(theme) {
 
 // Actualizar el icono al cargar la página si el DOM ya está listo
 document.addEventListener('DOMContentLoaded', () => {
+    const pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
+    const isFixedLightPage = document.documentElement.getAttribute('data-theme-fixed') === 'light' ||
+                            pathname.startsWith('/login') ||
+                            pathname.includes('/auth') ||
+                            pathname.startsWith('/portal-cliente');
+    if (isFixedLightPage) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        return;
+    }
+
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     updateThemeIcon(currentTheme);
 });
