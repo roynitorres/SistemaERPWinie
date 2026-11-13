@@ -204,9 +204,6 @@
                             <th>Factura #</th>
                             <th>Fecha</th>
                             <th>Tipo Venta</th>
-                            <th class="text-end">Total (C$)</th>
-                            <th class="text-end">Abonado (C$)</th>
-                            <th class="text-end">Saldo (C$)</th>
                             <th>Estado Pago</th>
                             <th class="text-end">Acciones</th>
                         </tr>
@@ -249,31 +246,7 @@
                                 </span>
                             </td>
 
-                            <!-- Columna 4: Total Facturado -->
-                            <td class="col-total text-md-end fw-bold">
-                                <span class="d-md-none mobile-lbl">Total:</span>
-                                <span class="mobile-val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
-                            </td>
-
-                            <!-- Columna 5: Abonado Recepcionado -->
-                            <td class="col-abonado text-md-end fw-bold text-success">
-                                <span class="d-md-none mobile-lbl">Abonado:</span>
-                                <span class="mobile-val">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
-                            </td>
-
-                            <!-- Columna 6: Saldo Pendiente -->
-                            <td class="col-saldo text-md-end fw-bold">
-                                <span class="d-md-none mobile-lbl">Saldo:</span>
-                                <span class="mobile-val">
-                                    {% if item.saldo_pendiente > 0.01 %}
-                                    <span style="color: #dc2626;">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</span>
-                                    {% else %}
-                                    <span style="color: var(--color-text-muted);">C$ 0.00</span>
-                                    {% endif %}
-                                </span>
-                            </td>
-
-                            <!-- Columna 7: Estado Pago (Desktop) -->
+                            <!-- Columna 4: Estado Pago (Desktop) -->
                             <td class="col-estado d-none d-md-table-cell">
                                 {% if item.es_pagada %}
                                 <span class="badge-pill-apex badge-pill-apex--active">PAGADA</span>
@@ -282,7 +255,7 @@
                                 {% endif %}
                             </td>
 
-                            <!-- Columna 8: Acciones y Botones -->
+                            <!-- Columna 5: Acciones y Botones -->
                             <td class="col-acciones text-end">
                                 <div class="portal-actions-group">
                                     <!-- Botón Ver Productos (Abre Modal solo de productos) -->
@@ -310,7 +283,7 @@
 
                         <!-- FILA ACORDEÓN TIPO COLLAPSE: PAGOS RECEPCIONADOS -->
                         <tr class="fila-acordeon-pagos collapse" id="acordeonPagos{{ v.id }}" data-parent-factura="{{ v.numero_factura|lower }}">
-                            <td colspan="8" class="p-0 border-0">
+                            <td colspan="5" class="p-0 border-0">
                                 <div class="acordeon-pagos-wrapper">
                                     <div class="acordeon-pagos-card">
                                         
@@ -391,7 +364,7 @@
 
                         {% else %}
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i> No tienes facturas ni compras registradas aún.
                             </td>
                         </tr>

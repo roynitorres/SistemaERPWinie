@@ -950,28 +950,6 @@
         margin-bottom: 4px !important;
     }
 
-    .col-total,
-    .col-abonado,
-    .col-saldo {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        font-size: 0.88rem !important;
-        padding: 3px 0 !important;
-    }
-
-    .mobile-lbl {
-        font-size: 0.74rem !important;
-        text-transform: uppercase !important;
-        font-weight: 700 !important;
-        color: var(--color-text-muted) !important;
-    }
-
-    .mobile-val {
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-    }
-
     .col-acciones {
         padding-top: 10px !important;
         border-top: 1px solid var(--color-border) !important;
