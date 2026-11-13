@@ -9,7 +9,7 @@
 <!-- ADAPTADO 100% PARA DISPOSITIVOS MÓVILES (TELÉFONOS)            -->
 <!-- ============================================================== -->
 <div class="modal fade" id="modalDetalleFacturaPortal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-products-responsive">
+    <div class="modal-dialog modal-dialog-centered modal-products-responsive">
         <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 20px; box-shadow: var(--shadow-modal); overflow: hidden;">
             
             <!-- CABECERA DEL MODAL DE PRODUCTOS -->
@@ -485,73 +485,4 @@
     </div>
 </div>
 
-
-<!-- ============================================================== -->
-<!-- MODAL APEX SHADCN: PRODUCTOS FACTURADOS (SOLO PRODUCTOS)      -->
-<!-- ADAPTADO 100% PARA DISPOSITIVOS MÓVILES (TELÉFONOS)            -->
-<!-- ============================================================== -->
-<div class="modal fade" id="modalDetalleFacturaPortal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-products-responsive">
-        <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 20px; box-shadow: var(--shadow-modal); overflow: hidden;">
-            
-            <!-- CABECERA DEL MODAL DE PRODUCTOS -->
-            <div class="modal-header d-flex align-items-center justify-content-between" style="padding: 16px 22px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);">
-                <div class="d-flex align-items-center gap-3">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 71, 171, 0.1); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
-                        <i class="bi bi-box-seam"></i>
-                    </div>
-                    <div>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <h5 class="fw-bold mb-0" id="detFacturaTitulo" style="color: var(--color-text-main); font-size: 1.12rem;">Productos Facturados</h5>
-                            <span id="detFacturaBadgeTipo" class="badge-pill-apex"></span>
-                        </div>
-                        <div class="text-muted small mt-1" id="detFacturaSubtitulo"></div>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--bs-btn-close-filter);"></button>
-            </div>
-
-            <!-- CUERPO: TABLA RESPONSIVE DE PRODUCTOS -->
-            <div class="modal-body" style="padding: 18px 22px;">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small text-muted fw-bold text-uppercase" style="letter-spacing: 0.05em;">Artículos de la Compra</span>
-                    <span id="detFacturaCantArticulos" class="badge" style="background: var(--color-bg-input); color: var(--color-text-muted); border: 1px solid var(--color-border); font-size: 0.75rem;"></span>
-                </div>
-
-                <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;">
-                    <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
-                        <thead style="background: var(--color-bg-input); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted);">
-                            <tr>
-                                <th style="padding: 10px 14px;">Producto / Descripción</th>
-                                <th class="text-center" style="padding: 10px 12px; width: 16%;">Cant.</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 22%;">Precio Unit.</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 24%;">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detFacturaProductosTbody">
-                            <!-- Inyectado dinámicamente por JS -->
-                        </tbody>
-                        <tfoot style="background: var(--color-bg-input); border-top: 1px solid var(--color-border); font-weight: 700;">
-                            <tr>
-                                <td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Total de Productos:</td>
-                                <td class="text-end" id="detFacturaTotalProductos" style="color: var(--color-primary); font-size: 1rem;"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            <!-- PIE DE ACCIONES -->
-            <div class="modal-footer d-flex align-items-center justify-content-between" style="padding: 14px 22px; border-top: 1px solid var(--color-border); background: var(--color-bg-input);">
-                <button type="button" class="btn-apex-outline" data-bs-dismiss="modal" style="padding: 8px 18px;">
-                    <i class="bi bi-x-circle me-1"></i> Cerrar
-                </button>
-                <a id="detFacturaBtnImprimir" href="#" target="_blank" class="btn-neon-primary" style="padding: 8px 20px; text-decoration: none;">
-                    <i class="bi bi-printer me-1"></i> Imprimir Factura
-                </a>
-            </div>
-
-        </div>
-    </div>
-</div>
 {% endblock %}

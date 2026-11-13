@@ -795,9 +795,30 @@
     color: var(--color-text-muted);
 }
 
-/* ─── MODAL DE PRODUCTOS FACTURADOS RESPONSIVE ────── */
+/* ─── MODAL DE PRODUCTOS FACTURADOS AUTO-ADAPTABLE ────── */
 .modal-products-responsive {
-    max-width: 720px;
+    max-width: 680px;
+    margin: 1.75rem auto;
+}
+
+.modal-products-responsive .modal-content {
+    height: auto !important;
+    max-height: 85vh !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-products-responsive .modal-body {
+    flex: 0 1 auto !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    padding: 18px 22px;
+}
+
+.modal-products-responsive .table-responsive {
+    margin-bottom: 0 !important;
+    max-height: 52vh !important;
+    overflow-y: auto !important;
 }
 
 /* ==========================================================================
@@ -1023,17 +1044,21 @@
         width: 100% !important;
     }
 
-    /* Modal Responsive en móvil */
+    /* Modal Responsive en móvil auto-adaptable */
     .modal-products-responsive {
-        margin: 10px auto !important;
-        max-width: calc(100% - 20px) !important;
+        margin: 12px auto !important;
+        max-width: calc(100% - 24px) !important;
     }
 
     .modal-products-responsive .modal-content {
+        max-height: 90vh !important;
+        height: auto !important;
         border-radius: 16px !important;
     }
 
     .modal-products-responsive .modal-body {
         padding: 14px 14px !important;
+        max-height: 65vh !important;
+        flex: 0 1 auto !important;
     }
 }
