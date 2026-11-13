@@ -943,10 +943,10 @@
         background: var(--color-bg-card) !important;
         border: 1px solid var(--color-border) !important;
         border-radius: 14px !important;
-        padding: 14px 14px !important;
+        padding: 12px 14px !important;
         margin-bottom: 12px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-        gap: 6px !important;
+        gap: 8px !important;
     }
 
     .portal-table-apex tr.fila-historial td {
@@ -957,24 +957,26 @@
         width: 100% !important;
     }
 
+    /* Ocultar en pantallas móviles: Fecha, Tipo de Venta y Estado de Pago */
+    .portal-table-apex tr.fila-historial td.col-fecha,
+    .portal-table-apex tr.fila-historial td.col-tipo,
+    .portal-table-apex tr.fila-historial td.col-estado {
+        display: none !important;
+    }
+
     .cell-factura-header {
         display: flex !important;
         align-items: center !important;
-        justify-content: space-between !important;
-        padding-bottom: 8px !important;
-        border-bottom: 1px dashed var(--color-border) !important;
-        margin-bottom: 4px !important;
-    }
-
-    .col-fecha {
-        font-size: 0.8rem !important;
-        margin-bottom: 4px !important;
+        justify-content: flex-start !important;
+        padding-bottom: 2px !important;
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
     }
 
     .col-acciones {
-        padding-top: 10px !important;
-        border-top: 1px solid var(--color-border) !important;
-        margin-top: 6px !important;
+        padding-top: 8px !important;
+        border-top: 1px dashed var(--color-border) !important;
+        margin-top: 0 !important;
     }
 
     .portal-actions-group {
