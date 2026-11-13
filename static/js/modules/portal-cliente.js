@@ -316,20 +316,20 @@
         }
 
         var modalEl = document.getElementById('modalDetalleFacturaPortal');
-        if (modalEl && window.bootstrap) {
-            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modal.show();
+        if (modalEl) {
+            if (window.bootstrap && window.bootstrap.Modal) {
+                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
+            } else if (typeof $(modalEl).modal === 'function') {
+                $(modalEl).modal('show');
+            } else {
+                modalEl.classList.add('show');
+                modalEl.style.display = 'block';
+            }
         }
     };
 
     // Alias para compatibilidad
     window.verDetalleFacturaPortal = window.verProductosFacturaPortal;
-
-        var modalEl = document.getElementById('modalDetalleFacturaPortal');
-        if (modalEl && window.bootstrap) {
-            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modal.show();
-        }
-    };
 
 })(window, document);
