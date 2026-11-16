@@ -9,7 +9,7 @@
     window.ERP = window.ERP || {};
 
     window.ERP.PortalCliente = {
-        filtroActual: 'TODOS',
+        filtroActual: 'CREDITO',
 
         /**
          * Inicializa la búsqueda en tiempo real e interacciones con las pills de estado
@@ -28,7 +28,7 @@
                     this.classList.add('state-pill--active');
                     this.classList.add('active');
 
-                    self.filtroActual = this.dataset.filtro || 'TODOS';
+                    self.filtroActual = this.dataset.filtro || 'CREDITO';
                     self.aplicarFiltros();
                 });
             });
@@ -38,6 +38,9 @@
                     self.aplicarFiltros();
                 });
             }
+
+            // Aplicar filtro inicial de Crédito
+            self.aplicarFiltros();
         },
 
         /**

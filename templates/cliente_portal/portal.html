@@ -159,12 +159,10 @@
                     <input type="text" id="buscarFactura" class="toolbar-input" placeholder="Buscar por N° Factura o Producto...">
                 </div>
 
-                <!-- TABS PILLS DE FILTRO -->
+                <!-- TABS PILLS DE FILTRO (SOLO CONTADO Y CRÉDITO) -->
                 <div class="state-pills-bar">
-                    <button type="button" class="state-pill state-pill--active active" data-filtro="TODOS">Todos</button>
+                    <button type="button" class="state-pill state-pill--active active" data-filtro="CREDITO">Crédito</button>
                     <button type="button" class="state-pill" data-filtro="CONTADO">Contado</button>
-                    <button type="button" class="state-pill" data-filtro="CREDITO">Crédito</button>
-                    <button type="button" class="state-pill" data-filtro="PENDIENTE">Pendientes</button>
                 </div>
             </div>
 
@@ -326,44 +324,20 @@
                                 <div class="acordeon-pagos-wrapper">
                                     <div class="acordeon-pagos-card">
                                         
-                                        <!-- Cabecera del Acordeón -->
-                                        <div class="acordeon-pagos-top">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="badge-icon-pagos">
-                                                    <i class="bi bi-cash-coin"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold text-dark" style="font-size: 0.95rem;">
-                                                        Abonos y Pagos Recepcionados
-                                                    </div>
-                                                    <div class="small text-muted">
-                                                        Factura #{{ v.numero_factura }} • {{ item.json_data.pagos|length }} {% if item.json_data.pagos|length == 1 %}abono registrado{% else %}abonos registrados{% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Lista de Pagos Recepcionados -->
+                                        <!-- Lista de Pagos Recepcionados (Sin encabezados: solo día, método y cantidad) -->
                                         {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
                                         <div class="acordeon-pagos-list">
                                             {% for pg in item.json_data.pagos %}
                                             <div class="acordeon-pago-row">
-                                                <div class="acordeon-pago-left">
-                                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                                        <span class="badge-pag-id">
-                                                            #PAG-{{ "%04d"|format(pg.id) }}
-                                                        </span>
-                                                        <span class="fw-bold text-dark" style="font-size: 0.88rem;">{{ pg.tipo }}</span>
-                                                    </div>
-                                                    <div class="small text-muted">
-                                                        <i class="bi bi-clock me-1"></i>{{ pg.fecha }}
-                                                        {% if pg.banco or pg.referencia %}
-                                                        • {{ pg.banco if pg.banco else '' }}{% if pg.banco and pg.referencia %} - {% endif %}{{ 'Ref: ' ~ pg.referencia if pg.referencia else '' }}
-                                                        {% endif %}
-                                                    </div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge-pag-id">
+                                                        {{ pg.tipo }}
+                                                    </span>
+                                                    <span class="small text-muted">
+                                                        <i class="bi bi-calendar-event me-1"></i>{{ pg.fecha }}
+                                                    </span>
                                                 </div>
-                                                <div class="acordeon-pago-right text-end">
-                                                    <span class="small text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Monto Recepcionado</span>
+                                                <div class="text-end">
                                                     <span class="fw-bold text-success fs-6">+ C$ {{ "%.2f"|format(pg.monto) }}</span>
                                                 </div>
                                             </div>
