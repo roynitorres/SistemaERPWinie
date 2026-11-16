@@ -4,73 +4,6 @@
 
 {% block content %}
 
-<!-- ============================================================== -->
-<!-- MODAL DE PRODUCTOS COMPRADOS (ABRE CON EL OJO DE VER DETALLE)   -->
-<!-- ALTURA AUTO-ADAPTABLE: COMPACTO PARA 1 O VARIOS ARTÍCULOS       -->
-<!-- ============================================================== -->
-<div class="modal fade" id="modalDetalleFacturaPortal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-products-responsive">
-        <div class="modal-content" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 20px; box-shadow: var(--shadow-modal); overflow: hidden;">
-            
-            <!-- CABECERA DEL MODAL DE PRODUCTOS -->
-            <div class="modal-header d-flex align-items-center justify-content-between" style="padding: 16px 22px; border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);">
-                <div class="d-flex align-items-center gap-3">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(2, 132, 199, 0.1); color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
-                        <i class="bi bi-box-seam"></i>
-                    </div>
-                    <div>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <h5 class="fw-bold mb-0" id="detFacturaTitulo" style="color: var(--color-text-main); font-size: 1.12rem;">Artículos Facturados</h5>
-                            <span id="detFacturaBadgeTipo" class="badge-tipo-pill"></span>
-                            <span id="detFacturaBadgeEstado" class="badge-status-pill"></span>
-                        </div>
-                        <div class="text-muted small mt-1" id="detFacturaSubtitulo"></div>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- CUERPO: TABLA RESPONSIVE DE PRODUCTOS -->
-            <div class="modal-body">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small text-muted fw-bold text-uppercase" style="letter-spacing: 0.05em;">Productos de esta Compra</span>
-                    <span id="detFacturaCantArticulos" class="badge bg-light text-dark border" style="font-size: 0.75rem;"></span>
-                </div>
-
-                <div class="table-responsive border rounded-3 overflow-hidden">
-                    <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
-                        <thead style="background: #f8fafc; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted);">
-                            <tr>
-                                <th style="padding: 10px 14px;">Producto / Descripción</th>
-                                <th class="text-center" style="padding: 10px 12px; width: 18%;">Cant.</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 24%;">Precio Unit.</th>
-                                <th class="text-end" style="padding: 10px 14px; width: 24%;">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detFacturaProductosTbody">
-                            <!-- Inyectado dinámicamente por JS -->
-                        </tbody>
-                        <tfoot style="background: #f8fafc; border-top: 1px solid var(--color-border); font-weight: 700;">
-                            <tr>
-                                <td colspan="3" class="text-end text-uppercase" style="font-size: 0.78rem; color: var(--color-text-muted);">Total de Productos:</td>
-                                <td class="text-end text-success fw-extrabold" id="detFacturaTotalProductos" style="font-size: 1rem;"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            <!-- PIE DE ACCIONES -->
-            <div class="modal-footer d-flex align-items-center justify-content-end" style="padding: 14px 22px; border-top: 1px solid var(--color-border); background: #f8fafc;">
-                <button type="button" class="btn btn-secondary px-4 py-2" data-bs-dismiss="modal" style="font-weight: 600; font-size: 0.85rem; border-radius: 9px;">
-                    <i class="bi bi-x-circle me-1"></i> Cerrar
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
 <div class="cliente-portal">
 
     <!-- ============================================================== -->
@@ -196,14 +129,60 @@
                         </span>
                         {% endif %}
 
-                        <!-- Botón Ojo: Ver Artículos Comprados (Abre modal) -->
+                        <!-- Botón Ver Artículos (Despliega sin modal) -->
+                        {% if item.json_data.productos and item.json_data.productos|length > 0 %}
                         <button type="button" 
                                 class="btn-trigger-articulos" 
-                                onclick="event.stopPropagation(); verProductosFacturaPortal({{ v.id }});" 
-                                title="Ver artículos y productos comprados (Perfumes, calzado, etc.)">
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#articulosFactura{{ v.id }}" 
+                                aria-expanded="false" 
+                                aria-controls="articulosFactura{{ v.id }}"
+                                onclick="event.stopPropagation();" 
+                                title="Ver artículos comprados">
                             <i class="bi bi-eye"></i>
-                            <span>Ver Artículos</span>
+                            <span>{{ item.json_data.productos|length }} {% if item.json_data.productos|length == 1 %}Artículo{% else %}Artículos{% endif %}</span>
+                            <i class="bi bi-chevron-down chevron-articulo-icon"></i>
                         </button>
+                        {% else %}
+                        <span class="btn-no-articulos">
+                            <i class="bi bi-box"></i> 0 Artículos
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DE ARTÍCULOS DESPLEGABLE (SIMPLE: CANTIDAD, NOMBRE Y PRECIO — SIN MODAL) -->
+                <div id="articulosFactura{{ v.id }}" class="collapse acordeon-articulos-collapse">
+                    <div class="acordeon-articulos-body">
+                        <div class="articulos-header-tag">
+                            Artículos de esta Compra
+                        </div>
+
+                        {% if item.json_data.productos and item.json_data.productos|length > 0 %}
+                        <div class="articulos-cards-list">
+                            {% for p in item.json_data.productos %}
+                            <div class="articulo-single-item">
+                                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                    <span class="articulo-cant-badge">{{ p.cantidad }}x</span>
+                                    <span class="articulo-nombre text-truncate">{{ p.nombre }}</span>
+                                </div>
+                                <div class="articulo-precio">
+                                    C$ {{ "%.2f"|format(p.subtotal or (p.cantidad * p.precio_unitario)) }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pie con Total Artículos -->
+                        <div class="articulos-footer-total">
+                            <span class="articulos-footer-label">Total Artículos:</span>
+                            <span class="articulos-footer-value">C$ {{ "%.2f"|format(v.total_venta) }}</span>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3 text-muted small">
+                            No hay productos registrados en esta factura.
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 

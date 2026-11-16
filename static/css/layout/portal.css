@@ -949,10 +949,10 @@
     border-radius: 10px;
     font-size: 0.8rem;
     font-weight: 700;
-    padding: 7px 16px;
+    padding: 7px 14px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
     transition: all 0.2s ease;
@@ -961,8 +961,117 @@
 .btn-trigger-articulos:hover {
     background-color: #e0f2fe;
     color: #0369a1;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.18);
-    transform: translateY(-1px);
+}
+
+.chevron-articulo-icon {
+    display: inline-block;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.75rem;
+}
+
+.btn-trigger-articulos[aria-expanded="true"] .chevron-articulo-icon {
+    transform: rotate(180deg);
+}
+
+.btn-no-articulos {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+}
+
+/* ─── SECCIÓN DE ARTÍCULOS DESPLEGABLE (SIN MODAL — CANTIDAD, NOMBRE Y PRECIO) ────── */
+.acordeon-articulos-collapse {
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+.acordeon-articulos-body {
+    padding: 14px 18px;
+}
+
+.articulos-header-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.articulos-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.articulo-single-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: background 0.15s ease;
+}
+
+.articulo-single-item:hover {
+    background: #fcfdfe;
+}
+
+.articulo-cant-badge {
+    background: #f0f9ff;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.articulo-nombre {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.articulo-precio {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #0f172a;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.articulos-footer-total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.articulos-footer-label {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+}
+
+.articulos-footer-value {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #0284c7;
 }
 
 /* ─── SECCIÓN DE ABONOS DESPLEGABLE (SIN ENCABEZADOS) ────── */
@@ -1396,6 +1505,35 @@
     }
 
     .abonos-footer-value {
+        font-size: 0.9rem !important;
+    }
+
+    .acordeon-articulos-body {
+        padding: 12px 12px !important;
+    }
+
+    .articulo-single-item {
+        padding: 8px 10px !important;
+    }
+
+    .articulo-nombre {
+        font-size: 0.8rem !important;
+    }
+
+    .articulo-precio {
+        font-size: 0.82rem !important;
+    }
+
+    .articulos-footer-total {
+        padding-top: 8px !important;
+        margin-top: 8px !important;
+    }
+
+    .articulos-footer-label {
+        font-size: 0.7rem !important;
+    }
+
+    .articulos-footer-value {
         font-size: 0.9rem !important;
     }
 
