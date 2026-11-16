@@ -73,65 +73,27 @@
 
 <div class="cliente-portal">
 
-    <!-- ===================================== -->
-    <!-- BANNER DE PORTADA Y CABECERA DE PERFIL -->
-    <!-- ===================================== -->
-    <div class="portal-hero-card">
-        <div class="portal-cover-banner"></div>
-        <div class="portal-hero-body">
-            
-            <div class="portal-hero-header">
-                <div>
-                    <div class="portal-avatar-wrapper">
-                        <div class="portal-avatar-img">
-                            {{ cliente.nombres[:2].upper() if cliente and cliente.nombres else 'CL' }}
-                        </div>
-                    </div>
-
-                    <div class="portal-hero-name">
-                        {{ cliente.nombres if cliente else 'Cliente Registrado' }}
-                    </div>
-
-                    <div class="portal-hero-badges">
-                        <span class="badge-pill-apex badge-pill-apex--active" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 700;">
-                            <i class="bi bi-person-badge-fill me-1"></i> CLIENTE REGISTRADO
-                        </span>
-                        <span class="badge-pill-apex" style="background: rgba(0, 176, 255, 0.12); color: var(--color-secondary); padding: 4px 12px; font-size: 0.78rem; font-weight: 700;">
-                            <i class="bi bi-check-circle-fill me-1"></i> ESTADO ACTIVO
-                        </span>
-                    </div>
-                </div>
-
-                <!-- BOTÓN CERRAR SESIÓN DIRECTO -->
-                <div>
-                    <a href="{{ url_for('auth.logout') }}" class="btn-logout-portal" style="text-decoration: none;">
-                        <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
-                    </a>
-                </div>
+    <!-- ============================================================== -->
+    <!-- CABECERA MINIMALISTA DEL PORTAL DEL CLIENTE (COMO EL BOCETO)   -->
+    <!-- Avatar con iniciales, Nombre, Rol y Botón Salir Directo         -->
+    <!-- ============================================================== -->
+    <header class="portal-header-minimal">
+        <div class="portal-user-profile">
+            <div class="portal-avatar-circle">
+                {{ cliente.nombres[:2].upper() if cliente and cliente.nombres else 'CL' }}
             </div>
-
-            <!-- FILA DE METADATOS DE CONTACTO -->
-            <div class="portal-meta-row">
-                <div class="portal-meta-item">
-                    <i class="bi bi-envelope-fill text-success"></i>
-                    <span>{{ cliente.email or 'Sin correo registrado' if cliente else 'N/A' }}</span>
-                </div>
-                <div class="portal-meta-item">
-                    <i class="bi bi-telephone-fill text-info"></i>
-                    <span>{{ cliente.telefono or 'Sin teléfono' if cliente else 'N/A' }}</span>
-                </div>
-                <div class="portal-meta-item">
-                    <i class="bi bi-geo-alt-fill text-warning"></i>
-                    <span>{{ cliente.ciudad or 'Nicaragua' if cliente else 'N/A' }}</span>
-                </div>
-                <div class="portal-meta-item">
-                    <i class="bi bi-shield-check text-primary"></i>
-                    <span>Portal Cliente Seguro SSL</span>
-                </div>
+            <div class="portal-user-info">
+                <h2 class="portal-user-name">{{ cliente.nombres if cliente else 'Cliente Registrado' }}</h2>
+                <span class="portal-user-sub">Portal del Cliente</span>
             </div>
-
         </div>
-    </div>
+
+        <!-- BOTÓN SALIR DIRECTO -->
+        <a href="{{ url_for('auth.logout') }}" class="portal-btn-salir" title="Cerrar Sesión">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Salir</span>
+        </a>
+    </header>
 
     <!-- ALERTAS DEL SISTEMA -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -145,17 +107,17 @@
     {% endif %}
     {% endwith %}
 
-    <!-- ===================================== -->
-    <!-- HISTORIAL DE FACTURAS Y ABONOS       -->
-    <!-- ===================================== -->
-    <div id="panel-portal-facturas" class="portal-panel-card">
+    <!-- ============================================================== -->
+    <!-- HISTORIAL DE FACTURAS Y ABONOS — DISEÑO MÓVIL-FIRST MINIMALISTA -->
+    <!-- ============================================================== -->
+    <div id="panel-portal-facturas" class="portal-panel-minimal">
         
         <!-- BARRA DE BÚSQUEDA Y FILTROS: SOLO CONTADO Y CRÉDITO -->
         <div class="portal-toolbar-minimal mb-3">
             <!-- Buscador en tiempo real -->
             <div class="portal-search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" id="buscarFactura" class="portal-search-input" placeholder="Buscar por N° Factura o Producto...">
+                <input type="text" id="buscarFactura" class="portal-search-input" placeholder="Buscar por factura o producto...">
             </div>
 
             <!-- Filtros: Únicamente Crédito y Contado (Crédito activo por defecto) -->
@@ -166,21 +128,6 @@
                 <button type="button" class="portal-filter-pill state-pill" data-filtro="CONTADO">
                     <i class="bi bi-cash"></i> Contado
                 </button>
-            </div>
-        </div>
-
-        <!-- ENCABEZADO DE SECCIÓN -->
-        <div class="portal-section-header mb-3">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <h5 class="portal-section-title">
-                        <i class="bi bi-receipt-cutoff text-success me-1"></i> Historial de Facturas
-                    </h5>
-                    <span class="portal-section-desc">Listado detallado de todas tus compras y pagos.</span>
-                </div>
-                <span id="badgeTotalVentas" class="portal-count-badge" title="Compras visibles">
-                    {{ kpis.total_facturas if kpis else 0 }}
-                </span>
             </div>
         </div>
 
