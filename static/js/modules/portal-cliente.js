@@ -41,21 +41,23 @@
         },
 
         /**
-         * Aplica los filtros de búsqueda por texto y por pill activo a las filas de la tabla
-         * y sincroniza las filas de acordeón de pagos asociadas.
+         * Aplica los filtros de búsqueda por texto (factura o productos) y por pill de estado
+         * a las tarjetas de facturas del portal.
          */
         aplicarFiltros: function () {
             var inputBuscar = document.getElementById('buscarFactura') || document.getElementById('buscarVenta');
             var query = inputBuscar ? inputBuscar.value.toLowerCase().trim() : '';
-            var filas = document.querySelectorAll('#tablaHistorial tr.fila-historial, #tablaVentasPortal tr.fila-venta');
+            var cards = document.querySelectorAll('.portal-factura-card, #tablaHistorial tr.fila-historial, #tablaVentasPortal tr.fila-venta');
+            var alertVacio = document.getElementById('noFacturasAlert');
             var visibles = 0;
 
-            filas.forEach(function (row) {
-                var numFactura = (row.dataset.factura || '').toLowerCase();
-                var tipoVenta = (row.dataset.tipo || '').toUpperCase();
-                var esPagada = row.dataset.pagada === '1';
+            cards.forEach(function (card) {
+                var numFactura = (card.dataset.factura || '').toLowerCase();
+                var productos = (card.dataset.productos || '').toLowerCase();
+                var tipoVenta = (card.dataset.tipo || '').toUpperCase();
+                var esPagada = card.dataset.pagada === '1';
 
-                var cumpleBusqueda = !query || numFactura.includes(query);
+                var cumpleBusqueda = !query || numFactura.includes(query) || productos.includes(query);
                 var cumpleFiltro = true;
 
                 if (this.filtroActual === 'CONTADO') {
@@ -66,26 +68,21 @@
                     cumpleFiltro = !esPagada;
                 }
 
-                // Fila de acordeón asociada que está inmediatamente después
-                var nextRow = row.nextElementSibling;
-                var esAcordeon = nextRow && nextRow.classList.contains('fila-acordeon-pagos');
-
                 if (cumpleBusqueda && cumpleFiltro) {
-                    row.style.display = '';
-                    if (esAcordeon && nextRow.dataset.wasVisible === '1') {
-                        nextRow.style.display = '';
-                    }
+                    card.style.display = '';
                     visibles++;
                 } else {
-                    row.style.display = 'none';
-                    if (esAcordeon) {
-                        if (nextRow.style.display !== 'none') {
-                            nextRow.dataset.wasVisible = '1';
-                        }
-                        nextRow.style.display = 'none';
-                    }
+                    card.style.display = 'none';
                 }
             }, this);
+
+            if (alertVacio) {
+                if (visibles === 0 && cards.length > 0) {
+                    alertVacio.classList.remove('d-none');
+                } else {
+                    alertVacio.classList.add('d-none');
+                }
+            }
 
             var badgeTotal = document.getElementById('badgeTotalVentas');
             if (badgeTotal) {

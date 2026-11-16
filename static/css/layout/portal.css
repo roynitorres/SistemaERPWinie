@@ -689,40 +689,53 @@
     color: inherit;
 }
 
-/* ─── CONTENEDOR Y COMPONENTES DEL ACORDEÓN DE PAGOS ────── */
-.fila-acordeon-pagos td {
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-}
+/* ==========================================================================
+   PORTAL DEL CLIENTE — TARJETAS MINIMALISTAS UNIFICADAS (ZERO MODALS)
+   Visualización directa de productos y abonos en móvil y escritorio
+   ========================================================================== */
 
-.acordeon-pagos-wrapper {
-    padding: 8px 18px 18px 18px;
-    background: rgba(0, 71, 171, 0.02);
+.portal-cards-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     width: 100%;
-    box-sizing: border-box;
 }
 
-.acordeon-pagos-card {
+.portal-factura-card {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    border-left: 4px solid #10b981;
-    border-radius: 12px;
+    border-radius: 18px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
     width: 100%;
     box-sizing: border-box;
 }
 
-.acordeon-pagos-top {
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--color-border);
-    background: rgba(16, 185, 129, 0.04);
+.portal-factura-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
 }
 
-.badge-icon-pagos {
-    width: 36px;
-    height: 36px;
+/* 1. Encabezado de la Factura */
+.factura-card-header {
+    padding: 14px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.factura-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.factura-icon-badge {
+    width: 38px;
+    height: 38px;
     border-radius: 10px;
     background: rgba(16, 185, 129, 0.12);
     color: #10b981;
@@ -733,70 +746,359 @@
     flex-shrink: 0;
 }
 
-.acordeon-pagos-list {
-    background: var(--color-bg-card);
+.factura-icon-badge.pending {
+    background: rgba(217, 119, 6, 0.12);
+    color: #d97706;
 }
 
-.acordeon-pago-row {
-    padding: 12px 18px;
+.factura-num-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 1px solid var(--color-border);
-    transition: background 0.15s ease;
-}
-
-.acordeon-pago-row:last-child {
-    border-bottom: none;
-}
-
-.acordeon-pago-row:hover {
-    background: rgba(0, 0, 0, 0.015);
-}
-
-.acordeon-pago-left {
-    flex: 1;
-}
-
-.acordeon-pago-right {
-    flex-shrink: 0;
-}
-
-.acordeon-pagos-bottom {
-    padding: 10px 18px;
-    background: var(--color-bg-input);
-    border-top: 1px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 20px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
-.summary-pill-item {
+.factura-numero {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    letter-spacing: -0.01em;
+}
+
+.badge-status-pill {
     display: inline-flex;
     align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.badge-status-paid {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-status-pending {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.factura-meta-info {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
     gap: 6px;
+}
+
+.meta-dot {
+    color: #cbd5e1;
+}
+
+.badge-tipo-pill {
+    font-weight: 600;
+    color: var(--color-text-main);
+    background: #e2e8f0;
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+}
+
+.btn-imprimir-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-main);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-imprimir-card:hover {
+    color: #10b981;
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+/* 2. Layout Grid Desktop (Productos a la izquierda, Abonos a la derecha) */
+.factura-card-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+/* Sección Productos Facturados */
+.factura-section-productos {
+    padding: 16px 18px;
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+}
+
+.seccion-bloque-titulo {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lbl-subtotal-header {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.factura-productos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.factura-producto-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    gap: 12px;
+}
+
+.prod-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.prod-icon-bullet {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.prod-nombre {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.prod-detalles {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 1px;
+}
+
+.prod-cod {
+    margin-left: 6px;
+    color: #94a3b8;
+}
+
+.prod-item-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.prod-monto {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+}
+
+.factura-total-row {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 0.82rem;
 }
 
-.summary-pill-item .lbl {
+.total-lbl {
+    font-weight: 600;
     color: var(--color-text-muted);
-    text-transform: uppercase;
-    font-size: 0.72rem;
-    font-weight: 700;
 }
 
-.summary-pill-item .val {
+.total-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+}
+
+/* Sección Abonos Recepcionados */
+.factura-section-pagos {
+    padding: 16px 18px;
+    background: rgba(16, 185, 129, 0.02);
+    display: flex;
+    flex-direction: column;
+}
+
+.factura-pagos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.factura-pago-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.18);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    gap: 12px;
+}
+
+.pago-item-left {
+    min-width: 0;
+}
+
+.pago-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-pag-id {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid #a7f3d0;
+}
+
+.pago-metodo {
+    font-size: 0.82rem;
     font-weight: 700;
     color: var(--color-text-main);
 }
 
-.acordeon-empty-state {
-    padding: 24px 18px;
+.pago-meta {
+    font-size: 0.73rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+.pago-item-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.pago-monto {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #059669;
+}
+
+.pago-empty-box {
+    padding: 24px 16px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px dashed var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 3. Pie Financiero de la Tarjeta */
+.factura-card-footer {
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.footer-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-lbl {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+.stat-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+}
+
+.stat-val-danger {
+    color: #dc2626 !important;
+    background: #fef2f2;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+}
+
+.badge-cobrado-100 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.badge-cobrado-parcial {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #d97706;
+}
+
+/* Estado Vacío General */
+.portal-empty-state {
+    padding: 48px 24px;
     text-align: center;
     color: var(--color-text-muted);
+    background: var(--color-bg-card);
+    border: 1px dashed var(--color-border);
+    border-radius: 16px;
+    font-size: 0.92rem;
 }
 
 /* ─── MODAL DE PRODUCTOS FACTURADOS AUTO-ADAPTABLE ────── */
@@ -930,167 +1232,54 @@
         display: none !important;
     }
 
-    /* TRANSFORMACIÓN DE LA TABLA EN TARJETAS TÁCTILES MÓVILES */
-    .portal-table-apex thead {
-        display: none !important;
+    /* ─── ADAPTACIÓN MÓVIL DE TARJETAS MINIMALISTAS UNIFICADAS ────── */
+    .portal-cards-stream {
+        gap: 14px !important;
     }
 
-    .portal-table-apex,
-    .portal-table-apex tbody {
-        display: block !important;
-        width: 100% !important;
-    }
-
-    .portal-table-apex tr.fila-historial {
-        display: flex !important;
-        flex-direction: column !important;
-        background: var(--color-bg-card) !important;
-        border: 1px solid var(--color-border) !important;
-        border-radius: 14px !important;
-        padding: 12px 14px !important;
-        margin-bottom: 12px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-        gap: 8px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    .portal-table-apex tr.fila-historial td {
-        display: block !important;
-        padding: 0 !important;
-        border: none !important;
-        background: transparent !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Ocultar en pantallas móviles: Fecha, Tipo de Venta y Estado de Pago */
-    .portal-table-apex tr.fila-historial td.col-fecha,
-    .portal-table-apex tr.fila-historial td.col-tipo,
-    .portal-table-apex tr.fila-historial td.col-estado {
-        display: none !important;
-    }
-
-    .cell-factura-header {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        padding-bottom: 2px !important;
-        border-bottom: none !important;
-        margin-bottom: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    .col-acciones {
-        padding-top: 8px !important;
-        border-top: 1px dashed var(--color-border) !important;
-        margin-top: 0 !important;
-    }
-
-    .portal-actions-group {
-        display: flex !important;
-        width: 100% !important;
-        gap: 8px !important;
-    }
-
-    .portal-actions-group .btn-ver-productos,
-    .portal-actions-group .btn-ver-pagos {
-        flex: 1 !important;
-        min-height: 40px !important;
-        padding: 8px 10px !important;
-        font-size: 0.82rem !important;
-        justify-content: center !important;
-    }
-
-    .portal-actions-group .btn-imprimir {
-        min-height: 40px !important;
-        padding: 8px 14px !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* Acordeón en móvil - Ancho Completo */
-    .portal-table-apex tr.fila-acordeon-pagos {
-        display: block !important;
-        width: 100% !important;
-        margin-top: -6px !important;
-        margin-bottom: 14px !important;
-        border: none !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    .portal-table-apex tr.fila-acordeon-pagos td {
-        display: block !important;
-        width: 100% !important;
-        padding: 0 !important;
-        border: none !important;
-        background: transparent !important;
-        box-sizing: border-box !important;
-    }
-
-    .fila-acordeon-pagos.collapse:not(.show) {
-        display: none !important;
-    }
-
-    .acordeon-pagos-wrapper {
-        display: block !important;
-        width: 100% !important;
-        padding: 0 !important;
-        background: transparent !important;
-        box-sizing: border-box !important;
-    }
-
-    .acordeon-pagos-card {
-        display: block !important;
-        width: 100% !important;
-        border-radius: 14px !important;
-        box-sizing: border-box !important;
-    }
-
-    .acordeon-pago-row {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 8px !important;
-        padding: 10px 14px !important;
-    }
-
-    .acordeon-pago-right {
-        width: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        padding-top: 6px !important;
-        border-top: 1px dashed var(--color-border) !important;
-    }
-
-    .acordeon-pagos-bottom {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-        padding: 12px 14px !important;
-    }
-
-    .summary-pill-item {
-        justify-content: space-between !important;
-        width: 100% !important;
-    }
-
-    /* Modal Responsive en móvil auto-adaptable */
-    .modal-products-responsive {
-        margin: 12px auto !important;
-        max-width: calc(100% - 24px) !important;
-    }
-
-    .modal-products-responsive .modal-content {
-        max-height: 90vh !important;
-        height: auto !important;
+    .portal-factura-card {
         border-radius: 16px !important;
     }
 
-    .modal-products-responsive .modal-body {
+    .factura-card-header {
+        padding: 12px 14px !important;
+    }
+
+    .factura-card-content {
+        grid-template-columns: 1fr !important;
+    }
+
+    .factura-section-productos {
+        border-right: none !important;
+        border-bottom: 1px solid var(--color-border) !important;
         padding: 14px 14px !important;
-        max-height: 65vh !important;
-        flex: 0 1 auto !important;
+    }
+
+    .factura-section-pagos {
+        padding: 14px 14px !important;
+    }
+
+    .factura-producto-item {
+        padding: 8px 10px !important;
+    }
+
+    .factura-pago-item {
+        padding: 8px 10px !important;
+    }
+
+    .factura-card-footer {
+        padding: 10px 14px !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+    }
+
+    .footer-stat {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+    }
+
+    .footer-stat.text-end {
+        align-items: flex-end !important;
     }
 }
