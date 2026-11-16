@@ -74,17 +74,16 @@
 <div class="cliente-portal">
 
     <!-- ============================================================== -->
-    <!-- CABECERA MINIMALISTA DEL PORTAL DEL CLIENTE (COMO EL BOCETO)   -->
-    <!-- Avatar con iniciales, Nombre, Rol y Botón Salir Directo         -->
+    <!-- CABECERA MINIMALISTA DEL PORTAL DEL CLIENTE                     -->
+    <!-- Solo Avatar con iniciales, Nombre y Apellido, y Botón Salir    -->
     <!-- ============================================================== -->
     <header class="portal-header-minimal">
         <div class="portal-user-profile">
             <div class="portal-avatar-circle">
-                {{ cliente.nombres[:2].upper() if cliente and cliente.nombres else 'CL' }}
+                {{ iniciales_cliente }}
             </div>
             <div class="portal-user-info">
-                <h2 class="portal-user-name">{{ cliente.nombres if cliente else 'Cliente Registrado' }}</h2>
-                <span class="portal-user-sub">Portal del Cliente</span>
+                <h2 class="portal-user-name">{{ nombre_cliente }}</h2>
             </div>
         </div>
 

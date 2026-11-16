@@ -29,6 +29,27 @@ def format_datetime_local(dt, created_at=None):
     return dt.strftime('%d/%m/%Y')
 
 
+def extract_nombre_apellido(nombre_completo):
+    """
+    Extrae únicamente el primer nombre y primer apellido para una visualización
+    limpia y minimalista en el portal (ej: 'Winie Garcia' en lugar de 4 nombres).
+    """
+    if not nombre_completo:
+        return "Cliente", "CL"
+    palabras = [p.capitalize() for p in nombre_completo.strip().split()]
+    if len(palabras) == 1:
+        return palabras[0], palabras[0][:2].upper()
+    elif len(palabras) == 2:
+        return f"{palabras[0]} {palabras[1]}", f"{palabras[0][0]}{palabras[1][0]}".upper()
+    elif len(palabras) == 3:
+        return f"{palabras[0]} {palabras[2]}", f"{palabras[0][0]}{palabras[2][0]}".upper()
+    else:
+        # 4 o más palabras: ej. WINIE LAURISSA GARCIA SANDOVAL -> Winie Garcia
+        nombre = f"{palabras[0]} {palabras[2]}"
+        iniciales = f"{palabras[0][0]}{palabras[2][0]}".upper()
+        return nombre, iniciales
+
+
 def solo_cliente():
     return current_user.is_authenticated and current_user.rol and current_user.rol.nombre.upper() == "CLIENTE"
 
@@ -175,9 +196,13 @@ def portal():
         "saldo_pendiente": saldo_pendiente_total,
     }
 
+    nombre_mostrar, iniciales_mostrar = extract_nombre_apellido(cliente.nombres if cliente else "")
+
     return render_template(
         "cliente_portal/portal.html",
         cliente=cliente,
+        nombre_cliente=nombre_mostrar,
+        iniciales_cliente=iniciales_mostrar,
         ventas_procesadas=ventas_procesadas,
         ventas=ventas,
         kpis=kpis,
