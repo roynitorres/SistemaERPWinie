@@ -162,9 +162,9 @@
                         <div class="articulos-cards-list">
                             {% for p in item.json_data.productos %}
                             <div class="articulo-single-item">
-                                <div class="d-flex align-items-center gap-2 overflow-hidden">
-                                    <span class="articulo-cant-badge">{{ p.cantidad }}x</span>
-                                    <span class="articulo-nombre text-truncate">{{ p.nombre }}</span>
+                                <div class="articulo-info-group">
+                                    <span class="articulo-cant-badge">{{ p.cantidad }}</span>
+                                    <span class="articulo-nombre" title="{{ p.nombre }}">{{ p.nombre }}</span>
                                 </div>
                                 <div class="articulo-precio">
                                     C$ {{ "%.2f"|format(p.subtotal or (p.cantidad * p.precio_unitario)) }}
