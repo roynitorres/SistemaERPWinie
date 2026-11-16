@@ -68,11 +68,21 @@
                     cumpleFiltro = !esPagada;
                 }
 
+                // Fila de acordeón asociada que está inmediatamente después
+                var nextRow = card.nextElementSibling;
+                var esAcordeon = nextRow && nextRow.classList.contains('fila-acordeon-pagos');
+
                 if (cumpleBusqueda && cumpleFiltro) {
                     card.style.display = '';
+                    if (esAcordeon && nextRow.classList.contains('show')) {
+                        nextRow.style.display = '';
+                    }
                     visibles++;
                 } else {
                     card.style.display = 'none';
+                    if (esAcordeon) {
+                        nextRow.style.display = 'none';
+                    }
                 }
             }, this);
 
