@@ -150,231 +150,168 @@
     <!-- ===================================== -->
     <div id="panel-portal-facturas" class="portal-panel-card">
         
-        <!-- BARRA DE HERRAMIENTAS Y PILLS DE FILTRADO -->
-        <div class="toolbar-apex mb-3">
-            <div class="toolbar-left-group">
-                <!-- BUSCADOR POR N° FACTURA O PRODUCTO -->
-                <div class="toolbar-search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="buscarFactura" class="toolbar-input" placeholder="Buscar por N° Factura o Producto...">
-                </div>
-
-                <!-- TABS PILLS DE FILTRO (SOLO CONTADO Y CRÉDITO) -->
-                <div class="state-pills-bar">
-                    <button type="button" class="state-pill state-pill--active active" data-filtro="CREDITO">Crédito</button>
-                    <button type="button" class="state-pill" data-filtro="CONTADO">Contado</button>
-                </div>
+        <!-- BARRA DE BÚSQUEDA Y FILTROS: SOLO CONTADO Y CRÉDITO -->
+        <div class="portal-toolbar-minimal mb-3">
+            <!-- Buscador en tiempo real -->
+            <div class="portal-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="buscarFactura" class="portal-search-input" placeholder="Buscar por N° Factura o Producto...">
             </div>
 
-            <!-- CONTADOR DE REGISTROS -->
-            <div class="toolbar-actions-right">
-                <span id="badgeTotalVentas" class="count-badge-apex" title="Total de compras">{{ kpis.total_facturas if kpis else 0 }}</span>
+            <!-- Filtros: Únicamente Crédito y Contado (Crédito activo por defecto) -->
+            <div class="portal-filter-tabs">
+                <button type="button" class="portal-filter-pill state-pill active" data-filtro="CREDITO">
+                    <i class="bi bi-credit-card-2-front"></i> Crédito
+                </button>
+                <button type="button" class="portal-filter-pill state-pill" data-filtro="CONTADO">
+                    <i class="bi bi-cash"></i> Contado
+                </button>
             </div>
         </div>
 
-        <!-- CONTENEDOR DE TABLA DE FACTURAS CONTRAÍDAS -->
-        <div class="portal-table-container">
-            <div style="padding: 14px 18px; border-bottom: 1px solid var(--color-border); background-color: var(--color-bg-card);" class="d-flex align-items-center justify-content-between">
+        <!-- ENCABEZADO DE SECCIÓN -->
+        <div class="portal-section-header mb-3">
+            <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <h5 style="margin: 0; color: var(--color-text-main); font-weight: 700; font-size: 1.05rem;">
-                        <i class="bi bi-receipt-cutoff text-success me-2"></i> Historial de Facturas
+                    <h5 class="portal-section-title">
+                        <i class="bi bi-receipt-cutoff text-success me-1"></i> Historial de Facturas
                     </h5>
-                    <small style="color: var(--color-text-muted);">Haz clic en cualquier factura para desplegar sus abonos. Pulsa el ojo 👁️ para ver los productos comprados.</small>
+                    <span class="portal-section-desc">Listado detallado de todas tus compras y pagos.</span>
                 </div>
+                <span id="badgeTotalVentas" class="portal-count-badge" title="Compras visibles">
+                    {{ kpis.total_facturas if kpis else 0 }}
+                </span>
             </div>
+        </div>
 
-            <div class="table-responsive">
-                <table class="portal-table-apex">
-                    <thead>
-                        <tr>
-                            <th>Factura #</th>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Estado</th>
-                            <th class="text-end">Total</th>
-                            <th class="text-end">Abonado</th>
-                            <th class="text-end">Saldo</th>
-                            <th class="text-center">Abonos</th>
-                            <th class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaHistorial">
-                        {% for item in ventas_procesadas %}
-                        {% set v = item.venta %}
-                        {% set tipo_val = v.tipo_venta.value if v.tipo_venta.value is defined else v.tipo_venta %}
-                        {% set prod_nombres = item.json_data.productos|map(attribute='nombre')|join(' ')|lower %}
+        <!-- FLUJO DE TARJETAS MINIMALISTAS (MÓVIL & DESKTOP) -->
+        <div id="listaFacturasPortal" class="portal-cards-stream">
+            {% for item in ventas_procesadas %}
+            {% set v = item.venta %}
+            {% set tipo_val = v.tipo_venta.value if v.tipo_venta.value is defined else v.tipo_venta %}
+            {% set prod_nombres = item.json_data.productos|map(attribute='nombre')|join(' ')|lower %}
 
-                        <!-- FILA PRINCIPAL CONTRAÍDA (CLIC DESPLIEGA EL HISTORIAL DE ABONOS) -->
-                        <tr class="fila-historial cursor-pointer" 
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#acordeonPagos{{ v.id }}" 
-                            aria-expanded="false" 
-                            aria-controls="acordeonPagos{{ v.id }}"
-                            data-factura="{{ v.numero_factura|lower }}"
-                            data-productos="{{ prod_nombres }}"
-                            data-tipo="{{ tipo_val }}"
-                            data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}"
-                            title="Haz clic para ver el historial de abonos de esta factura">
+            <div class="portal-factura-card"
+                 data-factura="{{ v.numero_factura|lower }}"
+                 data-productos="{{ prod_nombres }}"
+                 data-tipo="{{ tipo_val }}"
+                 data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}">
+                
+                <!-- Fila Principal Contraída (Clic despliega abonos) -->
+                <div class="factura-card-main cursor-pointer" onclick="var b=this.querySelector('.btn-trigger-abonos'); if(b) b.click();">
+                    <!-- Cabecera de la tarjeta: Factura #, Badge Estado, Fecha -->
+                    <div class="factura-card-top">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="factura-num-title">#{{ v.numero_factura }}</span>
+                            {% if item.es_pagada %}
+                            <span class="badge-status-pill badge-status-paid">PAGADA</span>
+                            {% else %}
+                            <span class="badge-status-pill badge-status-pending">PENDIENTE</span>
+                            {% endif %}
+                        </div>
+                        <div class="factura-card-date">
+                            <i class="bi bi-calendar-event me-1"></i> {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
+                        </div>
+                    </div>
 
-                            <!-- Columna 1: Factura # (En móvil incluye badges de estado) -->
-                            <td class="col-factura">
-                                <div class="cell-factura-header">
-                                    <span class="factura-num-text">#{{ v.numero_factura }}</span>
-                                    <div class="d-md-none d-flex gap-1.5 align-items-center">
-                                        <span class="badge-tipo-pill">{{ tipo_val }}</span>
-                                        {% if item.es_pagada %}
-                                        <span class="badge-status-pill badge-status-paid">PAGADA</span>
-                                        {% else %}
-                                        <span class="badge-status-pill badge-status-pending">PENDIENTE</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Columna 2: Fecha (Desktop) -->
-                            <td class="col-desktop-only text-muted">
-                                {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
-                            </td>
-
-                            <!-- Columna 3: Tipo Venta (Desktop) -->
-                            <td class="col-desktop-only">
-                                <span class="badge-tipo-pill">{{ tipo_val }}</span>
-                            </td>
-
-                            <!-- Columna 4: Estado Pago (Desktop) -->
-                            <td class="col-desktop-only">
-                                {% if item.es_pagada %}
-                                <span class="badge-status-pill badge-status-paid">PAGADA</span>
-                                {% else %}
-                                <span class="badge-status-pill badge-status-pending">PENDIENTE</span>
-                                {% endif %}
-                            </td>
-
-                            <!-- Columna 5: Total Factura (Desktop) -->
-                            <td class="col-desktop-only text-end fw-bold">
-                                C$ {{ "%.2f"|format(v.total_venta) }}
-                            </td>
-
-                            <!-- Columna 6: Total Abonado (Desktop) -->
-                            <td class="col-desktop-only text-end fw-bold text-success">
-                                C$ {{ "%.2f"|format(item.total_abonado) }}
-                            </td>
-
-                            <!-- Columna 7: Saldo Pendiente (Desktop) -->
-                            <td class="col-desktop-only text-end fw-bold {% if item.saldo_pendiente > 0.01 %}text-danger{% else %}text-muted{% endif %}">
+                    <!-- Banda de montos financieros (Total Factura y Saldo Pendiente) -->
+                    <div class="factura-montos-strip">
+                        <div>
+                            <span class="strip-label">Total Factura</span>
+                            <span class="strip-val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="strip-label">Saldo Pendiente</span>
+                            <span class="strip-val {% if item.saldo_pendiente > 0.01 %}strip-val-danger{% else %}strip-val-zero{% endif %}">
                                 C$ {{ "%.2f"|format(item.saldo_pendiente) }}
-                            </td>
+                            </span>
+                        </div>
+                    </div>
 
-                            <!-- Columna 8: Indicador de Abonos y Chevron (Desktop) -->
-                            <td class="col-desktop-only text-center">
-                                <span class="badge-abonos-pill" title="Clic para desplegar abonos">
-                                    <i class="bi bi-cash-stack"></i>
-                                    <span>{{ item.json_data.pagos|length }}</span>
-                                    <i class="bi bi-chevron-down chevron-icon ms-0.5"></i>
-                                </span>
-                            </td>
-
-                            <!-- Fila de metadatos para Móvil (Oculta en Desktop) -->
-                            <td class="d-md-none col-mobile-meta">
-                                <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.8rem; padding: 4px 0; border-top: 1px dashed #f1f5f9; border-bottom: 1px dashed #f1f5f9;">
-                                    <div>
-                                        <i class="bi bi-calendar3 me-1"></i> {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
-                                    </div>
-                                    <div>
-                                        Total: <b class="text-dark">C$ {{ "%.2f"|format(v.total_venta) }}</b>
-                                        {% if item.saldo_pendiente > 0.01 %}
-                                        • Saldo: <b class="text-danger">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</b>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Columna 9: Acciones (Ojo de ver detalle) -->
-                            <td class="col-acciones text-end" onclick="event.stopPropagation();">
-                                <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-2 w-100">
-                                    
-                                    <!-- Indicador táctil móvil de abonos -->
-                                    <div class="d-md-none text-success small fw-bold d-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#acordeonPagos{{ v.id }}">
-                                        <i class="bi bi-cash-stack"></i>
-                                        <span>{{ item.json_data.pagos|length }} {% if item.json_data.pagos|length == 1 %}abono{% else %}abonos{% endif %}</span>
-                                        <i class="bi bi-chevron-down chevron-icon ms-0.5"></i>
-                                    </div>
-
-                                    <div class="d-flex align-items-center gap-1.5">
-                                        <!-- BOTÓN OJO: VER DETALLE DE PRODUCTOS COMPRADOS -->
-                                        <button type="button" 
-                                                class="btn-action-icon btn-action-eye" 
-                                                onclick="event.stopPropagation(); verProductosFacturaPortal({{ v.id }});" 
-                                                title="Ver artículos y productos comprados (Perfumes, calzado, etc.)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- DATA JSON DE LA FACTURA EMBEBIDA PARA EL MODAL -->
-                                <script type="application/json" id="factura-detalle-json-{{ v.id }}">
-                                    {{ item.json_data | tojson | safe }}
-                                </script>
-                            </td>
-                        </tr>
-
-                        <!-- FILA ACORDEÓN TIPO COLLAPSE: ABONOS Y PAGOS RECEPCIONADOS (CONTRAÍDA POR DEFECTO) -->
-                        <tr class="fila-acordeon-pagos collapse" id="acordeonPagos{{ v.id }}" data-parent-factura="{{ v.numero_factura|lower }}">
-                            <td colspan="9" class="p-0 border-0">
-                                <div class="acordeon-pagos-wrapper">
-                                    <div class="acordeon-pagos-card">
-                                        
-                                        <!-- Lista de Pagos Recepcionados (Sin encabezados: solo día, método y cantidad) -->
-                                        {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
-                                        <div class="acordeon-pagos-list">
-                                            {% for pg in item.json_data.pagos %}
-                                            <div class="acordeon-pago-row">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span class="badge-pag-id">
-                                                        {{ pg.tipo }}
-                                                    </span>
-                                                    <span class="small text-muted">
-                                                        <i class="bi bi-calendar-event me-1"></i>{{ pg.fecha }}
-                                                    </span>
-                                                </div>
-                                                <div class="text-end">
-                                                    <span class="fw-bold text-success fs-6">+ C$ {{ "%.2f"|format(pg.monto) }}</span>
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-
-                                        <!-- Barra Resumen Financiero del Acordeón (Solo Total Suma de Abonos) -->
-                                        <div class="acordeon-pagos-bottom">
-                                            <div class="d-flex align-items-center justify-content-between w-100">
-                                                <span class="text-muted fw-bold text-uppercase" style="font-size: 0.74rem;">Total Abonos:</span>
-                                                <span class="text-success fw-bold fs-6">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
-                                            </div>
-                                        </div>
-
-                                        {% else %}
-                                        <!-- Estado Vacío sin Pagos -->
-                                        <div class="acordeon-empty-state">
-                                            <i class="bi bi-info-circle text-muted fs-4 mb-1 d-block"></i>
-                                            <span>Aún no se han recepcionado pagos o abonos para esta factura.</span>
-                                        </div>
-                                        {% endif %}
-
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-
+                    <!-- Barra de Acciones: Botón Abonos (despliega) + Botón Ojo (ver productos) -->
+                    <div class="factura-actions-bar">
+                        <!-- Botón de Abonos (Despliega sin encabezados) -->
+                        {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
+                        <button type="button" 
+                                class="btn-trigger-abonos" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#abonosFactura{{ v.id }}" 
+                                aria-expanded="false" 
+                                aria-controls="abonosFactura{{ v.id }}"
+                                onclick="event.stopPropagation();"
+                                title="Ver historial de abonos">
+                            <i class="bi bi-cash-stack"></i>
+                            <span>{{ item.json_data.pagos|length }} {% if item.json_data.pagos|length == 1 %}Abono{% else %}Abonos{% endif %}</span>
+                            <i class="bi bi-chevron-down chevron-abono-icon"></i>
+                        </button>
                         {% else %}
-                        <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-1 d-block mb-2"></i> No tienes facturas ni compras registradas aún.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        <span class="btn-no-abonos">
+                            <i class="bi bi-dash-circle"></i> 0 Abonos
+                        </span>
+                        {% endif %}
+
+                        <!-- Botón Ojo: Ver Artículos Comprados (Abre modal) -->
+                        <button type="button" 
+                                class="btn-trigger-articulos" 
+                                onclick="event.stopPropagation(); verProductosFacturaPortal({{ v.id }});" 
+                                title="Ver artículos y productos comprados (Perfumes, calzado, etc.)">
+                            <i class="bi bi-eye"></i>
+                            <span>Ver Artículos</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DE ABONOS DESPLEGABLE (SIN ENCABEZADOS: SOLO DÍA, MÉTODO Y CANTIDAD) -->
+                <div id="abonosFactura{{ v.id }}" class="collapse acordeon-abonos-collapse">
+                    <div class="acordeon-abonos-body">
+                        <div class="abonos-header-tag">
+                            Historial de Abonos
+                        </div>
+
+                        {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
+                        <div class="abonos-cards-list">
+                            {% for pg in item.json_data.pagos %}
+                            <div class="abono-single-item">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="abono-dot"></span>
+                                    <div>
+                                        <span class="abono-metodo">{{ pg.metodo or pg.tipo or 'Pago' }}</span>
+                                        <span class="abono-fecha">{{ pg.fecha }}</span>
+                                    </div>
+                                </div>
+                                <div class="abono-monto">
+                                    + C$ {{ "%.2f"|format(pg.monto) }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pie con Total Abonos -->
+                        <div class="abonos-footer-total">
+                            <span class="abonos-footer-label">Total Abonos:</span>
+                            <span class="abonos-footer-value">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3 text-muted small">
+                            Aún no se han recepcionado pagos o abonos para esta factura.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- DATA JSON DE LA FACTURA EMBEBIDA PARA EL MODAL -->
+                <script type="application/json" id="factura-detalle-json-{{ v.id }}">
+                    {{ item.json_data | tojson | safe }}
+                </script>
             </div>
+
+            {% else %}
+            <!-- Estado vacío si el cliente no tiene facturas registradas -->
+            <div class="portal-empty-state">
+                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                <span>No tienes facturas ni compras registradas aún.</span>
+            </div>
+            {% endfor %}
         </div>
 
         <!-- ALERTA CUANDO LA BÚSQUEDA NO ARROJA RESULTADOS -->

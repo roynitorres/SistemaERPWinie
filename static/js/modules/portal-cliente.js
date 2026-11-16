@@ -71,7 +71,7 @@
                     cumpleFiltro = !esPagada;
                 }
 
-                // Fila de acordeón asociada que está inmediatamente después
+                // Fila de acordeón asociada que está inmediatamente después (en modo tabla)
                 var nextRow = card.nextElementSibling;
                 var esAcordeon = nextRow && nextRow.classList.contains('fila-acordeon-pagos');
 

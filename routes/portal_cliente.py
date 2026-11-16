@@ -14,15 +14,19 @@ portal_cliente_bp = Blueprint("portal_cliente", __name__)
 def format_datetime_local(dt, created_at=None):
     if not dt:
         return ''
-    # Si la fecha/hora viene en 00:00 (por ejemplo ingresada como date YYYY-MM-DD sin hora)
-    if dt.hour == 0 and dt.minute == 0:
-        if created_at:
-            # created_at se guarda en UTC; zona local es UTC-6
-            local_time = (created_at - timedelta(hours=6)).time()
-            dt = datetime.combine(dt.date(), local_time)
-            return dt.strftime('%d/%m/%Y %I:%M %p')
-        return dt.strftime('%d/%m/%Y')
-    return dt.strftime('%d/%m/%Y %I:%M %p')
+    # Si viene con hora real (diferente de medianoche 00:00:00)
+    if dt.hour != 0 or dt.minute != 0:
+        return dt.strftime('%d/%m/%Y %I:%M %p')
+
+    # Si viene a las 00:00 y tenemos created_at con hora real
+    if created_at and (created_at.hour != 0 or created_at.minute != 0):
+        # created_at se guarda en UTC; zona local es UTC-6
+        local_time = (created_at - timedelta(hours=6)).time()
+        combined = datetime.combine(dt.date(), local_time)
+        return combined.strftime('%d/%m/%Y %I:%M %p')
+
+    # Si no hay hora o es medianoche, mostrar únicamente la fecha
+    return dt.strftime('%d/%m/%Y')
 
 
 def solo_cliente():
@@ -143,6 +147,7 @@ def portal():
                     "fecha": format_datetime_local(p.fecha_pago, p.created_at),
                     "monto": float(p.monto_pago),
                     "tipo": p.tipo_pago,
+                    "metodo": p.tipo_pago,
                     "banco": p.banco.nombre if p.banco else '',
                     "referencia": p.referencia or '',
                     "estado": p.estado
