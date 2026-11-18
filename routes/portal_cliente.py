@@ -103,7 +103,7 @@ def portal():
         joinedload(Venta.pagos).joinedload(Pago.banco),
         joinedload(Venta.cuotas),
         joinedload(Venta.detalle_ventas).joinedload(DetalleVenta.producto)
-    ).order_by(Venta.fecha_venta.asc(), Venta.id.asc()).all()
+    ).order_by(Venta.fecha_venta.desc(), Venta.id.desc()).all()
 
     total_facturado = 0.0
     total_recaudado = 0.0
