@@ -1,12 +1,13 @@
 /* ==========================================================================
-   ESTILOS APEX DARK PORTAL CLIENTE — SISTEMA ERP WINIE
+   ESTILOS PORTAL DEL CLIENTE — SISTEMA ERP WINIE
+   Limpio, Responsivo (Mobile-First y Escritorio en Filas)
    ========================================================================== */
 
 /* ─── SOBRESCRITURA DE SCROLLBAR Y LAYOUT GLOBAL ────── */
 .page-portal {
-    --color-primary-main: var(--color-primary);
+    --color-primary-main: var(--color-primary, #0047AB);
     min-height: 100vh !important;
-    background-color: var(--color-bg-card) !important;
+    background-color: #ffffff !important;
     color: var(--color-text-main) !important;
     font-family: var(--font-family-base);
 }
@@ -17,7 +18,7 @@
     padding: 18px 12px;
 }
 
-/* ─── ALERTAS APEX LIMPIAS ────── */
+/* ─── ALERTAS DEL PORTAL ────── */
 .alert-apex {
     display: flex;
     align-items: center;
@@ -53,7 +54,7 @@
     color: var(--color-secondary);
 }
 
-/* ─── CABECERA MINIMALISTA TIPO MOCKUP APROBADO ────── */
+/* ─── CABECERA DEL PORTAL (MÓVIL Y ESCRITORIO) ────── */
 .portal-header-minimal {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -84,7 +85,6 @@
     font-weight: 800;
     font-size: 0.82rem;
     letter-spacing: 0.02em;
-    
     flex-shrink: 0;
 }
 
@@ -176,305 +176,13 @@
     gap: 12px;
 }
 
-.btn-logout-portal:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(255, 82, 82, 0.2);
-}
-
-/* ─── TARJETAS MÉTRICAS (KPIs) ────── */
-.portal-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.portal-kpi-card {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.portal-kpi-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.16);
-}
-
-.portal-kpi-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    flex-shrink: 0;
-}
-
-.portal-kpi-val {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: var(--color-text-main);
-    line-height: 1.2;
-}
-
-.portal-kpi-lbl {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* ─── PESTAÑAS (TABS) APEX ────── */
-.portal-tabs-bar {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    padding: 6px;
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-}
-
-.portal-tab-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--color-text-muted);
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.portal-tab-btn:hover {
-    color: var(--color-text-main);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.portal-tab-btn.active {
-    background: linear-gradient(135deg, rgba(0, 230, 118, 0.15) 0%, rgba(0, 176, 255, 0.15) 100%);
-    border: 1px solid rgba(0, 230, 118, 0.3);
-    color: var(--color-primary);
-}
-
-/* ─── TOOLBAR, BUSCADOR Y PILLS (CORRECCIÓN FONDO BLANCO) ────── */
-.toolbar-apex {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 16px !important;
-    margin-bottom: 20px !important;
-    flex-wrap: wrap !important;
-}
-
-.toolbar-left-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    flex-wrap: wrap !important;
-}
-
-.toolbar-search-box {
-    position: relative !important;
-    width: 280px !important;
-}
-
-.toolbar-search-box i {
-    position: absolute !important;
-    left: 14px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    color: var(--color-text-muted) !important;
-    font-size: 0.95rem !important;
-    z-index: 5 !important;
-}
-
-.toolbar-input {
-    width: 100% !important;
-    background-color: var(--color-bg-card) !important;
-    border: 1px solid var(--color-primary) !important;
-    color: var(--color-text-main) !important;
-    padding: 9px 14px 9px 38px !important;
-    border-radius: 10px !important;
-    font-size: 0.88rem !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-.toolbar-input::placeholder {
-    color: var(--color-text-muted) !important;
-}
-
-.toolbar-input:focus {
-    border-color: var(--color-primary) !important;
-    box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15) !important;
-}
-
-.state-pills-bar {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-}
-
-.state-pill {
-    background-color: var(--color-bg-card) !important;
-    color: var(--color-text-muted) !important;
-    border: 1px solid var(--color-border) !important;
-    padding: 7px 16px !important;
-    border-radius: 20px !important;
-    font-size: 0.84rem !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-}
-
-.state-pill:hover {
-    color: var(--color-text-main) !important;
-    background-color: var(--color-bg-card-hover) !important;
-}
-
-.state-pill.state-pill--active, .state-pill.active {
-    background-color: transparent !important;
-    color: var(--color-primary) !important;
-    border: 1px solid var(--color-primary) !important;
-    box-shadow: none !important;
-}
-
-.count-badge-apex {
-    background-color: var(--color-bg-card) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: var(--color-primary) !important;
-    font-weight: 800 !important;
-    font-size: 0.92rem !important;
-    padding: 6px 14px !important;
-    border-radius: 10px !important;
-}
-
-/* ─── DROPDOWN DE TRES PUNTOS Y MENÚ DE ACCIONES APEX DARK ────── */
-.btn-three-dots {
-    background-color: var(--color-bg-card) !important;
-    color: var(--color-text-muted) !important;
-    border: 1px solid var(--color-border) !important;
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.15s ease !important;
-}
-
-.btn-three-dots:hover, .btn-three-dots:focus {
-    background-color: var(--color-bg-card-hover) !important;
-    color: var(--color-primary) !important;
-    border-color: rgba(0, 230, 118, 0.4) !important;
-}
-
-.dropdown-menu-dark-apex, .dropdown-menu {
-    background-color: var(--color-bg-card) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-    padding: 6px !important;
-}
-
-.dropdown-menu-dark-apex .dropdown-item, .dropdown-menu .dropdown-item {
-    color: var(--color-text-main) !important;
-    font-size: 0.85rem !important;
-    padding: 8px 14px !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background-color: transparent !important;
-    transition: background-color 0.15s ease, color 0.15s ease !important;
-}
-
-.dropdown-menu-dark-apex .dropdown-item:hover, 
-.dropdown-menu .dropdown-item:hover,
-.dropdown-menu-dark-apex .dropdown-item:focus, 
-.dropdown-menu .dropdown-item:focus {
-    background-color: var(--color-border) !important;
-    color: var(--color-primary) !important;
-}
-
-.dropdown-header-apex {
-    padding: 8px 14px !important;
-    font-size: 0.72rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    color: var(--color-primary) !important;
-    border-bottom: 1px solid var(--color-border) !important;
-    margin-bottom: 4px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-}
-
-/* ─── PANELES Y CONTENEDOR DE TABLAS APEX ────── */
+/* ─── PANELES Y FORMULARIOS (CAMBIAR CONTRASEÑA) ────── */
 .portal-panel-card {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 28px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-}
-
-.portal-table-container {
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--color-bg-header);
-}
-
-.portal-table-apex {
-    width: 100%;
-    color: var(--color-text-main);
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.portal-table-apex th {
-    background: transparent;
-    color: var(--color-text-main);
-    font-size: 0.76rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.portal-table-apex td {
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    vertical-align: middle;
-    font-size: 0.9rem;
-    background: var(--color-bg-card);
-}
-
-.portal-table-apex tbody tr:hover td {
-    background: rgba(255, 255, 255, 0.025);
-}
-
-/* ─── FORMULARIO Y OJOS DENTRO DEL INPUT ────── */
-.position-relative {
-    position: relative !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .portal-input-dark {
@@ -501,7 +209,6 @@
     box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.2) !important;
 }
 
-/* Botón Ojo Mostrar/Ocultar Alineado DENTRO del Input */
 .login-eye-btn {
     position: absolute;
     right: 12px;
@@ -524,193 +231,6 @@
     color: var(--color-text-main);
 }
 
-/* ─── BOTÓN NEÓN ÁMBAR APEX ────── */
-.btn-neon-amber {
-    background-color: var(--color-primary) !important;
-    border: none !important;
-    border-radius: 10px !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: 0.92rem !important;
-    padding: 10px 22px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 18px var(--color-primary-glow) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.btn-neon-amber:hover {
-    background-color: var(--color-primary-dark) !important;
-    color: #ffffff !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 24px var(--color-primary-glow) !important;
-}
-
-.btn-neon-amber:active {
-    transform: translateY(0) !important;
-    box-shadow: 0 2px 10px var(--color-primary-glow) !important;
-}
-
-/* ─── BOTÓN CONFIRMAR CERRAR SESIÓN (NEÓN ROJO) ────── */
-.btn-logout-confirm {
-    background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
-    border: none;
-    border-radius: 12px;
-    color: var(--color-text-main) !important;
-    font-weight: 800;
-    font-size: 0.9rem;
-    padding: 10px 18px;
-    box-shadow: 0 8px 20px rgba(255, 82, 82, 0.35);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-
-.btn-logout-confirm:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(255, 82, 82, 0.5);
-    color: var(--color-text-main) !important;
-    filter: brightness(1.1);
-}
-
-.btn-logout-confirm:active {
-    transform: translateY(1px);
-    box-shadow: 0 4px 12px rgba(255, 82, 82, 0.25);
-}
-
-@media (max-width: 768px) {
-    .portal-hero-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .portal-tabs-bar {
-        flex-direction: column;
-    }
-}
-
-/* ─── BOTÓN ICONO SUTIL DE ACCIÓN RÁPIDA ────── */
-.btn-icon-subtle {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-primary);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.95rem;
-    transition: all 0.15s ease;
-    vertical-align: middle;
-}
-
-.btn-icon-subtle:hover {
-    background: rgba(0, 71, 171, 0.08);
-    border-color: var(--color-primary);
-    color: var(--color-primary-dark);
-}
-
-/* ==========================================================================
-   ACORDEÓN DE PAGOS Y BOTONES INTERACTIVOS (DESKTOP Y MÓVIL)
-   ========================================================================== */
-
-.portal-actions-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: nowrap;
-}
-
-.btn-portal-item {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-card);
-    color: var(--color-text-main);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.18s ease;
-    white-space: nowrap;
-}
-
-.btn-portal-item:hover {
-    transform: translateY(-1px);
-    color: var(--color-text-main);
-}
-
-.btn-ver-productos {
-    border-color: rgba(0, 71, 171, 0.3);
-    color: var(--color-primary);
-    background: rgba(0, 71, 171, 0.06);
-}
-
-.btn-ver-productos:hover {
-    background: rgba(0, 71, 171, 0.15);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
-.btn-ver-pagos {
-    border-color: rgba(16, 185, 129, 0.3);
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.06);
-}
-
-.btn-ver-pagos:hover,
-.btn-ver-pagos[aria-expanded="true"] {
-    background: rgba(16, 185, 129, 0.16);
-    border-color: #10b981;
-    color: #059669;
-}
-
-.btn-ver-pagos .chevron-arrow {
-    display: inline-block;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    font-size: 0.78rem;
-}
-
-.btn-ver-pagos[aria-expanded="true"] .chevron-arrow {
-    transform: rotate(180deg);
-}
-
-.btn-imprimir {
-    color: var(--color-text-muted);
-    border-color: var(--color-border);
-    padding: 6px 10px;
-}
-
-.btn-imprimir:hover {
-    color: var(--color-text-main);
-    background: var(--color-bg-input);
-    border-color: var(--color-text-muted);
-}
-
-.badge-count-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    background: rgba(0, 0, 0, 0.08);
-    color: inherit;
-}
-
-/* ==========================================================================
-   PORTAL DEL CLIENTE — DISEÑO MÓVIL-FIRST MINIMALISTA (CARDS STREAM)
-   Contraído por defecto; clic despliega abonos limpios; ojo abre modal productos
-   ========================================================================== */
-
 /* ─── BARRA DE HERRAMIENTAS Y FILTROS MINIMALISTA ────── */
 .portal-toolbar-minimal {
     display: flex;
@@ -729,7 +249,7 @@
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color:var(--color-text-muted);
+    color: var(--color-text-muted);
     font-size: 0.95rem;
     pointer-events: none;
 }
@@ -749,96 +269,62 @@
 
 .portal-search-input:focus {
     background: #ffffff;
-    border-color:var(--color-primary);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(16, 75, 185, 0.15);
 }
 
 .portal-filter-tabs {
     display: flex;
+    align-items: center;
     gap: 8px;
     width: 100%;
 }
 
 .portal-filter-pill {
     flex: 1;
-    padding: 9px 16px;
-    border-radius: 12px;
-    font-size: 0.84rem;
-    font-weight: 700;
-    text-align: center;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    border: 1px solid #e2e8f0;
-    background: #f1f5f9;
-    color: #64748b;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.84rem;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .portal-filter-pill:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+    color: var(--color-text-main);
+    border-color: #cbd5e1;
 }
 
 .portal-filter-pill.active,
 .portal-filter-pill.state-pill--active {
-    background:var(--color-primary) !important;
+    background: var(--color-primary) !important;
     color: #ffffff !important;
     border-color: var(--color-primary) !important;
-    
 }
 
-/* ─── ENCABEZADO DE SECCIÓN Y CONTADOR ────── */
-.portal-section-header {
-    padding-bottom: 12px;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.portal-section-title {
-    margin: 0;
-    font-weight: 800;
-    font-size: 1.05rem;
-    color: #0f172a;
-    display: flex;
-    align-items: center;
-}
-
-.portal-section-desc {
-    font-size: 0.78rem;
-    color: #94a3b8;
-    display: block;
-    margin-top: 2px;
-}
-
-.portal-count-badge {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    color: #059669;
-    font-weight: 800;
-    font-size: 0.82rem;
-    padding: 4px 12px;
-    border-radius: 20px;
-}
-
-/* ─── FLUJO DE TARJETAS MINIMALISTAS (CARDS STREAM) ────── */
+/* ─── FLUJO DE TARJETAS DE FACTURAS (CARDS STREAM) ────── */
 .portal-cards-stream {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    width: 100%;
 }
 
 .portal-factura-card {
-    background: #ffffff;
+    background: var(--color-bg-card);
     border: 1px solid #e2e8f0;
     border-radius: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     overflow: hidden;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
-    width: 100%;
-    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .portal-factura-card:hover {
@@ -897,7 +383,7 @@
 .badge-status-pending,
 .badge-pending {
     background-color: var(--sidebar-text-muted);
-    color:#FFFFFF;
+    color: #FFFFFF;
     border: 1px solid #bbb0a3cc;
     border-radius: 9999px !important;
 }
@@ -962,10 +448,9 @@
     transition: all 0.2s ease;
 }
 
-
 .chevron-abono-icon {
     display: inline-block;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s ease;
     font-size: 0.75rem;
 }
 
@@ -998,8 +483,6 @@
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
-
 
 .chevron-articulo-icon {
     display: inline-block;
@@ -1043,7 +526,7 @@
     opacity: 0.85;
 }
 
-/* ─── SECCIÓN DE ARTÍCULOS DESPLEGABLE (SIN MODAL — CANTIDAD, NOMBRE Y PRECIO) ────── */
+/* ─── SECCIÓN DE ARTÍCULOS DESPLEGABLE (SIN MODAL — SIMPLE) ────── */
 .acordeon-articulos-collapse {
     border-top: 1px solid #f1f5f9;
     background: #f8fafc;
@@ -1114,7 +597,7 @@
 .articulo-nombre {
     font-size: 0.84rem;
     font-weight: 600;
-    color: var(--color-text-main);
+    color: var(--color-primary-main);
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
@@ -1126,7 +609,7 @@
 .articulo-precio {
     font-size: 0.88rem;
     font-weight: 600;
-    color: var(--color-text-main);
+    color: var(--color-primary-main);
     flex-shrink: 0;
     text-align: right;
     white-space: nowrap;
@@ -1142,17 +625,17 @@
 }
 
 .articulos-footer-label {
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--color-text-main);
+    color: var(--color-primary-main);
 }
 
 .articulos-footer-value {
     font-size: 0.98rem;
     font-weight: 900;
-    color: var(--color-text-main);
+    color: var(--color-primary-main);
 }
 
 /* ─── SECCIÓN DE ABONOS DESPLEGABLE (SIN ENCABEZADOS) ────── */
@@ -1170,7 +653,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #94a3b8;
+    color: var(--color-text-muted);
     margin-bottom: 10px;
 }
 
@@ -1181,13 +664,14 @@
 }
 
 .abono-single-item {
-    background: #ffffff;
+    background: var(--color-bg-card);
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 10px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     transition: background 0.15s ease;
 }
@@ -1196,24 +680,17 @@
     background: #fcfdfe;
 }
 
-.abono-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #10b981;
-    flex-shrink: 0;
-}
-
 .abono-metodo {
     font-size: 0.84rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--color-text-main);
     display: block;
 }
 
 .abono-fecha {
-    font-size: 0.75rem;
-    color: #94a3b8;
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
 }
 
 .abono-monto {
@@ -1232,7 +709,7 @@
 }
 
 .abonos-footer-label {
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1243,6 +720,17 @@
     font-size: 0.98rem;
     font-weight: 900;
     color: var(--color-text-main);
+}
+
+/* Estado Vacío General */
+.portal-empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--color-text-muted);
+    background: var(--color-bg-card);
+    border: 1px dashed var(--color-border);
+    border-radius: 16px;
+    font-size: 0.92rem;
 }
 
 /* ─── ADAPTACIÓN EN ESCRITORIO (>= 768px y >= 1024px) ────── */
@@ -1370,146 +858,6 @@
     }
 }
 
-/* ─── FILA Y COMPONENTES DEL ACORDEÓN DE ABONOS ────── */
-.fila-acordeon-pagos td {
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-}
-
-.acordeon-pagos-wrapper {
-    padding: 8px 18px 18px 18px;
-    background: #f8fafc;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.acordeon-pagos-card {
-    background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-left: 4px solid #10b981;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.acordeon-pagos-top {
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--color-border);
-    background: rgba(16, 185, 129, 0.04);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.badge-icon-pagos {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: rgba(16, 185, 129, 0.12);
-    color: #10b981;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
-    flex-shrink: 0;
-}
-
-.acordeon-pagos-list {
-    background: #ffffff;
-}
-
-.acordeon-pago-row {
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    border-bottom: 1px solid #f1f5f9;
-    transition: background 0.15s ease;
-}
-
-.acordeon-pago-row:last-child {
-    border-bottom: none;
-}
-
-.acordeon-pago-row:hover {
-    background: #f8fafc;
-}
-
-.acordeon-pago-left {
-    flex: 1;
-}
-
-.acordeon-pago-right {
-    flex-shrink: 0;
-}
-
-.badge-pag-id {
-    font-size: 0.68rem;
-    font-weight: 800;
-    color: #059669;
-    background: #ecfdf5;
-    padding: 1px 6px;
-    border-radius: 4px;
-    border: 1px solid #a7f3d0;
-}
-
-.acordeon-pagos-bottom {
-    padding: 12px 18px;
-    background: #f8fafc;
-    border-top: 1px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.acordeon-empty-state {
-    padding: 28px 18px;
-    text-align: center;
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
-}
-
-/* Estado Vacío General */
-.portal-empty-state {
-    padding: 48px 24px;
-    text-align: center;
-    color: var(--color-text-muted);
-    background: var(--color-bg-card);
-    border: 1px dashed var(--color-border);
-    border-radius: 16px;
-    font-size: 0.92rem;
-}
-
-/* ─── MODAL DE PRODUCTOS FACTURADOS AUTO-ADAPTABLE ────── */
-.modal-products-responsive {
-    max-width: 680px;
-    margin: 1.75rem auto;
-}
-
-.modal-products-responsive .modal-content {
-    height: auto !important;
-    max-height: 85vh !important;
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-products-responsive .modal-body {
-    flex: 0 1 auto !important;
-    max-height: 60vh !important;
-    overflow-y: auto !important;
-    padding: 18px 22px;
-}
-
-.modal-products-responsive .table-responsive {
-    margin-bottom: 0 !important;
-    max-height: 52vh !important;
-    overflow-y: auto !important;
-}
-
 /* ==========================================================================
    OPTIMIZACIONES MÓVILES EXCLUSIVAS (TELÉFONOS Y PANTALLAS PEQUEÑAS)
    ========================================================================== */
@@ -1521,98 +869,6 @@
     .portal-panel-card {
         padding: 16px 12px;
         border-radius: 14px;
-    }
-
-    .portal-cover-banner {
-        height: 100px;
-    }
-
-    .portal-hero-body {
-        padding: 0 16px 16px 16px;
-    }
-
-    .portal-avatar-wrapper {
-        margin-top: -45px;
-        margin-bottom: 10px;
-    }
-
-    .portal-avatar-img {
-        width: 80px;
-        height: 80px;
-        font-size: 1.8rem;
-        border-width: 3px;
-    }
-
-    .portal-hero-name {
-        font-size: 1.25rem;
-        line-height: 1.3;
-    }
-
-    .btn-logout-portal {
-        width: 100%;
-        justify-content: center;
-        margin-top: 6px;
-    }
-
-    /* Pestañas de Navegación */
-    .portal-tabs-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
-        padding: 4px;
-    }
-
-    .portal-tab-btn {
-        font-size: 0.8rem;
-        padding: 10px 6px;
-        text-align: center;
-        justify-content: center;
-        white-space: normal;
-        line-height: 1.2;
-    }
-
-    /* Barra de Búsqueda y Pills con Scroll Horizontal Táctil */
-    .toolbar-apex {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-        margin-bottom: 14px !important;
-    }
-
-    .toolbar-left-group {
-        flex-direction: column !important;
-        width: 100% !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-    }
-
-    .toolbar-search-box {
-        width: 100% !important;
-    }
-
-    .state-pills-bar {
-        width: 100% !important;
-        overflow-x: auto !important;
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        gap: 8px !important;
-        padding-bottom: 6px !important;
-        -webkit-overflow-scrolling: touch !important;
-        scrollbar-width: none;
-    }
-
-    .state-pills-bar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .state-pill {
-        flex-shrink: 0 !important;
-        padding: 6px 14px !important;
-        font-size: 0.8rem !important;
-    }
-
-    .toolbar-actions-right {
-        display: none !important;
     }
 
     /* ─── OPTIMIZACIONES MÓVILES PARA TARJETAS STREAM ────── */
@@ -1719,23 +975,5 @@
 
     .articulos-footer-value {
         font-size: 0.9rem !important;
-    }
-
-    /* Modal Responsive en móvil auto-adaptable */
-    .modal-products-responsive {
-        margin: 12px auto !important;
-        max-width: calc(100% - 24px) !important;
-    }
-
-    .modal-products-responsive .modal-content {
-        max-height: 90vh !important;
-        height: auto !important;
-        border-radius: 16px !important;
-    }
-
-    .modal-products-responsive .modal-body {
-        padding: 14px 14px !important;
-        max-height: 65vh !important;
-        flex: 0 1 auto !important;
     }
 }
