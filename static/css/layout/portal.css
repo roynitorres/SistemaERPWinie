@@ -4,9 +4,9 @@
 
 /* ─── SOBRESCRITURA DE SCROLLBAR Y LAYOUT GLOBAL ────── */
 .page-portal {
-    --color-primary-main: var(--color-primary, #0047AB);
+    --color-primary-main: var(--color-primary);
     min-height: 100vh !important;
-    background-color: #ffffff !important;
+    background-color: var(--color-bg-card) !important;
     color: var(--color-text-main) !important;
     font-family: var(--font-family-base);
 }
@@ -1019,6 +1019,28 @@
     align-items: center;
     gap: 5px;
     padding: 6px 10px;
+}
+
+/* Botón Imprimir Factura (Solo visible en pantalla de escritorio) */
+.btn-trigger-imprimir {
+    background-color: var(--color-bg-card);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+
+.btn-trigger-imprimir:hover {
+    color: var(--color-primary);
+    text-decoration: none !important;
+    opacity: 0.85;
 }
 
 /* ─── SECCIÓN DE ARTÍCULOS DESPLEGABLE (SIN MODAL — CANTIDAD, NOMBRE Y PRECIO) ────── */

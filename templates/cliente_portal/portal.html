@@ -175,6 +175,16 @@
                             <i class="bi bi-box"></i> 0 Artículos
                         </span>
                         {% endif %}
+
+                        <!-- Botón Imprimir Factura (Solo visible en pantalla de escritorio) -->
+                        <a href="{{ url_for('pagos.factura', venta_id=v.id) }}" 
+                           target="_blank" 
+                           class="btn-trigger-imprimir d-none d-md-inline-flex" 
+                           onclick="event.stopPropagation();" 
+                           title="Imprimir Factura">
+                            <i class="bi bi-printer"></i>
+                            <span>Imprimir</span>
+                        </a>
                     </div>
                 </div>
 
