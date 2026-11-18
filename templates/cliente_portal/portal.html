@@ -7,8 +7,9 @@
 <div class="cliente-portal">
 
     <!-- ============================================================== -->
-    <!-- CABECERA MINIMALISTA DEL PORTAL DEL CLIENTE                     -->
-    <!-- Solo Avatar con iniciales, Nombre y Apellido, y Botón Salir    -->
+    <!-- CABECERA DEL PORTAL DEL CLIENTE                                 -->
+    <!-- Móvil: Avatar, Nombre y Apellido, y Salir                       -->
+    <!-- Escritorio: Nombre Completo, Teléfono, Correo, Ciudad y Salir  -->
     <!-- ============================================================== -->
     <header class="portal-header-minimal">
         <div class="portal-user-profile">
@@ -16,7 +17,33 @@
                 {{ iniciales_cliente }}
             </div>
             <div class="portal-user-info">
-                <h2 class="portal-user-name">{{ nombre_cliente }}</h2>
+                <!-- Móvil (< 768px): Nombre y Apellido corto -->
+                <h2 class="portal-user-name d-md-none">{{ nombre_cliente }}</h2>
+
+                <!-- Escritorio (>= 768px): Nombre Completo y Datos de Contacto -->
+                <div class="d-none d-md-block">
+                    <h2 class="portal-user-name portal-user-name-desktop">{{ (cliente.nombres|title) if (cliente and cliente.nombres) else nombre_cliente }}</h2>
+                    <div class="portal-user-contact-row">
+                        {% if cliente and cliente.telefono %}
+                        <span class="portal-contact-item">
+                            <i class="bi bi-telephone-fill"></i>
+                            <span>{{ (cliente.telefono[:4] ~ '-' ~ cliente.telefono[4:]) if (cliente.telefono|length == 8 and '-' not in cliente.telefono) else cliente.telefono }}</span>
+                        </span>
+                        {% endif %}
+
+                        <span class="portal-contact-item">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span>{{ (cliente.usuario.email if (cliente and cliente.usuario and cliente.usuario.email) else (current_user.email if current_user.email else 'Sin correo registrado')) }}</span>
+                        </span>
+
+                        {% if cliente and cliente.ciudad %}
+                        <span class="portal-contact-item">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>{{ cliente.ciudad|title }}</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -99,7 +126,7 @@
                             <span class="strip-label">Total Factura</span>
                             <span class="strip-val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end text-md-start">
                             <span class="strip-label">Saldo Pendiente</span>
                             <span class="strip-val {% if item.saldo_pendiente > 0.01 %}strip-val-danger{% else %}strip-val-zero{% endif %}">
                                 C$ {{ "%.2f"|format(item.saldo_pendiente) }}
@@ -125,7 +152,7 @@
                         </button>
                         {% else %}
                         <span class="btn-no-abonos">
-                            <i class="bi bi-dash-circle"></i> 0 Abonos
+                            <i class="bi bi-dash-circle"></i> 0 Abono
                         </span>
                         {% endif %}
 
@@ -198,7 +225,7 @@
                             {% for pg in item.json_data.pagos %}
                             <div class="abono-single-item">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="abono-dot"></span>
+                                    
                                     <div>
                                         <span class="abono-metodo">{{ pg.metodo or pg.tipo or 'Pago' }}</span>
                                         <span class="abono-fecha">{{ pg.fecha }}</span>
