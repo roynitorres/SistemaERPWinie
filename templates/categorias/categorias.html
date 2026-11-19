@@ -153,19 +153,9 @@
                             {{ categoria.created_at.strftime('%d/%m/%Y') if categoria.created_at else '-' }}
                         </td>
                         <td class="data-table__cell text-end">
-                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
-                            <div class="dropdown d-inline-block">
-                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-editar-fila">
-                                            <i class="bi bi-pencil me-2 text-primary"></i> Editar Categoría
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
+                            <button type="button" class="btn-action-edit btn-editar-fila" title="Editar Categoría">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
