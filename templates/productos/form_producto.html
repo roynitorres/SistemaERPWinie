@@ -63,13 +63,13 @@
                     </div>
                     <div>
                         <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">1. Información Principal</h5>
-                        <small class="text-muted">Código, clasificación y proveedores del producto</small>
+                        <small class="text-muted">Código, clasificación, proveedores y estado del producto</small>
                     </div>
                 </div>
 
                 <div class="row g-3">
                     <!-- CÓDIGO -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">CÓDIGO / SKU</label>
                             <div class="position-relative">
@@ -81,12 +81,12 @@
                                        value="{{ producto.codigo_producto if producto else '' }}"
                                        oninput="this.value = this.value.toUpperCase()">
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Código único de inventario o barras.</small>
+                            <small class="text-muted" style="font-size: 0.72rem;">Código único de inventario.</small>
                         </div>
                     </div>
 
                     <!-- NOMBRE -->
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">NOMBRE DEL PRODUCTO</label>
                             <input type="text" 
@@ -96,11 +96,39 @@
                                    placeholder="Nombre descriptivo del producto" 
                                    value="{{ producto.nombre if producto else '' }}"
                                    oninput="this.value = this.value.toUpperCase()">
+                            <small class="text-muted" style="font-size: 0.72rem;">Descripción completa comercial.</small>
+                        </div>
+                    </div>
+
+                    <!-- ESTADO -->
+                    <div class="col-md-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label">ESTADO</label>
+                            <select class="form-input select-estado-apex" name="estado" id="form_estado" data-estado="{{ producto.estado.value if producto else 'ACTIVO' }}">
+                                <option value="ACTIVO" {% if not producto or producto.estado.value == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                                <option value="INACTIVO" {% if producto and producto.estado.value == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                            </select>
+                            <small class="text-muted" style="font-size: 0.72rem;">Disponibilidad en catálogo.</small>
+                        </div>
+                    </div>
+
+                    <!-- CATEGORÍA -->
+                    <div class="col-md-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">CATEGORÍA</label>
+                            <select class="form-input" id="form_categoria" name="categoria_id">
+                                <option value="">Seleccione categoría...</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if producto and producto.categoria_id == categoria.id %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
                     <!-- MARCA -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">MARCA</label>
                             <input type="text" 
@@ -113,27 +141,12 @@
                         </div>
                     </div>
 
-                    <!-- CATEGORÍA -->
-                    <div class="col-md-4">
-                        <div class="form-group mb-0">
-                            <label class="form-label form-label--required">CATEGORÍA</label>
-                            <select class="form-input" id="form_categoria" name="categoria_id">
-                                <option value="">Seleccione una categoría...</option>
-                                {% for categoria in categorias %}
-                                <option value="{{ categoria.id }}" {% if producto and producto.categoria_id == categoria.id %}selected{% endif %}>
-                                    {{ categoria.nombre }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
                     <!-- PROVEEDOR -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">PROVEEDOR</label>
                             <select class="form-input" id="form_proveedor" name="proveedor_id">
-                                <option value="">Seleccione un proveedor...</option>
+                                <option value="">Seleccione proveedor...</option>
                                 {% for proveedor in proveedores %}
                                 <option value="{{ proveedor.id }}" {% if producto and producto.proveedor_id == proveedor.id %}selected{% endif %}>
                                     {{ proveedor.nombre_proveedor }}
@@ -142,29 +155,9 @@
                             </select>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- SEPARADOR DE SECCIÓN -->
-            <hr class="my-4" style="border-color: var(--color-border); opacity: 0.6;">
-
-            <!-- ========================================== -->
-            <!-- SECCIÓN 2: INVENTARIO Y ALERTA DE STOCK   -->
-            <!-- ========================================== -->
-            <div class="form-section-apex mb-4 pb-2">
-                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--color-border) !important;">
-                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 121, 56, 0.1); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
-                        <i class="bi bi-boxes"></i>
-                    </div>
-                    <div>
-                        <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">2. Control de Inventario y Stock</h5>
-                        <small class="text-muted">Define existencias de compra y el punto de reposición</small>
-                    </div>
-                </div>
-
-                <div class="row g-3">
                     <!-- FECHA DE COMPRA -->
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">FECHA DE COMPRA</label>
                             <input type="date" 
@@ -174,39 +167,6 @@
                                    value="{{ fecha_hoy }}">
                         </div>
                     </div>
-
-                    <!-- CANTIDAD COMPRADA -->
-                    <div class="col-md-4">
-                        <div class="form-group mb-0">
-                            <label class="form-label form-label--required">CANTIDAD COMPRADA (UNIDADES)</label>
-                            <input type="number" 
-                                   class="form-input" 
-                                   id="form_cantidad_comprada" 
-                                   name="cantidad_comprada" 
-                                   placeholder="Ej. 10" 
-                                   min="1"
-                                   value="{{ producto.cantidad_comprada if producto else '' }}">
-                            <small class="text-muted" style="font-size: 0.72rem;">Stock actual: <strong>{{ producto.stock if producto else 'Nuevo lote' }}</strong></small>
-                        </div>
-                    </div>
-
-                    <!-- STOCK MÍNIMO (ALERTA DE REPOSICIÓN) -->
-                    <div class="col-md-4">
-                        <div class="form-group mb-0">
-                            <label class="form-label form-label--required">
-                                STOCK MÍNIMO (PUNTO DE ALERTA)
-                                <i class="bi bi-question-circle ms-1 text-primary" title="El sistema te avisará en amarillo cuando el stock sea menor o igual a este número"></i>
-                            </label>
-                            <input type="number" 
-                                   class="form-input" 
-                                   id="form_stock_minimo" 
-                                   name="stock_minimo" 
-                                   placeholder="Ej. 5" 
-                                   min="0"
-                                   value="{{ producto.stock_minimo if producto else 5 }}">
-                            <small class="text-muted" style="font-size: 0.72rem;">Aviso preventivo antes de agotar existencias.</small>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -214,81 +174,111 @@
             <hr class="my-4" style="border-color: var(--color-border); opacity: 0.6;">
 
             <!-- ========================================== -->
-            <!-- SECCIÓN 3: PRECIOS Y MARGEN INTELIGENTE    -->
+            <!-- SECCIÓN 2: INVENTARIO, COSTOS Y PRECIOS   -->
             <!-- ========================================== -->
             <div class="form-section-apex">
-                <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom flex-wrap gap-2" style="border-color: var(--color-border) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
-                            <i class="bi bi-calculator"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">3. Costos, Márgenes y Precios de Venta</h5>
-                            <small class="text-muted">Cálculo automático de ganancia y precio al contado</small>
-                        </div>
+                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--color-border) !important;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 121, 56, 0.1); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="bi bi-calculator-fill"></i>
                     </div>
-
-                    <!-- Badge Estado del Producto -->
-                    <div class="d-flex align-items-center gap-2">
-                        <label class="form-label mb-0">ESTADO:</label>
-                        <select class="form-input select-estado-apex py-1 px-3" name="estado" id="form_estado" data-estado="{{ producto.estado.value if producto else 'ACTIVO' }}" style="width: auto; min-width: 120px;">
-                            <option value="ACTIVO" {% if not producto or producto.estado.value == 'ACTIVO' %}selected{% endif %}>Activo</option>
-                            <option value="INACTIVO" {% if producto and producto.estado.value == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
-                        </select>
+                    <div>
+                        <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">2. Control de Inventario, Costos y Precios</h5>
+                        <small class="text-muted">Cantidades de stock, costos unitarios, margen deseado y precio de venta al contado</small>
                     </div>
                 </div>
 
-                <div class="row g-3">
-                    <!-- PRECIO COMPRA (COSTO) -->
-                    <div class="col-md-4">
+                <!-- BLOQUE COMPACTO Y PROPORCIONAL DE LOS 5 CAMPOS -->
+                <div class="row g-3 align-items-start">
+                    
+                    <!-- 1. CANTIDAD COMPRADA -->
+                    <div class="col-6 col-md-4 col-lg-2">
                         <div class="form-group mb-0">
-                            <label class="form-label form-label--required">PRECIO DE COSTO / COMPRA</label>
+                            <label class="form-label form-label--required text-truncate" title="Cantidad Comprada">CANT. COMPRADA</label>
+                            <div class="input-group-apex">
+                                <input type="number" 
+                                       class="form-input-clean text-center fw-bold" 
+                                       id="form_cantidad_comprada" 
+                                       name="cantidad_comprada" 
+                                       placeholder="10" 
+                                       min="1"
+                                       value="{{ producto.cantidad_comprada if producto else '' }}">
+                                <span class="input-group-addon addon-suffix">ud</span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Stock: <strong>{{ producto.stock if producto else 'Nuevo' }}</strong></small>
+                        </div>
+                    </div>
+
+                    <!-- 2. STOCK MÍNIMO -->
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required text-truncate" title="Stock Mínimo (Punto de Alerta)">
+                                STOCK MÍNIMO
+                                <i class="bi bi-question-circle ms-1 text-primary" title="El sistema avisará en amarillo cuando el stock sea menor o igual"></i>
+                            </label>
+                            <div class="input-group-apex">
+                                <input type="number" 
+                                       class="form-input-clean text-center fw-bold" 
+                                       id="form_stock_minimo" 
+                                       name="stock_minimo" 
+                                       placeholder="5" 
+                                       min="0"
+                                       value="{{ producto.stock_minimo if producto else 5 }}">
+                                <span class="input-group-addon addon-suffix">ud</span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Alerta reposición.</small>
+                        </div>
+                    </div>
+
+                    <!-- 3. PRECIO DE COMPRA (COSTO) -->
+                    <div class="col-12 col-md-4 col-lg-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label form-label--required">PRECIO DE COSTO</label>
                             <div class="input-group-apex">
                                 <span class="input-group-addon addon-prefix">C$</span>
                                 <input type="number" 
                                        step="0.01" 
-                                       class="form-input-clean" 
+                                       class="form-input-clean fw-bold" 
                                        id="form_precio_compra" 
                                        name="precio_compra" 
                                        placeholder="0.00" 
                                        value="{{ '%.2f'|format(producto.precio_compra) if producto else '' }}">
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Costo neto unitario de adquisición.</small>
+                            <small class="text-muted" style="font-size: 0.72rem;">Costo neto unitario.</small>
                         </div>
                     </div>
 
-                    <!-- MARGEN DE GANANCIA (%) -->
-                    <div class="col-md-4">
+                    <!-- 4. MARGEN DESEADO (%) -->
+                    <div class="col-6 col-md-6 col-lg-2">
                         <div class="form-group mb-0">
                             <label class="form-label">MARGEN DESEADO</label>
                             <div class="input-group-apex">
                                 <input type="number" 
                                        step="0.1" 
-                                       class="form-input-clean" 
+                                       class="form-input-clean text-center fw-bold" 
                                        id="form_margen" 
                                        placeholder="30" 
                                        min="0">
                                 <span class="input-group-addon addon-suffix">%</span>
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Margen sobre el costo para sugerir venta.</small>
+                            <small class="text-muted" style="font-size: 0.72rem;">Margen sobre costo.</small>
                         </div>
                     </div>
 
-                    <!-- PRECIO VENTA (CONTADO) -->
-                    <div class="col-md-4">
+                    <!-- 5. PRECIO VENTA AL CONTADO -->
+                    <div class="col-6 col-md-6 col-lg-3">
                         <div class="form-group mb-0">
-                            <label class="form-label form-label--required">PRECIO VENTA AL CONTADO</label>
+                            <label class="form-label form-label--required">PRECIO VENTA CONTADO</label>
                             <div class="input-group-apex">
-                                <span class="input-group-addon addon-prefix">C$</span>
+                                <span class="input-group-addon addon-prefix text-success">C$</span>
                                 <input type="number" 
                                        step="0.01" 
-                                       class="form-input-clean" 
+                                       class="form-input-clean fw-bold text-success" 
                                        id="form_precio_venta" 
                                        name="precio_venta" 
                                        placeholder="0.00" 
                                        value="{{ '%.2f'|format(producto.precio_venta) if producto else '' }}">
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Precio de mostrador para clientes de contado.</small>
+                            <small class="text-muted" style="font-size: 0.72rem;">Precio de mostrador.</small>
                         </div>
                     </div>
                 </div>
