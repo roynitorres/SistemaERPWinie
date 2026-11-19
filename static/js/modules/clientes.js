@@ -161,9 +161,6 @@
             var summaryEl = document.getElementById('paginationSummary');
             if (summaryEl) summaryEl.innerText = summaryText;
 
-            var badgeTotal = document.getElementById('badgeTotalItems');
-            if (badgeTotal) badgeTotal.textContent = totalItems;
-
             this.renderControls(totalPages);
         },
 
@@ -394,11 +391,6 @@
                         row.style.display = 'none';
                     }
                 });
-
-                var badgeTotal = document.getElementById('badgeTotalVentas');
-                if (badgeTotal) {
-                    badgeTotal.textContent = visibles;
-                }
             };
 
             document.querySelectorAll('.state-pill[data-filtro]').forEach(function (pill) {
