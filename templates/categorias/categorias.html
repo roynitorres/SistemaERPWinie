@@ -8,8 +8,8 @@
     <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
         <h1 class="page-title-apex">
-            <i class="bi bi-tags px-2"></i>Clasificación de Categorías</h1>
-        <p class="page-subtitle-apex">Organiza y administra las categorías de tu inventario.</p>
+            Categorías</h1>
+        <p class="page-subtitle-apex">Organiza y administra las categorías.</p>
     </div>
 
     <!-- ===================================== -->
@@ -23,19 +23,15 @@
                 <input type="text" class="toolbar-input" id="buscarCategoria" placeholder="Buscar categoría...">
             </div>
 
-            <!-- TABS PILLS DE ESTADO (TODOS, ACTIVO, INACTIVO) -->
+            <!-- TABS PILLS DE ESTADO (ESTILO PÍLDORA: SOLO ACTIVO E INACTIVO) -->
             <div class="state-pills-bar">
-                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
-                <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
+                <button type="button" class="state-pill state-pill--active" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
                 <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
             </div>
         </div>
 
         <!-- Acciones Derecha -->
         <div class="toolbar-actions-right">
-            <!-- Dynamic Count Badge (Número Puro) -->
-            <span id="badgeTotalItems" class="count-badge-apex" title="Total de registros">0</span>
-            
             <a href="#" class="btn-apex-outline">
                 <i class="bi bi-download"></i> Exportación
             </a>

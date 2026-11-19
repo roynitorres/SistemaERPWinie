@@ -22,18 +22,18 @@
                 </a>
                 <span class="mx-2">/</span>
                 <span class="text-primary font-weight-bold">
-                    {% if producto %}Editar: {{ producto.nombre }}{% else %}Registrar Nuevo{% endif %}
+                    {% if producto %}Editar: {{ producto.nombre }}{% else %} Nuevo{% endif %}
                 </span>
             </div>
             <h1 class="page-title-apex mb-1" style="font-size: 1.65rem;">
                 {% if producto %}
                     <i class="bi bi-pencil-square text-primary me-2"></i>Editar Producto
                 {% else %}
-                    <i class="bi bi-plus-circle-fill text-primary me-2"></i>Registrar Nuevo Producto
+                    <i class="bi bi-plus-circle-fill text-primary me-2"></i> Nuevo Producto
                 {% endif %}
             </h1>
             <p class="page-subtitle-apex">
-                Ingresa la información general, existencias de inventario, márgenes de ganancia y alertas de stock.
+                Ingresa la información general, existencias de inventario.
             </p>
         </div>
 
@@ -81,7 +81,7 @@
                                        value="{{ producto.codigo_producto if producto else '' }}"
                                        oninput="this.value = this.value.toUpperCase()">
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Código único de inventario.</small>
+                           
                         </div>
                     </div>
 
@@ -96,7 +96,7 @@
                                    placeholder="Nombre descriptivo del producto" 
                                    value="{{ producto.nombre if producto else '' }}"
                                    oninput="this.value = this.value.toUpperCase()">
-                            <small class="text-muted" style="font-size: 0.72rem;">Descripción completa comercial.</small>
+                            
                         </div>
                     </div>
 
@@ -108,7 +108,7 @@
                                 <option value="ACTIVO" {% if not producto or producto.estado.value == 'ACTIVO' %}selected{% endif %}>Activo</option>
                                 <option value="INACTIVO" {% if producto and producto.estado.value == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
                             </select>
-                            <small class="text-muted" style="font-size: 0.72rem;">Disponibilidad en catálogo.</small>
+                            
                         </div>
                     </div>
 
@@ -170,23 +170,11 @@
                 </div>
             </div>
 
-            <!-- SEPARADOR DE SECCIÓN -->
-            <hr class="my-4" style="border-color: var(--color-border); opacity: 0.6;">
-
             <!-- ========================================== -->
             <!-- SECCIÓN 2: INVENTARIO, COSTOS Y PRECIOS   -->
             <!-- ========================================== -->
             <div class="form-section-apex">
-                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--color-border) !important;">
-                    <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 121, 56, 0.1); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
-                        <i class="bi bi-calculator-fill"></i>
-                    </div>
-                    <div>
-                        <h5 class="mb-0 fw-bold" style="font-size: 1.05rem; color: var(--color-text-main);">2. Control de Inventario, Costos y Precios</h5>
-                        <small class="text-muted">Cantidades de stock, costos unitarios, margen deseado y precio de venta al contado</small>
-                    </div>
-                </div>
-
+                
                 <!-- BLOQUE COMPACTO Y PROPORCIONAL DE LOS 5 CAMPOS -->
                 <div class="row g-3 align-items-start">
                     
@@ -204,7 +192,7 @@
                                        value="{{ producto.cantidad_comprada if producto else '' }}">
                                 <span class="input-group-addon addon-suffix">ud</span>
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Stock: <strong>{{ producto.stock if producto else 'Nuevo' }}</strong></small>
+                           
                         </div>
                     </div>
 
@@ -225,7 +213,7 @@
                                        value="{{ producto.stock_minimo if producto else 5 }}">
                                 <span class="input-group-addon addon-suffix">ud</span>
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Alerta reposición.</small>
+                            
                         </div>
                     </div>
 
@@ -234,7 +222,7 @@
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">PRECIO DE COSTO</label>
                             <div class="input-group-apex">
-                                <span class="input-group-addon addon-prefix">C$</span>
+                                
                                 <input type="number" 
                                        step="0.01" 
                                        class="form-input-clean fw-bold" 
@@ -242,8 +230,9 @@
                                        name="precio_compra" 
                                        placeholder="0.00" 
                                        value="{{ '%.2f'|format(producto.precio_compra) if producto else '' }}">
+                                       <span class="input-group-addon addon-prefix">C$</span>
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Costo neto unitario.</small>
+                            
                         </div>
                     </div>
 
@@ -260,7 +249,7 @@
                                        min="0">
                                 <span class="input-group-addon addon-suffix">%</span>
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Margen sobre costo.</small>
+                            
                         </div>
                     </div>
 
@@ -269,16 +258,17 @@
                         <div class="form-group mb-0">
                             <label class="form-label form-label--required">PRECIO VENTA CONTADO</label>
                             <div class="input-group-apex">
-                                <span class="input-group-addon addon-prefix text-success">C$</span>
+                                
                                 <input type="number" 
                                        step="0.01" 
-                                       class="form-input-clean fw-bold text-success" 
+                                       class="form-input-clean fw-bold" 
                                        id="form_precio_venta" 
                                        name="precio_venta" 
                                        placeholder="0.00" 
                                        value="{{ '%.2f'|format(producto.precio_venta) if producto else '' }}">
+                                       <span class="input-group-addon addon-prefix ">C$</span>
                             </div>
-                            <small class="text-muted" style="font-size: 0.72rem;">Precio de mostrador.</small>
+                            
                         </div>
                     </div>
                 </div>
@@ -303,7 +293,7 @@
                                 <button type="button" class="btn-quick-margin" data-margin="100">+100%</button>
                             </div>
                         </div>
-                        <small class="text-muted fst-italic" style="font-size: 0.72rem;">Haz clic para autocalcular el precio al instante</small>
+                        
                     </div>
                 </div>
 
@@ -312,19 +302,19 @@
                     <div class="row text-center g-3">
                         <div class="col-6 col-md-3">
                             <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Ganancia x Unidad</div>
-                            <div class="fw-bold text-success fs-5" id="metricGananciaUnidad">C$ 0.00</div>
+                            <div class="fw-bold  fs-5" id="metricGananciaUnidad">C$ 0.00</div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Margen Bruto Real</div>
-                            <div class="fw-bold text-primary fs-5" id="metricMargenPct">0.0%</div>
+                            <div class="fw-bold  fs-5" id="metricMargenPct">0.0%</div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Inversión Total Lote</div>
-                            <div class="fw-bold text-muted fs-5" id="metricInversionTotal">C$ 0.00</div>
+                            <div class="fw-bold  fs-5" id="metricInversionTotal">C$ 0.00</div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="text-muted text-uppercase" style="font-size: 0.72rem; font-weight: 700;">Utilidad Proyectada</div>
-                            <div class="fw-bold text-success fs-5" id="metricUtilidadTotal">C$ 0.00</div>
+                            <div class="fw-bold  fs-5" id="metricUtilidadTotal">C$ 0.00</div>
                         </div>
                     </div>
                 </div>
