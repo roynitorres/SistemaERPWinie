@@ -10,8 +10,8 @@
 
     window.ERP.Clientes = {
         textoCopiarCredenciales: '',
-        filtroActual: 'TODOS',
-        estadoFiltroActual: 'TODOS',
+        filtroActual: 'ACTIVO',
+        estadoFiltroActual: 'ACTIVO',
         mesFiltroActual: 'TODOS',
         currentPage: 1,
         itemsPerPage: 10,
@@ -42,13 +42,12 @@
                         p.classList.remove('state-pill--active');
                     });
                     this.classList.add('state-pill--active');
-                    self.estadoFiltroActual = this.dataset.estado || 'TODOS';
+                    self.estadoFiltroActual = this.dataset.estado || 'ACTIVO';
                     self.aplicarFiltrosClientes();
                 });
             });
 
-            this.initFiltroMeses();
-            this.renderTable();
+            this.aplicarFiltrosClientes();
         },
 
         /**
@@ -126,10 +125,8 @@
                     ciudad.includes(query);
 
                 var cumpleEstado = this.estadoFiltroActual === 'TODOS' || estadoRow === this.estadoFiltroActual;
-                
-                var cumpleMes = this.mesFiltroActual === 'TODOS' || fechaRow === this.mesFiltroActual;
 
-                return cumpleTexto && cumpleEstado && cumpleMes;
+                return cumpleTexto && cumpleEstado;
             }, this);
 
             this.currentPage = 1;

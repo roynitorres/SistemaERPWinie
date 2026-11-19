@@ -8,7 +8,7 @@
     <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
         <h1 class="page-title-apex">
-            <i class="bi bi-people px-2" ></i>Catálogo de Clientes</h1>
+            <i class="bi bi-people px-2" ></i>Clientes</h1>
         <p class="page-subtitle-apex">Administra, busca y registra a todos los clientes de tu negocio.</p>
     </div>
 
@@ -23,21 +23,10 @@
                 <input type="text" class="toolbar-input" id="buscarCliente" placeholder="Buscar clientes...">
             </div>
 
-            <!-- TABS PILLS DE ESTADO (AL LADO DERECHO DEL INPUT DE BÚSQUEDA) -->
+            <!-- TABS PILLS DE ESTADO (ESTILO PÍLDORA: SOLO ACTIVO E INACTIVO) -->
             <div class="state-pills-bar">
-                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
-                <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
+                <button type="button" class="state-pill state-pill--active" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
                 <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
-            </div>
-
-            <!-- FILTRO DE MESES DINÁMICO -->
-            <div class="dropdown d-inline-block ms-2">
-                <button class="btn-apex-outline" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Filtrar por Mes" style="padding: 7px 12px; border-radius: 10px;">
-                    <i class="bi bi-funnel"></i> <span id="textoFiltroMes">Todos los meses</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark-apex shadow" id="filtroMesDropdown">
-                    <!-- Opciones inyectadas por JS -->
-                </ul>
             </div>
         </div>
 
