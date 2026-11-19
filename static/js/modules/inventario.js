@@ -41,7 +41,7 @@
             var itemsPerPage = 10;
             var allRows = Array.from(document.querySelectorAll("#tablaProductos tr"));
             var filteredRows = [...allRows];
-            var estadoFiltroActual = "TODOS";
+            var estadoFiltroActual = "ACTIVO";
 
             var renderControls = function (totalPages) {
                 var controlsContainer = document.getElementById("paginationControls");
@@ -117,11 +117,6 @@
                     paginationSummary.innerHTML = `${paginationText} | <strong style="margin-left: 10px; color: var(--color-primary-dark);">Total P. Costo de página: C$ ${totalPrecioCompra.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
                 }
 
-                var badgeTotal = document.getElementById("badgeTotalItems");
-                if (badgeTotal) {
-                    badgeTotal.textContent = totalItems;
-                }
-
                 renderControls(totalPages);
             };
 
@@ -144,9 +139,10 @@
                 renderTable();
             };
 
-            document.querySelectorAll(".state-pill").forEach(function (pill) {
+            var pills = document.querySelectorAll(".toolbar-apex .state-pill");
+            pills.forEach(function (pill) {
                 pill.addEventListener("click", function () {
-                    document.querySelectorAll(".state-pill").forEach(function (p) { p.classList.remove("state-pill--active"); });
+                    pills.forEach(function (p) { p.classList.remove("state-pill--active"); });
                     this.classList.add("state-pill--active");
                     estadoFiltroActual = this.dataset.estado;
                     filterTable();
@@ -157,7 +153,7 @@
                 buscarProducto.addEventListener("input", filterTable);
             }
 
-            renderTable();
+            filterTable();
         },
 
         /**

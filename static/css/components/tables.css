@@ -190,7 +190,8 @@
     box-shadow: 0 1px 3px rgba(0, 116, 29, 0.2) !important;
 }
 
-/* Menú de Tres Puntos (⋮) */
+/* Botones de Acción en Tablas (Editar, etc.) y Menú de Tres Puntos (⋮) */
+.btn-action-edit,
 .btn-three-dots {
     background: transparent;
     border: 1px solid var(--color-border);
@@ -202,10 +203,16 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    text-decoration: none !important;
     transition: all 0.2s ease;
 }
 
+.btn-three-dots {
+    font-size: 1.1rem;
+}
+
+.btn-action-edit:hover, .btn-action-edit:focus,
 .btn-three-dots:hover, .btn-three-dots:focus {
     background-color: var(--color-bg-card-hover);
     color: var(--color-primary);
