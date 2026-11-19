@@ -6,9 +6,11 @@ from utils.permisos import roles_required
 from models.cliente import Cliente
 from models.venta import Venta
 from models.pago import Pago
+from models.detalle_venta import DetalleVenta
 from models.enums import EstadoCliente, EstadoVenta, TipoVenta
 from sqlalchemy.orm import joinedload
 from datetime import datetime
+from routes.portal_cliente import format_datetime_local, extract_nombre_apellido
 
 # Servicios
 from services.cliente_service import (
@@ -110,10 +112,13 @@ def restaurar_password_cliente(cliente_id):
 @roles_required("ADMIN", "VENDEDOR")
 def historial_cliente(cliente_id):
     cliente = Cliente.query.get_or_404(cliente_id)
-    ventas = Venta.query.filter_by(cliente_id=cliente_id).options(
-        joinedload(Venta.pagos),
-        joinedload(Venta.cuotas)
-    ).order_by(Venta.fecha_venta.desc()).all()
+    ventas = Venta.query.filter_by(
+        cliente_id=cliente_id
+    ).options(
+        joinedload(Venta.pagos).joinedload(Pago.banco),
+        joinedload(Venta.cuotas),
+        joinedload(Venta.detalle_ventas).joinedload(DetalleVenta.producto)
+    ).order_by(Venta.fecha_venta.desc(), Venta.id.desc()).all()
 
     ventas_procesadas = []
     for venta in ventas:
@@ -121,6 +126,7 @@ def historial_cliente(cliente_id):
             continue
 
         monto_venta = float(venta.total_venta)
+        tipo_val = venta.tipo_venta.value if hasattr(venta.tipo_venta, 'value') else str(venta.tipo_venta)
         total_abonado = sum(
             float(pago.monto_pago)
             for pago in venta.pagos
@@ -128,16 +134,57 @@ def historial_cliente(cliente_id):
         )
         saldo = monto_venta - total_abonado
 
+        json_data = {
+            "id": venta.id,
+            "numero_factura": venta.numero_factura,
+            "fecha_venta": format_datetime_local(venta.fecha_venta, venta.created_at),
+            "tipo_venta": tipo_val,
+            "total_venta": monto_venta,
+            "total_abonado": total_abonado,
+            "saldo_pendiente": float(max(0.0, saldo)),
+            "es_pagada": saldo <= 0.01,
+            "productos": [
+                {
+                    "nombre": d.producto.nombre if d.producto else "Producto",
+                    "codigo": d.producto.codigo_producto if d.producto else "",
+                    "cantidad": d.cantidad,
+                    "precio_unitario": float(d.precio_unitario),
+                    "descuento_monto": float(d.descuento_monto or 0.0),
+                    "subtotal": float(d.subtotal)
+                }
+                for d in venta.detalle_ventas
+            ],
+            "pagos": [
+                {
+                    "id": p.id,
+                    "fecha": format_datetime_local(p.fecha_pago, p.created_at),
+                    "monto": float(p.monto_pago),
+                    "tipo": p.tipo_pago,
+                    "metodo": p.tipo_pago,
+                    "banco": p.banco.nombre if p.banco else '',
+                    "referencia": p.referencia or '',
+                    "estado": p.estado
+                }
+                for p in venta.pagos if p.estado == "ACTIVO"
+            ],
+            "url_imprimir": url_for('pagos.factura', venta_id=venta.id)
+        }
+
         ventas_procesadas.append({
             "venta": venta,
             "total_abonado": total_abonado,
             "saldo_pendiente": max(0.0, saldo),
-            "es_pagada": saldo <= 0.01
+            "es_pagada": saldo <= 0.01,
+            "json_data": json_data
         })
+
+    nombre_mostrar, iniciales_mostrar = extract_nombre_apellido(cliente.nombres if cliente else "")
 
     return render_template(
         "clientes/historial_cliente.html",
         cliente=cliente,
+        nombre_cliente=nombre_mostrar,
+        iniciales_cliente=iniciales_mostrar,
         ventas_procesadas=ventas_procesadas,
         now=datetime.now()
     )

@@ -1,154 +1,298 @@
 {% extends "base.html" %}
 
-{% block title %}Historial de Compras - {{ cliente.nombres }}{% endblock %}
+{% block title %}Historial de Facturas - {{ cliente.nombres }}{% endblock %}
 
-{% block topbar_title %}{{ cliente.nombres }}{% endblock %}
+{% block topbar_title %}Historial de Facturas{% endblock %}
 
 {% block content %}
-    <!-- ===================================== -->
-    <!-- ENCABEZADO DE PÁGINA APEX DARK -->
-    <!-- ===================================== -->
-    <div class="page-header-apex" style="display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-            <div class="breadcrumbs-apex">
-                Dashboard &gt; <a href="{{ url_for('clientes.clientes') }}" style="color: var(--color-text-muted); text-decoration: none;">Clientes</a> &gt; <span>Historial</span>
-            </div>
-            <h1 class="page-title-apex">Historial de Facturas</h1>
-            <p class="page-subtitle-apex">Historial de compras y movimientos del cliente.</p>
-        </div>
-        <div>
-            <a href="{{ url_for('clientes.clientes') }}" class="btn-apex-outline">
-                <i class="bi bi-arrow-left me-1"></i> Volver a Clientes
-            </a>
-        </div>
+<div class="cliente-portal">
+
+    <!-- ============================================================== -->
+    <!-- BREADCRUMBS Y NAVEGACIÓN ADMINISTRATIVA                        -->
+    <!-- ============================================================== -->
+    <div class="breadcrumbs-apex mb-2">
+        Dashboard &gt; <a href="{{ url_for('clientes.clientes') }}" style="color: var(--color-text-muted); text-decoration: none;">Clientes</a> &gt; <span>Historial de Facturas</span>
     </div>
 
+    <!-- ============================================================== -->
+    <!-- CABECERA DEL CLIENTE (MÓVIL Y ESCRITORIO)                       -->
+    <!-- Móvil: Avatar, Nombre Corto y Botón Volver                     -->
+    <!-- Escritorio: Nombre Completo, Teléfono, Correo, Ciudad y Volver  -->
+    <!-- ============================================================== -->
+    <header class="portal-header-minimal">
+        <div class="portal-user-profile">
+            <div class="portal-avatar-circle">
+                {{ iniciales_cliente }}
+            </div>
+            <div class="portal-user-info">
+                <!-- Móvil (< 768px): Nombre y Apellido corto -->
+                <h2 class="portal-user-name d-md-none">{{ nombre_cliente }}</h2>
 
+                <!-- Escritorio (>= 768px): Nombre Completo y Datos de Contacto -->
+                <div class="d-none d-md-block">
+                    <h2 class="portal-user-name portal-user-name-desktop">{{ (cliente.nombres|title) if (cliente and cliente.nombres) else nombre_cliente }}</h2>
+                    <div class="portal-user-contact-row">
+                        {% if cliente and cliente.telefono %}
+                        <span class="portal-contact-item">
+                            <i class="bi bi-telephone-fill"></i>
+                            <span>{{ (cliente.telefono[:4] ~ '-' ~ cliente.telefono[4:]) if (cliente.telefono|length == 8 and '-' not in cliente.telefono) else cliente.telefono }}</span>
+                        </span>
+                        {% endif %}
 
-    <!-- ===================================== -->
-    <!-- BARRA DE HERRAMIENTAS Y PILLS -->
-    <!-- ===================================== -->
-    <div class="toolbar-apex">
-        <!-- Grupo Izquierdo: Buscador Oscuro + Pills de Estado al lado derecho -->
-        <div class="toolbar-left-group">
-            <div class="toolbar-search-box">
+                        <span class="portal-contact-item">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span>{{ (cliente.usuario.email if (cliente and cliente.usuario and cliente.usuario.email) else 'Sin correo registrado') }}</span>
+                        </span>
+
+                        {% if cliente and cliente.ciudad %}
+                        <span class="portal-contact-item">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>{{ cliente.ciudad|title }}</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTÓN VOLVER A CLIENTES -->
+        <a href="{{ url_for('clientes.clientes') }}" class="portal-btn-salir" title="Volver al Catálogo de Clientes">
+            <i class="bi bi-arrow-left"></i>
+            <span>Volver a Clientes</span>
+        </a>
+    </header>
+
+    <!-- ALERTAS DEL SISTEMA -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert-apex alert-apex-{{ category if category in ['success', 'warning', 'danger', 'info'] else 'danger' }}">
+            <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'warning' %}exclamation-triangle-fill{% else %}exclamation-circle-fill{% endif %} fs-5"></i>
+            <div>{{ message }}</div>
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- ============================================================== -->
+    <!-- HISTORIAL DE FACTURAS Y ABONOS — DISEÑO MÓVIL Y ESCRITORIO     -->
+    <!-- ============================================================== -->
+    <div id="panel-portal-facturas" class="portal-panel-minimal">
+        
+        <!-- BARRA DE BÚSQUEDA Y FILTROS: SOLO CRÉDITO Y CONTADO -->
+        <div class="portal-toolbar-minimal mb-3">
+            <!-- Buscador en tiempo real -->
+            <div class="portal-search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" class="toolbar-input" id="buscarFactura" placeholder="Buscar por N° Factura...">
+                <input type="text" id="buscarFactura" class="portal-search-input" placeholder="Buscar por factura o producto...">
             </div>
 
-            <!-- TABS PILLS DE FILTRO -->
-            <div class="state-pills-bar">
-                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-filtro="TODOS">Todos</button>
-                <button type="button" class="state-pill" id="btnPillContado" data-filtro="CONTADO">Contado</button>
-                <button type="button" class="state-pill" id="btnPillCredito" data-filtro="CREDITO">Crédito</button>
-                <button type="button" class="state-pill" id="btnPillPendiente" data-filtro="PENDIENTE">Pendientes</button>
+            <!-- Filtros: Únicamente Crédito y Contado (Crédito activo por defecto) -->
+            <div class="portal-filter-tabs">
+                <button type="button" class="portal-filter-pill state-pill active" data-filtro="CREDITO">
+                    <i class="bi bi-credit-card-2-front"></i> Crédito
+                </button>
+                <button type="button" class="portal-filter-pill state-pill" data-filtro="CONTADO">
+                    <i class="bi bi-cash"></i> Contado
+                </button>
             </div>
         </div>
 
-        <!-- Acciones Derecha -->
-        <div class="toolbar-actions-right">
-            <span id="badgeTotalVentas" class="count-badge-apex" title="Total de registros">{{ ventas_procesadas|length }}</span>
-        </div>
-    </div>
+        <!-- FLUJO DE TARJETAS MINIMALISTAS (MÓVIL & DESKTOP) -->
+        <div id="listaFacturasPortal" class="portal-cards-stream">
+            {% for item in ventas_procesadas %}
+            {% set v = item.venta %}
+            {% set tipo_val = v.tipo_venta.value if v.tipo_venta.value is defined else v.tipo_venta %}
+            {% set prod_nombres = item.json_data.productos|map(attribute='nombre')|join(' ')|lower %}
 
-    <!-- ===================================== -->
-    <!-- TABLA DE HISTORIAL DE COMPRAS (APEX DARK) -->
-    <!-- ===================================== -->
-    <div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px;">
-        <div style="padding: 18px 24px; border-bottom: 1px solid var(--color-border); background-color: var(--color-bg-card);">
-            <h5 style="margin: 0; color: var(--color-text-main); font-weight: 700;">
-                <i class="bi bi-person-fill me-2"></i> {{ cliente.nombres }}
-            </h5>
-            <small style="color: var(--color-text-muted);">Listado detallado de todas las ventas y pagos de este cliente.</small>
-        </div>
-
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead class="data-table__head">
-                    <tr>
-                        <th>Factura #</th>
-                        <th>Fecha</th>
-                        <th>Tipo Venta</th>
-                        <th style="text-align: right;">Total (C$)</th>
-                        <th style="text-align: right;">Abonado (C$)</th>
-                        <th style="text-align: right;">Saldo (C$)</th>
-                        <th>Estado Pago</th>
-                        <th style="text-align: right;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaHistorial">
-                    {% for item in ventas_procesadas %}
-                    {% set v = item.venta %}
-                    <tr class="data-table__row fila-historial" 
-                        data-factura="{{ v.numero_factura.lower() }}"
-                        data-tipo="{{ v.tipo_venta.value }}"
-                        data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}">
-
-                        <td class="data-table__cell" style=" color: var(--color-text-main);">
-                            #{{ v.numero_factura }}
-                        </td>
-                        <td class="data-table__cell" style="color: var(--color-text-main);">
-                            {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
-                        </td>
-                        <td class="data-table__cell">
-                            <span class="badge-pill-apex" style="background: var(--color-primary-glow); color: var(--color-text-main); ">
-                                {{ v.tipo_venta.value }}
-                            </span>
-                        </td>
-                        <td class="data-table__cell text-end" style=" color: var(--color-text-main);">
-                            C$ {{ "%.2f"|format(v.total_venta) }}
-                        </td>
-                        <td class="data-table__cell text-end" style=" color: var(--color-text-main);">
-                            C$ {{ "%.2f"|format(item.total_abonado) }}
-                        </td>
-                        <td class="data-table__cell text-end" >
-                            {% if item.saldo_pendiente > 0.01 %}
-                            <span style="color: var(--color-danger);">C$ {{ "%.2f"|format(item.saldo_pendiente) }}</span>
-                            {% else %}
-                            <span style="color: var(--color-text-main);">C$ 0.00</span>
-                            {% endif %}
-                        </td>
-                        <td class="data-table__cell">
+            <div class="portal-factura-card"
+                 data-factura="{{ v.numero_factura|lower }}"
+                 data-productos="{{ prod_nombres }}"
+                 data-tipo="{{ tipo_val }}"
+                 data-pagada="{% if item.es_pagada %}1{% else %}0{% endif %}">
+                
+                <!-- Fila Principal Contraída (Clic despliega abonos) -->
+                <div class="factura-card-main cursor-pointer" onclick="var b=this.querySelector('.btn-trigger-abonos'); if(b) b.click();">
+                    <!-- Cabecera de la tarjeta: Factura #, Badge Estado, Fecha -->
+                    <div class="factura-card-top">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="factura-num-title">#{{ v.numero_factura }}</span>
                             {% if item.es_pagada %}
-                            <span class="badge-pill-apex badge-pill-apex--active">PAGADA</span>
+                            <span class="badge-status-pill badge-status-paid">PAGADA</span>
                             {% else %}
-                            <span class="badge-pill-apex badge-pill-apex--inactive">PENDIENTE</span>
+                            <span class="badge-status-pill badge-status-pending">PENDIENTE</span>
                             {% endif %}
-                        </td>
-                        <td class="data-table__cell text-end">
-                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
-                            <div class="dropdown d-inline-block">
-                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Opciones">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
-                                    <li>
-                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                            ACCIONES
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('pagos.factura', venta_id=v.id) }}" target="_blank">
-                                             Imprimir Factura
-                                        </a>
-                                    </li>
-                                    </li>
-                                </ul>
+                        </div>
+                        <div class="factura-card-date">
+                            <i class="bi bi-calendar-event me-1"></i> {{ v.fecha_venta.strftime('%d/%m/%Y') if v.fecha_venta else '-' }}
+                        </div>
+                    </div>
+
+                    <!-- Banda de montos financieros (Total Factura y Saldo Pendiente) -->
+                    <div class="factura-montos-strip">
+                        <div>
+                            <span class="strip-label">Total Factura</span>
+                            <span class="strip-val">C$ {{ "%.2f"|format(v.total_venta) }}</span>
+                        </div>
+                        <div class="text-end text-md-start">
+                            <span class="strip-label">Saldo Pendiente</span>
+                            <span class="strip-val {% if item.saldo_pendiente > 0.01 %}strip-val-danger{% else %}strip-val-zero{% endif %}">
+                                C$ {{ "%.2f"|format(item.saldo_pendiente) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Acciones: Botón Abonos + Botón Artículos + Botón Imprimir (Escritorio) -->
+                    <div class="factura-actions-bar">
+                        <!-- Botón de Abonos (Despliega sin recargar) -->
+                        {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
+                        <button type="button" 
+                                class="btn-trigger-abonos" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#abonosFactura{{ v.id }}" 
+                                aria-expanded="false" 
+                                aria-controls="abonosFactura{{ v.id }}"
+                                onclick="event.stopPropagation();" 
+                                title="Ver historial de abonos">
+                            <i class="bi bi-cash-stack"></i>
+                            <span>{{ item.json_data.pagos|length }} {% if item.json_data.pagos|length == 1 %}Abono{% else %}Abonos{% endif %}</span>
+                            <i class="bi bi-chevron-down chevron-abono-icon"></i>
+                        </button>
+                        {% else %}
+                        <span class="btn-no-abonos">
+                            <i class="bi bi-dash-circle"></i> 0 Abono
+                        </span>
+                        {% endif %}
+
+                        <!-- Botón Ver Artículos (Despliega sin modal) -->
+                        {% if item.json_data.productos and item.json_data.productos|length > 0 %}
+                        <button type="button" 
+                                class="btn-trigger-articulos" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#articulosFactura{{ v.id }}" 
+                                aria-expanded="false" 
+                                aria-controls="articulosFactura{{ v.id }}"
+                                onclick="event.stopPropagation();" 
+                                title="Ver artículos comprados">
+                            <i class="bi bi-eye"></i>
+                            <span>{{ item.json_data.productos|length }} {% if item.json_data.productos|length == 1 %}Artículo{% else %}Artículos{% endif %}</span>
+                            <i class="bi bi-chevron-down chevron-articulo-icon"></i>
+                        </button>
+                        {% else %}
+                        <span class="btn-no-articulos">
+                            <i class="bi bi-box"></i> 0 Artículos
+                        </span>
+                        {% endif %}
+
+                        <!-- Botón Imprimir Factura (Solo visible en pantalla de escritorio) -->
+                        <a href="{{ url_for('pagos.factura', venta_id=v.id) }}" 
+                           target="_blank" 
+                           class="btn-trigger-imprimir d-none d-md-inline-flex" 
+                           onclick="event.stopPropagation();" 
+                           title="Imprimir Factura">
+                            <i class="bi bi-printer"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DE ARTÍCULOS DESPLEGABLE (SIN MODAL) -->
+                <div id="articulosFactura{{ v.id }}" class="collapse acordeon-articulos-collapse">
+                    <div class="acordeon-articulos-body">
+                        <div class="articulos-header-tag">
+                            Artículos de esta Compra
+                        </div>
+
+                        {% if item.json_data.productos and item.json_data.productos|length > 0 %}
+                        <div class="articulos-cards-list">
+                            {% for p in item.json_data.productos %}
+                            <div class="articulo-single-item">
+                                <div class="articulo-info-group">
+                                    <span class="articulo-cant-badge">{{ p.cantidad }}</span>
+                                    <span class="articulo-nombre" title="{{ p.nombre }}">{{ p.nombre }}</span>
+                                </div>
+                                <div class="articulo-precio">
+                                    C$ {{ "%.2f"|format(p.subtotal or (p.cantidad * p.precio_unitario)) }}
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="8" class="text-center py-4 " style="color: var(--color-text-muted);">
-                            Este cliente no registra compras ni facturas activas.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pie con Total Artículos -->
+                        <div class="articulos-footer-total">
+                            <span class="articulos-footer-label">Total Artículos:</span>
+                            <span class="articulos-footer-value">C$ {{ "%.2f"|format(v.total_venta) }}</span>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3 text-muted small">
+                            No hay productos registrados en esta factura.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DE ABONOS DESPLEGABLE (SIN ENCABEZADOS: DÍA, MÉTODO Y MONTO) -->
+                <div id="abonosFactura{{ v.id }}" class="collapse acordeon-abonos-collapse">
+                    <div class="acordeon-abonos-body">
+                        <div class="abonos-header-tag">
+                            Historial de Abonos
+                        </div>
+
+                        {% if item.json_data.pagos and item.json_data.pagos|length > 0 %}
+                        <div class="abonos-cards-list">
+                            {% for pg in item.json_data.pagos %}
+                            <div class="abono-single-item">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div>
+                                        <span class="abono-metodo">{{ pg.metodo or pg.tipo or 'Pago' }}</span>
+                                        <span class="abono-fecha">{{ pg.fecha }}</span>
+                                    </div>
+                                </div>
+                                <div class="abono-monto">
+                                    + C$ {{ "%.2f"|format(pg.monto) }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pie con Total Abonos -->
+                        <div class="abonos-footer-total">
+                            <span class="abonos-footer-label">Total Abonos:</span>
+                            <span class="abonos-footer-value">C$ {{ "%.2f"|format(item.total_abonado) }}</span>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3 text-muted small">
+                            Aún no se han recepcionado pagos o abonos para esta factura.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- DATA JSON DE LA FACTURA EMBEBIDA -->
+                <script type="application/json" id="factura-detalle-json-{{ v.id }}">
+                    {{ item.json_data | tojson | safe }}
+                </script>
+            </div>
+
+            {% else %}
+            <!-- Estado vacío si el cliente no tiene facturas registradas -->
+            <div class="portal-empty-state">
+                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                <span>Este cliente no tiene facturas ni compras registradas aún.</span>
+            </div>
+            {% endfor %}
         </div>
+
+        <!-- ALERTA CUANDO LA BÚSQUEDA NO ARROJA RESULTADOS -->
+        <div id="noFacturasAlert" class="portal-empty-state d-none mt-3">
+            <i class="bi bi-search fs-2 d-block mb-2 text-muted"></i>
+            No se encontraron compras o facturas que coincidan con la búsqueda.
+        </div>
+
     </div>
 
+</div>
+{% endblock %}
 
-
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/modules/portal-cliente.js') }}"></script>
 {% endblock %}
