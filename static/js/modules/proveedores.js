@@ -250,7 +250,7 @@
             var itemsPerPage = 10;
             var allRows = Array.from(document.querySelectorAll("#tablaProveedores tr"));
             var filteredRows = [...allRows];
-            var estadoFiltroActual = "TODOS";
+            var estadoFiltroActual = "ACTIVO";
 
             var renderControls = function (totalPages) {
                 var controlsContainer = document.getElementById("paginationControls");
@@ -319,9 +319,6 @@
                 var summaryEl = document.getElementById("paginationSummary");
                 if (summaryEl) summaryEl.innerText = summaryText;
 
-                var badgeTotal = document.getElementById("badgeTotalItems");
-                if (badgeTotal) badgeTotal.textContent = totalItems;
-
                 renderControls(totalPages);
             };
 
@@ -357,9 +354,10 @@
                 renderTable();
             };
 
-            document.querySelectorAll(".state-pill").forEach(function (pill) {
+            var pills = document.querySelectorAll(".toolbar-apex .state-pill");
+            pills.forEach(function (pill) {
                 pill.addEventListener("click", function () {
-                    document.querySelectorAll(".state-pill").forEach(function (p) { p.classList.remove("state-pill--active"); });
+                    pills.forEach(function (p) { p.classList.remove("state-pill--active"); });
                     this.classList.add("state-pill--active");
                     estadoFiltroActual = this.dataset.estado;
                     aplicarFiltros();
@@ -371,7 +369,7 @@
                 buscarProveedorInput.addEventListener("input", aplicarFiltros);
             }
 
-            renderTable();
+            aplicarFiltros();
         }
     };
 

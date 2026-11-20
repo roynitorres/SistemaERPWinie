@@ -8,8 +8,8 @@
     <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
         <h1 class="page-title-apex">
-            <i class="bi bi-truck px-2"></i>Directorio de Proveedores</h1>
-        <p class="page-subtitle-apex">Gestiona la información y contacto de todos tus proveedores.</p>
+          Proveedores</h1>
+        <p class="page-subtitle-apex">Contacto de todos los proveedores.</p>
     </div>
 
     <!-- ===================================== -->
@@ -23,19 +23,15 @@
                 <input type="text" class="toolbar-input" id="buscarProveedor" placeholder="Buscar por código, nombre o contacto...">
             </div>
 
-            <!-- TABS PILLS DE ESTADO (TODOS, ACTIVO, INACTIVO) -->
+            <!-- TABS PILLS DE ESTADO (ESTILO PÍLDORA: SOLO ACTIVO E INACTIVO) -->
             <div class="state-pills-bar">
-                <button type="button" class="state-pill state-pill--active" id="btnPillTodos" data-estado="TODOS">Todos</button>
-                <button type="button" class="state-pill" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
+                <button type="button" class="state-pill state-pill--active" id="btnPillActivo" data-estado="ACTIVO">Activo</button>
                 <button type="button" class="state-pill" id="btnPillInactivo" data-estado="INACTIVO">Inactivo</button>
             </div>
         </div>
 
         <!-- Acciones Derecha -->
         <div class="toolbar-actions-right">
-            <!-- Dynamic Count Badge (Número Puro) -->
-            <span id="badgeTotalItems" class="count-badge-apex" title="Total de registros">0</span>
-            
             <a href="{{ url_for('proveedores.exportar_proveedores') }}" class="btn-apex-outline">
                 <i class="bi bi-download"></i> Exportación
             </a>
@@ -227,24 +223,9 @@
                             {{ proveedor.ruc or '-' }}
                         </td>
                         <td class="data-table__cell text-end">
-                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
-                            <div class="dropdown d-inline-block">
-                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Opciones">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
-                                    <li>
-                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                             ACCIONES
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-editar-fila">
-                                             Editar 
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
+                            <button type="button" class="btn-action-edit btn-editar-fila" title="Editar Proveedor">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
