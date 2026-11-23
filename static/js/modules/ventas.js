@@ -406,7 +406,7 @@
             if (this.detalleVenta.length === 0) {
                 tbody.innerHTML = `
                     <tr class="data-table__row">
-                        <td colspan="7" class="data-table__cell text-center" style="padding: 40px 16px; color: var(--color-text-muted);">
+                        <td colspan="6" class="data-table__cell text-center" style="padding: 40px 16px; color: var(--color-text-muted);">
                             <i class="bi bi-cart-x d-block mb-2" style="font-size: 2.2rem; opacity: 0.5;"></i>
                             El carrito está vacío. Escanee un código de barras o use "Agregar Producto".
                         </td>
@@ -435,11 +435,6 @@
                         </div>
                     </td>
                     <td class="data-table__cell text-end" style="color: var(--color-text-main);">C$ ${producto.precio.toFixed(2)}</td>
-                    <td class="data-table__cell text-center">
-                        <input type="number" class="pos-field-input input-descuento" data-index="${index}" 
-                               style="width: 75px; height: 26px; padding: 0 4px; text-align: right; font-weight: 600;" 
-                               value="${producto.descuento_monto}" min="0">
-                    </td>
                     <td class="data-table__cell text-end" style="font-weight: 800; color: var(--color-primary);">C$ ${producto.subtotal.toFixed(2)}</td>
                     <td class="data-table__cell text-center">
                         <button type="button" class="btn-trash-item btn-eliminar-item" data-index="${index}" title="Quitar fila">
@@ -474,12 +469,6 @@
                 });
             });
 
-            tbody.querySelectorAll('.input-descuento').forEach(function (inp) {
-                inp.addEventListener('change', function () {
-                    self.actualizarLinea(parseInt(this.dataset.index), 'descuento_monto', this.value);
-                });
-            });
-
             this.actualizarTotales(subtotalGeneral);
         },
 
@@ -504,29 +493,8 @@
             }
         },
 
-        actualizarLinea: function (index, campo, valor) {
-            var p = this.detalleVenta[index];
-            if (!p) return;
-
-            if (campo === 'descuento_monto') {
-                var d = parseFloat(valor) || 0;
-                if (d < 0) d = 0;
-                var maxDescuento = p.precio * p.cantidad;
-                if (d > maxDescuento) {
-                    d = maxDescuento;
-                    this.mostrarMensaje("warning", "El descuento no puede superar el monto de la línea");
-                }
-                p.descuento_monto = d;
-            }
-
-            this.recalcularItem(p);
-            this.renderizarTabla();
-        },
-
         recalcularItem: function (p) {
-            var bruto = p.precio * p.cantidad;
-            var neto = bruto - (p.descuento_monto || 0);
-            p.subtotal = Math.max(0, neto);
+            p.subtotal = p.precio * p.cantidad;
         },
 
         aumentarCantidad: function (index) {
