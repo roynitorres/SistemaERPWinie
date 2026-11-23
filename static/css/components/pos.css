@@ -1,0 +1,566 @@
+/* ==========================================================================
+   MÓDULO DE FACTURACIÓN / PUNTO DE VENTA (POS) - VISTA ÚNICA MINIMALISTA
+   ========================================================================== */
+
+/* Contenedor Principal: 100% de la altura disponible sin scroll de página */
+.pos-workspace-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    overflow: hidden;
+    gap: 10px;
+}
+
+/* ==========================================================================
+   1. BARRA HORIZONTAL DE CLIENTE Y FACTURA (FUERA DE CARDS - MINIMALISTA)
+   ========================================================================== */
+.pos-header-horizontal {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+    flex-shrink: 0;
+}
+
+.pos-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pos-field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    margin-bottom: 2px;
+}
+
+.pos-field-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pos-field-icon-wrap i {
+    position: absolute;
+    left: 10px;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.pos-field-input {
+    width: 100%;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0 10px 0 32px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    background: var(--color-bg-card);
+    outline: none;
+    transition: all 0.15s ease;
+}
+
+.pos-field-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 71, 171, 0.12);
+}
+
+.pos-field-input--readonly {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-muted);
+    cursor: default;
+}
+
+/* ==========================================================================
+   2. GRID PRINCIPAL: 2 COLUMNAS (TABLA DIRECTA + PANEL DERECHO DE COBRO)
+   ========================================================================== */
+.pos-main-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 12px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* --------------------------------------------------------------------------
+   COLUMNA IZQUIERDA: BUSCADOR + AGREGAR + TABLA DIRECTA (SIN TÍTULO)
+   -------------------------------------------------------------------------- */
+.pos-left-panel {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Barra de Acción: Buscador rápido y botón agregar producto */
+.pos-action-toolbar {
+    padding: 8px 12px;
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.pos-search-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pos-search-wrapper i.search-ico {
+    position: absolute;
+    left: 11px;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+}
+
+.pos-search-input {
+    width: 100%;
+    height: 38px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    padding-left: 34px;
+    padding-right: 75px;
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    outline: none;
+    background: var(--color-bg-card);
+    transition: all 0.15s ease;
+}
+
+.pos-search-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 71, 171, 0.12);
+}
+
+.pos-f2-badge {
+    position: absolute;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.btn-add-product-pos {
+    height: 38px;
+    padding: 0 16px;
+    background: var(--color-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 71, 171, 0.25);
+}
+
+.btn-add-product-pos:hover {
+    background: var(--color-primary-hover, #003580);
+}
+
+/* Tabla Directa con Scroll Interno */
+.pos-table-container {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    min-height: 0;
+}
+
+.pos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+
+.pos-table th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--color-bg-card);
+    padding: 9px 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.pos-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.84rem;
+    vertical-align: middle;
+}
+
+.pos-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Controles de Cantidad en Fila */
+.pos-qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg-card);
+    overflow: hidden;
+}
+
+.pos-qty-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--color-text-muted);
+    transition: all 0.1s;
+}
+
+.pos-qty-btn:hover {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
+.pos-qty-val {
+    width: 32px;
+    height: 24px;
+    border: none;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.82rem;
+    outline: none;
+    color: var(--color-text-main);
+    background: transparent;
+}
+
+.btn-trash-item {
+    background: rgba(255, 82, 82, 0.1);
+    border: 1px solid rgba(255, 82, 82, 0.2);
+    color: var(--color-danger, #ef4444);
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    transition: all 0.15s;
+}
+
+.btn-trash-item:hover {
+    background: var(--color-danger, #ef4444);
+    color: #ffffff;
+}
+
+/* Barra Inferior del Carrito */
+.pos-table-footer-bar {
+    height: 34px;
+    padding: 0 14px;
+    background: var(--color-bg-card);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   COLUMNA DERECHA: COBRO, TOTAL SUPERIOR A NIVEL DE OJOS Y PAGOS
+   -------------------------------------------------------------------------- */
+.pos-right-panel {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* ★ TARJETA HERO: TOTAL A PAGAR (ARRIBA, INMEDIATAMENTE VISIBLE) */
+.pos-hero-total-card {
+    background: linear-gradient(135deg, #0047AB 0%, #002d73 100%);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 71, 171, 0.28);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.pos-hero-total-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pos-hero-total-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pos-hero-total-number {
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+    margin: 2px 0;
+}
+
+/* Desglose de Monto e IVA */
+.pos-breakdown-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.pos-breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.pos-breakdown-row strong {
+    color: var(--color-text-main);
+    font-weight: 700;
+}
+
+/* Métodos de Pago */
+.pos-payment-methods {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pos-pay-btn {
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 7px 4px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: var(--color-text-muted);
+}
+
+.pos-pay-btn i {
+    font-size: 1.05rem;
+}
+
+.pos-pay-btn span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.pos-pay-btn.active {
+    border-color: var(--color-primary);
+    background: rgba(0, 71, 171, 0.12);
+    color: var(--color-primary);
+}
+
+.pos-pay-btn.active span {
+    color: var(--color-primary);
+}
+
+/* Calculadora de Vuelto */
+.pos-cash-calculator {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pos-cash-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pos-cash-input-wrap {
+    position: relative;
+    width: 130px;
+}
+
+.pos-cash-input-wrap input {
+    width: 100%;
+    height: 32px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0 8px 0 24px;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-align: right;
+    outline: none;
+    color: var(--color-text-main);
+    background: var(--color-bg-card);
+}
+
+.pos-cash-input-wrap input:focus {
+    border-color: var(--color-primary);
+}
+
+.pos-currency-tag {
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+.pos-change-badge {
+    background: rgba(5, 150, 105, 0.12);
+    color: #10b981;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+/* Panel de Crédito */
+.pos-credito-compact-panel {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--color-primary);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* Acciones Finales */
+.pos-checkout-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.btn-pos-submit {
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    width: 100%;
+    height: 46px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(5, 150, 105, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+}
+
+.btn-pos-submit:hover {
+    background: #047857;
+}
+
+.pos-f9-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.btn-pos-cancel {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    width: 100%;
+    height: 28px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.15s;
+}
+
+.btn-pos-cancel:hover {
+    color: var(--color-danger, #ef4444);
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+}

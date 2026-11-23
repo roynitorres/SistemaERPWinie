@@ -1,246 +1,283 @@
 {% extends "base.html" %}
 
+{% block title %}Punto de Venta / Facturación{% endblock %}
 
-{% block title %}Nueva Venta{% endblock %}
-
-{% block topbar_title %}Nueva Venta{% endblock %}
+{% block topbar_title %}Punto de Venta{% endblock %}
 
 {% block content %}
-<!-- ===================================== -->
-<!-- ENCABEZADO DE PÁGINA Y STEPPER APEX DARK -->
-<!-- ===================================== -->
-<div class="page-header-apex d-flex justify-content-between align-items-center flex-wrap gap-3">
-    <div>
-        <h1 class="page-title-apex">
-            <i class="bi bi-cart-plus px-2"></i>Punto de Venta</h1>
-        <p class="page-subtitle-apex">Busca, agrega productos y procesa nuevas ventas.</p>
-    </div>
+<form id="formVenta" novalidate onsubmit="return false;">
+    <div class="pos-workspace-container">
 
-    <!-- PILDORAS STEPPER PASO 1 Y PASO 2 -->
-    <div class="d-flex gap-2">
-        <button type="button" class="stepper-tab-btn active" id="pillPaso1">
-            <span style="background: rgba(0,0,0,0.2); width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">1</span>
-            Productos de la Venta
-        </button>
-        <button type="button" class="stepper-tab-btn" id="pillPaso2">
-            <span style="background: rgba(0,0,0,0.2); width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">2</span>
-            Cliente & Pago / Crédito
-        </button>
-    </div>
-</div>
-
-<!-- ===================================== -->
-<!-- PASO 1: PRODUCTOS PRIMERO (CARRITO Y TOTALES) -->
-<!-- ===================================== -->
-<div id="vistaPaso1" class="step-view">
-    <div class="panel" style="padding: 0; display: flex; flex-direction: column; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
-        <div style="padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); background-color: var(--color-bg-card);">
-            <div>
-                <h5 style="margin: 0; color: var(--color-text-main); font-weight: 700;">
-                    <i class="bi bi-box-seam-fill  me-2"></i> Detalle de Productos 
-                </h5>
-                <small style="color: var(--color-text-muted);">Busque y seleccione los productos que el cliente va a comprar.</small>
-            </div>
-            <button type="button" class="btn-neon-primary" id="btnAgregarProducto" onclick="abrirModal('modalProductos')">
-                <i class="bi bi-plus-lg me-1"></i> Agregar Producto
-            </button>
-        </div>
-
-        <div class="table-responsive" style="min-height: 280px; max-height: 480px; overflow-y: auto;">
-            <table class="data-table" style="margin-bottom: 0;">
-                <thead class="data-table__head" style="position: sticky; top: 0; z-index: 2; background-color: var(--color-bg-card);">
-                    <tr>
-                        <th>Código</th>
-                        <th>Descripción</th>
-                        <th style="text-align: center;">Cantidad</th>
-                        <th style="text-align: right;">P. Unitario (C$)</th>
-                        <th style="text-align: right;">Descuento (C$)</th>
-                        <th style="text-align: right;">Subtotal (C$)</th>
-                        <th style="text-align: right;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="detalleVentaBody"></tbody>
-            </table>
-        </div>
-
-        <!-- PIE DE FACTURA CON TOTALES -->
-        <div style="z-index: 10; margin-top: auto; background-color: var(--color-bg-card); border-top: 1px solid var(--color-border);">
-            <div style="padding: 20px 24px;">
-                <div style="max-width: 340px; margin-left: auto;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: var(--color-text-primary);">Subtotal</span>
-                        <strong id="subtotalVenta" style="color: var(--color-text-main);">C$ 0.00</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: var(--color-text-muted);">IVA ({{ empresa.iva if empresa else 15 }}%)</span>
-                        <strong id="ivaVenta" style="color: var(--color-text-main);">C$ 0.00</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); font-size: 1.35rem;">
-                        <span style="font-weight: 800; color: var(--color-text-main);">Total a Pagar</span>
-                        <strong id="totalVenta" style="color: var(--color-primary); font-weight: 800; font-size: 1.5rem;">C$ 0.00</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--color-border); background-color: var(--color-bg-card);">
-                <button type="button" class="btn-apex-outline" id="btnLimpiarVenta">
-                    <i class="bi bi-arrow-clockwise me-1"></i> Limpiar Carrito
-                </button>
-                <button type="button" class="btn-neon-primary" id="btnIrPaso2" style="padding: 10px 24px;">
-                   Continuar a Cliente  <i class="bi bi-arrow-right ms-2"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===================================== -->
-<!-- PASO 2: DATOS DEL CLIENTE ARRIBA & PLAN DE CUOTAS ABAJO -->
-<!-- ===================================== -->
-<div id="vistaPaso2" class="step-view" style="display: none;">
-    <form id="formVenta" novalidate>
-        <div class="d-flex flex-column gap-4">
-            
-            <!-- PANEL SUPERIOR: DATOS DEL CLIENTE Y FACTURA -->
-            <div class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px;">
-                <h5 style="margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; color: var(--color-text-main); font-weight: 700;">
-                    <i class="bi bi-person-lines-fill  me-2" style="color: var(--color-primary);"></i> Datos del Cliente
-                </h5>
-                
-                <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr; gap: 16px; align-items: start;">
-                    <!-- CLIENTE -->
-                    <div class="form-group">
-                        <label class="form-label form-label--required">Cliente</label>
-                        <input type="text" class="form-input" id="cliente_nombre"
-                            list="clientesList" placeholder="Escriba o seleccione un cliente" autocomplete="off">
-                        <datalist id="clientesList">
-                            {% for cliente in clientes %}
-                            <option value="{{ cliente.nombres }}"
-                                data-id="{{ cliente.id }}"
+        <!-- ============================================================== -->
+        <!-- 1. DATOS DEL CLIENTE Y FACTURA EN FILA HORIZONTAL (SIN CARD)   -->
+        <!-- ============================================================== -->
+        <div class="pos-header-horizontal">
+            <!-- 1. Cliente -->
+            <div class="pos-field-group">
+                <label class="pos-field-label">Cliente <span class="text-danger">*</span></label>
+                <div class="pos-field-icon-wrap">
+                    <i class="bi bi-person"></i>
+                    <input type="text" 
+                           class="pos-field-input" 
+                           id="cliente_nombre" 
+                           list="clientesList" 
+                           placeholder="Escriba o seleccione un cliente..." 
+                           autocomplete="off">
+                    <datalist id="clientesList">
+                        {% for cliente in clientes %}
+                        <option value="{{ cliente.nombres }}" 
+                                data-id="{{ cliente.id }}" 
                                 data-telefono="{{ cliente.telefono or '' }}"></option>
-                            {% endfor %}
-                        </datalist>
-                        <input type="hidden" id="cliente_id" name="cliente_id">
-                    </div>
-
-                    <!-- TIPO VENTA -->
-                    <div class="form-group">
-                        <label class="form-label">Tipo de Venta</label>
-                        <select class="form-input" id="tipo_venta" name="tipo_venta">
-                            <option value="CONTADO">Contado</option>
-                            <option value="CREDITO">Crédito</option>
-                        </select>
-                    </div>
-
-                    <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
-
-                    <!-- N° FACTURA -->
-                    <div class="form-group">
-                        <label class="form-label">N° Factura</label>
-                        <input type="text" class="form-input" id="numero_factura" name="numero_factura"
-                            value="{{ numero_factura }}" readonly style="background-color: rgba(255, 255, 255, 0.03); color: var(--color-primary); font-weight: 700;">
-                    </div>
-
-                    <!-- FECHA VENTA -->
-                    <div class="form-group">
-                        <label class="form-label">Fecha Emisión</label>
-                        <input type="date" class="form-input" id="fecha_venta" name="fecha_venta" value="{{ fecha_actual }}">
-                    </div>
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="cliente_id" name="cliente_id">
                 </div>
             </div>
 
-            <!-- PANEL INFERIOR: CONFIGURACIÓN Y TABLA DE CUOTAS / AMORTIZACIÓN (SÓLO CRÉDITO) -->
-            <div class="panel" id="panelCuotasCredito" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; margin-bottom: 20px;">
-                    <h5 style="margin: 0; color: var(--color-text-primary); font-weight: 700;">
-                        <i class="bi bi-calendar-range-fill me-2" style="color: var(--color-primary);"></i> Plan de Cuotas / Amortización de Crédito
-                    </h5>
-                    <span class="badge-pill-apex badge-pill-apex--active" style="font-size: 0.8rem; padding: 4px 10px;">
-                        Cuotas <span id="lblCuotasContador">0/0</span>
-                    </span>
+            <!-- 2. Tipo de Venta -->
+            <div class="pos-field-group">
+                <label class="pos-field-label">Tipo de Venta</label>
+                <div class="pos-field-icon-wrap">
+                    <i class="bi bi-wallet2"></i>
+                    <select class="pos-field-input" id="tipo_venta" name="tipo_venta" style="cursor: pointer;">
+                        <option value="CONTADO" selected>Contado (Inmediato)</option>
+                        <option value="CREDITO">Crédito (A Plazos)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 3. N° Factura -->
+            <div class="pos-field-group">
+                <label class="pos-field-label">N° Factura</label>
+                <div class="pos-field-icon-wrap">
+                    <i class="bi bi-hash"></i>
+                    <input type="text" 
+                           class="pos-field-input pos-field-input--readonly" 
+                           id="numero_factura" 
+                           name="numero_factura" 
+                           value="{{ numero_factura }}" 
+                           readonly>
+                    <input type="hidden" id="serie_factura" name="serie_factura" value="{{ empresa.serie_factura if empresa else 'F001' }}">
+                </div>
+            </div>
+
+            <!-- 4. Fecha de Emisión -->
+            <div class="pos-field-group">
+                <label class="pos-field-label">Fecha Emisión</label>
+                <div class="pos-field-icon-wrap">
+                    <i class="bi bi-calendar-event"></i>
+                    <input type="date" 
+                           class="pos-field-input pos-field-input--readonly" 
+                           id="fecha_venta" 
+                           name="fecha_venta" 
+                           value="{{ fecha_actual }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- 2. WORKSPACE POS EN 2 COLUMNAS (UNA SOLA VISTA SIN SCROLL)     -->
+        <!-- ============================================================== -->
+        <div class="pos-main-grid">
+
+            <!-- ---------------------------------------------------------- -->
+            <!-- A. COLUMNA IZQUIERDA: BUSCADOR + AGREGAR + TABLA DIRECTA   -->
+            <!-- ---------------------------------------------------------- -->
+            <div class="pos-left-panel">
+                
+                <!-- BARRA DE ACCIÓN: BUSCADOR / ESCÁNER + BOTÓN AGREGAR -->
+                <div class="pos-action-toolbar">
+                    <div class="pos-search-wrapper">
+                        <i class="bi bi-search search-ico"></i>
+                        <input type="text" 
+                               class="pos-search-input" 
+                               id="buscarProductoRapido" 
+                               placeholder="Escanear código de barras o teclear nombre (Enter o F2)..." 
+                               autofocus 
+                               autocomplete="off">
+                        <span class="pos-f2-badge"><i class="bi bi-upc-scan"></i> F2</span>
+                    </div>
+
+                    <button type="button" class="btn-add-product-pos" id="btnAgregarProducto">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Agregar Producto</span>
+                    </button>
                 </div>
 
-                <!-- PARÁMETROS DEL PLAN DE PAGOS -->
-                <div style="display: grid; grid-template-columns: 1fr 1.3fr 1fr 140px; gap: 14px; align-items: end; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label class="form-label">N° de Cuotas</label>
-                        <input type="number" id="num_cuotas" class="form-input text-center" min="1" max="24" value="2" style="font-weight: 800; color: var(--color-text-subtle);">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Frecuencia de Pago</label>
-                        <select id="frecuencia_pago" class="form-input" >
-                            <option value="15">Quincenal (cada 15 días)</option>
-                            <option value="30" selected >Mensual (cada 30 días)</option>
-                            <option value="7">Semanal (cada 7 días)</option>
-                            <option value="CUSTOM">Personalizado</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Días de Gracia</label>
-                        <input type="number" id="dias_gracia_cuota" class="form-input text-center" min="0" max="15" value="2" style="font-weight: 700;color: var(--color-text-subtle);">
-                    </div>
-
-                    <div class="form-group">
-                        <button type="button" class="btn-apex-outline w-100" id="btnGenerarCuotas" style="padding: 10px 8px; font-size: 0.82rem;">
-                            <i class="bi bi-arrow-repeat me-1"></i> Recalcular
-                        </button>
-                    </div>
-                </div>
-
-                <!-- TABLA EDITABLE DE CUOTAS SUGERIDAS -->
-                <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-bg-card); max-height: 320px; overflow-y: auto;">
-                    <table class="data-table" style="margin-bottom: 0;">
-                        <thead class="data-table__head" style="position: sticky; top: 0; background: var(--color-bg-card); z-index: 2;">
+                <!-- TABLA DIRECTA DE PRODUCTOS (SIN TÍTULOS INNECESARIOS) -->
+                <div class="pos-table-container">
+                    <table class="pos-table">
+                        <thead>
                             <tr>
-                                <th style="width: 70px; text-align: center;">N°</th>
-                                <th>Fecha Vencimiento Sugerida (Editable)</th>
-                                <th style="text-align: right;">Monto Cuota (C$) (Editable)</th>
-                                <th style="text-align: center;">Días Gracia</th>
-                                <th style="text-align: center;">Vencimiento Final con Gracia</th>
+                                <th style="width: 14%;">Código</th>
+                                <th style="width: 36%;">Descripción</th>
+                                <th style="width: 16%; text-align: center;">Cantidad</th>
+                                <th style="width: 13%; text-align: right;">P. Unit (C$)</th>
+                                <th style="width: 11%; text-align: center;">Desc (C$)</th>
+                                <th style="width: 14%; text-align: right;">Subtotal (C$)</th>
+                                <th style="width: 6%; text-align: center;"></th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyCuotasCredito"></tbody>
+                        <tbody id="detalleVentaBody">
+                            <!-- Los productos agregados se renderizan dinámicamente aquí -->
+                        </tbody>
                     </table>
                 </div>
 
-                <!-- BARRA DE VERIFICACIÓN DE TOTAL DE CUOTAS EN TIEMPO REAL -->
-                <div style="margin-top: 16px; padding: 12px 16px; background-color: var(--color-bg-card-hover); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--color-border);">
-                    <div style="font-size: 0.88rem; color: var(--color-text-muted);">
-                        Suma total del plan de cuotas:
+                <!-- BARRA DE ESTADO INFERIOR DEL CARRITO -->
+                <div class="pos-table-footer-bar">
+                    <div>
+                        Carrito: <strong id="lblTotalItemsCarrito" style="color: var(--color-text-main);">0 productos</strong>
                     </div>
-                    <div id="resumenCuotasValidacion" style="font-size: 1.1rem; font-weight: 800; color: var(--color-primary);">
+                    <div>
+                        Atajos: <span style="font-family: monospace; font-weight: 700; color: var(--color-primary);">F2</span> Buscar | <span style="font-family: monospace; font-weight: 700; color: #10b981;">F9</span> Facturar
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------------------------------------------------- -->
+            <!-- B. COLUMNA DERECHA: TOTAL A LA ALTURA DE LOS OJOS & COBRO  -->
+            <!-- ---------------------------------------------------------- -->
+            <div class="pos-right-panel">
+
+                <!-- 1. TARJETA HERO: TOTAL A PAGAR (ARRIBA, VISIBLE DE INMEDIATO) -->
+                <div class="pos-hero-total-card">
+                    <div class="pos-hero-total-header">
+                        <span class="pos-hero-total-label">
+                            <i class="bi bi-cash-coin"></i> Total a Pagar
+                        </span>
+                        <span style="font-size: 0.68rem; background: rgba(255,255,255,0.2); padding: 2px 7px; border-radius: 10px; font-weight: 700;">
+                            C$ (Córdobas)
+                        </span>
+                    </div>
+                    <div class="pos-hero-total-number" id="totalVenta">
                         C$ 0.00
                     </div>
                 </div>
-            </div>
 
-            <!-- RESUMEN FINAL Y BOTONES DE ACCIÓN PASO 2 -->
-            <div class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <span style="font-size: 1rem; color: var(--color-text-main); font-weight: 700;">Resumen General Factura</span>
-                    <span style="font-size: 1.3rem; font-weight: 800; color: var(--color-primary);" id="totalPaso2">C$ 0.00</span>
+                <!-- 2. DESGLOSE DE MONTO E IVA -->
+                <div class="pos-breakdown-box">
+                    <div class="pos-breakdown-row">
+                        <span>Monto (Subtotal):</span>
+                        <strong id="subtotalVenta">C$ 0.00</strong>
+                    </div>
+                    <div class="pos-breakdown-row">
+                        <span>IVA ({{ empresa.iva if empresa else 15 }}%):</span>
+                        <strong id="ivaVenta">C$ 0.00</strong>
+                    </div>
                 </div>
 
-                <div class="pt-3" style="display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--color-border);">
-                    <button type="button" class="btn-apex-outline" id="btnVolverPaso1" style="padding: 12px 20px;">
-                        <i class="bi bi-arrow-left me-2"></i> Volver a Productos
+                <!-- 3. FORMA DE PAGO -->
+                <div>
+                    <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--color-text-muted); display: block; margin-bottom: 4px;">
+                        Forma de Pago
+                    </span>
+                    <div class="pos-payment-methods">
+                        <div class="pos-pay-btn active" data-metodo="efectivo" id="payMethodEfectivo">
+                            <i class="bi bi-cash"></i>
+                            <span>Efectivo</span>
+                        </div>
+                        <div class="pos-pay-btn" data-metodo="tarjeta" id="payMethodTarjeta">
+                            <i class="bi bi-credit-card"></i>
+                            <span>Tarjeta</span>
+                        </div>
+                        <div class="pos-pay-btn" data-metodo="transfer" id="payMethodTransfer">
+                            <i class="bi bi-phone"></i>
+                            <span>Transfer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. CALCULADORA DE RECIBIDO Y CAMBIO -->
+                <div class="pos-cash-calculator" id="posCashBox">
+                    <div class="pos-cash-row">
+                        <span style="font-size: 0.74rem; font-weight: 700; color: var(--color-text-muted);">Monto Recibido:</span>
+                        <div class="pos-cash-input-wrap">
+                            <span class="pos-currency-tag">C$</span>
+                            <input type="text" id="inputMontoRecibido" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="pos-cash-row" style="padding-top: 4px; border-top: 1px dashed var(--color-border);">
+                        <span style="font-size: 0.74rem; font-weight: 800; color: var(--color-text-main);">Cambio / Vuelto:</span>
+                        <span class="pos-change-badge" id="badgeCambio">C$ 0.00</span>
+                    </div>
+                </div>
+
+                <!-- 5. CONFIGURACIÓN COMPACTA DE CUOTAS (SOLO SI ES CRÉDITO) -->
+                <div class="pos-credito-compact-panel" id="panelCuotasCredito" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.72rem; font-weight: 800; color: var(--color-primary); text-transform: uppercase;">
+                            <i class="bi bi-calendar3 me-1"></i> Plan de Cuotas
+                        </span>
+                        <span id="lblCuotasContador" style="font-size: 0.7rem; font-weight: 700; color: var(--color-text-muted);">0/0</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                        <div>
+                            <label style="font-size: 0.65rem; color: var(--color-text-muted); font-weight: 700;">N° Cuotas</label>
+                            <input type="number" id="num_cuotas" class="pos-field-input" min="1" max="24" value="2" style="height: 30px; padding: 0 6px; font-weight: 800; text-align: center;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.65rem; color: var(--color-text-muted); font-weight: 700;">Frecuencia</label>
+                            <select id="frecuencia_pago" class="pos-field-input" style="height: 30px; padding: 0 4px; font-size: 0.75rem;">
+                                <option value="15">Quincenal (15 d)</option>
+                                <option value="30" selected>Mensual (30 d)</option>
+                                <option value="7">Semanal (7 d)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                        <span style="font-size: 0.68rem; color: var(--color-text-muted);">Días Gracia:</span>
+                        <input type="number" id="dias_gracia_cuota" class="pos-field-input" min="0" max="15" value="2" style="width: 50px; height: 26px; padding: 0 4px; text-align: center; font-weight: 700;">
+                        <button type="button" class="btn-apex-outline" id="btnGenerarCuotas" style="padding: 2px 8px; font-size: 0.7rem; height: 26px;">
+                            <i class="bi bi-arrow-repeat"></i> Calcular
+                        </button>
+                    </div>
+
+                    <!-- Tabla de Cuotas -->
+                    <div style="max-height: 120px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 6px; margin-top: 4px; background: var(--color-bg-card);">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.72rem;">
+                            <thead>
+                                <tr style="background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--color-border);">
+                                    <th style="padding: 3px 6px;">N°</th>
+                                    <th style="padding: 3px 6px;">Vencimiento</th>
+                                    <th style="padding: 3px 6px; text-align: right;">Monto (C$)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCuotasCredito"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="resumenCuotasValidacion" style="font-size: 0.72rem; font-weight: 700; color: var(--color-primary); margin-top: 2px;">
+                        C$ 0.00
+                    </div>
+                </div>
+
+                <!-- 6. BOTONES DE ACCIÓN: EMITIR FACTURA Y LIMPIAR -->
+                <div class="pos-checkout-actions">
+                    <button type="button" class="btn-pos-submit" id="btnGuardar">
+                        <i class="bi bi-printer-fill"></i>
+                        <span>PROCESAR Y FACTURAR</span>
+                        <span class="pos-f9-badge">F9</span>
                     </button>
-                    <button type="button" class="btn-neon-primary" id="btnGuardar" style="padding: 12px 28px; font-size: 1rem;">
-                        <i class="bi bi-floppy me-2"></i> Procesar y Emitir Factura
+
+                    <button type="button" class="btn-pos-cancel" id="btnLimpiarVenta">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        <span>Limpiar Venta Actual</span>
                     </button>
                 </div>
+
             </div>
 
         </div>
-    </form>
-</div>
+    </div>
+</form>
 
-
-<!-- ===================================== -->
-<!-- MODAL PRODUCTOS APEX DARK -->
-<!-- ===================================== -->
+<!-- ============================================================== -->
+<!-- 3. MODAL CATÁLOGO DE PRODUCTOS (BÚSQUEDA Y SELECCIÓN MÚLTIPLE) -->
+<!-- ============================================================== -->
 <div class="modal-overlay" id="modalProductos">
     <div class="modal-window" style="max-width: 950px;">
         <div class="modal-header">
@@ -253,14 +290,17 @@
         </div>
 
         <div class="modal-body py-3">
-            <!-- BUSCADOR + CATEGORÍA PILLS -->
+            <!-- Buscador en Modal + Categorías -->
             <div class="d-flex flex-column gap-2 mb-3">
                 <div class="toolbar-search-box" style="width: 100%;">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="toolbar-input" id="buscarProducto" placeholder="Buscar por código, nombre o marca... (Doble clic en fila para agregar al instante)">
+                    <input type="text" 
+                           class="toolbar-input" 
+                           id="buscarProducto" 
+                           placeholder="Buscar por código, nombre o marca... (Doble clic en fila para agregar)">
                 </div>
 
-                <!-- PILLS DE CATEGORÍAS -->
+                <!-- Pills de Categorías -->
                 <div class="state-pills-bar modal-category-pills" style="overflow-x: auto; white-space: nowrap; padding-bottom: 4px; border-bottom: 1px solid var(--color-border);">
                     <button type="button" class="state-pill state-pill--active modal-cat-pill" data-categoria-id="TODAS">Todas las Categorías</button>
                     {% for cat in categorias %}
@@ -269,7 +309,7 @@
                 </div>
             </div>
 
-            <!-- TABLA DE PRODUCTOS -->
+            <!-- Tabla de Productos en Modal -->
             <div class="table-responsive" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-bg-card);">
                 <table class="data-table" style="margin-bottom: 0;">
                     <thead class="data-table__head" style="position: sticky; top: 0; z-index: 2; background-color: var(--color-bg-card);">
@@ -289,7 +329,7 @@
             </div>
         </div>
 
-        <!-- PIE DE MODAL CON RESUMEN DE SELECCIÓN -->
+        <!-- Pie de Modal -->
         <div class="modal-footer" style="justify-content: space-between; align-items: center; background: var(--color-bg-card); border-top: 1px solid var(--color-border);">
             <div id="modalSelectionSummary" style="font-size: 0.88rem; color: var(--color-text-muted);">
                 <span id="selectedCountText">0 productos seleccionados</span>
@@ -304,14 +344,14 @@
     </div>
 </div>
 
-<!-- ===================================== -->
-<!-- MODAL CONFIRMACION VENTA ENRIQUECIDO -->
-<!-- ===================================== -->
+<!-- ============================================================== -->
+<!-- 4. MODAL CONFIRMACIÓN DE EMISIÓN DE FACTURA                     -->
+<!-- ============================================================== -->
 <div class="modal-overlay" id="modalConfirmarVenta">
-    <div class="modal-window" style="max-width: 500px;">
+    <div class="modal-window" style="max-width: 480px;">
         <div class="modal-header">
             <h5 class="modal-title">
-                <i class="bi bi-question-circle-fill  me-1"></i> Confirmar Emisión de Factura
+                <i class="bi bi-question-circle-fill me-1" style="color: var(--color-primary);"></i> Confirmar Emisión de Factura
             </h5>
             <button type="button" class="modal-close-btn" onclick="cerrarModal('modalConfirmarVenta')">
                 <i class="bi bi-x-lg"></i>
@@ -321,35 +361,37 @@
         <div class="modal-body py-4">
             <div class="p-3 mb-3" style="background-color: var(--color-bg-card-hover); border: 1px solid var(--color-border); border-radius: 12px;">
                 <div class="d-flex justify-content-between mb-2">
-                    <span style="color: var(--color-text-main); font-size: 0.88rem;">Cliente:</span>
+                    <span style="color: var(--color-text-muted); font-size: 0.86rem;">Cliente:</span>
                     <strong id="confirmCliente" style="color: var(--color-text-main);"></strong>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
-                    <span style="color: var(--color-text-main); font-size: 0.88rem;">Tipo de Venta:</span>
+                    <span style="color: var(--color-text-muted); font-size: 0.86rem;">Tipo de Venta:</span>
                     <strong id="confirmTipoVenta" style="color: var(--color-text-main);"></strong>
                 </div>
                 <div class="d-flex justify-content-between mb-2" id="rowConfirmCuotas" style="display: none;">
-                    <span style="color: var(--color-text-main); font-size: 0.88rem;">Cantidad de Cuotas:</span>
+                    <span style="color: var(--color-text-muted); font-size: 0.86rem;">Plan de Cuotas:</span>
                     <strong id="confirmCuotas" style="color: var(--color-text-main);"></strong>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
-                    <span style="color: var(--color-text-main); font-size: 0.88rem;">N° Factura:</span>
-                    <strong id="confirmNumFactura" style="color: var(--color-text-main);"></strong>
+                    <span style="color: var(--color-text-muted); font-size: 0.86rem;">N° Factura:</span>
+                    <strong id="confirmNumFactura" style="color: var(--color-primary); font-family: monospace;"></strong>
                 </div>
                 <div class="d-flex justify-content-between mt-3 pt-2" style="border-top: 1px solid var(--color-border); font-size: 1.25rem;">
                     <span style="color: var(--color-text-main); font-weight: 700;">Monto Total:</span>
-                    <strong id="confirmTotal" style="color: var(--color-text-main); font-weight: 800;"></strong>
+                    <strong id="confirmTotal" style="color: var(--color-primary); font-weight: 900;"></strong>
                 </div>
             </div>
-            <p style="text-align: center; margin-top: 12px; color: var(--color-text-main); font-size: 0.9rem;">¿Está seguro que desea procesar y registrar esta factura?</p>
+            <p style="text-align: center; margin-top: 8px; color: var(--color-text-muted); font-size: 0.88rem;">
+                ¿Desea procesar la venta y generar la factura para su cobro e impresión?
+            </p>
         </div>
 
         <div class="modal-footer" style="justify-content: center; gap: 12px;">
             <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalConfirmarVenta')">
                 Cancelar
             </button>
-            <button type="button" class="btn-neon-primary" id="btnConfirmarGuardar">
-                <i class="bi bi-check-lg me-1"></i> Confirmar y Guardar
+            <button type="button" class="btn-neon-primary" id="btnConfirmarGuardar" style="background: #059669; border-color: #059669;">
+                <i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir
             </button>
         </div>
     </div>
@@ -361,4 +403,5 @@
 <script>
     window.empresaIVA = Number("{{ empresa.iva if empresa else 15 }}");
 </script>
+<script src="{{ url_for('static', filename='js/modules/ventas.js') }}?v=3.0"></script>
 {% endblock %}

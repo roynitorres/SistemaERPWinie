@@ -1,6 +1,6 @@
 /* ==========================================================================
    SISTEMA ERP WINIE — MÓDULO DE VENTAS / POS (static/js/modules/ventas.js)
-   Búsqueda de productos, carrito dinámico, calculador de crédito y facturación
+   Punto de Venta en Vista Única, Carrito Dinámico, Escáner y Facturación
    ========================================================================== */
 
 (function (window, document) {
@@ -13,6 +13,7 @@
         categoriaSeleccionada: 'TODAS',
         searchDebounceTimer: null,
         productosMap: {},
+        formaPagoSeleccionada: 'efectivo',
 
         /**
          * Muestra una notificación Toast flotante
@@ -43,41 +44,7 @@
         },
 
         /**
-         * Control del Stepper (Paso 1: Selección Productos vs Paso 2: Datos Cliente y Crédito)
-         */
-        initStepper: function () {
-            var self = this;
-            var pillPaso1 = document.getElementById('pillPaso1');
-            var pillPaso2 = document.getElementById('pillPaso2');
-            var vistaPaso1 = document.getElementById('vistaPaso1');
-            var vistaPaso2 = document.getElementById('vistaPaso2');
-            var btnIrPaso2 = document.getElementById('btnIrPaso2');
-            var btnVolverPaso1 = document.getElementById('btnVolverPaso1');
-            var inputClienteNombre = document.getElementById('cliente_nombre');
-
-            this.irAPaso = function (paso) {
-                if (paso === 1) {
-                    if (pillPaso1) pillPaso1.classList.add('active');
-                    if (pillPaso2) pillPaso2.classList.remove('active');
-                    if (vistaPaso1) vistaPaso1.style.display = 'block';
-                    if (vistaPaso2) vistaPaso2.style.display = 'none';
-                } else {
-                    if (pillPaso1) pillPaso1.classList.remove('active');
-                    if (pillPaso2) pillPaso2.classList.add('active');
-                    if (vistaPaso1) vistaPaso1.style.display = 'none';
-                    if (vistaPaso2) vistaPaso2.style.display = 'block';
-                    if (inputClienteNombre) inputClienteNombre.focus();
-                }
-            };
-
-            if (pillPaso1) pillPaso1.addEventListener('click', function () { self.irAPaso(1); });
-            if (pillPaso2) pillPaso2.addEventListener('click', function () { self.irAPaso(2); });
-            if (btnIrPaso2) btnIrPaso2.addEventListener('click', function () { self.irAPaso(2); });
-            if (btnVolverPaso1) btnVolverPaso1.addEventListener('click', function () { self.irAPaso(1); });
-        },
-
-        /**
-         * Selección de cliente mediante Datalist
+         * Inicialización del selector de clientes mediante Datalist
          */
         initClienteDatalist: function () {
             var inputClienteNombre = document.getElementById('cliente_nombre');
@@ -105,7 +72,93 @@
         },
 
         /**
-         * Búsqueda dinámica de productos en modal
+         * Buscador rápido por código de barras / texto con escaneo directo
+         */
+        initBuscadorRapido: function () {
+            var self = this;
+            var inputRapido = document.getElementById('buscarProductoRapido');
+            if (!inputRapido) return;
+
+            inputRapido.addEventListener('keydown', async function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var val = this.value.trim();
+                    if (!val) return;
+
+                    try {
+                        var url = '/buscar-productos?busqueda=' + encodeURIComponent(val) + '&categoria_id=TODAS';
+                        var resp = await fetch(url);
+                        var productos = await resp.json();
+
+                        if (!productos || productos.length === 0) {
+                            self.mostrarMensaje("warning", `No se encontró producto con: "${val}"`);
+                            return;
+                        }
+
+                        // Coincidencia exacta o único resultado
+                        var match = productos.find(function (p) {
+                            return (p.codigo && p.codigo.toLowerCase() === val.toLowerCase());
+                        }) || (productos.length === 1 ? productos[0] : null);
+
+                        if (match) {
+                            self.agregarOIncrementarProducto(match);
+                            inputRapido.value = '';
+                        } else {
+                            // Múltiples coincidencias: abrir modal para selección visual
+                            var buscarModal = document.getElementById('buscarProducto');
+                            if (buscarModal) buscarModal.value = val;
+                            window.ERP.UI.openModal('modalProductos');
+                            self.buscarProductos(val);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        self.mostrarMensaje("danger", "Error al buscar el producto");
+                    }
+                }
+            });
+        },
+
+        /**
+         * Agregar producto al carrito o incrementar si ya existe
+         */
+        agregarOIncrementarProducto: function (producto) {
+            if (producto.stock <= 0) {
+                this.mostrarMensaje("danger", `El producto "${producto.nombre}" está agotado`);
+                return;
+            }
+
+            var existeIndex = this.detalleVenta.findIndex(function (p) {
+                return p.producto_id === producto.id;
+            });
+
+            if (existeIndex !== -1) {
+                var item = this.detalleVenta[existeIndex];
+                if (item.cantidad + 1 > producto.stock) {
+                    this.mostrarMensaje("warning", `Stock máximo alcanzado (${producto.stock} unid.)`);
+                    return;
+                }
+                item.cantidad++;
+                this.recalcularItem(item);
+                this.renderizarTabla();
+                this.mostrarMensaje("success", `Cantidad incrementada: "${producto.nombre}" (${item.cantidad})`);
+            } else {
+                this.detalleVenta.push({
+                    producto_id: producto.id,
+                    codigo: producto.codigo,
+                    nombre: producto.nombre,
+                    precio: producto.precio,
+                    descuento_monto: 0,
+                    cantidad: 1,
+                    stock: producto.stock,
+                    subtotal: producto.precio
+                });
+                this.renderizarTabla();
+                this.mostrarMensaje("success", `Se agregó "${producto.nombre}"`);
+            }
+        },
+
+        /**
+         * Búsqueda dinámica de productos en modal catálogo
          */
         initBuscadorProductosModal: function () {
             var self = this;
@@ -181,7 +234,7 @@
                     tbodyBusqueda.innerHTML = `
                         <tr class="data-table__row">
                             <td colspan="6" class="data-table__cell text-center py-3" style="color: var(--color-danger);">
-                                <i class="bi bi-emoji-frown me-1"></i> No se encontraron productos en esta categoría
+                                <i class="bi bi-emoji-frown me-1"></i> No se encontraron productos
                             </td>
                         </tr>
                     `;
@@ -199,7 +252,7 @@
                     tr.innerHTML = `
                         <td class="data-table__cell">
                             <div class="customer-cell-wrapper">
-                                <div class="avatar-circle-apex" style="background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%); color: #090a0f;">
+                                <div class="avatar-circle-apex" style="background: linear-gradient(135deg, #0047AB 0%, #00b0ff 100%); color: #ffffff;">
                                     <i class="bi bi-box-seam-fill"></i>
                                 </div>
                                 <div>
@@ -208,8 +261,8 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main);">${producto.codigo}</td>
-                        <td class="data-table__cell ">${producto.categoria}</td>
+                        <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main); font-family: monospace;">${producto.codigo}</td>
+                        <td class="data-table__cell">${producto.categoria}</td>
                         <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">C$ ${producto.precio.toFixed(2)}</td>
                         <td class="data-table__cell text-center">
                             <span class="badge-pill-apex ${producto.stock > 0 ? 'badge-pill-apex--active' : 'badge-pill-apex--inactive'}">
@@ -224,7 +277,10 @@
                     tr.addEventListener('dblclick', function () {
                         var pId = this.dataset.prodId;
                         var prod = self.productosMap[pId];
-                        if (prod) self.agregarUnProductoAlDetalle(prod);
+                        if (prod) {
+                            self.agregarOIncrementarProducto(prod);
+                            window.ERP.UI.closeModal('modalProductos');
+                        }
                     });
 
                     tbodyBusqueda.appendChild(tr);
@@ -262,7 +318,7 @@
                 if (prod) {
                     totalEstimado += prod.precio;
                     var row = cb.closest('tr');
-                    if (row) row.style.backgroundColor = 'rgba(0, 230, 118, 0.08)';
+                    if (row) row.style.backgroundColor = 'rgba(0, 71, 171, 0.08)';
                 }
             });
 
@@ -274,39 +330,11 @@
             var selectedCountText = document.getElementById("selectedCountText");
             if (selectedCountText) {
                 if (count > 0) {
-                    selectedCountText.innerHTML = '<strong style="color: var(--color-text-main);">' + count + '</strong> producto' + (count > 1 ? 's' : '') + ' seleccionado' + (count > 1 ? 's' : '') + ' | Total estimado: <strong style="color: var(--color-text-main);">C$ ' + totalEstimado.toFixed(2) + '</strong>';
+                    selectedCountText.innerHTML = '<strong style="color: var(--color-text-main);">' + count + '</strong> seleccionado' + (count > 1 ? 's' : '') + ' | Total: <strong style="color: var(--color-primary);">C$ ' + totalEstimado.toFixed(2) + '</strong>';
                 } else {
                     selectedCountText.textContent = "0 productos seleccionados";
                 }
             }
-        },
-
-        agregarUnProductoAlDetalle: function (producto) {
-            if (producto.stock <= 0) {
-                this.mostrarMensaje("danger", "El producto " + producto.nombre + " está agotado");
-                return;
-            }
-
-            var existe = this.detalleVenta.find(function (p) { return p.producto_id === producto.id; });
-            if (existe) {
-                this.mostrarMensaje("warning", "El producto " + producto.nombre + " ya está en la factura");
-                return;
-            }
-
-            this.detalleVenta.push({
-                producto_id: producto.id,
-                codigo: producto.codigo,
-                nombre: producto.nombre,
-                precio: producto.precio,
-                descuento_monto: 0,
-                cantidad: 1,
-                stock: producto.stock,
-                subtotal: producto.precio
-            });
-
-            this.renderizarTabla();
-            this.mostrarMensaje("success", 'Se agregó "' + producto.nombre + '" a la factura');
-            window.ERP.UI.closeModal('modalProductos');
         },
 
         agregarProductosSeleccionados: function () {
@@ -318,7 +346,6 @@
 
             var agregados = 0;
             var erroresStock = 0;
-            var repetidos = 0;
             var self = this;
 
             checkboxes.forEach(function (cb) {
@@ -327,8 +354,16 @@
                 if (!producto) return;
 
                 if (producto.stock <= 0) { erroresStock++; return; }
+
                 var existe = self.detalleVenta.find(function (p) { return p.producto_id === producto.id; });
-                if (existe) { repetidos++; return; }
+                if (existe) {
+                    if (existe.cantidad + 1 <= producto.stock) {
+                        existe.cantidad++;
+                        self.recalcularItem(existe);
+                        agregados++;
+                    }
+                    return;
+                }
 
                 self.detalleVenta.push({
                     producto_id: producto.id,
@@ -344,14 +379,6 @@
             });
 
             if (agregados > 0) this.renderizarTabla();
-
-            if (erroresStock > 0 || repetidos > 0) {
-                var msg = [];
-                if (erroresStock > 0) msg.push(erroresStock + " sin stock");
-                if (repetidos > 0) msg.push(repetidos + " ya en lista");
-                this.mostrarMensaje("warning", "Aviso: " + msg.join(", "));
-            }
-
             window.ERP.UI.closeModal("modalProductos");
             this.limpiarModalProducto();
         },
@@ -366,56 +393,68 @@
         },
 
         /**
-         * Renderizado de la tabla de ítems del carrito
+         * Renderizado de la tabla de items del carrito
          */
         renderizarTabla: function () {
             var tbody = document.getElementById("detalleVentaBody");
             if (!tbody) return;
             tbody.innerHTML = "";
             var subtotalGeneral = 0;
+            var totalUnidades = 0;
             var self = this;
 
             if (this.detalleVenta.length === 0) {
                 tbody.innerHTML = `
                     <tr class="data-table__row">
-                        <td colspan="7" class="data-table__cell data-table__cell--center" style="padding: var(--spacing-xl); color: var(--color-text-muted);">
-                            <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem;"></i>
-                            Sin productos agregados en el paso 1
+                        <td colspan="7" class="data-table__cell text-center" style="padding: 40px 16px; color: var(--color-text-muted);">
+                            <i class="bi bi-cart-x d-block mb-2" style="font-size: 2.2rem; opacity: 0.5;"></i>
+                            El carrito está vacío. Escanee un código de barras o use "Agregar Producto".
                         </td>
                     </tr>
                 `;
+                var lblContador = document.getElementById('lblTotalItemsCarrito');
+                if (lblContador) lblContador.textContent = '0 productos';
                 this.actualizarTotales(0);
                 return;
             }
 
             this.detalleVenta.forEach(function (producto, index) {
                 subtotalGeneral += producto.subtotal;
+                totalUnidades += producto.cantidad;
+
                 var tr = document.createElement('tr');
                 tr.className = 'data-table__row';
                 tr.innerHTML = `
-                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-primary);">${producto.codigo}</td>
-                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-primary);">${producto.nombre}</td>
+                    <td class="data-table__cell" style="font-weight: 700; color: var(--color-text-muted); font-family: monospace;">${producto.codigo}</td>
+                    <td class="data-table__cell" style="font-weight: 600; color: var(--color-text-main);">${producto.nombre}</td>
                     <td class="data-table__cell text-center">
-                        <div class="cantidad-control">
-                            <button type="button" class="cantidad-btn btn-disminuir" data-index="${index}" title="Disminuir"><i class="bi bi-dash"></i></button>
-                            <span class="cantidad-num">${producto.cantidad}</span>
-                            <button type="button" class="cantidad-btn btn-aumentar" data-index="${index}" title="Aumentar"><i class="bi bi-plus"></i></button>
+                        <div class="pos-qty-stepper">
+                            <button type="button" class="pos-qty-btn btn-disminuir" data-index="${index}" title="Disminuir"><i class="bi bi-dash"></i></button>
+                            <input type="text" class="pos-qty-val input-cantidad" data-index="${index}" value="${producto.cantidad}" readonly>
+                            <button type="button" class="pos-qty-btn btn-aumentar" data-index="${index}" title="Aumentar"><i class="bi bi-plus"></i></button>
                         </div>
                     </td>
-                    <td class="data-table__cell text-end" style="color:var(--color-text-primary);">C$ ${producto.precio.toFixed(2)}</td>
+                    <td class="data-table__cell text-end" style="color: var(--color-text-main);">C$ ${producto.precio.toFixed(2)}</td>
                     <td class="data-table__cell text-center">
-                        <input type="number" class="form-input text-end input-descuento" data-index="${index}" style="width: 85px; padding: 4px 8px; font-weight: 600; background-color: rgba(255,255,255,0.04);" 
-                        value="${producto.descuento_monto}" min="0">
+                        <input type="number" class="pos-field-input input-descuento" data-index="${index}" 
+                               style="width: 75px; height: 26px; padding: 0 4px; text-align: right; font-weight: 600;" 
+                               value="${producto.descuento_monto}" min="0">
                     </td>
-                    <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-primary);">C$ ${producto.subtotal.toFixed(2)}</td>
-                    <td class="data-table__cell text-end">
-                        <button type="button" class="btn-three-dots btn-eliminar-item" data-index="${index}" title="Quitar producto" style="color: var(--color-text-danger); background: rgba(255, 82, 82, 0.1); border: 1px solid rgba(255, 82, 82, 0.2); width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-trash-fill"></i>
+                    <td class="data-table__cell text-end" style="font-weight: 800; color: var(--color-primary);">C$ ${producto.subtotal.toFixed(2)}</td>
+                    <td class="data-table__cell text-center">
+                        <button type="button" class="btn-trash-item btn-eliminar-item" data-index="${index}" title="Quitar fila">
+                            <i class="bi bi-trash3-fill"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Actualizar badge contador
+            var lblContadorCarrito = document.getElementById('lblTotalItemsCarrito');
+            if (lblContadorCarrito) {
+                lblContadorCarrito.textContent = `${this.detalleVenta.length} producto${this.detalleVenta.length > 1 ? 's' : ''} (${totalUnidades} unid.)`;
+            }
 
             tbody.querySelectorAll('.btn-disminuir').forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -452,12 +491,12 @@
             var stEl = document.getElementById("subtotalVenta");
             var ivaEl = document.getElementById("ivaVenta");
             var tEl = document.getElementById("totalVenta");
-            var tP2 = document.getElementById("totalPaso2");
 
             if (stEl) stEl.textContent = "C$ " + subtotal.toFixed(2);
             if (ivaEl) ivaEl.textContent = "C$ " + iva.toFixed(2);
             if (tEl) tEl.textContent = "C$ " + total.toFixed(2);
-            if (tP2) tP2.textContent = "C$ " + total.toFixed(2);
+
+            this.calcularCambio();
 
             var tipoVentaSelect = document.getElementById("tipo_venta");
             if (tipoVentaSelect && tipoVentaSelect.value === "CREDITO") {
@@ -468,32 +507,33 @@
         actualizarLinea: function (index, campo, valor) {
             var p = this.detalleVenta[index];
             if (!p) return;
-            var val = parseFloat(valor) || 0;
+
             if (campo === 'descuento_monto') {
-                var bruto = p.cantidad * p.precio;
-                var descuentoMonto = Math.min(val, bruto);
-                p.descuento_monto = descuentoMonto;
-                p.subtotal = bruto - descuentoMonto;
+                var d = parseFloat(valor) || 0;
+                if (d < 0) d = 0;
+                var maxDescuento = p.precio * p.cantidad;
+                if (d > maxDescuento) {
+                    d = maxDescuento;
+                    this.mostrarMensaje("warning", "El descuento no puede superar el monto de la línea");
+                }
+                p.descuento_monto = d;
             }
+
+            this.recalcularItem(p);
             this.renderizarTabla();
         },
 
-        recalcularItem: function (producto) {
-            var bruto = producto.cantidad * producto.precio;
-            var descuentoMonto = parseFloat(producto.descuento_monto) || 0;
-            producto.subtotal = Math.max(bruto - descuentoMonto, 0);
-        },
-
-        eliminarProducto: function (index) {
-            this.detalleVenta.splice(index, 1);
-            this.renderizarTabla();
+        recalcularItem: function (p) {
+            var bruto = p.precio * p.cantidad;
+            var neto = bruto - (p.descuento_monto || 0);
+            p.subtotal = Math.max(0, neto);
         },
 
         aumentarCantidad: function (index) {
             var producto = this.detalleVenta[index];
             if (!producto) return;
-            if (producto.cantidad >= producto.stock) {
-                this.mostrarMensaje("danger", "No hay más stock disponible");
+            if (producto.cantidad + 1 > producto.stock) {
+                this.mostrarMensaje("warning", `Stock máximo alcanzado (${producto.stock} unid.)`);
                 return;
             }
             producto.cantidad++;
@@ -504,10 +544,76 @@
         disminuirCantidad: function (index) {
             var producto = this.detalleVenta[index];
             if (!producto) return;
-            if (producto.cantidad <= 1) return;
+            if (producto.cantidad <= 1) {
+                this.eliminarProducto(index);
+                return;
+            }
             producto.cantidad--;
             this.recalcularItem(producto);
             this.renderizarTabla();
+        },
+
+        eliminarProducto: function (index) {
+            var prod = this.detalleVenta[index];
+            this.detalleVenta.splice(index, 1);
+            this.renderizarTabla();
+            if (prod) this.mostrarMensaje("warning", `Se eliminó "${prod.nombre}" del carrito`);
+        },
+
+        /**
+         * Inicialización de Forma de Pago y Calculadora de Vuelto
+         */
+        initFormaPagoYCalculadora: function () {
+            var self = this;
+            var payBtns = document.querySelectorAll('.pos-pay-btn');
+            var cashBox = document.getElementById('posCashBox');
+            var inputRecibido = document.getElementById('inputMontoRecibido');
+
+            payBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    payBtns.forEach(function (b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                    self.formaPagoSeleccionada = this.dataset.metodo || 'efectivo';
+
+                    if (self.formaPagoSeleccionada !== 'efectivo') {
+                        if (cashBox) {
+                            cashBox.style.opacity = '0.35';
+                            cashBox.style.pointerEvents = 'none';
+                        }
+                        var badge = document.getElementById('badgeCambio');
+                        if (badge) badge.textContent = 'C$ 0.00';
+                    } else {
+                        if (cashBox) {
+                            cashBox.style.opacity = '1';
+                            cashBox.style.pointerEvents = 'auto';
+                        }
+                        self.calcularCambio();
+                    }
+                });
+            });
+
+            if (inputRecibido) {
+                inputRecibido.addEventListener('input', function () {
+                    self.calcularCambio();
+                });
+                inputRecibido.addEventListener('keyup', function () {
+                    self.calcularCambio();
+                });
+            }
+        },
+
+        calcularCambio: function () {
+            if (this.formaPagoSeleccionada !== 'efectivo') return;
+
+            var inputRecibido = document.getElementById('inputMontoRecibido');
+            var badgeCambio = document.getElementById('badgeCambio');
+            if (!inputRecibido || !badgeCambio) return;
+
+            var recibido = parseFloat(inputRecibido.value.replace(/,/g, '')) || 0;
+            var total = this.obtenerTotalCalculado();
+            var cambio = Math.max(0, recibido - total);
+
+            badgeCambio.textContent = 'C$ ' + cambio.toFixed(2);
         },
 
         /**
@@ -520,7 +626,7 @@
 
             var actualizarVistaCredito = function () {
                 if (tipoVentaSelect && tipoVentaSelect.value === "CREDITO") {
-                    if (panelCuotasCredito) panelCuotasCredito.style.display = "block";
+                    if (panelCuotasCredito) panelCuotasCredito.style.display = "flex";
                     self.generarTablaCuotasSugeridas();
                 } else {
                     if (panelCuotasCredito) panelCuotasCredito.style.display = "none";
@@ -542,6 +648,7 @@
                     el.addEventListener("input", function () { self.generarTablaCuotasSugeridas(); });
                 }
             });
+
             if (btnGenerarCuotas) {
                 btnGenerarCuotas.addEventListener("click", function () { self.generarTablaCuotasSugeridas(); });
             }
@@ -563,7 +670,7 @@
             var totalVentaVal = this.obtenerTotalCalculado();
 
             var lblContador = document.getElementById("lblCuotasContador");
-            if (lblContador) lblContador.textContent = `0/${numCuotas}`;
+            if (lblContador) lblContador.textContent = `${numCuotas} cuotas`;
 
             var montoBaseCuota = parseFloat((totalVentaVal / numCuotas).toFixed(2));
             var acumulado = 0;
@@ -587,28 +694,15 @@
                 var dd = String(fVenc.getDate()).padStart(2, '0');
                 var fechaVencStr = `${yyyy}-${mm}-${dd}`;
 
-                var fGracia = new Date(fVenc);
-                fGracia.setDate(fGracia.getDate() + diasGracia);
-                var yyyyG = fGracia.getFullYear();
-                var mmG = String(fGracia.getMonth() + 1).padStart(2, '0');
-                var ddG = String(fGracia.getDate()).padStart(2, '0');
-                var fechaGraciaStr = `${ddG}/${mmG}/${yyyyG}`;
-
                 var tr = document.createElement("tr");
-                tr.className = "data-table__row";
+                tr.style.borderBottom = "1px solid var(--color-border)";
                 tr.innerHTML = `
-                    <td class="data-table__cell text-center" style="font-weight: 700; color: var(--color-text-main);">Cuota ${i}</td>
-                    <td class="data-table__cell">
-                        <input type="date" class="form-input form-input-sm fecha-cuota-input" value="${fechaVencStr}" style="padding: 4px 8px; font-weight: 600;">
+                    <td style="padding: 3px 6px; font-weight: 700; color: var(--color-text-main);">#${i}</td>
+                    <td style="padding: 3px 6px;">
+                        <input type="date" class="pos-field-input fecha-cuota-input" value="${fechaVencStr}" style="height: 24px; padding: 0 4px; font-size: 0.7rem;">
                     </td>
-                    <td class="data-table__cell text-end">
-                        <input type="number" step="0.01" class="form-input form-input-sm monto-cuota-input text-end" value="${montoCuota.toFixed(2)}" style="width: 120px; font-weight: 800; ">
-                    </td>
-                    <td class="data-table__cell text-center celda-dias-gracia" style="font-size: 0.88rem;">
-                        +${diasGracia} días
-                    </td>
-                    <td class="data-table__cell text-center celda-fecha-gracia" style="font-size: 0.88rem; font-weight: 700;">
-                        ${fechaGraciaStr}
+                    <td style="padding: 3px 6px; text-align: right;">
+                        <input type="number" step="0.01" class="pos-field-input monto-cuota-input" value="${montoCuota.toFixed(2)}" style="width: 75px; height: 24px; padding: 0 4px; font-weight: 800; text-align: right; font-size: 0.72rem;">
                     </td>
                 `;
                 tbodyCuotasCredito.appendChild(tr);
@@ -618,32 +712,7 @@
                 inp.addEventListener('input', function () { self.validarSumaCuotas(); });
             });
 
-            tbodyCuotasCredito.querySelectorAll('.fecha-cuota-input').forEach(function (inp) {
-                inp.addEventListener('change', function () { self.recalcularFechaGraciaFila(this); });
-            });
-
             this.validarSumaCuotas();
-        },
-
-        recalcularFechaGraciaFila: function (inputFecha) {
-            var row = inputFecha.closest("tr");
-            if (!row) return;
-            var inputDiasGraciaCuota = document.getElementById("dias_gracia_cuota");
-            var diasGracia = parseInt(inputDiasGraciaCuota ? inputDiasGraciaCuota.value : 0) || 0;
-            var val = inputFecha.value;
-            if (val) {
-                var fVenc = new Date(val + 'T00:00:00');
-                fVenc.setDate(fVenc.getDate() + diasGracia);
-                var yyyyG = fVenc.getFullYear();
-                var mmG = String(fVenc.getMonth() + 1).padStart(2, '0');
-                var ddG = String(fVenc.getDate()).padStart(2, '0');
-
-                var celdaDias = row.querySelector(".celda-dias-gracia");
-                if (celdaDias) celdaDias.textContent = `+${diasGracia} días`;
-
-                var celdaGracia = row.querySelector(".celda-fecha-gracia");
-                if (celdaGracia) celdaGracia.textContent = `${ddG}/${mmG}/${yyyyG}`;
-            }
         },
 
         validarSumaCuotas: function () {
@@ -658,11 +727,11 @@
 
             if (resumenCuotasValidacion) {
                 if (dif < 0.05) {
-                    resumenCuotasValidacion.style.color = "var(--color-txt-main)";
-                    resumenCuotasValidacion.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Suma de cuotas coincide con el Total: C$ ${suma.toFixed(2)}`;
+                    resumenCuotasValidacion.style.color = "var(--color-primary)";
+                    resumenCuotasValidacion.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Cuotas coinciden con el Total (C$ ${suma.toFixed(2)})`;
                 } else {
-                    resumenCuotasValidacion.style.color = "#ff5252";
-                    resumenCuotasValidacion.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> Suma de cuotas (C$ ${suma.toFixed(2)}) no coincide con Total (C$ ${totalVentaVal.toFixed(2)})`;
+                    resumenCuotasValidacion.style.color = "var(--color-danger, #ef4444)";
+                    resumenCuotasValidacion.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> Suma (C$ ${suma.toFixed(2)}) ≠ Total (C$ ${totalVentaVal.toFixed(2)})`;
                 }
             }
         },
@@ -695,7 +764,8 @@
                     window.ERP.Validators.clearError(inputFechaVenta);
                     self.detalleVenta = [];
                     if (formVentaElem) formVentaElem.reset();
-                    self.irAPaso(1);
+                    var inputMontoRecibido = document.getElementById("inputMontoRecibido");
+                    if (inputMontoRecibido) inputMontoRecibido.value = "";
                     self.renderizarTabla();
                 });
             }
@@ -732,8 +802,8 @@
 
                     if (self.detalleVenta.length === 0) {
                         self.mostrarMensaje("warning", "Debe agregar al menos un producto a la factura");
-                        self.irAPaso(1);
-                        window.ERP.UI.openModal('modalProductos');
+                        var rapido = document.getElementById("buscarProductoRapido");
+                        if (rapido) rapido.focus();
                         return false;
                     }
 
@@ -857,7 +927,7 @@
                     this.mostrarMensaje("danger", resultado.message);
                     if (btnConfirmarGuardar) {
                         btnConfirmarGuardar.disabled = false;
-                        btnConfirmarGuardar.innerHTML = `<i class="bi bi-check-lg"></i> Confirmar y Guardar`;
+                        btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
                     }
                     return;
                 }
@@ -870,17 +940,41 @@
                 this.mostrarMensaje("danger", "Error al emitir la factura");
                 if (btnConfirmarGuardar) {
                     btnConfirmarGuardar.disabled = false;
-                    btnConfirmarGuardar.innerHTML = `<i class="bi bi-check-lg"></i> Confirmar y Guardar`;
+                    btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
                 }
             }
         },
 
+        /**
+         * Atajos de Teclado Globales (F2 para buscar, F9 para facturar)
+         */
+        initShortcuts: function () {
+            var self = this;
+            window.addEventListener('keydown', function (e) {
+                if (e.key === 'F2') {
+                    e.preventDefault();
+                    var rapido = document.getElementById("buscarProductoRapido");
+                    if (rapido) {
+                        rapido.focus();
+                        rapido.select();
+                    }
+                }
+                if (e.key === 'F9') {
+                    e.preventDefault();
+                    var btnGuardar = document.getElementById("btnGuardar");
+                    if (btnGuardar) btnGuardar.click();
+                }
+            });
+        },
+
         init: function () {
-            this.initStepper();
             this.initClienteDatalist();
+            this.initBuscadorRapido();
             this.initBuscadorProductosModal();
+            this.initFormaPagoYCalculadora();
             this.initCredito();
             this.initFormVentaSubmit();
+            this.initShortcuts();
             this.renderizarTabla();
         }
     };
