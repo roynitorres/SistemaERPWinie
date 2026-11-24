@@ -565,30 +565,6 @@
                 });
             });
 
-            // Botones de billetes directos y exacto
-            var btnPagoExacto = document.getElementById("btnPagoExacto");
-            if (btnPagoExacto) {
-                btnPagoExacto.addEventListener("click", function () {
-                    var total = self.obtenerTotalCalculado();
-                    if (inputRecibido) {
-                        inputRecibido.value = total.toFixed(2);
-                        inputRecibido.classList.remove("pos-field-input--error");
-                    }
-                    self.calcularCambio();
-                });
-            }
-
-            document.querySelectorAll(".btn-quick-bill[data-billete]").forEach(function (btn) {
-                btn.addEventListener("click", function () {
-                    var valorBillete = parseFloat(this.dataset.billete) || 0;
-                    if (inputRecibido) {
-                        inputRecibido.value = valorBillete.toFixed(2);
-                        inputRecibido.classList.remove("pos-field-input--error");
-                    }
-                    self.calcularCambio();
-                });
-            });
-
             if (inputRecibido) {
                 inputRecibido.addEventListener('input', function () {
                     this.classList.remove("pos-field-input--error");
@@ -882,8 +858,7 @@
                     var rowConfirmCambio = document.getElementById("rowConfirmCambio");
                     var cCambio = document.getElementById("confirmCambio");
 
-                    var metodoTexto = self.formaPagoSeleccionada === 'efectivo' ? 'Efectivo' :
-                                     (self.formaPagoSeleccionada === 'tarjeta' ? 'Tarjeta' : 'Transferencia');
+                    var metodoTexto = self.formaPagoSeleccionada === 'efectivo' ? 'Efectivo' : 'Transferencia';
                     if (cMetodo) cMetodo.textContent = metodoTexto;
 
                     if (tipoVenta === "CONTADO" && self.formaPagoSeleccionada === "efectivo") {
