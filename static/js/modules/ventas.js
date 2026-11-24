@@ -548,6 +548,11 @@
                             cashBox.style.opacity = '0.35';
                             cashBox.style.pointerEvents = 'none';
                         }
+                        var total = self.obtenerTotalCalculado();
+                        if (inputRecibido) {
+                            inputRecibido.value = total > 0 ? total.toFixed(2) : '';
+                            inputRecibido.classList.remove("pos-field-input--error");
+                        }
                         var badge = document.getElementById('badgeCambio');
                         if (badge) badge.textContent = 'C$ 0.00';
                     } else {
@@ -806,34 +811,44 @@
                     var total = totalEl ? totalEl.textContent : '';
                     var totalVentaVal = self.obtenerTotalCalculado();
 
-                    // VALIDACIÓN OBLIGATORIA: VENTA AL CONTADO EN EFECTIVO
+                    // VALIDACIÓN OBLIGATORIA: VENTA AL CONTADO
                     if (tipoVenta === "CONTADO") {
-                        if (self.formaPagoSeleccionada === "efectivo") {
-                            var inputRecibido = document.getElementById("inputMontoRecibido");
-                            var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
-                            var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+                        var inputRecibido = document.getElementById("inputMontoRecibido");
+                        var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
 
-                            if (!rawRecibido || isNaN(montoRecibidoNum) || montoRecibidoNum <= 0) {
-                                self.mostrarMensaje("warning", "Debe ingresar el monto recibido del cliente para ventas al contado.");
-                                if (inputRecibido) {
-                                    inputRecibido.focus();
-                                    inputRecibido.classList.add("pos-field-input--error");
-                                }
-                                return false;
-                            }
-
-                            if (montoRecibidoNum < totalVentaVal - 0.05) {
-                                self.mostrarMensaje("danger", `El monto recibido (C$ ${montoRecibidoNum.toFixed(2)}) no cubre el total de la factura (C$ ${totalVentaVal.toFixed(2)}).`);
-                                if (inputRecibido) {
-                                    inputRecibido.focus();
-                                    inputRecibido.classList.add("pos-field-input--error");
-                                }
-                                return false;
-                            }
-
+                        // 1. ¿Tiene algún valor ingresado por el usuario?
+                        if (!rawRecibido) {
+                            self.mostrarMensaje("warning", "Debe ingresar el monto recibido del cliente para procesar la factura.");
                             if (inputRecibido) {
-                                inputRecibido.classList.remove("pos-field-input--error");
+                                inputRecibido.focus();
+                                inputRecibido.classList.add("pos-field-input--error");
                             }
+                            return false;
+                        }
+
+                        // 2. Si hay un valor, debe validarse que sea numérico válido y cubra el total
+                        var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+
+                        if (isNaN(montoRecibidoNum) || montoRecibidoNum <= 0) {
+                            self.mostrarMensaje("warning", "El monto recibido debe ser un valor mayor a cero.");
+                            if (inputRecibido) {
+                                inputRecibido.focus();
+                                inputRecibido.classList.add("pos-field-input--error");
+                            }
+                            return false;
+                        }
+
+                        if (montoRecibidoNum < totalVentaVal - 0.05) {
+                            self.mostrarMensaje("danger", `El monto recibido (C$ ${montoRecibidoNum.toFixed(2)}) no cubre el total de la factura (C$ ${totalVentaVal.toFixed(2)}).`);
+                            if (inputRecibido) {
+                                inputRecibido.focus();
+                                inputRecibido.classList.add("pos-field-input--error");
+                            }
+                            return false;
+                        }
+
+                        if (inputRecibido) {
+                            inputRecibido.classList.remove("pos-field-input--error");
                         }
                     }
 
@@ -953,9 +968,26 @@
 
             var totalVentaVal = this.obtenerTotalCalculado();
             var inputRecibido = document.getElementById("inputMontoRecibido");
-            var montoRecibidoVal = (tipoVenta === 'CONTADO' && this.formaPagoSeleccionada === 'efectivo')
-                ? (parseFloat(inputRecibido ? inputRecibido.value : 0) || totalVentaVal)
-                : totalVentaVal;
+            var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
+            var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+
+            if (tipoVenta === "CONTADO") {
+                if (!rawRecibido || isNaN(montoRecibidoNum) || montoRecibidoNum < totalVentaVal - 0.05) {
+                    this.mostrarMensaje("danger", "El monto recibido es obligatorio y debe cubrir el total de la venta.");
+                    if (inputRecibido) {
+                        inputRecibido.focus();
+                        inputRecibido.classList.add("pos-field-input--error");
+                    }
+                    if (btnConfirmarGuardar) {
+                        btnConfirmarGuardar.disabled = false;
+                        btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
+                    }
+                    window.ERP.UI.closeModal("modalConfirmarVenta");
+                    return false;
+                }
+            }
+
+            var montoRecibidoVal = (tipoVenta === 'CONTADO') ? montoRecibidoNum : totalVentaVal;
 
             var datos = {
                 cliente_id: clienteId,

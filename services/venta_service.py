@@ -82,14 +82,15 @@ def crear_venta(data, usuario_id, descuento_maximo):
         iva = subtotal * (iva_porcentaje / 100)
         total = subtotal + iva
 
-        # Validación para ventas de contado en efectivo: monto recibido obligatorio y suficiente
-        metodo_pago = data.get("metodo_pago", "efectivo")
+        # Validación obligatoria para ventas de contado: el monto recibido no puede estar vacío ni ser insuficiente
         monto_recibido_raw = data.get("monto_recibido")
-        if tipo_venta == TipoVenta.CONTADO and metodo_pago == "efectivo":
+        if tipo_venta == TipoVenta.CONTADO:
             if monto_recibido_raw is None or str(monto_recibido_raw).strip() == "":
-                return False, "Debe ingresar el monto recibido del cliente para ventas al contado."
+                return False, "Debe ingresar el monto recibido del cliente para procesar la venta al contado."
             try:
                 monto_recibido_val = float(monto_recibido_raw)
+                if monto_recibido_val <= 0:
+                    return False, "El monto recibido debe ser mayor a cero."
                 if monto_recibido_val < total - 0.05:
                     return False, f"El monto recibido (C$ {monto_recibido_val:.2f}) no cubre el total de la venta (C$ {total:.2f})."
             except (ValueError, TypeError):
