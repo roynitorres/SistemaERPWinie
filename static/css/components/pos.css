@@ -82,6 +82,18 @@
     cursor: default;
 }
 
+.pos-field-input--error {
+    border-color: var(--color-danger, #ef4444) !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+    animation: posShake 0.25s ease-in-out;
+}
+
+@keyframes posShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
 /* ==========================================================================
    2. GRID PRINCIPAL: 2 COLUMNAS (TABLA DIRECTA + PANEL DERECHO DE COBRO)
    ========================================================================== */

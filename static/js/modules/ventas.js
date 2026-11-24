@@ -560,8 +560,33 @@
                 });
             });
 
+            // Botones de billetes directos y exacto
+            var btnPagoExacto = document.getElementById("btnPagoExacto");
+            if (btnPagoExacto) {
+                btnPagoExacto.addEventListener("click", function () {
+                    var total = self.obtenerTotalCalculado();
+                    if (inputRecibido) {
+                        inputRecibido.value = total.toFixed(2);
+                        inputRecibido.classList.remove("pos-field-input--error");
+                    }
+                    self.calcularCambio();
+                });
+            }
+
+            document.querySelectorAll(".btn-quick-bill[data-billete]").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var valorBillete = parseFloat(this.dataset.billete) || 0;
+                    if (inputRecibido) {
+                        inputRecibido.value = valorBillete.toFixed(2);
+                        inputRecibido.classList.remove("pos-field-input--error");
+                    }
+                    self.calcularCambio();
+                });
+            });
+
             if (inputRecibido) {
                 inputRecibido.addEventListener('input', function () {
+                    this.classList.remove("pos-field-input--error");
                     self.calcularCambio();
                 });
                 inputRecibido.addEventListener('keyup', function () {
@@ -779,6 +804,38 @@
                     var numFactura = numFacturaEl ? numFacturaEl.value : '';
                     var totalEl = document.getElementById("totalVenta");
                     var total = totalEl ? totalEl.textContent : '';
+                    var totalVentaVal = self.obtenerTotalCalculado();
+
+                    // VALIDACIÓN OBLIGATORIA: VENTA AL CONTADO EN EFECTIVO
+                    if (tipoVenta === "CONTADO") {
+                        if (self.formaPagoSeleccionada === "efectivo") {
+                            var inputRecibido = document.getElementById("inputMontoRecibido");
+                            var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
+                            var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+
+                            if (!rawRecibido || isNaN(montoRecibidoNum) || montoRecibidoNum <= 0) {
+                                self.mostrarMensaje("warning", "Debe ingresar el monto recibido del cliente para ventas al contado.");
+                                if (inputRecibido) {
+                                    inputRecibido.focus();
+                                    inputRecibido.classList.add("pos-field-input--error");
+                                }
+                                return false;
+                            }
+
+                            if (montoRecibidoNum < totalVentaVal - 0.05) {
+                                self.mostrarMensaje("danger", `El monto recibido (C$ ${montoRecibidoNum.toFixed(2)}) no cubre el total de la factura (C$ ${totalVentaVal.toFixed(2)}).`);
+                                if (inputRecibido) {
+                                    inputRecibido.focus();
+                                    inputRecibido.classList.add("pos-field-input--error");
+                                }
+                                return false;
+                            }
+
+                            if (inputRecibido) {
+                                inputRecibido.classList.remove("pos-field-input--error");
+                            }
+                        }
+                    }
 
                     var rowConfirmCuotas = document.getElementById("rowConfirmCuotas");
                     var confirmCuotas = document.getElementById("confirmCuotas");
@@ -789,7 +846,6 @@
                         document.querySelectorAll(".monto-cuota-input").forEach(function (inp) {
                             suma += parseFloat(inp.value) || 0;
                         });
-                        var totalVentaVal = self.obtenerTotalCalculado();
                         if (Math.abs(suma - totalVentaVal) > 0.05) {
                             self.mostrarMensaje("danger", "La suma de las cuotas no coincide con el total de la venta");
                             return false;
@@ -805,6 +861,29 @@
                     var cT = document.getElementById("confirmTipoVenta");
                     var cN = document.getElementById("confirmNumFactura");
                     var cTot = document.getElementById("confirmTotal");
+                    var cMetodo = document.getElementById("confirmMetodoPago");
+                    var rowConfirmRecibido = document.getElementById("rowConfirmRecibido");
+                    var cRecibido = document.getElementById("confirmMontoRecibido");
+                    var rowConfirmCambio = document.getElementById("rowConfirmCambio");
+                    var cCambio = document.getElementById("confirmCambio");
+
+                    var metodoTexto = self.formaPagoSeleccionada === 'efectivo' ? 'Efectivo' :
+                                     (self.formaPagoSeleccionada === 'tarjeta' ? 'Tarjeta' : 'Transferencia');
+                    if (cMetodo) cMetodo.textContent = metodoTexto;
+
+                    if (tipoVenta === "CONTADO" && self.formaPagoSeleccionada === "efectivo") {
+                        var inputRecibidoEl = document.getElementById("inputMontoRecibido");
+                        var mRecibido = parseFloat(inputRecibidoEl ? inputRecibidoEl.value : 0) || 0;
+                        var mCambio = Math.max(0, mRecibido - totalVentaVal);
+
+                        if (rowConfirmRecibido) rowConfirmRecibido.style.display = "flex";
+                        if (cRecibido) cRecibido.textContent = "C$ " + mRecibido.toFixed(2);
+                        if (rowConfirmCambio) rowConfirmCambio.style.display = "flex";
+                        if (cCambio) cCambio.textContent = "C$ " + mCambio.toFixed(2);
+                    } else {
+                        if (rowConfirmRecibido) rowConfirmRecibido.style.display = "none";
+                        if (rowConfirmCambio) rowConfirmCambio.style.display = "none";
+                    }
 
                     if (cC) cC.textContent = clienteNombreVal;
                     if (cT) cT.textContent = tipoVenta;
@@ -872,6 +951,12 @@
                 btnConfirmarGuardar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Procesando...`;
             }
 
+            var totalVentaVal = this.obtenerTotalCalculado();
+            var inputRecibido = document.getElementById("inputMontoRecibido");
+            var montoRecibidoVal = (tipoVenta === 'CONTADO' && this.formaPagoSeleccionada === 'efectivo')
+                ? (parseFloat(inputRecibido ? inputRecibido.value : 0) || totalVentaVal)
+                : totalVentaVal;
+
             var datos = {
                 cliente_id: clienteId,
                 tipo_venta: tipoVenta,
@@ -879,7 +964,9 @@
                 fecha_limite_credito: fechaLimiteCreditoCalculada,
                 observaciones: "",
                 productos: this.detalleVenta,
-                cuotas: cuotasPayload
+                cuotas: cuotasPayload,
+                metodo_pago: this.formaPagoSeleccionada,
+                monto_recibido: montoRecibidoVal
             };
 
             try {
