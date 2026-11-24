@@ -183,7 +183,7 @@
                     </div>
                 </div>
 
-                <!-- 4. CALCULADORA DE RECIBIDO Y CAMBIO -->
+                <!-- 4. CALCULADORA DE RECIBIDO Y CAMBIO (EFECTIVO) -->
                 <div class="pos-cash-calculator" id="posCashBox">
                     <div class="pos-cash-row">
                         <span style="font-size: 0.74rem; font-weight: 700; color: var(--color-text-muted);">Monto Recibido:</span>
@@ -196,6 +196,35 @@
                     <div class="pos-cash-row" style="padding-top: 4px; border-top: 1px dashed var(--color-border);">
                         <span style="font-size: 0.74rem; font-weight: 800; color: var(--color-text-main);">Cambio / Vuelto:</span>
                         <span class="pos-change-badge" id="badgeCambio">C$ 0.00</span>
+                    </div>
+                </div>
+
+                <!-- 4.1 CAJA DE TRANSFERENCIA BANCARIA (BANCO Y REFERENCIA) -->
+                <div class="pos-transfer-box" id="posTransferBox" style="display: none;">
+                    <div class="pos-transfer-field">
+                        <label class="pos-transfer-label" for="transferBanco">
+                            <i class="bi bi-bank me-1"></i> Banco <span style="color: var(--color-danger, #ef4444);">*</span>
+                        </label>
+                        <div class="pos-field-icon-wrap">
+                            <i class="bi bi-building"></i>
+                            <input type="text" id="transferBanco" list="bancosList" class="pos-field-input" placeholder="Digite o seleccione banco..." autocomplete="off" style="height: 32px; padding: 0 8px 0 28px; font-size: 0.82rem;">
+                            <datalist id="bancosList">
+                                {% for banco in bancos %}
+                                <option value="{{ banco.nombre }}" data-id="{{ banco.id }}">{{ banco.nombre }}</option>
+                                {% endfor %}
+                            </datalist>
+                            <input type="hidden" id="transferBancoId">
+                        </div>
+                    </div>
+
+                    <div class="pos-transfer-field">
+                        <label class="pos-transfer-label" for="transferReferencia">
+                            <i class="bi bi-receipt me-1"></i> N° de Referencia <span style="color: var(--color-danger, #ef4444);">*</span>
+                        </label>
+                        <div class="pos-field-icon-wrap">
+                            <i class="bi bi-hash"></i>
+                            <input type="text" id="transferReferencia" class="pos-field-input" placeholder="Ej: REF-98342 / Comprobante" autocomplete="off" style="height: 32px; padding: 0 8px 0 28px; font-size: 0.82rem;">
+                        </div>
                     </div>
                 </div>
 
@@ -366,6 +395,14 @@
                 <div class="d-flex justify-content-between mb-2" id="rowConfirmMetodoPago">
                     <span style="color: var(--color-text-muted); font-size: 0.86rem;">Forma de Pago:</span>
                     <strong id="confirmMetodoPago" style="color: var(--color-text-main);"></strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2" id="rowConfirmBanco" style="display: none;">
+                    <span style="color: var(--color-text-muted); font-size: 0.86rem;">Banco:</span>
+                    <strong id="confirmBanco" style="color: var(--color-text-main);"></strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2" id="rowConfirmReferencia" style="display: none;">
+                    <span style="color: var(--color-text-muted); font-size: 0.86rem;">N° Referencia:</span>
+                    <strong id="confirmReferencia" style="color: var(--color-primary); font-family: monospace;"></strong>
                 </div>
                 <div class="d-flex justify-content-between mb-2" id="rowConfirmRecibido" style="display: none;">
                     <span style="color: var(--color-text-muted); font-size: 0.86rem;">Monto Recibido:</span>

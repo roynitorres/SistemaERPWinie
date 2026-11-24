@@ -501,6 +501,34 @@
     font-size: 0.9rem;
 }
 
+/* Caja de Transferencia Bancaria */
+.pos-transfer-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pos-transfer-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pos-transfer-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+}
+
 /* Panel de Crédito */
 .pos-credito-compact-panel {
     background: rgba(255, 255, 255, 0.03);

@@ -19,6 +19,7 @@ from models.detalle_venta import DetalleVenta
 from models.producto import Producto
 from models.cliente import Cliente
 from models.empresa import Empresa
+from models.banco import Banco
 from utils.permisos import roles_required
 
 # Servicios
@@ -43,6 +44,7 @@ def ventas():
     clientes = Cliente.query.order_by(Cliente.nombres.asc()).all()
     productos = Producto.query.filter(Producto.stock > 0, Producto.estado == EstadoProducto.ACTIVO).all()
     categorias = Categoria.query.filter_by(estado=EstadoCategoria.ACTIVO).order_by(Categoria.nombre.asc()).all()
+    bancos = Banco.query.filter_by(estado="ACTIVO").order_by(Banco.nombre.asc()).all()
     numero_factura = generar_numero_factura()
     fecha_actual = datetime.now().strftime("%Y-%m-%d")
     empresa = Empresa.query.first()
@@ -52,6 +54,7 @@ def ventas():
         clientes=clientes,
         productos=productos,
         categorias=categorias,
+        bancos=bancos,
         numero_factura=numero_factura,
         fecha_actual=fecha_actual,
         descuento_maximo=descuento_maximo,

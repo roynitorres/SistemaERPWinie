@@ -4,6 +4,8 @@ from models.detalle_venta import DetalleVenta
 from models.producto import Producto
 from models.empresa import Empresa
 from models.cuota_venta import CuotaVenta
+from models.pago import Pago
+from models.banco import Banco
 from models.enums import EstadoVenta, TipoVenta, EstadoProducto
 from datetime import datetime, date, timedelta
 
@@ -82,19 +84,32 @@ def crear_venta(data, usuario_id, descuento_maximo):
         iva = subtotal * (iva_porcentaje / 100)
         total = subtotal + iva
 
-        # Validación obligatoria para ventas de contado: el monto recibido no puede estar vacío ni ser insuficiente
+        # Extraer método de pago y datos de cobro
+        metodo_pago = data.get("metodo_pago", "efectivo")
         monto_recibido_raw = data.get("monto_recibido")
+        banco_id_raw = data.get("banco_id")
+        banco_nombre = str(data.get("banco_nombre") or "").strip()
+        referencia = str(data.get("referencia") or "").strip()
+
+        # Validación obligatoria para ventas de contado
         if tipo_venta == TipoVenta.CONTADO:
-            if monto_recibido_raw is None or str(monto_recibido_raw).strip() == "":
-                return False, "Debe ingresar el monto recibido del cliente para procesar la venta al contado."
-            try:
-                monto_recibido_val = float(monto_recibido_raw)
-                if monto_recibido_val <= 0:
-                    return False, "El monto recibido debe ser mayor a cero."
-                if monto_recibido_val < total - 0.05:
-                    return False, f"El monto recibido (C$ {monto_recibido_val:.2f}) no cubre el total de la venta (C$ {total:.2f})."
-            except (ValueError, TypeError):
-                return False, "El monto recibido ingresado no es válido."
+            if metodo_pago == "transfer":
+                if not banco_nombre and not banco_id_raw:
+                    return False, "Debe especificar el banco para el pago por transferencia."
+                if not referencia:
+                    return False, "Debe ingresar el número de referencia para el pago por transferencia."
+            else:
+                # Efectivo
+                if monto_recibido_raw is None or str(monto_recibido_raw).strip() == "":
+                    return False, "Debe ingresar el monto recibido del cliente para procesar la venta al contado."
+                try:
+                    monto_recibido_val = float(monto_recibido_raw)
+                    if monto_recibido_val <= 0:
+                        return False, "El monto recibido debe ser mayor a cero."
+                    if monto_recibido_val < total - 0.05:
+                        return False, f"El monto recibido (C$ {monto_recibido_val:.2f}) no cubre el total de la venta (C$ {total:.2f})."
+                except (ValueError, TypeError):
+                    return False, "El monto recibido ingresado no es válido."
 
         # Formateo de fechas
         if fecha_venta_str:
@@ -121,6 +136,23 @@ def crear_venta(data, usuario_id, descuento_maximo):
         
         db.session.add(nueva_venta)
         db.session.flush() # Flush para obtener nueva_venta.id sin hacer commit aún
+        
+        # Resolver banco si aplica a venta por transferencia
+        banco_id = None
+        if tipo_venta == TipoVenta.CONTADO and metodo_pago == "transfer":
+            if banco_id_raw and str(banco_id_raw).isdigit():
+                banco_obj = db.session.get(Banco, int(banco_id_raw))
+                if banco_obj:
+                    banco_id = banco_obj.id
+            if not banco_id and banco_nombre:
+                banco_obj = Banco.query.filter(Banco.nombre.ilike(f"%{banco_nombre}%")).first()
+                if banco_obj:
+                    banco_id = banco_obj.id
+                else:
+                    nuevo_banco = Banco(nombre=banco_nombre, estado="ACTIVO")
+                    db.session.add(nuevo_banco)
+                    db.session.flush()
+                    banco_id = nuevo_banco.id
         
         # Procesamiento e inserción de detalles de productos
         for item in productos_lista:
@@ -195,6 +227,25 @@ def crear_venta(data, usuario_id, descuento_maximo):
                     estado="PENDIENTE"
                 )
                 db.session.add(nueva_cuota)
+
+        # Si la venta es de Contado, registrar el pago de inmediato
+        if tipo_venta == TipoVenta.CONTADO:
+            tipo_pago_str = "TRANSFERENCIA" if metodo_pago == "transfer" else "EFECTIVO"
+            pago_contado = Pago(
+                venta_id=nueva_venta.id,
+                usuario_id=usuario_id,
+                cuota_id=None,
+                banco_id=banco_id if metodo_pago == "transfer" else None,
+                monto_pago=total,
+                monto_efectivo=0.00 if metodo_pago == "transfer" else total,
+                monto_transferencia=total if metodo_pago == "transfer" else 0.00,
+                tipo_pago=tipo_pago_str,
+                referencia=referencia if metodo_pago == "transfer" else None,
+                observaciones=observaciones or (f"Pago al contado - {tipo_pago_str}"),
+                fecha_pago=fecha_venta,
+                estado="ACTIVO"
+            )
+            db.session.add(pago_contado)
             
         # Transacción completada con éxito
         db.session.commit()
@@ -226,14 +277,8 @@ def anular_venta_service(venta_id):
         # En la lógica anterior de pagos.py, dice "No se puede anular una factura que ya está pagada"
         # pero para ventas al contado están pagadas de inmediato.
         # Oh, revisando la lógica original de pagos.py:
-        if saldo_pendiente <= 0 and venta.tipo_venta == TipoVenta.CREDITO:
-            return False, "No se puede anular una factura de crédito que ya está pagada en su totalidad."
-        # Actually, the original logic in pagos.py was:
-        # if saldo_pendiente <= 0: return False, "No se puede anular..."
-        # Wait, if it's CONTADO, total_abonado isn't created automatically maybe? Or is it?
-        # I will keep the strict logic but adjust if necessary. Let's stick to the existing check.
-        if saldo_pendiente <= 0 and total_abonado > 0:
-            return False, "No se puede anular una factura que ya tiene pagos registrados que cubren el total."
+        if saldo_pendiente <= 0 and total_abonado > 0 and venta.tipo_venta == TipoVenta.CREDITO:
+            return False, "No se puede anular una factura de crédito que ya tiene pagos registrados que cubren el total."
 
         # Revertir stock
         for detalle in venta.detalle_ventas:
@@ -241,6 +286,10 @@ def anular_venta_service(venta_id):
             # Reactivar producto si estaba inactivo y ahora tiene stock
             if detalle.producto.stock > 0 and detalle.producto.estado != EstadoProducto.ACTIVO:
                 detalle.producto.estado = EstadoProducto.ACTIVO 
+
+        for p in venta.pagos:
+            p.estado = "ANULADO"
+            p.motivo_anulacion = "Factura anulada"
 
         venta.estado = EstadoVenta.ANULADA
         db.session.commit()

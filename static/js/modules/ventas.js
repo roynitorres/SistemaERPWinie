@@ -535,7 +535,10 @@
             var self = this;
             var payBtns = document.querySelectorAll('.pos-pay-btn');
             var cashBox = document.getElementById('posCashBox');
+            var transferBox = document.getElementById('posTransferBox');
             var inputRecibido = document.getElementById('inputMontoRecibido');
+            var inputBanco = document.getElementById('transferBanco');
+            var inputRef = document.getElementById('transferReferencia');
 
             payBtns.forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -543,24 +546,18 @@
                     this.classList.add('active');
                     self.formaPagoSeleccionada = this.dataset.metodo || 'efectivo';
 
-                    if (self.formaPagoSeleccionada !== 'efectivo') {
-                        if (cashBox) {
-                            cashBox.style.opacity = '0.35';
-                            cashBox.style.pointerEvents = 'none';
-                        }
-                        var total = self.obtenerTotalCalculado();
-                        if (inputRecibido) {
-                            inputRecibido.value = total > 0 ? total.toFixed(2) : '';
-                            inputRecibido.classList.remove("pos-field-input--error");
-                        }
-                        var badge = document.getElementById('badgeCambio');
-                        if (badge) badge.textContent = 'C$ 0.00';
+                    if (self.formaPagoSeleccionada === 'transfer') {
+                        if (cashBox) cashBox.style.display = 'none';
+                        if (transferBox) transferBox.style.display = 'flex';
+                        if (inputRecibido) inputRecibido.classList.remove("pos-field-input--error");
+                        if (inputBanco) inputBanco.focus();
                     } else {
-                        if (cashBox) {
-                            cashBox.style.opacity = '1';
-                            cashBox.style.pointerEvents = 'auto';
-                        }
+                        if (cashBox) cashBox.style.display = 'flex';
+                        if (transferBox) transferBox.style.display = 'none';
+                        if (inputBanco) inputBanco.classList.remove("pos-field-input--error");
+                        if (inputRef) inputRef.classList.remove("pos-field-input--error");
                         self.calcularCambio();
+                        if (inputRecibido) inputRecibido.focus();
                     }
                 });
             });
@@ -572,6 +569,41 @@
                 });
                 inputRecibido.addEventListener('keyup', function () {
                     self.calcularCambio();
+                });
+            }
+
+            self.initBancoDatalist();
+        },
+
+        initBancoDatalist: function () {
+            var inputBanco = document.getElementById('transferBanco');
+            var inputBancoId = document.getElementById('transferBancoId');
+            var datalistBancos = document.getElementById('bancosList');
+            var inputRef = document.getElementById('transferReferencia');
+
+            if (inputBanco && datalistBancos) {
+                var checkBancoSelection = function () {
+                    inputBanco.classList.remove("pos-field-input--error");
+                    var val = inputBanco.value.trim().toLowerCase();
+                    var options = Array.from(datalistBancos.options);
+                    var selectedOption = options.find(function (opt) {
+                        return opt.value.trim().toLowerCase() === val;
+                    });
+
+                    if (selectedOption) {
+                        if (inputBancoId) inputBancoId.value = selectedOption.dataset.id || '';
+                    } else {
+                        if (inputBancoId) inputBancoId.value = '';
+                    }
+                };
+
+                inputBanco.addEventListener('input', checkBancoSelection);
+                inputBanco.addEventListener('change', checkBancoSelection);
+            }
+
+            if (inputRef) {
+                inputRef.addEventListener('input', function () {
+                    this.classList.remove("pos-field-input--error");
                 });
             }
         },
@@ -789,42 +821,70 @@
 
                     // VALIDACIÓN OBLIGATORIA: VENTA AL CONTADO
                     if (tipoVenta === "CONTADO") {
-                        var inputRecibido = document.getElementById("inputMontoRecibido");
-                        var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
+                        if (self.formaPagoSeleccionada === "efectivo") {
+                            var inputRecibido = document.getElementById("inputMontoRecibido");
+                            var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
 
-                        // 1. ¿Tiene algún valor ingresado por el usuario?
-                        if (!rawRecibido) {
-                            self.mostrarMensaje("warning", "Debe ingresar el monto recibido del cliente para procesar la factura.");
-                            if (inputRecibido) {
-                                inputRecibido.focus();
-                                inputRecibido.classList.add("pos-field-input--error");
+                            // 1. ¿Tiene algún valor ingresado por el usuario?
+                            if (!rawRecibido) {
+                                self.mostrarMensaje("warning", "Debe ingresar el monto recibido del cliente para procesar la factura.");
+                                if (inputRecibido) {
+                                    inputRecibido.focus();
+                                    inputRecibido.classList.add("pos-field-input--error");
+                                }
+                                return false;
                             }
-                            return false;
-                        }
 
-                        // 2. Si hay un valor, debe validarse que sea numérico válido y cubra el total
-                        var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+                            // 2. Si hay un valor, debe validarse que sea numérico válido y cubra el total
+                            var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
 
-                        if (isNaN(montoRecibidoNum) || montoRecibidoNum <= 0) {
-                            self.mostrarMensaje("warning", "El monto recibido debe ser un valor mayor a cero.");
-                            if (inputRecibido) {
-                                inputRecibido.focus();
-                                inputRecibido.classList.add("pos-field-input--error");
+                            if (isNaN(montoRecibidoNum) || montoRecibidoNum <= 0) {
+                                self.mostrarMensaje("warning", "El monto recibido debe ser un valor mayor a cero.");
+                                if (inputRecibido) {
+                                    inputRecibido.focus();
+                                    inputRecibido.classList.add("pos-field-input--error");
+                                }
+                                return false;
                             }
-                            return false;
-                        }
 
-                        if (montoRecibidoNum < totalVentaVal - 0.05) {
-                            self.mostrarMensaje("danger", `El monto recibido (C$ ${montoRecibidoNum.toFixed(2)}) no cubre el total de la factura (C$ ${totalVentaVal.toFixed(2)}).`);
-                            if (inputRecibido) {
-                                inputRecibido.focus();
-                                inputRecibido.classList.add("pos-field-input--error");
+                            if (montoRecibidoNum < totalVentaVal - 0.05) {
+                                self.mostrarMensaje("danger", `El monto recibido (C$ ${montoRecibidoNum.toFixed(2)}) no cubre el total de la factura (C$ ${totalVentaVal.toFixed(2)}).`);
+                                if (inputRecibido) {
+                                    inputRecibido.focus();
+                                    inputRecibido.classList.add("pos-field-input--error");
+                                }
+                                return false;
                             }
-                            return false;
-                        }
 
-                        if (inputRecibido) {
-                            inputRecibido.classList.remove("pos-field-input--error");
+                            if (inputRecibido) {
+                                inputRecibido.classList.remove("pos-field-input--error");
+                            }
+                        } else if (self.formaPagoSeleccionada === "transfer") {
+                            var inputBanco = document.getElementById("transferBanco");
+                            var inputRef = document.getElementById("transferReferencia");
+                            var bancoVal = inputBanco ? inputBanco.value.trim() : "";
+                            var refVal = inputRef ? inputRef.value.trim() : "";
+
+                            if (!bancoVal) {
+                                self.mostrarMensaje("warning", "Debe digitar o seleccionar el banco de la transferencia.");
+                                if (inputBanco) {
+                                    inputBanco.focus();
+                                    inputBanco.classList.add("pos-field-input--error");
+                                }
+                                return false;
+                            }
+
+                            if (!refVal) {
+                                self.mostrarMensaje("warning", "Debe ingresar el número de referencia del comprobante de pago.");
+                                if (inputRef) {
+                                    inputRef.focus();
+                                    inputRef.classList.add("pos-field-input--error");
+                                }
+                                return false;
+                            }
+
+                            if (inputBanco) inputBanco.classList.remove("pos-field-input--error");
+                            if (inputRef) inputRef.classList.remove("pos-field-input--error");
                         }
                     }
 
@@ -853,6 +913,10 @@
                     var cN = document.getElementById("confirmNumFactura");
                     var cTot = document.getElementById("confirmTotal");
                     var cMetodo = document.getElementById("confirmMetodoPago");
+                    var rowConfirmBanco = document.getElementById("rowConfirmBanco");
+                    var confirmBanco = document.getElementById("confirmBanco");
+                    var rowConfirmReferencia = document.getElementById("rowConfirmReferencia");
+                    var confirmReferencia = document.getElementById("confirmReferencia");
                     var rowConfirmRecibido = document.getElementById("rowConfirmRecibido");
                     var cRecibido = document.getElementById("confirmMontoRecibido");
                     var rowConfirmCambio = document.getElementById("rowConfirmCambio");
@@ -861,18 +925,36 @@
                     var metodoTexto = self.formaPagoSeleccionada === 'efectivo' ? 'Efectivo' : 'Transferencia';
                     if (cMetodo) cMetodo.textContent = metodoTexto;
 
-                    if (tipoVenta === "CONTADO" && self.formaPagoSeleccionada === "efectivo") {
-                        var inputRecibidoEl = document.getElementById("inputMontoRecibido");
-                        var mRecibido = parseFloat(inputRecibidoEl ? inputRecibidoEl.value : 0) || 0;
-                        var mCambio = Math.max(0, mRecibido - totalVentaVal);
+                    if (tipoVenta === "CONTADO") {
+                        if (self.formaPagoSeleccionada === "efectivo") {
+                            var inputRecibidoEl = document.getElementById("inputMontoRecibido");
+                            var mRecibido = parseFloat(inputRecibidoEl ? inputRecibidoEl.value : 0) || 0;
+                            var mCambio = Math.max(0, mRecibido - totalVentaVal);
 
-                        if (rowConfirmRecibido) rowConfirmRecibido.style.display = "flex";
-                        if (cRecibido) cRecibido.textContent = "C$ " + mRecibido.toFixed(2);
-                        if (rowConfirmCambio) rowConfirmCambio.style.display = "flex";
-                        if (cCambio) cCambio.textContent = "C$ " + mCambio.toFixed(2);
+                            if (rowConfirmRecibido) rowConfirmRecibido.style.display = "flex";
+                            if (cRecibido) cRecibido.textContent = "C$ " + mRecibido.toFixed(2);
+                            if (rowConfirmCambio) rowConfirmCambio.style.display = "flex";
+                            if (cCambio) cCambio.textContent = "C$ " + mCambio.toFixed(2);
+
+                            if (rowConfirmBanco) rowConfirmBanco.style.display = "none";
+                            if (rowConfirmReferencia) rowConfirmReferencia.style.display = "none";
+                        } else if (self.formaPagoSeleccionada === "transfer") {
+                            var inputBancoEl = document.getElementById("transferBanco");
+                            var inputRefEl = document.getElementById("transferReferencia");
+
+                            if (rowConfirmBanco) rowConfirmBanco.style.display = "flex";
+                            if (confirmBanco) confirmBanco.textContent = inputBancoEl ? inputBancoEl.value.trim() : "";
+                            if (rowConfirmReferencia) rowConfirmReferencia.style.display = "flex";
+                            if (confirmReferencia) confirmReferencia.textContent = inputRefEl ? inputRefEl.value.trim() : "";
+
+                            if (rowConfirmRecibido) rowConfirmRecibido.style.display = "none";
+                            if (rowConfirmCambio) rowConfirmCambio.style.display = "none";
+                        }
                     } else {
                         if (rowConfirmRecibido) rowConfirmRecibido.style.display = "none";
                         if (rowConfirmCambio) rowConfirmCambio.style.display = "none";
+                        if (rowConfirmBanco) rowConfirmBanco.style.display = "none";
+                        if (rowConfirmReferencia) rowConfirmReferencia.style.display = "none";
                     }
 
                     if (cC) cC.textContent = clienteNombreVal;
@@ -942,27 +1024,71 @@
             }
 
             var totalVentaVal = this.obtenerTotalCalculado();
-            var inputRecibido = document.getElementById("inputMontoRecibido");
-            var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
-            var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+            var bancoId = "";
+            var bancoNombre = "";
+            var referencia = "";
+            var montoRecibidoVal = totalVentaVal;
 
             if (tipoVenta === "CONTADO") {
-                if (!rawRecibido || isNaN(montoRecibidoNum) || montoRecibidoNum < totalVentaVal - 0.05) {
-                    this.mostrarMensaje("danger", "El monto recibido es obligatorio y debe cubrir el total de la venta.");
-                    if (inputRecibido) {
-                        inputRecibido.focus();
-                        inputRecibido.classList.add("pos-field-input--error");
+                if (this.formaPagoSeleccionada === "efectivo") {
+                    var inputRecibido = document.getElementById("inputMontoRecibido");
+                    var rawRecibido = inputRecibido ? inputRecibido.value.trim() : '';
+                    var montoRecibidoNum = parseFloat(rawRecibido.replace(/,/g, ''));
+
+                    if (!rawRecibido || isNaN(montoRecibidoNum) || montoRecibidoNum < totalVentaVal - 0.05) {
+                        this.mostrarMensaje("danger", "El monto recibido es obligatorio y debe cubrir el total de la venta.");
+                        if (inputRecibido) {
+                            inputRecibido.focus();
+                            inputRecibido.classList.add("pos-field-input--error");
+                        }
+                        if (btnConfirmarGuardar) {
+                            btnConfirmarGuardar.disabled = false;
+                            btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
+                        }
+                        window.ERP.UI.closeModal("modalConfirmarVenta");
+                        return false;
                     }
-                    if (btnConfirmarGuardar) {
-                        btnConfirmarGuardar.disabled = false;
-                        btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
+                    montoRecibidoVal = montoRecibidoNum;
+                } else if (this.formaPagoSeleccionada === "transfer") {
+                    var inputBanco = document.getElementById("transferBanco");
+                    var inputBancoId = document.getElementById("transferBancoId");
+                    var inputRef = document.getElementById("transferReferencia");
+
+                    bancoNombre = inputBanco ? inputBanco.value.trim() : "";
+                    bancoId = inputBancoId ? inputBancoId.value.trim() : "";
+                    referencia = inputRef ? inputRef.value.trim() : "";
+
+                    if (!bancoNombre) {
+                        this.mostrarMensaje("warning", "Debe digitar o seleccionar el banco de la transferencia.");
+                        if (inputBanco) {
+                            inputBanco.focus();
+                            inputBanco.classList.add("pos-field-input--error");
+                        }
+                        if (btnConfirmarGuardar) {
+                            btnConfirmarGuardar.disabled = false;
+                            btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
+                        }
+                        window.ERP.UI.closeModal("modalConfirmarVenta");
+                        return false;
                     }
-                    window.ERP.UI.closeModal("modalConfirmarVenta");
-                    return false;
+
+                    if (!referencia) {
+                        this.mostrarMensaje("warning", "Debe ingresar el número de referencia del comprobante de pago.");
+                        if (inputRef) {
+                            inputRef.focus();
+                            inputRef.classList.add("pos-field-input--error");
+                        }
+                        if (btnConfirmarGuardar) {
+                            btnConfirmarGuardar.disabled = false;
+                            btnConfirmarGuardar.innerHTML = `<i class="bi bi-printer-fill me-1"></i> Confirmar y Emitir`;
+                        }
+                        window.ERP.UI.closeModal("modalConfirmarVenta");
+                        return false;
+                    }
+
+                    montoRecibidoVal = totalVentaVal;
                 }
             }
-
-            var montoRecibidoVal = (tipoVenta === 'CONTADO') ? montoRecibidoNum : totalVentaVal;
 
             var datos = {
                 cliente_id: clienteId,
@@ -973,7 +1099,10 @@
                 productos: this.detalleVenta,
                 cuotas: cuotasPayload,
                 metodo_pago: this.formaPagoSeleccionada,
-                monto_recibido: montoRecibidoVal
+                monto_recibido: montoRecibidoVal,
+                banco_id: bancoId,
+                banco_nombre: bancoNombre,
+                referencia: referencia
             };
 
             try {
