@@ -15,35 +15,30 @@
         <p class="page-subtitle-apex">Visualiza y administra todas las ventas emitidas de contado y cuentas por cobrar a crédito.</p>
     </div>
 
-    <!-- PÍLDORAS PRINCIPALES: CONTADO / CRÉDITO -->
-    <div style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 6px 8px; display: inline-flex; gap: 8px; margin-bottom: 18px;">
-        <a href="{{ url_for('pagos.facturas', tipo='contado') }}" class="state-pill" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 10px;">
-            <i class="bi bi-cash-coin"></i>
-            <span>Facturas de Contado</span>
-            <span style="background: rgba(255, 255, 255, 0.1); font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800;">{{ total_contado }}</span>
-        </a>
-        <a href="{{ url_for('pagos.facturas', tipo='credito') }}" class="state-pill state-pill--active" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 10px;">
-            <i class="bi bi-calendar2-check"></i>
-            <span>Facturas a Crédito</span>
-            <span style="background: rgba(255, 255, 255, 0.2); font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800;">{{ total_credito }}</span>
-        </a>
-    </div>
-
     <!-- ===================================== -->
     <!-- BARRA DE HERRAMIENTAS, BÚSQUEDA Y PILLS APEX -->
     <!-- ===================================== -->
     <div class="toolbar-apex">
-        <!-- Grupo Izquierdo: Buscador Oscuro + Pills de Estado al lado derecho -->
-        <div class="toolbar-left-group">
+        <!-- Grupo Izquierdo: Buscador Oscuro + Píldoras Contado/Crédito al lado derecho del input buscar -->
+        <div class="toolbar-left-group" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <div class="toolbar-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" class="toolbar-input" id="buscarClienteCxc" placeholder="Buscar cliente o factura...">
             </div>
 
-            <!-- FILTRO DE MESES -->
-            <select class="toolbar-input" id="filtro_mes_cxc" style="width: auto; max-width: 200px; cursor: pointer; background-color: var(--color-bg-input); border-radius: 10px; color: var(--color-text-main);">
-                <option value="TODOS">Todos los meses</option>
-            </select>
+            <!-- PÍLDORAS PRINCIPALES: CONTADO / CRÉDITO (AL LADO DERECHO DEL INPUT BUSCAR) -->
+            <div class="state-pills-bar" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--color-border); border-radius: 10px; padding: 3px; display: inline-flex; gap: 4px;">
+                <a href="{{ url_for('pagos.facturas', tipo='contado') }}" class="state-pill" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.82rem; padding: 5px 14px; border-radius: 7px;">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Contado</span>
+                    <span style="background: rgba(255, 255, 255, 0.1); font-size: 0.7rem; padding: 1px 6px; border-radius: 999px; font-weight: 800;">{{ total_contado }}</span>
+                </a>
+                <a href="{{ url_for('pagos.facturas', tipo='credito') }}" class="state-pill state-pill--active" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.82rem; padding: 5px 14px; border-radius: 7px;">
+                    <i class="bi bi-calendar2-check"></i>
+                    <span>Crédito</span>
+                    <span style="background: rgba(255, 255, 255, 0.2); font-size: 0.7rem; padding: 1px 6px; border-radius: 999px; font-weight: 800;">{{ total_credito }}</span>
+                </a>
+            </div>
 
             <!-- TABS PILLS DE ESTADO (PENDIENTES, PAGADAS) -->
             <div class="state-pills-bar" id="estadoSwitcher">
@@ -56,9 +51,6 @@
 
         <!-- Acciones Derecha -->
         <div class="toolbar-actions-right">
-            <!-- Dynamic Count Badge (Número Puro) -->
-            <span id="badgeCantidadRegistros" class="count-badge-apex" title="Total de registros">0</span>
-            
             <a href="{{ url_for('clientes.exportar_clientes') }}" class="btn-apex-outline">
                 <i class="bi bi-download"></i> Exportación
             </a>

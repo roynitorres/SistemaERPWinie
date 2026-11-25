@@ -66,10 +66,9 @@
         },
 
         /**
-         * Paginación y Filtrado por Meses de Facturas de Contado (`pagos_contado.html`)
+         * Paginación y Filtrado de Facturas de Contado (`pagos_contado.html`)
          */
         initPaginationContado: function () {
-            var filtroMesCxc = document.getElementById("filtro_mes_cxc");
             var buscarClienteCxc = document.getElementById("buscarClienteCxc");
             var tablaPagos = document.getElementById("tablaPagos");
             if (!tablaPagos) return;
@@ -89,11 +88,6 @@
                         totalMonto += monto;
                     }
                 });
-
-                var badgeTotalFacturas = document.getElementById("badgeTotalFacturas");
-                if (badgeTotalFacturas) {
-                    badgeTotalFacturas.innerHTML = filteredRows.length;
-                }
 
                 var paginationSummary = document.getElementById("paginationSummary");
                 if (paginationSummary) {
@@ -173,7 +167,6 @@
             };
 
             var filtrarCuentas = function () {
-                var mes = filtroMesCxc ? filtroMesCxc.value : "TODOS";
                 var query = buscarClienteCxc ? buscarClienteCxc.value.toLowerCase().trim() : "";
 
                 filteredRows = allRows.filter(function (row) {
@@ -181,43 +174,13 @@
                     var cliente = row.children[1] ? row.children[1].innerText.toLowerCase() : "";
                     var metodo = row.children[3] ? row.children[3].innerText.toLowerCase() : "";
                     var ref = row.children[4] ? row.children[4].innerText.toLowerCase() : "";
-                    var rowMes = row.dataset.mes || "";
 
-                    var coincideTexto = factura.includes(query) || cliente.includes(query) || metodo.includes(query) || ref.includes(query);
-                    var coincideMes = (mes === "TODOS" || rowMes === mes);
-
-                    return coincideTexto && coincideMes;
+                    return factura.includes(query) || cliente.includes(query) || metodo.includes(query) || ref.includes(query);
                 });
 
                 currentPage = 1;
                 renderTable();
             };
-
-            // Poblar combobox de meses
-            if (filtroMesCxc) {
-                var mesesSet = new Set();
-                allRows.forEach(function (row) {
-                    if (row.dataset.mes) mesesSet.add(row.dataset.mes);
-                });
-
-                var mesesArray = Array.from(mesesSet).sort().reverse();
-                var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-                filtroMesCxc.innerHTML = '<option value="TODOS">Todos los meses</option>';
-                mesesArray.forEach(function (mes) {
-                    var option = document.createElement("option");
-                    option.value = mes;
-                    var parts = mes.split('-');
-                    if (parts.length === 2) {
-                        var y = parts[0];
-                        var m = parseInt(parts[1], 10);
-                        option.text = `${monthNames[m - 1]} ${y}`;
-                        filtroMesCxc.appendChild(option);
-                    }
-                });
-
-                filtroMesCxc.addEventListener("change", filtrarCuentas);
-            }
 
             if (buscarClienteCxc) {
                 buscarClienteCxc.addEventListener("input", filtrarCuentas);
