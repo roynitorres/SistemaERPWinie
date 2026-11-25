@@ -109,7 +109,7 @@
                     {% endif %}
                     <!-- 5. VENTAS Y FACTURACIÓN -->
                     {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
-                    <li class="sidebar__dropdown {% if (request.endpoint and 'ventas' in request.endpoint) or (request.endpoint and 'pagos' in request.endpoint) %}is-expanded{% endif %}">
+                    <li class="sidebar__dropdown {% if (request.endpoint and 'ventas' in request.endpoint) or (request.endpoint and 'pagos' in request.endpoint) or (request.endpoint and 'cobros' in request.endpoint) %}is-expanded{% endif %}">
                         <div class="sidebar__link sidebar__dropdown-toggle sidebar__text-only-header" onclick="toggleSidebarDropdown(this)">
                             <span class="sidebar__text sidebar__group-title">Ventas</span>
                             <i class="bi bi-chevron-right sidebar__chevron"></i>
@@ -125,6 +125,12 @@
                                 <a class="sidebar__sublink {% if request.endpoint and 'pagos' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}" title="Historial y Cobranza de Facturas">
                                     <i class="bi bi-receipt-cutoff sidebar__icon"></i>
                                     <span class="sidebar__subtext">Facturas</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="sidebar__sublink {% if request.endpoint and 'cobros' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('cobros.index') }}" title="Módulo de Cobros y Recibos de Caja">
+                                    <i class="bi bi-wallet2 sidebar__icon" style="color: #10b981;"></i>
+                                    <span class="sidebar__subtext">Cobros</span>
                                 </a>
                             </li>
                         </ul>
@@ -685,6 +691,14 @@
             "category": "Facturas",
             "description": "Cuentas por cobrar y cuotas de crédito",
             "keywords": "factura facturas credito cuotas abonos pagos por cobrar plazos financiamiento"
+        }) %}
+        {% set _ = nav_items.append({
+            "title": "Cobros y Recibos de Caja",
+            "url": url_for('cobros.index'),
+            "icon": "bi-wallet2",
+            "category": "Ventas",
+            "description": "Abonos a cuenta corriente y emisión de recibos de caja",
+            "keywords": "cobros cobro recibo recibos abono cuenta corriente caja cliente"
         }) %}
     {% endif %}
     {% if rol_actual == 'ADMIN' %}

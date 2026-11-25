@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+{% block title %}Cobros & Recibos de Caja{% endblock %}
+
+{% block topbar_title %}Módulo de Cobranza & Recibos{% endblock %}
+
+{% block content %}
+<div class="page-header-apex mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1 class="page-title-apex">
+                <i class="bi bi-wallet2 text-success px-2"></i>Cobros & Recibos de Caja
+            </h1>
+            <p class="page-subtitle-apex">Abona y liquida cuentas corrientes distribuyendo el pago en una o múltiples facturas.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('cobros.historial') }}" class="btn-apex-outline">
+                <i class="bi bi-clock-history me-1"></i> Historial de Recibos
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- BUSCADOR DEL CLIENTE (HERO)          -->
+<!-- ===================================== -->
+<div class="panel mb-4" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 18px 22px;">
+    <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 8px;">
+        <i class="bi bi-person-bounding-box me-1 text-primary"></i> 1. Buscar y Seleccionar Cliente
+    </div>
+    <div style="position: relative; max-width: 650px;">
+        <i class="bi bi-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #38bdf8; font-size: 1.1rem;"></i>
+        <input type="text" class="form-input" id="inputBuscarClienteCobro" placeholder="Escriba el nombre, RUC, cédula o teléfono..." style="padding-left: 44px; font-size: 0.95rem; font-weight: 600;" autocomplete="off">
+        
+        <!-- Dropdown flotante de autocompletado -->
+        <div id="dropdownClientesCobro" style="position: absolute; top: calc(100% + 6px); left: 0; width: 100%; background: #162032; border: 1px solid var(--color-border); border-radius: 10px; max-height: 320px; overflow-y: auto; z-index: 1000; box-shadow: 0 12px 30px rgba(0,0,0,0.6); display: none;">
+            <!-- Inyectado dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- BANNER DE RESUMEN DEL CLIENTE        -->
+<!-- ===================================== -->
+<div id="bannerClienteSeleccionado" class="panel mb-4" style="display: none; background: linear-gradient(135deg, rgba(0, 71, 171, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 18px 24px;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar-circle-apex" style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--color-primary) 0%, #00b4d8 100%); color: #fff; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+                <h3 id="lblBannerNombreCliente" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; color: var(--color-text-main);">---</h3>
+                <div style="font-size: 0.82rem; color: var(--color-text-muted); display: flex; gap: 16px; flex-wrap: wrap;">
+                    <span><i class="bi bi-telephone-fill me-1" style="color: #38bdf8;"></i> <span id="lblBannerTelefono">---</span></span>
+                    <span><i class="bi bi-card-text me-1" style="color: #10b981;"></i> <span id="lblBannerIdentificacion">---</span></span>
+                    <span><i class="bi bi-receipt me-1" style="color: #f59e0b;"></i> <strong id="lblBannerFacturasCount" style="color: #f59e0b;">0</strong> facturas pendientes</span>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: right; background: rgba(0, 0, 0, 0.25); padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
+            <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-warning);">Saldo Total Pendiente</div>
+            <div id="lblBannerSaldoTotal" style="font-size: 1.7rem; font-weight: 900; color: #f59e0b;">C$ 0.00</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- ESPACIO DE TRABAJO EN 2 PANELES      -->
+<!-- ===================================== -->
+<div id="workspaceCobro" class="grid grid--2-cols mb-4" style="display: none; grid-template-columns: 1.45fr 1fr; gap: 20px; align-items: flex-start;">
+    
+    <!-- PANEL IZQUIERDO: FACTURAS PENDIENTES DEL CLIENTE -->
+    <div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
+        <div style="padding: 14px 18px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);">
+            <div style="font-size: 0.92rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-list-check" style="color: #38bdf8;"></i> Facturas a Afectar
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); padding: 3px 10px; border-radius: 999px;">
+                <i class="bi bi-sort-numeric-down me-1"></i> Orden FIFO (Antigua a Reciente)
+            </span>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="data-table" style="table-layout: auto; width: 100%;">
+                <thead class="data-table__head">
+                    <tr>
+                        <th style="width: 40px; text-align: center;">✓</th>
+                        <th style="width: 110px; white-space: nowrap;">Factura</th>
+                        <th style="width: 120px; white-space: nowrap;">Vencimiento</th>
+                        <th style="width: 100px; text-align: right; white-space: nowrap;">Total</th>
+                        <th style="width: 110px; text-align: right; white-space: nowrap;">Saldo</th>
+                        <th style="width: 130px; text-align: right; white-space: nowrap;">Abonar Hoy</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyFacturasCobro">
+                    <!-- Filas inyectadas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PANEL DERECHO: REGISTRO DEL PAGO -->
+    <div class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #10b981; padding-bottom: 10px; border-bottom: 1px solid var(--color-border);">
+            <i class="bi bi-cash-stack"></i> Datos del Cobro Recibido
+        </div>
+
+        <!-- MONTO RECIBIDO HERO -->
+        <div class="form-group">
+            <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">Monto Recibido del Cliente (C$)</label>
+            <input type="number" step="0.01" min="0.01" class="form-input" id="cobroMontoRecibido" placeholder="0.00" style="font-size: 1.45rem; font-weight: 900; color: #10b981; padding: 12px 14px;">
+        </div>
+
+        <!-- ATAJOS DE MONTO RÁPIDO -->
+        <div id="cajaAtajosCobro" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn-apex-outline" id="btnPagarVencida" style="font-size: 0.76rem; padding: 5px 10px; border-radius: 8px;">
+                <i class="bi bi-clock-history text-danger me-1"></i> Factura Vencida
+            </button>
+            <button type="button" class="btn-apex-outline" id="btnPagarTotal" style="font-size: 0.76rem; padding: 5px 10px; border-radius: 8px;">
+                <i class="bi bi-check2-all text-success me-1"></i> Saldo Total Completo
+            </button>
+        </div>
+
+        <!-- FORMA DE PAGO -->
+        <div class="form-group">
+            <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">Forma de Pago</label>
+            <select class="form-input" id="cobroTipoPago">
+                <option value="EFECTIVO">Efectivo</option>
+                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+            </select>
+        </div>
+
+        <!-- BANCO Y REFERENCIA (SI TRANSFERENCIA) -->
+        <div id="cajaBancoRefCobro" style="display: none; flex-direction: column; gap: 12px;">
+            <div class="form-group">
+                <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700;">Banco Destino</label>
+                <select class="form-input" id="cobroBancoId">
+                    <option value="">-- Seleccionar Banco --</option>
+                    {% if bancos %}
+                    {% for b in bancos %}
+                    <option value="{{ b.id }}">{{ b.nombre }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700;">N° Referencia Bancaria</label>
+                <input type="text" class="form-input" id="cobroReferencia" placeholder="Ej: TR-884920">
+            </div>
+        </div>
+
+        <!-- OBSERVACIONES -->
+        <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Observaciones (Opcional)</label>
+            <input type="text" class="form-input" id="cobroObservaciones" placeholder="Notas adicionales del cobro...">
+        </div>
+
+        <!-- RESUMEN DE SALDO -->
+        <div style="background: #141c2b; border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <span style="color: var(--color-text-muted);">Saldo Anterior:</span>
+                <strong id="lblResumenSaldoAnterior">C$ 0.00</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="color: #10b981; font-weight: 800;">
+                <span>Abono Aplicado:</span>
+                <span id="lblResumenMontoAbono">- C$ 0.00</span>
+            </div>
+            <div style="border-top: 1px dashed var(--color-border); margin: 4px 0;"></div>
+            <div class="d-flex justify-content-between align-items-center" style="font-size: 0.95rem;">
+                <span style="font-weight: 700;">Nuevo Saldo Deudor:</span>
+                <strong id="lblResumenNuevoSaldo" style="color: #f59e0b; font-size: 1.15rem;">C$ 0.00</strong>
+            </div>
+        </div>
+
+        <!-- BOTÓN PRINCIPAL -->
+        <button type="button" class="btn-neon-primary" id="btnEmitirRecibo" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 13px; font-size: 0.98rem; font-weight: 800; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja
+        </button>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- MODAL DE VISTA PREVIA DEL RECIBO     -->
+<!-- ===================================== -->
+<div class="modal-overlay" id="modalReciboExito">
+    <div class="modal-window" style="max-width: 440px; background: #ffffff; color: #111827; border-radius: 16px; padding: 24px;">
+        <div style="text-align: center; border-bottom: 2px dashed #e5e7eb; padding-bottom: 14px; margin-bottom: 14px;">
+            <div style="font-size: 1.15rem; font-weight: 900; letter-spacing: -0.02em;">SISTEMA ERP WINIE</div>
+            <div style="font-size: 0.75rem; color: #6b7280;">Comprobante Oficial de Cobro</div>
+            <div style="font-family: monospace; font-weight: 900; color: #0047AB; font-size: 1.05rem; margin-top: 4px;" id="lblModalReciboNum">#RC-000000</div>
+            <div style="font-size: 0.72rem; color: #6b7280; margin-top: 2px;" id="lblModalReciboFecha">---</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;">
+            <div class="d-flex justify-content-between">
+                <span style="color: #6b7280;">Cliente:</span>
+                <strong id="lblModalReciboCliente">---</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span style="color: #6b7280;">Método:</span>
+                <strong id="lblModalReciboMetodo">---</strong>
+            </div>
+
+            <div style="border-top: 1px dashed #d1d5db; margin: 6px 0;"></div>
+            <div style="font-weight: 800; font-size: 0.76rem; text-transform: uppercase; color: #4b5563;">Facturas Afectadas:</div>
+            <div id="listaModalFacturasAfectadas" style="display: flex; flex-direction: column; gap: 4px; max-height: 140px; overflow-y: auto;">
+                <!-- Dinámico -->
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center" style="font-size: 1.15rem; font-weight: 900; border-top: 2px solid #111827; border-bottom: 2px solid #111827; padding: 8px 0; margin: 8px 0;">
+                <span>TOTAL COBRADO:</span>
+                <span style="color: #059669;" id="lblModalReciboMonto">C$ 0.00</span>
+            </div>
+
+            <div class="d-flex justify-content-between" style="font-size: 0.82rem;">
+                <span style="color: #6b7280;">Saldo Anterior:</span>
+                <span id="lblModalReciboSaldoAnt">C$ 0.00</span>
+            </div>
+            <div class="d-flex justify-content-between" style="font-size: 0.85rem; font-weight: 800; color: #d97706;">
+                <span>Nuevo Saldo Deudor:</span>
+                <span id="lblModalReciboSaldoNuevo">C$ 0.00</span>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex flex-column gap-2">
+            <a href="#" id="btnImprimirTicketOficial" target="_blank" class="btn btn--primary w-100" style="background: #0047AB; border-color: #0047AB; padding: 10px; font-weight: 800; text-align: center; text-decoration: none;">
+                <i class="bi bi-printer-fill me-1"></i> Imprimir Recibo Oficial
+            </a>
+            <button type="button" class="btn btn--outline w-100" onclick="nuevoCobroLimpiar()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Registrar Otro Cobro
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var clienteActual = null;
+    var facturasActuales = [];
+    var ultimoReciboId = null;
+
+    // Toast flotante
+    function showToast(msg, tipo) {
+        tipo = tipo || 'success';
+        if (window.ERP && window.ERP.Pagos && window.ERP.Pagos.showToast) {
+            window.ERP.Pagos.showToast(msg, tipo);
+        } else {
+            alert(msg);
+        }
+    }
+
+    // Autocompletado de Clientes
+    var inputBuscar = document.getElementById('inputBuscarClienteCobro');
+    var dropdown = document.getElementById('dropdownClientesCobro');
+    var timerBuscar = null;
+
+    if (inputBuscar) {
+        inputBuscar.addEventListener('input', function() {
+            var q = this.value.trim();
+            clearTimeout(timerBuscar);
+            if (q.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            timerBuscar = setTimeout(function() {
+                fetch('/cobros/clientes-buscar?q=' + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.clientes.length > 0) {
+                            var html = '';
+                            data.clientes.forEach(function(c) {
+                                html += `
+                                <div class="p-3 d-flex justify-content-between align-items-center" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);" onclick="seleccionarCliente(${c.id})">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle-apex" style="width: 32px; height: 32px; font-size: 0.85rem;"><i class="bi bi-person-fill"></i></div>
+                                        <div>
+                                            <strong style="color: var(--color-text-main); font-size: 0.9rem;">${c.nombres}</strong>
+                                            <div style="font-size: 0.72rem; color: var(--color-text-muted);">
+                                                ${c.telefono ? 'Tel: ' + c.telefono + ' • ' : ''}${c.facturas_count} facturas pendientes
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 0.7rem; color: ${c.facturas_vencidas > 0 ? '#ef4444' : '#f59e0b'}; font-weight: 700;">
+                                            ${c.facturas_vencidas > 0 ? 'Vencido' : 'Saldo'}
+                                        </div>
+                                        <strong style="color: ${c.facturas_vencidas > 0 ? '#ef4444' : '#f59e0b'}; font-size: 0.92rem;">C$ ${c.saldo_total.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+                                    </div>
+                                </div>
+                                `;
+                            });
+                            dropdown.innerHTML = html;
+                            dropdown.style.display = 'block';
+                        } else {
+                            dropdown.innerHTML = '<div class="p-3 text-center text-muted" style="font-size: 0.85rem;">No se encontraron clientes con cuentas por cobrar</div>';
+                            dropdown.style.display = 'block';
+                        }
+                    });
+            }, 250);
+        });
+    }
+
+    // Ocultar dropdown al hacer click afuera
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#inputBuscarClienteCobro') && !e.target.closest('#dropdownClientesCobro')) {
+            if (dropdown) dropdown.style.display = 'none';
+        }
+    });
+
+    // Cargar cliente y sus facturas
+    function seleccionarCliente(clienteId) {
+        if (dropdown) dropdown.style.display = 'none';
+        fetch('/cobros/cliente/' + clienteId + '/facturas')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    clienteActual = data.cliente;
+                    facturasActuales = data.facturas;
+                    renderClienteWorkspace();
+                } else {
+                    showToast(data.message || 'Error cargando facturas del cliente', 'danger');
+                }
+            })
+            .catch(() => showToast('Error al conectar con el servidor', 'danger'));
+    }
+
+    function renderClienteWorkspace() {
+        if (!clienteActual) return;
+
+        // Render Banner
+        document.getElementById('lblBannerNombreCliente').innerText = clienteActual.nombres;
+        document.getElementById('lblBannerTelefono').innerText = clienteActual.telefono || 'Sin teléfono';
+        document.getElementById('lblBannerIdentificacion').innerText = clienteActual.identificacion || 'Consumidor';
+        document.getElementById('lblBannerFacturasCount').innerText = clienteActual.total_facturas;
+        document.getElementById('lblBannerSaldoTotal').innerText = 'C$ ' + clienteActual.saldo_total.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+        document.getElementById('lblResumenSaldoAnterior').innerText = 'C$ ' + clienteActual.saldo_total.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+        document.getElementById('bannerClienteSeleccionado').style.display = 'block';
+        document.getElementById('workspaceCobro').style.display = 'grid';
+
+        // Render Facturas
+        var tbody = document.getElementById('tbodyFacturasCobro');
+        tbody.innerHTML = '';
+
+        var totalVencido = 0;
+        var primerFacturaVencidaMonto = 0;
+
+        if (facturasActuales.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Este cliente no tiene facturas pendientes</td></tr>';
+            return;
+        }
+
+        facturasActuales.forEach(function(f, idx) {
+            if (f.es_vencida) {
+                totalVencido += f.saldo_pendiente;
+                if (primerFacturaVencidaMonto === 0) primerFacturaVencidaMonto = f.saldo_pendiente;
+            }
+
+            var tr = document.createElement('tr');
+            tr.className = 'data-table__row fila-factura-cobro';
+            tr.dataset.id = f.id;
+            tr.dataset.saldo = f.saldo_pendiente;
+
+            tr.innerHTML = `
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input check-factura-afectar" checked style="width: 18px; height: 18px; cursor: pointer;" onchange="recalcularDistribucion()">
+                </td>
+                <td style="font-weight: 800; font-family: monospace; color: #38bdf8; white-space: nowrap;">
+                    #${f.numero_factura}
+                </td>
+                <td style="white-space: nowrap;">
+                    <div style="font-weight: 600; color: ${f.es_vencida ? '#ef4444' : 'var(--color-text-main)'};">
+                        ${f.fecha_limite_credito}
+                    </div>
+                    ${f.es_vencida ? '<div style="font-size: 0.7rem; color: #ef4444; font-weight: 700;"><i class="bi bi-exclamation-triangle-fill"></i> Vencida (' + f.dias_vencida + 'd)</div>' : ''}
+                </td>
+                <td class="text-end" style="color: var(--color-text-muted); white-space: nowrap;">
+                    C$ ${f.total_venta.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                </td>
+                <td class="text-end" style="font-weight: 800; color: ${f.es_vencida ? '#ef4444' : '#f59e0b'}; white-space: nowrap;">
+                    C$ ${f.saldo_pendiente.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                </td>
+                <td class="text-end" style="white-space: nowrap;">
+                    <input type="number" step="0.01" min="0" class="form-input input-monto-distribuido text-end" style="width: 110px; font-weight: 800; color: #10b981; padding: 5px 8px;" value="0.00" oninput="manualOverride()">
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Configurar atajos
+        var btnVencida = document.getElementById('btnPagarVencida');
+        if (totalVencido > 0) {
+            btnVencida.style.display = 'inline-flex';
+            btnVencida.onclick = function() { aplicarMonto(totalVencido); };
+            btnVencida.innerHTML = `<i class="bi bi-clock-history text-danger me-1"></i> Pagar Vencidas (C$ ${totalVencido.toFixed(2)})`;
+        } else {
+            btnVencida.style.display = 'none';
+        }
+
+        var btnTotal = document.getElementById('btnPagarTotal');
+        btnTotal.onclick = function() { aplicarMonto(clienteActual.saldo_total); };
+        btnTotal.innerHTML = `<i class="bi bi-check2-all text-success me-1"></i> Saldo Total (C$ ${clienteActual.saldo_total.toFixed(2)})`;
+
+        // Monto por defecto sugerido: Primera cuota / saldo más antiguo
+        var sugerido = primerFacturaVencidaMonto > 0 ? primerFacturaVencidaMonto : (facturasActuales[0] ? facturasActuales[0].saldo_pendiente : clienteActual.saldo_total);
+        aplicarMonto(sugerido);
+    }
+
+    function aplicarMonto(monto) {
+        var inp = document.getElementById('cobroMontoRecibido');
+        inp.value = Number(monto).toFixed(2);
+        distribuirMonto(monto);
+    }
+
+    function distribuirMonto(montoRecibido) {
+        var m = parseFloat(montoRecibido) || 0;
+        var restante = m;
+        var filas = document.querySelectorAll('.fila-factura-cobro');
+
+        filas.forEach(function(row) {
+            var check = row.querySelector('.check-factura-afectar');
+            var saldo = parseFloat(row.dataset.saldo);
+            var input = row.querySelector('.input-monto-distribuido');
+
+            if (check && check.checked) {
+                if (restante >= saldo) {
+                    input.value = saldo.toFixed(2);
+                    restante -= saldo;
+                } else if (restante > 0) {
+                    input.value = restante.toFixed(2);
+                    restante = 0;
+                } else {
+                    input.value = "0.00";
+                }
+            } else {
+                input.value = "0.00";
+            }
+        });
+
+        actualizarResumen(m);
+    }
+
+    function recalcularDistribucion() {
+        var m = parseFloat(document.getElementById('cobroMontoRecibido').value) || 0;
+        distribuirMonto(m);
+    }
+
+    function manualOverride() {
+        var totalDistribuido = 0;
+        document.querySelectorAll('.input-monto-distribuido').forEach(function(inp) {
+            totalDistribuido += parseFloat(inp.value) || 0;
+        });
+        document.getElementById('cobroMontoRecibido').value = totalDistribuido.toFixed(2);
+        actualizarResumen(totalDistribuido);
+    }
+
+    function actualizarResumen(montoAbonado) {
+        if (!clienteActual) return;
+        document.getElementById('lblResumenMontoAbono').innerText = '- C$ ' + montoAbonado.toLocaleString('en-US', {minimumFractionDigits: 2});
+        var nuevoSaldo = Math.max(0, clienteActual.saldo_total - montoAbonado);
+        document.getElementById('lblResumenNuevoSaldo').innerText = 'C$ ' + nuevoSaldo.toLocaleString('en-US', {minimumFractionDigits: 2});
+    }
+
+    // Toggle Banco & Ref en transferencias
+    var selectTipoPago = document.getElementById('cobroTipoPago');
+    if (selectTipoPago) {
+        selectTipoPago.addEventListener('change', function() {
+            var caja = document.getElementById('cajaBancoRefCobro');
+            caja.style.display = (this.value === 'TRANSFERENCIA') ? 'flex' : 'none';
+        });
+    }
+
+    var inputMonto = document.getElementById('cobroMontoRecibido');
+    if (inputMonto) {
+        inputMonto.addEventListener('input', function() {
+            distribuirMonto(this.value);
+        });
+    }
+
+    // Confirmar y Procesar Cobro
+    var btnConfirmar = document.getElementById('btnEmitirRecibo');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', async function() {
+            if (!clienteActual) {
+                showToast('Seleccione un cliente primero', 'warning');
+                return;
+            }
+
+            var montoTotal = parseFloat(document.getElementById('cobroMontoRecibido').value) || 0;
+            if (montoTotal <= 0) {
+                showToast('Ingrese un monto a cobrar válido mayor a cero', 'warning');
+                return;
+            }
+
+            var tipoPago = selectTipoPago.value;
+            var bancoId = document.getElementById('cobroBancoId').value;
+            var referencia = document.getElementById('cobroReferencia').value.trim();
+            var observaciones = document.getElementById('cobroObservaciones').value.trim();
+
+            if (tipoPago === 'TRANSFERENCIA') {
+                if (!bancoId) {
+                    showToast('Seleccione el banco destino de la transferencia', 'warning');
+                    return;
+                }
+                if (!referencia) {
+                    showToast('Digite el número de referencia bancaria', 'warning');
+                    return;
+                }
+            }
+
+            var distribucion = [];
+            document.querySelectorAll('.fila-factura-cobro').forEach(function(row) {
+                var vId = row.dataset.id;
+                var mAplicar = parseFloat(row.querySelector('.input-monto-distribuido').value) || 0;
+                if (mAplicar > 0) {
+                    distribucion.push({ venta_id: parseInt(vId), monto: mAplicar });
+                }
+            });
+
+            if (distribucion.length === 0) {
+                showToast('Debe asignar el monto a por lo menos una factura', 'warning');
+                return;
+            }
+
+            btnConfirmar.disabled = true;
+            btnConfirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Procesando...';
+
+            try {
+                var resp = await fetch('/cobros/procesar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cliente_id: clienteActual.id,
+                        monto_total: montoTotal,
+                        tipo_pago: tipoPago,
+                        banco_id: bancoId || null,
+                        referencia: referencia,
+                        observaciones: observaciones,
+                        distribucion: distribucion
+                    })
+                });
+
+                var res = await resp.json();
+                if (res.success) {
+                    ultimoReciboId = res.recibo_id;
+                    mostrarModalReciboExito(res, distribucion);
+                } else {
+                    showToast(res.message || 'Error al procesar cobro', 'danger');
+                    btnConfirmar.disabled = false;
+                    btnConfirmar.innerHTML = '<i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja';
+                }
+            } catch (e) {
+                showToast('Error de conexión al procesar el cobro', 'danger');
+                btnConfirmar.disabled = false;
+                btnConfirmar.innerHTML = '<i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja';
+            }
+        });
+    }
+
+    function mostrarModalReciboExito(res, distribucion) {
+        document.getElementById('lblModalReciboNum').innerText = '#' + res.numero_recibo;
+        document.getElementById('lblModalReciboFecha').innerText = new Date().toLocaleString();
+        document.getElementById('lblModalReciboCliente').innerText = clienteActual.nombres;
+        document.getElementById('lblModalReciboMetodo').innerText = selectTipoPago.value;
+        document.getElementById('lblModalReciboMonto').innerText = 'C$ ' + res.monto_total.toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('lblModalReciboSaldoAnt').innerText = 'C$ ' + res.saldo_anterior.toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('lblModalReciboSaldoNuevo').innerText = 'C$ ' + res.saldo_nuevo.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+        var listaFact = document.getElementById('listaModalFacturasAfectadas');
+        listaFact.innerHTML = '';
+        distribucion.forEach(function(d) {
+            var f = facturasActuales.find(x => x.id === d.venta_id);
+            var num = f ? f.numero_factura : d.venta_id;
+            listaFact.innerHTML += `
+                <div class="d-flex justify-content-between" style="font-size: 0.78rem;">
+                    <span>#${num}:</span>
+                    <strong>C$ ${d.monto.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+                </div>
+            `;
+        });
+
+        document.getElementById('btnImprimirTicketOficial').href = '/cobros/recibo/' + res.recibo_id;
+        document.getElementById('modalReciboExito').classList.add('active');
+    }
+
+    function nuevoCobroLimpiar() {
+        document.getElementById('modalReciboExito').classList.remove('active');
+        location.reload();
+    }
+
+    // Inicialización si vino cliente_id por URL
+    {% if cliente_id_param %}
+    seleccionarCliente({{ cliente_id_param }});
+    {% endif %}
+</script>
+{% endblock %}

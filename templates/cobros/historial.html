@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Recibos de Cobro{% endblock %}
+
+{% block topbar_title %}Historial de Cobros Emitidos{% endblock %}
+
+{% block content %}
+<div class="page-header-apex mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1 class="page-title-apex">
+                <i class="bi bi-clock-history text-primary px-2"></i>Historial de Recibos de Caja
+            </h1>
+            <p class="page-subtitle-apex">Consulta, reimprime y audita todos los comprobantes de cobro emitidos en el sistema.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('cobros.index') }}" class="btn-neon-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; text-decoration: none;">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Cobro
+            </a>
+            <a href="{{ url_for('pagos.facturas', tipo='credito') }}" class="btn-apex-outline" style="text-decoration: none;">
+                <i class="bi bi-receipt me-1"></i> Facturas Crédito
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px;">
+    <div class="table-responsive">
+        <table class="data-table" style="table-layout: auto; width: 100%;">
+            <thead class="data-table__head">
+                <tr>
+                    <th style="width: 120px; white-space: nowrap;">Recibo</th>
+                    <th style="width: 140px; white-space: nowrap;">Fecha</th>
+                    <th style="min-width: 200px;">Cliente</th>
+                    <th style="width: 160px; white-space: nowrap;">Forma de Pago</th>
+                    <th style="width: 130px; text-align: right; white-space: nowrap;">Total Cobrado</th>
+                    <th style="width: 130px; text-align: right; white-space: nowrap;">Saldo Nuevo</th>
+                    <th style="width: 100px; text-align: center; white-space: nowrap;">Estado</th>
+                    <th style="width: 90px; text-align: center; white-space: nowrap;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recibos %}
+                {% for r in recibos %}
+                <tr class="data-table__row">
+                    <td class="data-table__cell" style="font-weight: 800; font-family: monospace; color: #38bdf8; white-space: nowrap;">
+                        #{{ r.numero_recibo }}
+                    </td>
+                    <td class="data-table__cell" style="white-space: nowrap; font-size: 0.84rem;">
+                        {{ r.created_at.strftime('%d/%m/%Y %I:%M %p') }}
+                    </td>
+                    <td class="data-table__cell">
+                        <div class="customer-cell-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                            <div class="avatar-circle-apex" style="width: 30px; height: 30px; font-size: 0.8rem; background: linear-gradient(135deg, var(--color-primary) 0%, #00b4d8 100%); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <span class="customer-title-text" style="font-weight: 700;">{{ r.cliente.nombres if r.cliente else 'Cliente Ocasional' }}</span>
+                        </div>
+                    </td>
+                    <td class="data-table__cell" style="white-space: nowrap;">
+                        {% if r.tipo_pago == 'EFECTIVO' %}
+                        <span class="badge-status-apex" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                            <i class="bi bi-cash me-1"></i> Efectivo
+                        </span>
+                        {% else %}
+                        <span class="badge-status-apex" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                            <i class="bi bi-bank me-1"></i> {{ r.banco.nombre if r.banco else 'Transf.' }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="data-table__cell text-end" style="font-weight: 800; color: #10b981; white-space: nowrap;">
+                        C$ {{ "%.2f"|format(r.monto_total) }}
+                    </td>
+                    <td class="data-table__cell text-end" style="font-weight: 700; color: #f59e0b; white-space: nowrap;">
+                        C$ {{ "%.2f"|format(r.saldo_nuevo) }}
+                    </td>
+                    <td class="data-table__cell text-center" style="white-space: nowrap;">
+                        {% if r.estado == 'ACTIVO' %}
+                        <span class="badge bg-success" style="font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">VÁLIDO</span>
+                        {% else %}
+                        <span class="badge bg-danger" style="font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 6px;">ANULADO</span>
+                        {% endif %}
+                    </td>
+                    <td class="data-table__cell text-center" style="white-space: nowrap;">
+                        <div class="d-inline-flex gap-1">
+                            <a href="{{ url_for('cobros.ver_recibo', recibo_id=r.id) }}" target="_blank" class="btn-apex-outline" title="Imprimir Recibo" style="padding: 5px 8px; border-radius: 6px;">
+                                <i class="bi bi-printer-fill"></i>
+                            </a>
+                            {% if current_user.rol == 'ADMIN' and r.estado == 'ACTIVO' %}
+                            <button type="button" class="btn-apex-outline" title="Anular Recibo" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3); padding: 5px 8px; border-radius: 6px;" onclick="anularReciboPrompt({{ r.id }}, '{{ r.numero_recibo }}')">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i>
+                        No se han emitido recibos de caja aún.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function anularReciboPrompt(reciboId, numeroRecibo) {
+        var motivo = prompt("Indique el motivo de anulación para el recibo #" + numeroRecibo + ":");
+        if (!motivo || !motivo.trim()) return;
+
+        try {
+            var resp = await fetch("/cobros/recibo/" + reciboId + "/anular", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ motivo: motivo.trim() })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                alert(data.message || "Recibo anulado");
+                location.reload();
+            } else {
+                alert("Error: " + (data.message || "No se pudo anular el recibo"));
+            }
+        } catch (e) {
+            alert("Error de conexión al anular el recibo");
+        }
+    }
+</script>
+{% endblock %}

@@ -21,6 +21,7 @@ from models.detalle_venta import DetalleVenta
 from models.pago import Pago
 from models.banco import Banco
 from models.cuota_venta import CuotaVenta
+from models.recibo_caja import ReciboCaja
 from models.empresa import Empresa
 from models.proveedor import Proveedor
 from models.enums import EstadoVenta, TipoVenta, EstadoProducto, EstadoCliente, EstadoProveedor
@@ -34,6 +35,7 @@ from routes.categorias import categorias_bp
 from routes.productos import productos_bp
 from routes.ventas import ventas_bp
 from routes.pagos import pagos_bp
+from routes.cobros import cobros_bp
 from routes.portal_cliente import portal_cliente_bp
 from routes.empresa import empresa_bp
 from routes.proveedores import proveedores_bp
@@ -81,6 +83,8 @@ with app.app_context():
                 conn.execute(text("ALTER TABLE pagos ADD COLUMN monto_efectivo NUMERIC(10,2) DEFAULT 0.00"))
             if 'monto_transferencia' not in columns_pagos:
                 conn.execute(text("ALTER TABLE pagos ADD COLUMN monto_transferencia NUMERIC(10,2) DEFAULT 0.00"))
+            if 'recibo_caja_id' not in columns_pagos:
+                conn.execute(text("ALTER TABLE pagos ADD COLUMN recibo_caja_id INTEGER"))
             conn.commit()
 
         # Asignar clave temporal limpia a usuarios existentes que requieran cambio y no tengan clave almacenada
@@ -128,6 +132,7 @@ app.register_blueprint(categorias_bp)
 app.register_blueprint(productos_bp)
 app.register_blueprint(ventas_bp)
 app.register_blueprint(pagos_bp)
+app.register_blueprint(cobros_bp)
 app.register_blueprint(portal_cliente_bp)
 app.register_blueprint(empresa_bp)
 app.register_blueprint(proveedores_bp)

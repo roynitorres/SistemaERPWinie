@@ -53,6 +53,13 @@ class Pago(db.Model):
         nullable=True
     )
 
+    # Recibo de caja asociado (si fue registrado vía módulo de cobros)
+    recibo_caja_id = db.Column(
+        db.Integer,
+        db.ForeignKey("recibos_caja.id"),
+        nullable=True
+    )
+
     # ==================================================
     # INFORMACIÓN PAGO
     # ==================================================
@@ -153,6 +160,13 @@ class Pago(db.Model):
     # Cuota asociada
     cuota = db.relationship(
         "CuotaVenta",
+        back_populates="pagos",
+        lazy=True
+    )
+
+    # Recibo de caja asociado
+    recibo_caja = db.relationship(
+        "ReciboCaja",
         back_populates="pagos",
         lazy=True
     )
