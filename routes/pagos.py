@@ -109,6 +109,9 @@ def facturas(tipo, estado):
     }
     
 
+    total_contado = Venta.query.filter_by(tipo_venta=TipoVenta.CONTADO, estado=EstadoVenta.ACTIVA).count()
+    total_credito = Venta.query.filter_by(tipo_venta=TipoVenta.CREDITO, estado=EstadoVenta.ACTIVA).count()
+
     if tipo_filtro == TipoVenta.CONTADO:
         plantilla = "pagos/pagos_contado.html"
     else:
@@ -120,6 +123,8 @@ def facturas(tipo, estado):
         ventas=ventas_filtradas,
         ventas_pendientes=ventas_pendientes,
         kpis=kpis,
+        total_contado=total_contado,
+        total_credito=total_credito,
         tipo_factura=tipo_filtro,
         estado_factura=estado,
         now=datetime.now()

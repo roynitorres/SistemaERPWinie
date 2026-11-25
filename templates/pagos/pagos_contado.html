@@ -8,8 +8,22 @@
     <!-- HEADER DE PÁGINA -->
     <div class="page-header-apex">
         <h1 class="page-title-apex">
-            <i class="bi bi-cash-stack px-2"></i>Facturas de Contado</h1>
-        <p class="page-subtitle-apex">Visualiza y administra todas las ventas pagadas al contado.</p>
+            <i class="bi bi-receipt-cutoff px-2"></i>Gestión de Facturas</h1>
+        <p class="page-subtitle-apex">Visualiza y administra todas las ventas emitidas de contado y cuentas por cobrar a crédito.</p>
+    </div>
+
+    <!-- PÍLDORAS PRINCIPALES: CONTADO / CRÉDITO -->
+    <div style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 6px 8px; display: inline-flex; gap: 8px; margin-bottom: 18px;">
+        <a href="{{ url_for('pagos.facturas', tipo='contado') }}" class="state-pill state-pill--active" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 10px;">
+            <i class="bi bi-cash-coin"></i>
+            <span>Facturas de Contado</span>
+            <span style="background: rgba(255, 255, 255, 0.2); font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800;">{{ total_contado }}</span>
+        </a>
+        <a href="{{ url_for('pagos.facturas', tipo='credito') }}" class="state-pill" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 10px;">
+            <i class="bi bi-calendar2-check"></i>
+            <span>Facturas a Crédito</span>
+            <span style="background: rgba(255, 255, 255, 0.1); font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800;">{{ total_credito }}</span>
+        </a>
     </div>
 
     <!-- ===================================== -->
@@ -53,23 +67,26 @@
             <table class="data-table">
                 <thead class="data-table__head">
                     <tr>
-                        <th style="width: 15%;">Factura</th>
-                        <th style="width: 45%;">Cliente</th>
-                        <th style="width: 15%;">Fecha de Facturación</th>
-                        <th style="text-align: right; width: 15%;">Total</th>
-                        <th style="text-align: right; width: 10%;">Acciones</th>
+                        <th style="width: 14%;">Factura</th>
+                        <th style="width: 28%;">Cliente</th>
+                        <th style="width: 14%;">Fecha Facturación</th>
+                        <th style="width: 18%;">Método de Pago</th>
+                        <th style="width: 12%;">Referencia</th>
+                        <th style="text-align: right; width: 10%;">Total</th>
+                        <th style="text-align: center; width: 4%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaPagos">
                     {% for venta in ventas %}
                     {% set total_abonado = namespace(valor=0) %}
-                    {% set pago_info = namespace(fecha='', forma='', ref='', obs='') %}
+                    {% set pago_info = namespace(fecha='', forma='', banco='', ref='', obs='') %}
                     {% for pago in venta.pagos %}
                         {% if pago.estado == "ACTIVO" %}
                             {% set total_abonado.valor = total_abonado.valor + pago.monto_pago %}
                             {% set pago_info.fecha = pago.fecha_pago.strftime('%d/%m/%Y') if pago.fecha_pago else '' %}
                             {% set pago_info.forma = pago.tipo_pago %}
-                            {% set pago_info.ref = pago.referencia or 'Ninguna' %}
+                            {% set pago_info.banco = pago.banco.nombre if pago.banco else '' %}
+                            {% set pago_info.ref = pago.referencia or '' %}
                             {% set pago_info.obs = pago.observaciones or 'Sin observaciones' %}
                         {% endif %}
                     {% endfor %}
@@ -77,7 +94,7 @@
 
                     <!-- FILA PRINCIPAL -->
                     <tr class="data-table__row fila-factura" data-mes="{{ venta.fecha_venta.strftime('%Y-%m') if venta.fecha_venta else '' }}">
-                        <td class="data-table__cell" style="font-weight: 700; color: var(--color-text-main);">
+                        <td class="data-table__cell" style="font-weight: 800; font-family: monospace; color: #38bdf8;">
                             #{{ venta.numero_factura }}
                         </td>
                         <td class="data-table__cell">
@@ -86,75 +103,35 @@
                                     <i class="bi bi-person-fill"></i>
                                 </div>
                                 <div>
-                                    <span class="customer-title-text">{{ venta.cliente.nombres }}</span>
-                                    {% if saldo_pendiente > 0 %}
-                                    {% set dias_pendiente = ((now - venta.fecha_venta).days) if venta.fecha_venta else 0 %}
-                                    <span class="badge-pill-apex badge-pill-apex--inactive" style="font-size: 0.7rem; padding: 2px 8px;">
-                                        <i class="bi bi-clock me-1"></i>Pendiente {{ dias_pendiente }} d
-                                    </span>
-                                    {% endif %}
+                                    <span class="customer-title-text">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</span>
                                 </div>
                             </div>
                         </td>
-                        <td class="data-table__cell " style="color: var(--color-text-main);">
+                        <td class="data-table__cell" style="color: var(--color-text-main);">
                             {{ venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-' }}
                         </td>
-                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">
+                        <td class="data-table__cell">
+                            {% if pago_info.forma == 'TRANSFERENCIA' %}
+                                <span class="badge-pill-apex" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-weight: 700; font-size: 0.76rem; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="bi bi-phone"></i> {{ pago_info.banco or 'Transferencia' }}
+                                </span>
+                            {% else %}
+                                <span class="badge-pill-apex" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); font-weight: 700; font-size: 0.76rem; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="bi bi-cash"></i> Efectivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="data-table__cell" style="font-family: monospace; font-size: 0.82rem; color: var(--color-text-muted);">
+                            {{ pago_info.ref if pago_info.ref else '-' }}
+                        </td>
+                        <td class="data-table__cell text-end" style="font-weight: 800; color: #10b981; font-size: 0.92rem;">
                             C$ {{ "%.2f"|format(venta.total_venta) }}
                         </td>
-                        <td class="data-table__cell text-end">
-                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
-                            <div class="dropdown d-inline-block">
-                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Opciones">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
-                                    <li>
-                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                        ACCIONES
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank">
-                                            Imprimir Factura
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-ver-pago"
-                                            data-factura="{{ venta.numero_factura }}"
-                                            data-cliente="{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}"
-                                            data-monto="{{ "%.2f"|format(total_abonado.valor if total_abonado.valor > 0 else venta.total_venta) }}"
-                                            data-fecha="{{ pago_info.fecha or (venta.fecha_venta.strftime('%d/%m/%Y') if venta.fecha_venta else '-') }}"
-                                            data-forma="{{ pago_info.forma or 'EFECTIVO' }}"
-                                            data-banco="{{ pago_info.banco or '-' }}"
-                                            data-referencia="{{ pago_info.ref }}"
-                                            data-observaciones="{{ pago_info.obs }}">
-                                            Ver Historial 
-                                        </button>
-                                    </li>
-                                    {% if saldo_pendiente > 0 and venta.estado.value == "ACTIVA" %}
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-abonar"
-                                            data-venta-id="{{ venta.id }}"
-                                            data-factura="{{ venta.numero_factura }}"
-                                            data-cliente="{{ venta.cliente.nombres if venta.cliente else 'N/D' }}"
-                                            data-saldo="{{ "%.2f"|format(saldo_pendiente) }}">
-                                            Pagar Factura
-                                        </button>
-                                    </li>
-                                    {% endif %}
-                                    {% if current_user.rol.nombre == "ADMIN" and venta.estado.value == "ACTIVA" and saldo_pendiente > 0 %}
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-anular-factura text-danger"
-                                            data-venta-id="{{ venta.id }}"
-                                            data-factura="{{ venta.numero_factura }}"
-                                            data-action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}">
-                                            Anular Factura
-                                        </button>
-                                    </li>
-                                    {% endif %}
-                                </ul>
-                            </div>
+                        <td class="data-table__cell text-center">
+                            <!-- ACCIÓN DIRECTA: IMPRIMIR FACTURA (UN CLIC) -->
+                            <a href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank" class="btn-apex-outline" title="Imprimir Factura #{{ venta.numero_factura }}" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--color-text-main); text-decoration: none;">
+                                <i class="bi bi-printer-fill" style="font-size: 0.95rem;"></i>
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}

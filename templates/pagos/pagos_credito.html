@@ -11,8 +11,22 @@
     <!-- ===================================== -->
     <div class="page-header-apex">
         <h1 class="page-title-apex">
-            <i class="bi bi-clock-history px-2"></i>Cuentas por Cobrar (Crédito)</h1>
-        <p class="page-subtitle-apex">Visualiza las facturas emitidas a crédito y registra sus abonos.</p>
+            <i class="bi bi-receipt-cutoff px-2"></i>Gestión de Facturas</h1>
+        <p class="page-subtitle-apex">Visualiza y administra todas las ventas emitidas de contado y cuentas por cobrar a crédito.</p>
+    </div>
+
+    <!-- PÍLDORAS PRINCIPALES: CONTADO / CRÉDITO -->
+    <div style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 6px 8px; display: inline-flex; gap: 8px; margin-bottom: 18px;">
+        <a href="{{ url_for('pagos.facturas', tipo='contado') }}" class="state-pill" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 10px;">
+            <i class="bi bi-cash-coin"></i>
+            <span>Facturas de Contado</span>
+            <span style="background: rgba(255, 255, 255, 0.1); font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800;">{{ total_contado }}</span>
+        </a>
+        <a href="{{ url_for('pagos.facturas', tipo='credito') }}" class="state-pill state-pill--active" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 10px;">
+            <i class="bi bi-calendar2-check"></i>
+            <span>Facturas a Crédito</span>
+            <span style="background: rgba(255, 255, 255, 0.2); font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 800;">{{ total_credito }}</span>
+        </a>
     </div>
 
     <!-- ===================================== -->

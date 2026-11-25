@@ -107,39 +107,24 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <!-- 5. OPERACIONES (SUBMENÚ VENTAS) -->
+                    <!-- 5. VENTAS Y FACTURACIÓN -->
                     {% if rol_actual in ['ADMIN', 'VENDEDOR'] %}
-                    <li class="sidebar__dropdown {% if request.endpoint and 'ventas' in request.endpoint %}is-expanded{% endif %}">
+                    <li class="sidebar__dropdown {% if (request.endpoint and 'ventas' in request.endpoint) or (request.endpoint and 'pagos' in request.endpoint) %}is-expanded{% endif %}">
                         <div class="sidebar__link sidebar__dropdown-toggle sidebar__text-only-header" onclick="toggleSidebarDropdown(this)">
                             <span class="sidebar__text sidebar__group-title">Ventas</span>
                             <i class="bi bi-chevron-right sidebar__chevron"></i>
                         </div>
                         <ul class="sidebar__submenu">
                             <li>
-                                <a class="sidebar__sublink {% if request.endpoint and 'ventas' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('ventas.ventas') }}" title="Ventas">
+                                <a class="sidebar__sublink {% if request.endpoint and 'ventas' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('ventas.ventas') }}" title="Punto de Venta / Facturar">
                                     <i class="bi bi-cart-check sidebar__icon"></i>
-                                    <span class="sidebar__subtext">Ventas</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- 6. FACTURACIÓN (CONTADO Y CRÉDITO) -->
-                    <li class="sidebar__dropdown {% if request.endpoint and 'pagos' in request.endpoint %}is-expanded{% endif %}">
-                        <div class="sidebar__link sidebar__dropdown-toggle sidebar__text-only-header" onclick="toggleSidebarDropdown(this)">
-                            <span class="sidebar__text sidebar__group-title">Facturas</span>
-                            <i class="bi bi-chevron-right sidebar__chevron"></i>
-                        </div>
-                        <ul class="sidebar__submenu">
-                            <li>
-                                <a class="sidebar__sublink {% if request.path and '/facturas/contado' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}" title="Facturas de Contado">
-                                    <i class="bi bi-cash-coin sidebar__icon"></i>
-                                    <span class="sidebar__subtext">De Contado</span>
+                                    <span class="sidebar__subtext">Venta</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="sidebar__sublink {% if request.path and '/facturas/credito' in request.path %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='credito', estado='todas') }}" title="Facturas a Crédito">
-                                    <i class="bi bi-calendar2-check sidebar__icon"></i>
-                                    <span class="sidebar__subtext">A Crédito</span>
+                                <a class="sidebar__sublink {% if request.endpoint and 'pagos' in request.endpoint %}sidebar__sublink--active{% endif %}" href="{{ url_for('pagos.facturas', tipo='contado', estado='todas') }}" title="Historial y Cobranza de Facturas">
+                                    <i class="bi bi-receipt-cutoff sidebar__icon"></i>
+                                    <span class="sidebar__subtext">Facturas</span>
                                 </a>
                             </li>
                         </ul>
@@ -618,7 +603,7 @@
     <script src="{{ url_for('static', filename='js/modules/perfil.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/clientes.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/ventas.js') }}?v=3.5"></script>
-    <script src="{{ url_for('static', filename='js/modules/pagos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/pagos.js') }}?v=2.0"></script>
     <script src="{{ url_for('static', filename='js/modules/inventario.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/modules/proveedores.js') }}"></script>

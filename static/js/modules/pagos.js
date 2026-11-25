@@ -82,9 +82,9 @@
             var updateBadge = function () {
                 var totalMonto = 0;
                 filteredRows.forEach(function (row) {
-                    var cell3 = row.children[3];
-                    if (cell3) {
-                        var totalText = cell3.innerText.replace("C$", "").replace(/,/g, "").trim();
+                    var cellTotal = row.children[5] || row.children[3];
+                    if (cellTotal) {
+                        var totalText = cellTotal.innerText.replace("C$", "").replace(/,/g, "").trim();
                         var monto = parseFloat(totalText) || 0;
                         totalMonto += monto;
                     }
@@ -179,9 +179,11 @@
                 filteredRows = allRows.filter(function (row) {
                     var factura = row.children[0] ? row.children[0].innerText.toLowerCase() : "";
                     var cliente = row.children[1] ? row.children[1].innerText.toLowerCase() : "";
+                    var metodo = row.children[3] ? row.children[3].innerText.toLowerCase() : "";
+                    var ref = row.children[4] ? row.children[4].innerText.toLowerCase() : "";
                     var rowMes = row.dataset.mes || "";
 
-                    var coincideTexto = factura.includes(query) || cliente.includes(query);
+                    var coincideTexto = factura.includes(query) || cliente.includes(query) || metodo.includes(query) || ref.includes(query);
                     var coincideMes = (mes === "TODOS" || rowMes === mes);
 
                     return coincideTexto && coincideMes;
