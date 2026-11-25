@@ -57,6 +57,7 @@ def facturas(tipo, estado):
     tipo_filtro = TipoVenta.CONTADO if tipo == "contado" else TipoVenta.CREDITO
 
     clientes = Cliente.query.order_by(Cliente.nombres.asc()).all()
+    bancos = Banco.query.filter_by(estado="ACTIVO").order_by(Banco.nombre.asc()).all()
 
     ventas = Venta.query.filter_by(tipo_venta=tipo_filtro).options(
         joinedload(Venta.cliente),
@@ -120,6 +121,7 @@ def facturas(tipo, estado):
     return render_template(
         plantilla,
         clientes=clientes,
+        bancos=bancos,
         ventas=ventas_filtradas,
         ventas_pendientes=ventas_pendientes,
         kpis=kpis,

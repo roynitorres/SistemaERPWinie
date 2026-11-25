@@ -64,93 +64,114 @@
         <div class="table-responsive">
             
             <!-- TABLA PENDIENTES -->
-            <table id="tablaContainerPendientes" class="data-table tabla-activa">
+            <table id="tablaContainerPendientes" class="data-table tabla-activa" style="table-layout: auto; width: 100%;">
                 <thead class="data-table__head">
                     <tr>
-                        <th style="width: 15%;">Factura</th>
-                        <th style="width: 40%;">Cliente</th>
-                        <th style="width: 15%;">Vencimiento</th>
-                        <th style="text-align: right; width: 10%;">Total</th>
-                        <th style="text-align: center; width: 10%;">Cuotas</th>
-                        <th style="text-align: right; width: 10%;">Acciones</th>
+                        <th style="width: 110px; white-space: nowrap;">Factura</th>
+                        <th style="min-width: 200px;">Cliente</th>
+                        <th style="width: 130px; white-space: nowrap;">Vencimiento</th>
+                        <th style="width: 100px; text-align: center; white-space: nowrap;">Cuotas</th>
+                        <th style="width: 120px; text-align: right; white-space: nowrap;">Total</th>
+                        <th style="width: 130px; text-align: right; white-space: nowrap;">Saldo Pendiente</th>
+                        <th style="width: 100px; text-align: center; white-space: nowrap;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaPagosPendientes">
                     {% macro render_fila_venta(venta, saldo_pendiente, total_abonado, mostrar_saldos_abonos=True) %}
+                    {% set proxima_cuota_monto = namespace(valor=0) %}
+                    {% if venta.cuotas %}
+                        {% for c in venta.cuotas %}
+                            {% if c.estado != 'PAGADA' and proxima_cuota_monto.valor == 0 %}
+                                {% set saldo_cuota = (c.monto_cuota - c.monto_abonado) if (c.monto_cuota - c.monto_abonado) > 0 else c.monto_cuota %}
+                                {% set proxima_cuota_monto.valor = saldo_cuota %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if proxima_cuota_monto.valor == 0 %}
+                        {% set proxima_cuota_monto.valor = saldo_pendiente %}
+                    {% endif %}
+                    {% set es_vencida = venta.fecha_limite_credito and now and venta.fecha_limite_credito < now.date() %}
                     <!-- FILA PRINCIPAL -->
                     <tr class="data-table__row fila-factura">
-                        <td class="data-table__cell" style="font-weight: 700; color: var(--color-text-main);">
+                        <td class="data-table__cell" style="font-weight: 800; font-family: monospace; color: #38bdf8; white-space: nowrap;">
                             #{{ venta.numero_factura }}
                         </td>
                         <td class="data-table__cell">
-                            <div class="customer-cell-wrapper">
-                                <div class="avatar-circle-apex" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: var(--color-bg-app);">
+                            <div class="customer-cell-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                                <div class="avatar-circle-apex" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary) 0%, #00b4d8 100%); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.85rem;">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
                                 <div>
-                                    <span class="customer-title-text">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</span>
+                                    <span class="customer-title-text" style="font-weight: 700; color: var(--color-text-main);">{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}</span>
+                                    {% if venta.cliente and venta.cliente.telefono %}
+                                    <div style="font-size: 0.72rem; color: var(--color-text-muted);">{{ venta.cliente.telefono }}</div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </td>
-                        <td class="data-table__cell" style="color: var(--color-text-main);">
-                            {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}
+                        <td class="data-table__cell" style="white-space: nowrap;">
+                            <div style="font-weight: 600; color: {{ 'var(--color-danger)' if (es_vencida and saldo_pendiente > 0) else 'var(--color-text-main)' }};">
+                                {{ venta.fecha_limite_credito.strftime('%d/%m/%Y') if venta.fecha_limite_credito else '-' }}
+                            </div>
+                            {% if es_vencida and saldo_pendiente > 0 %}
+                            <div style="font-size: 0.72rem; color: var(--color-danger); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Vencida
+                            </div>
+                            {% endif %}
                         </td>
-                        <td class="data-table__cell text-end" style="font-weight: 700; color: var(--color-text-main);">
-                            C$ {{ "%.2f"|format(venta.total_venta) }}
-                        </td>
-                        <td class="data-table__cell text-center" style="font-weight: 700;">
+                        <td class="data-table__cell text-center" style="white-space: nowrap;">
                             {% if venta.cuotas %}
                             {% set total_cuotas_c = venta.cuotas|length %}
                             {% set pagadas_cuotas_c = venta.cuotas | selectattr('estado', 'equalto', 'PAGADA') | list | length %}
-                            <span style="color: var(--color-primary); font-size: 0.95rem;">{{ pagadas_cuotas_c }}/{{ total_cuotas_c }}</span>
+                            <a href="{{ url_for('pagos.historial_factura', venta_id=venta.id) }}" class="badge-cuotas" title="Ver historial de cuotas" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">
+                                <i class="bi bi-pie-chart-fill"></i> {{ pagadas_cuotas_c }}/{{ total_cuotas_c }}
+                            </a>
                             {% else %}
-                            <span style="color: var(--color-text-muted);">0/0</span>
+                            <span style="color: var(--color-text-muted); font-size: 0.8rem;">0/0</span>
                             {% endif %}
                         </td>
-                        <td class="data-table__cell text-end">
-                            <!-- MENÚ DE TRES PUNTOS VERTICALES (⋮) -->
-                            <div class="dropdown d-inline-block">
-                                <button class="btn-three-dots" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Opciones">
-                                    <i class="bi bi-three-dots-vertical"></i>
+                        <td class="data-table__cell text-end cell-total" style="font-weight: 600; color: var(--color-text-muted); white-space: nowrap;">
+                            C$ {{ "%.2f"|format(venta.total_venta) }}
+                        </td>
+                        <td class="data-table__cell text-end cell-saldo" style="white-space: nowrap;">
+                            {% if saldo_pendiente > 0 %}
+                            <strong style="font-size: 0.95rem; font-weight: 900; color: {{ 'var(--color-danger)' if es_vencida else '#f59e0b' }};">
+                                C$ {{ "%.2f"|format(saldo_pendiente) }}
+                            </strong>
+                            {% else %}
+                            <span style="font-size: 0.82rem; font-weight: 800; color: var(--color-success); display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-check-circle-fill"></i> Saldada
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="data-table__cell text-center" style="white-space: nowrap;">
+                            <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
+                                {% if saldo_pendiente > 0 and venta.estado.value == "ACTIVA" %}
+                                <button type="button" class="btn-apex-outline btn-abonar"
+                                    style="border-color: rgba(16, 185, 129, 0.35); color: #10b981; background: rgba(16, 185, 129, 0.08); padding: 5px 9px; border-radius: 8px; font-size: 0.9rem;"
+                                    title="Registrar Abono"
+                                    data-venta-id="{{ venta.id }}"
+                                    data-factura="{{ venta.numero_factura }}"
+                                    data-cliente="{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}"
+                                    data-total-venta="{{ "%.2f"|format(venta.total_venta) }}"
+                                    data-saldo-pendiente="{{ "%.2f"|format(saldo_pendiente) }}"
+                                    data-proxima-cuota="{{ "%.2f"|format(proxima_cuota_monto.valor) }}">
+                                    <i class="bi bi-cash-coin"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-apex">
-                                    <li>
-                                        <div class="dropdown-header-apex" style="padding: 8px 14px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-main); background-color: var(--color-bg-card-hover); border-bottom: 1px solid var(--color-border); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                                            ACCIONES
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank">
-                                            Imprimir Factura
-                                        </a>
-                                    </li>
-                                    {% if es_activa %}
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-abonar text-success"
-                                            data-venta-id="{{ venta.id }}"
-                                            data-factura="{{ venta.numero_factura }}"
-                                            data-cliente="{{ venta.cliente.nombres if venta.cliente else 'Cliente Ocasional' }}"
-                                            data-saldo-pendiente="{{ saldo_pendiente }}">
-                                            Registrar Abono
-                                        </button>
-                                    </li>
-                                    {% endif %}
-                                    <li>
-                                         <a class="dropdown-item" href="{{ url_for('pagos.historial_factura', venta_id=venta.id) }}">
-                                            Ver Historial
-                                         </a>
-                                     </li>
-                                    {% if total_abonado.valor == 0 and venta.estado.value == "ACTIVA" %}
-                                    <li>
-                                        <button type="button" class="dropdown-item btn-anular-factura text-danger"
-                                            data-venta-id="{{ venta.id }}"
-                                            data-factura="{{ venta.numero_factura }}"
-                                            data-action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}">
-                                             Anular Factura
-                                        </button>
-                                    </li>
-                                    {% endif %}
-                                </ul>
+                                {% endif %}
+                                <a href="{{ url_for('pagos.factura', venta_id=venta.id) }}" target="_blank" class="btn-apex-outline" title="Imprimir Factura" style="padding: 5px 9px; border-radius: 8px; font-size: 0.9rem;">
+                                    <i class="bi bi-printer-fill"></i>
+                                </a>
+                                {% if total_abonado.valor == 0 and venta.estado.value == "ACTIVA" %}
+                                <button type="button" class="btn-apex-outline btn-anular-factura"
+                                    style="border-color: rgba(239, 68, 68, 0.35); color: #ef4444; background: rgba(239, 68, 68, 0.08); padding: 5px 9px; border-radius: 8px; font-size: 0.9rem;"
+                                    title="Anular Factura"
+                                    data-venta-id="{{ venta.id }}"
+                                    data-factura="{{ venta.numero_factura }}"
+                                    data-action="{{ url_for('pagos.anular_venta', venta_id=venta.id) }}">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -173,15 +194,16 @@
             </table>
 
             <!-- TABLA PAGADAS -->
-            <table id="tablaContainerPagadas" class="data-table" style="display: none;">
+            <table id="tablaContainerPagadas" class="data-table" style="table-layout: auto; width: 100%; display: none;">
                 <thead class="data-table__head">
                     <tr>
-                        <th style="width: 15%;">Factura</th>
-                        <th style="width: 40%;">Cliente</th>
-                        <th style="width: 15%;">Vencimiento</th>
-                        <th style="text-align: right; width: 10%;">Total</th>
-                        <th style="text-align: center; width: 10%;">Cuotas</th>
-                        <th style="text-align: right; width: 10%;">Acciones</th>
+                        <th style="width: 110px; white-space: nowrap;">Factura</th>
+                        <th style="min-width: 200px;">Cliente</th>
+                        <th style="width: 130px; white-space: nowrap;">Vencimiento</th>
+                        <th style="width: 100px; text-align: center; white-space: nowrap;">Cuotas</th>
+                        <th style="width: 120px; text-align: right; white-space: nowrap;">Total</th>
+                        <th style="width: 130px; text-align: right; white-space: nowrap;">Saldo Pendiente</th>
+                        <th style="width: 100px; text-align: center; white-space: nowrap;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tablaPagosPagadas">
@@ -222,11 +244,11 @@
         <div class="modal-window" style="max-width: 520px;">
             <div class="modal-header">
                 <div>
-                    <h5 class="modal-title" style="margin-bottom: 2px;">
-                        <i class="bi bi-wallet2 text-success me-2"></i> Registrar Abono a Factura
+                    <h5 class="modal-title" style="margin-bottom: 2px; color: #10b981;">
+                        <i class="bi bi-cash-coin me-2"></i> Registrar Abono a Factura
                     </h5>
-                    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
-                        Factura: <strong style="color: var(--color-primary);" id="lblFacturaAbonar">#---</strong> | 
+                    <div style="font-size: 0.82rem; color: var(--color-text-muted);">
+                        Factura: <strong style="color: #38bdf8;" id="lblFacturaAbonar">#---</strong> | 
                         Cliente: <strong style="color: var(--color-text-main);" id="lblClienteAbonar">---</strong>
                     </div>
                 </div>
@@ -240,16 +262,36 @@
                     <input type="hidden" name="venta_id" id="abonarVentaId">
                     <input type="hidden" id="abonarSaldoPendiente">
 
-                    <div style="background-color: rgba(255, 82, 82, 0.08); border-left: 4px solid var(--color-text-danger); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: var(--color-text-muted); font-size: 0.9rem;">Saldo pendiente actual:</span>
-                        <strong id="lblSaldoPendiente" style="font-size: 1.25rem; color: var(--color-text-danger); font-weight: 800;">C$ 0.00</strong>
+                    <!-- TARJETA RESUMEN DE LA DEUDA -->
+                    <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-left: 4px solid var(--color-warning); padding: 12px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--color-text-muted);">Estado de Cuenta</div>
+                            <div style="font-size: 0.82rem; color: var(--color-text-muted);" id="lblTotalFacturaAbonar">Total Factura: C$ 0.00</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--color-text-muted);">Saldo Pendiente</div>
+                            <strong id="lblSaldoPendiente" style="font-size: 1.35rem; color: #f59e0b; font-weight: 900;">C$ 0.00</strong>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DE MONTO RÁPIDO (1 CLIC) -->
+                    <div id="cajaAtajosMonto" style="display: flex; flex-direction: column; gap: 6px;">
+                        <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">Atajos de Monto Rápido:</span>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn-apex-outline" id="btnChipCuota" style="font-size: 0.78rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
+                                <i class="bi bi-lightning-charge-fill" style="color: #38bdf8;"></i> Cuota: <strong id="lblChipMontoCuota" style="color: #38bdf8;">C$ 0.00</strong>
+                            </button>
+                            <button type="button" class="btn-apex-outline" id="btnChipTotal" style="font-size: 0.78rem; padding: 5px 12px; border-radius: 8px; font-weight: 700;">
+                                <i class="bi bi-check2-all" style="color: #10b981;"></i> Saldo Total: <strong id="lblChipMontoTotal" style="color: #10b981;">C$ 0.00</strong>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Fila 1: Monto y Fecha -->
                     <div class="grid grid--2-cols" style="gap: 16px;">
                         <div class="form-group">
                             <label class="form-label form-label--required">Monto del Abono (C$)</label>
-                            <input type="number" class="form-input" name="monto_pago" id="abonarMonto" step="0.01" min="0.01" required style="font-size: 1.25rem; font-weight: 800; color: var(--color-primary);">
+                            <input type="number" class="form-input" name="monto_pago" id="abonarMonto" step="0.01" min="0.01" required style="font-size: 1.25rem; font-weight: 900; color: #10b981;">
                         </div>
                         <div class="form-group">
                             <label class="form-label form-label--required">Fecha de Abono</label>
@@ -257,36 +299,87 @@
                         </div>
                     </div>
 
-                    <!-- Fila 2: Forma de Pago y Referencia -->
+                    <!-- Fila 2: Forma de Pago y Banco -->
                     <div class="grid grid--2-cols" style="gap: 16px;">
                         <div class="form-group">
                             <label class="form-label form-label--required">Forma de Pago</label>
                             <select class="form-input" name="tipo_pago" id="abonarForma" required>
-                                <option value="">Seleccione forma</option>
                                 <option value="EFECTIVO">Efectivo</option>
                                 <option value="TRANSFERENCIA">Transferencia</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">N° Referencia</label>
-                            <input type="text" class="form-input" name="referencia" id="abonarReferencia" placeholder="Ej: #948201 (Opcional)">
+                        <div class="form-group" id="grupoBancoCredito" style="display: none;">
+                            <label class="form-label form-label--required">Banco Destino</label>
+                            <div style="display: flex; gap: 8px;">
+                                <select class="form-input" id="abonar_banco_id" name="banco_id" style="flex-grow: 1;">
+                                    <option value="">-- Seleccionar Banco --</option>
+                                    {% if bancos %}
+                                    {% for b in bancos %}
+                                    <option value="{{ b.id }}">{{ b.nombre }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <button type="button" class="btn-apex-outline" id="btnAbrirNuevoBancoCreditoModal" title="Agregar Banco" style="white-space: nowrap; padding: 6px 10px;">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Fila 3: Observaciones -->
+                    <!-- Fila 3: Referencia (si es transferencia) -->
+                    <div class="form-group" id="grupoReferenciaCredito" style="display: none;">
+                        <label class="form-label form-label--required">N° de Referencia Bancaria</label>
+                        <input type="text" class="form-input" name="referencia" id="abonarReferencia" placeholder="Ej: TR-884920">
+                    </div>
+
+                    <!-- Fila 4: Observaciones -->
                     <div class="form-group">
-                        <label class="form-label">Observaciones</label>
+                        <label class="form-label">Observaciones (Opcional)</label>
                         <input type="text" class="form-input" name="observaciones" id="abonarObservaciones" placeholder="Notas adicionales del abono...">
                     </div>
 
-                    <!-- Modal Footer con Colores del Sistema -->
+                    <!-- PREVIEW EN VIVO DEL SALDO RESULTANTE -->
+                    <div id="cajaPreviewSaldoRestante" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
+                        <span style="color: var(--color-text-muted);">Saldo restante tras este abono:</span>
+                        <strong id="lblSaldoRestanteCalculado" style="font-size: 1.05rem; color: #f59e0b; font-weight: 800;">C$ 0.00</strong>
+                    </div>
+
+                    <!-- Modal Footer -->
                     <div class="modal-footer" style="margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--color-border); justify-content: flex-end; gap: 10px;">
                         <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalAbonarFactura')">Cancelar</button>
-                        <button type="submit" class="btn-neon-primary">
-                            <i class="bi bi-check-lg me-1"></i> Registrar Abono
+                        <button type="submit" class="btn-neon-primary" style="background: #10b981; border-color: #10b981;">
+                            <i class="bi bi-check-lg me-1"></i> Confirmar y Registrar Abono
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- MODAL NUEVO BANCO CRÉDITO            -->
+    <!-- ===================================== -->
+    <div class="modal-overlay" id="modalNuevoBancoCredito">
+        <div class="modal-window" style="max-width: 400px;">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-bank me-2 text-primary"></i> Nuevo Banco
+                </h5>
+                <button type="button" class="modal-close-btn" onclick="cerrarModal('modalNuevoBancoCredito')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body py-3">
+                <div class="form-group">
+                    <label class="form-label form-label--required">Nombre del Banco</label>
+                    <input type="text" class="form-input" id="nuevo_banco_nombre_credito" placeholder="Ej: BAC, Banpro, Lafise, etc.">
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--color-border); padding: 12px 20px; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="btn-apex-outline" onclick="cerrarModal('modalNuevoBancoCredito')">Cancelar</button>
+                <button type="button" class="btn-neon-primary" id="btnGuardarNuevoBancoCredito">
+                    <i class="bi bi-check-lg me-1"></i> Guardar Banco
+                </button>
             </div>
         </div>
     </div>

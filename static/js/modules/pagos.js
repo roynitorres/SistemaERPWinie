@@ -261,6 +261,7 @@
                 var endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
                 var totalFacturado = 0;
+                var totalSaldo = 0;
                 allRows.forEach(function (row) { row.style.display = "none"; });
 
                 for (var i = startIndex; i < endIndex; i++) {
@@ -268,53 +269,40 @@
                 }
 
                 filteredRows.forEach(function (row) {
-                    var cell3 = row.children[3];
-                    if (cell3) {
-                        var totalText = cell3.innerText.replace("C$", "").replace(/,/g, "").trim();
-                        var monto = parseFloat(totalText) || 0;
-                        totalFacturado += monto;
+                    var cellTotal = row.querySelector(".cell-total") || row.children[4];
+                    if (cellTotal) {
+                        var totalText = cellTotal.innerText.replace("C$", "").replace(/,/g, "").trim();
+                        totalFacturado += parseFloat(totalText) || 0;
+                    }
+                    var cellSaldo = row.querySelector(".cell-saldo") || row.children[5];
+                    if (cellSaldo) {
+                        var saldoText = cellSaldo.innerText.replace("C$", "").replace(/,/g, "").trim();
+                        totalSaldo += parseFloat(saldoText) || 0;
                     }
                 });
 
                 var summaryEl = document.getElementById("paginationSummary");
                 if (summaryEl) {
-                    summaryEl.innerHTML =
-                        (totalItems > 0
-                            ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
-                            : "Mostrando 0 a 0 de 0 registros") +
-                        ` | <strong style="color: var(--color-primary-dark); font-weight: bold; margin-left: 10px;">Total página: C$ ${totalFacturado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
+                    var summaryHtml = totalItems > 0
+                        ? `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems} registros`
+                        : "Mostrando 0 a 0 de 0 registros";
+                    summaryHtml += ` | <span style="margin-left: 8px; color: var(--color-text-muted);">Total: <strong>C$ ${totalFacturado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>`;
+                    if (totalSaldo > 0) {
+                        summaryHtml += ` | <span style="margin-left: 8px; color: #f59e0b;">Saldo Pendiente: <strong>C$ ${totalSaldo.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>`;
+                    }
+                    summaryEl.innerHTML = summaryHtml;
                 }
 
                 renderControls(totalPages);
             };
 
             var filtrarCuentas = function () {
-                var mes = filtroMesCxc ? filtroMesCxc.value : "TODOS";
                 var query = buscarClienteCxc ? buscarClienteCxc.value.toLowerCase().trim() : "";
 
                 filteredRows = allRows.filter(function (row) {
                     var factura = row.children[0] ? row.children[0].innerText.toLowerCase() : "";
                     var cliente = row.children[1] ? row.children[1].innerText.toLowerCase() : "";
-                    var fechaCell = row.children[2] ? row.children[2].innerText.trim() : "";
-
-                    var coincideTexto = factura.includes(query) || cliente.includes(query);
-
-                    var coincideMes = true;
-                    if (mes !== "TODOS") {
-                        if (fechaCell && fechaCell !== '-') {
-                            var parts = fechaCell.split('/');
-                            if (parts.length === 3) {
-                                var mesAnio = `${parts[2]}-${parts[1].padStart(2, '0')}`;
-                                coincideMes = (mesAnio === mes || `${parts[1]}/${parts[2]}` === mes);
-                            } else {
-                                coincideMes = false;
-                            }
-                        } else {
-                            coincideMes = false;
-                        }
-                    }
-
-                    return coincideTexto && coincideMes;
+                    return factura.includes(query) || cliente.includes(query);
                 });
 
                 if (badgeCantidadRegistros) {
@@ -563,19 +551,133 @@
         initPagosCredito: function () {
             var self = this;
             var formAbonarFactura = document.getElementById("formAbonarFactura");
+            var abonarForma = document.getElementById("abonarForma");
+            var bancoSelectCredito = document.getElementById("abonar_banco_id");
+            var inputAbonarMonto = document.getElementById("abonarMonto");
+            var btnChipCuota = document.getElementById("btnChipCuota");
+            var btnChipTotal = document.getElementById("btnChipTotal");
+            var btnAbrirNuevoBancoCreditoModal = document.getElementById("btnAbrirNuevoBancoCreditoModal");
+            var btnGuardarNuevoBancoCredito = document.getElementById("btnGuardarNuevoBancoCredito");
+            var inputNuevoBancoNombreCredito = document.getElementById("nuevo_banco_nombre_credito");
 
-            document.querySelectorAll(".btn-abonar[data-saldo-pendiente]").forEach(function (btn) {
+            var calcularSaldoRestante = function () {
+                var saldoActual = Number(document.getElementById("abonarSaldoPendiente") ? document.getElementById("abonarSaldoPendiente").value : 0);
+                var monto = Number(inputAbonarMonto ? inputAbonarMonto.value : 0);
+                var restante = saldoActual - monto;
+                var cajaPreview = document.getElementById("cajaPreviewSaldoRestante");
+
+                if (!cajaPreview) return;
+
+                if (restante <= 0.005) {
+                    cajaPreview.style.background = "rgba(16, 185, 129, 0.12)";
+                    cajaPreview.style.borderColor = "rgba(16, 185, 129, 0.35)";
+                    cajaPreview.innerHTML = '<span style="color: #10b981; font-weight: 700;"><i class="bi bi-check-circle-fill me-1"></i> ¡La factura quedará 100% SALDADA!</span><strong style="color: #10b981; font-size: 1.05rem; font-weight: 800;">C$ 0.00</strong>';
+                } else {
+                    cajaPreview.style.background = "rgba(255, 255, 255, 0.03)";
+                    cajaPreview.style.borderColor = "var(--color-border)";
+                    cajaPreview.innerHTML = '<span style="color: var(--color-text-muted);">Saldo restante tras este abono:</span><strong id="lblSaldoRestanteCalculado" style="font-size: 1.05rem; color: #f59e0b; font-weight: 800;">C$ ' + restante.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</strong>';
+                }
+            };
+
+            var toggleCamposMetodo = function () {
+                var forma = abonarForma ? abonarForma.value : "EFECTIVO";
+                var gBanco = document.getElementById("grupoBancoCredito");
+                var gRef = document.getElementById("grupoReferenciaCredito");
+                if (forma === "TRANSFERENCIA") {
+                    if (gBanco) gBanco.style.display = "block";
+                    if (gRef) gRef.style.display = "block";
+                    if (bancoSelectCredito && bancoSelectCredito.options.length <= 1) {
+                        self.cargarBancos(bancoSelectCredito);
+                    }
+                } else {
+                    if (gBanco) gBanco.style.display = "none";
+                    if (gRef) gRef.style.display = "none";
+                }
+            };
+
+            if (abonarForma) {
+                abonarForma.addEventListener("change", toggleCamposMetodo);
+            }
+
+            if (inputAbonarMonto) {
+                inputAbonarMonto.addEventListener("input", calcularSaldoRestante);
+            }
+
+            if (btnChipCuota) {
+                btnChipCuota.addEventListener("click", function () {
+                    var cuota = Number(this.dataset.monto || 0);
+                    if (inputAbonarMonto) {
+                        inputAbonarMonto.value = cuota.toFixed(2);
+                        calcularSaldoRestante();
+                    }
+                });
+            }
+
+            if (btnChipTotal) {
+                btnChipTotal.addEventListener("click", function () {
+                    var total = Number(this.dataset.monto || 0);
+                    if (inputAbonarMonto) {
+                        inputAbonarMonto.value = total.toFixed(2);
+                        calcularSaldoRestante();
+                    }
+                });
+            }
+
+            // Modal Nuevo Banco en Crédito
+            if (btnAbrirNuevoBancoCreditoModal) {
+                btnAbrirNuevoBancoCreditoModal.addEventListener("click", function () {
+                    if (inputNuevoBancoNombreCredito) inputNuevoBancoNombreCredito.value = "";
+                    window.ERP.UI.openModal("modalNuevoBancoCredito");
+                });
+            }
+
+            if (btnGuardarNuevoBancoCredito) {
+                btnGuardarNuevoBancoCredito.addEventListener("click", async function () {
+                    var nom = inputNuevoBancoNombreCredito ? inputNuevoBancoNombreCredito.value.trim() : "";
+                    if (!nom) {
+                        if (inputNuevoBancoNombreCredito) inputNuevoBancoNombreCredito.focus();
+                        return;
+                    }
+
+                    try {
+                        var resp = await fetch("/bancos/guardar", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ nombre: nom })
+                        });
+                        var data = await resp.json();
+                        if (data.success) {
+                            window.ERP.UI.closeModal("modalNuevoBancoCredito");
+                            self.showToast(data.message || "Banco registrado correctamente", "success");
+                            await self.cargarBancos(bancoSelectCredito);
+                            if (data.banco && bancoSelectCredito) {
+                                bancoSelectCredito.value = data.banco.id;
+                            }
+                        } else {
+                            self.showToast(data.message || "Error al registrar banco", "danger");
+                        }
+                    } catch (err) {
+                        self.showToast("Error de conexión al guardar banco.", "danger");
+                    }
+                });
+            }
+
+            // Click en botón Abonar de cualquier fila
+            document.querySelectorAll(".btn-abonar").forEach(function (btn) {
                 btn.addEventListener("click", function (e) {
                     e.stopPropagation();
                     var ventaId = this.dataset.ventaId;
                     var factura = this.dataset.factura;
                     var cliente = this.dataset.cliente || "N/D";
-                    var saldo = this.dataset.saldo;
+                    var totalVenta = Number(this.dataset.totalVenta || 0);
+                    var saldo = Number(this.dataset.saldoPendiente || this.dataset.saldo || 0);
+                    var proxCuota = Number(this.dataset.proximaCuota || saldo);
 
                     var aVId = document.getElementById("abonarVentaId");
                     var aSP = document.getElementById("abonarSaldoPendiente");
                     var lFact = document.getElementById("lblFacturaAbonar");
                     var lCli = document.getElementById("lblClienteAbonar");
+                    var lTot = document.getElementById("lblTotalFacturaAbonar");
                     var lSaldo = document.getElementById("lblSaldoPendiente");
                     var aMont = document.getElementById("abonarMonto");
                     var aFech = document.getElementById("abonarFecha");
@@ -583,21 +685,40 @@
                     var aRef = document.getElementById("abonarReferencia");
                     var aObs = document.getElementById("abonarObservaciones");
 
+                    var lChipCuota = document.getElementById("lblChipMontoCuota");
+                    var lChipTotal = document.getElementById("lblChipMontoTotal");
+
                     if (aVId) aVId.value = ventaId;
-                    if (aSP) aSP.value = saldo;
+                    if (aSP) aSP.value = saldo.toFixed(2);
                     if (lFact) lFact.innerText = `#${factura}`;
                     if (lCli) lCli.innerText = cliente;
+                    if (lTot) lTot.innerText = `Total Factura: C$ ${totalVenta.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    if (lSaldo) lSaldo.innerText = `C$ ${saldo.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-                    var saldoNumerico = Number(saldo) || 0;
-                    if (lSaldo) lSaldo.innerText = "C$ " + saldoNumerico.toFixed(2);
+                    if (btnChipCuota && lChipCuota) {
+                        btnChipCuota.dataset.monto = proxCuota.toFixed(2);
+                        lChipCuota.innerText = `C$ ${proxCuota.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        btnChipCuota.style.display = (proxCuota > 0 && Math.abs(proxCuota - saldo) > 0.01) ? "inline-flex" : "none";
+                    }
+
+                    if (btnChipTotal && lChipTotal) {
+                        btnChipTotal.dataset.monto = saldo.toFixed(2);
+                        lChipTotal.innerText = `C$ ${saldo.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }
+
+                    // Por defecto, sugerir monto de la próxima cuota si es distinta, o el saldo completo
+                    var montoSugerido = (proxCuota > 0 && proxCuota <= saldo) ? proxCuota : saldo;
                     if (aMont) {
-                        aMont.value = saldoNumerico.toFixed(2);
-                        aMont.max = saldoNumerico;
+                        aMont.value = montoSugerido.toFixed(2);
+                        aMont.max = saldo.toFixed(2);
                     }
                     if (aFech) aFech.value = new Date().toISOString().split("T")[0];
-                    if (aForm) aForm.value = "";
+                    if (aForm) aForm.value = "EFECTIVO";
                     if (aRef) aRef.value = "";
                     if (aObs) aObs.value = "";
+
+                    toggleCamposMetodo();
+                    calcularSaldoRestante();
 
                     window.ERP.UI.openModal("modalAbonarFactura");
                 });
@@ -611,13 +732,15 @@
                     var monto = Number(document.getElementById("abonarMonto") ? document.getElementById("abonarMonto").value : 0);
                     var forma = document.getElementById("abonarForma") ? document.getElementById("abonarForma").value : '';
                     var fecha = document.getElementById("abonarFecha") ? document.getElementById("abonarFecha").value : '';
+                    var bancoId = document.getElementById("abonar_banco_id") ? document.getElementById("abonar_banco_id").value : '';
+                    var referencia = document.getElementById("abonarReferencia") ? document.getElementById("abonarReferencia").value.trim() : '';
 
                     if (monto <= 0) {
                         self.showToast('Ingrese un monto de abono mayor a cero.', 'warning');
                         return;
                     }
 
-                    if (monto > saldo) {
+                    if (monto > (saldo + 0.05)) {
                         self.showToast('El abono no puede superar el saldo pendiente.', 'warning');
                         return;
                     }
@@ -625,6 +748,17 @@
                     if (!forma || !fecha) {
                         self.showToast('Verifique forma de pago y fecha.', 'warning');
                         return;
+                    }
+
+                    if (forma === "TRANSFERENCIA") {
+                        if (!bancoId) {
+                            self.showToast("Debe seleccionar un banco para pagos por transferencia.", "warning");
+                            return;
+                        }
+                        if (!referencia) {
+                            self.showToast("Debe digitar el número de referencia de la transferencia.", "warning");
+                            return;
+                        }
                     }
 
                     var formData = new FormData(this);
@@ -640,9 +774,9 @@
                         if (resultado.success) {
                             window.ERP.UI.closeModal("modalAbonarFactura");
                             self.showToast('Abono registrado exitosamente.', 'success');
-                            setTimeout(function () { location.reload(); }, 1800);
+                            setTimeout(function () { location.reload(); }, 1200);
                         } else {
-                            self.showToast(resultado.message, 'danger');
+                            self.showToast(resultado.message || 'Error al procesar el abono', 'danger');
                         }
                     } catch (err) {
                         self.showToast('Error al conectar con el servidor.', 'danger');
