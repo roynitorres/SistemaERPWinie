@@ -203,8 +203,13 @@
 <!-- ===================================== -->
 <!-- MODAL DE VISTA PREVIA DEL RECIBO     -->
 <!-- ===================================== -->
-<div class="modal-overlay" id="modalReciboExito">
-    <div class="modal-window" style="max-width: 440px; background: #ffffff; color: #111827; border-radius: 16px; padding: 24px;">
+<div class="modal-overlay" id="modalReciboExito" style="display: none; opacity: 0; visibility: hidden;">
+    <div class="modal-window" style="max-width: 440px; background: #ffffff; color: #111827; border-radius: 16px; padding: 24px; position: relative;">
+        <!-- Botón cerrar rápido en la esquina superior derecha -->
+        <button type="button" onclick="nuevoCobroLimpiar()" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.15rem; color: #6b7280; cursor: pointer; padding: 4px;" title="Cerrar Comprobante">
+            <i class="bi bi-x-lg"></i>
+        </button>
+
         <div style="text-align: center; border-bottom: 2px dashed #e5e7eb; padding-bottom: 14px; margin-bottom: 14px;">
             <div style="font-size: 1.15rem; font-weight: 900; letter-spacing: -0.02em;">SISTEMA ERP WINIE</div>
             <div style="font-size: 0.75rem; color: #6b7280;">Comprobante Oficial de Cobro</div>
@@ -435,9 +440,14 @@
         btnTotal.onclick = function() { aplicarMonto(clienteActual.saldo_total); };
         btnTotal.innerHTML = `<i class="bi bi-check2-all me-1"></i> Total (C$ ${clienteActual.saldo_total.toFixed(2)})`;
 
-        // Monto por defecto sugerido: Primera cuota / saldo más antiguo
-        var sugerido = primerFacturaVencidaMonto > 0 ? primerFacturaVencidaMonto : (facturasActuales[0] ? facturasActuales[0].saldo_pendiente : clienteActual.saldo_total);
-        aplicarMonto(sugerido);
+        // El monto recibido debe ser digitado manualmente por el cajero
+        var inp = document.getElementById('cobroMontoRecibido');
+        if (inp) {
+            inp.value = '';
+            inp.placeholder = '0.00';
+            inp.focus();
+        }
+        actualizarResumen(0);
 
         sincronizarAlturasPaneles();
     }
@@ -463,19 +473,8 @@
     window.addEventListener('resize', sincronizarAlturasPaneles);
 
     function toggleSelectAllFacturas(checked) {
-        var sumaTotal = 0;
-        document.querySelectorAll('.fila-factura-cobro').forEach(function(row) {
-            var chk = row.querySelector('.check-factura-afectar');
-            var saldo = parseFloat(row.dataset.saldo) || 0;
-            var input = row.querySelector('.input-monto-distribuido');
-
-            if (chk) chk.checked = checked;
-            if (checked) {
-                input.value = saldo.toFixed(2);
-                sumaTotal += saldo;
-            } else {
-                input.value = "0.00";
-            }
+        document.querySelectorAll('.fila-factura-cobro .check-factura-afectar').forEach(function(chk) {
+            chk.checked = checked;
         });
 
         var chkAll = document.getElementById('checkSelectAllFacturas');
@@ -484,89 +483,75 @@
         if (chkTh) chkTh.checked = checked;
 
         var inpMonto = document.getElementById('cobroMontoRecibido');
-        if (inpMonto) inpMonto.value = sumaTotal.toFixed(2);
-
-        actualizarResumen(sumaTotal);
+        var m = parseFloat(inpMonto.value) || 0;
+        if (m > 0) {
+            distribuirMonto(m);
+        } else {
+            document.querySelectorAll('.fila-factura-cobro .input-monto-distribuido').forEach(function(inp) {
+                inp.value = "0.00";
+            });
+        }
     }
 
     function onCheckFacturaChanged(chkChanged) {
-        if (chkChanged) {
-            var row = chkChanged.closest('.fila-factura-cobro');
-            var saldo = parseFloat(row.dataset.saldo) || 0;
-            var input = row.querySelector('.input-monto-distribuido');
-            if (chkChanged.checked) {
-                input.value = saldo.toFixed(2);
-            } else {
-                input.value = "0.00";
+        var inpMonto = document.getElementById('cobroMontoRecibido');
+        var m = parseFloat(inpMonto.value) || 0;
+        if (m > 0) {
+            distribuirMonto(m);
+        } else {
+            if (chkChanged && !chkChanged.checked) {
+                var row = chkChanged.closest('.fila-factura-cobro');
+                var inp = row.querySelector('.input-monto-distribuido');
+                if (inp) inp.value = "0.00";
             }
         }
+        sincronizarSelectAllState();
+    }
 
-        var sumaTotal = 0;
+    function sincronizarSelectAllState() {
         var allChecked = true;
         var anyChecked = false;
-
-        document.querySelectorAll('.fila-factura-cobro').forEach(function(r) {
-            var chk = r.querySelector('.check-factura-afectar');
-            var inp = r.querySelector('.input-monto-distribuido');
-            var val = parseFloat(inp.value) || 0;
-            if (chk && chk.checked) {
-                sumaTotal += val;
-                anyChecked = true;
-            } else {
-                allChecked = false;
-            }
+        document.querySelectorAll('.fila-factura-cobro .check-factura-afectar').forEach(function(chk) {
+            if (chk.checked) anyChecked = true;
+            else allChecked = false;
         });
-
         var chkAll = document.getElementById('checkSelectAllFacturas');
         var chkTh = document.getElementById('checkThSelectAll');
         if (chkAll) chkAll.checked = allChecked && anyChecked;
         if (chkTh) chkTh.checked = allChecked && anyChecked;
-
-        var inpMonto = document.getElementById('cobroMontoRecibido');
-        if (inpMonto) inpMonto.value = sumaTotal.toFixed(2);
-
-        actualizarResumen(sumaTotal);
     }
 
     function aplicarMonto(monto) {
         var inp = document.getElementById('cobroMontoRecibido');
         inp.value = Number(monto).toFixed(2);
         distribuirMonto(monto);
+        inp.focus();
     }
 
     function distribuirMonto(montoRecibido) {
         var m = parseFloat(montoRecibido) || 0;
         var restante = m;
         var filas = document.querySelectorAll('.fila-factura-cobro');
-        var allChecked = true;
-        var anyChecked = false;
 
         filas.forEach(function(row) {
             var check = row.querySelector('.check-factura-afectar');
             var saldo = parseFloat(row.dataset.saldo);
             var input = row.querySelector('.input-monto-distribuido');
 
-            if (restante >= saldo) {
-                input.value = saldo.toFixed(2);
-                if (check) check.checked = true;
-                anyChecked = true;
-                restante -= saldo;
-            } else if (restante > 0) {
-                input.value = restante.toFixed(2);
-                if (check) check.checked = true;
-                anyChecked = true;
-                restante = 0;
+            if (check && check.checked) {
+                if (restante >= saldo) {
+                    input.value = saldo.toFixed(2);
+                    restante -= saldo;
+                } else if (restante > 0) {
+                    input.value = restante.toFixed(2);
+                    restante = 0;
+                } else {
+                    input.value = "0.00";
+                }
             } else {
                 input.value = "0.00";
-                if (check) check.checked = false;
-                allChecked = false;
             }
         });
-
-        var chkAll = document.getElementById('checkSelectAllFacturas');
-        var chkTh = document.getElementById('checkThSelectAll');
-        if (chkAll) chkAll.checked = allChecked && anyChecked;
-        if (chkTh) chkTh.checked = allChecked && anyChecked;
 
         actualizarResumen(m);
     }
@@ -582,27 +567,17 @@
         }
 
         var totalDistribuido = 0;
-        var allChecked = true;
-        var anyChecked = false;
-
         document.querySelectorAll('.fila-factura-cobro').forEach(function(r) {
             var chk = r.querySelector('.check-factura-afectar');
             var inp = r.querySelector('.input-monto-distribuido');
             var val = parseFloat(inp.value) || 0;
             if (chk && chk.checked) {
                 totalDistribuido += val;
-                anyChecked = true;
-            } else {
-                allChecked = false;
             }
         });
 
-        var chkAll = document.getElementById('checkSelectAllFacturas');
-        var chkTh = document.getElementById('checkThSelectAll');
-        if (chkAll) chkAll.checked = allChecked && anyChecked;
-        if (chkTh) chkTh.checked = allChecked && anyChecked;
-
-        document.getElementById('cobroMontoRecibido').value = totalDistribuido.toFixed(2);
+        sincronizarSelectAllState();
+        document.getElementById('cobroMontoRecibido').value = totalDistribuido > 0 ? totalDistribuido.toFixed(2) : '';
         actualizarResumen(totalDistribuido);
     }
 
@@ -641,7 +616,8 @@
 
             var montoTotal = parseFloat(document.getElementById('cobroMontoRecibido').value) || 0;
             if (montoTotal <= 0) {
-                showToast('Ingrese un monto a cobrar válido mayor a cero', 'warning');
+                showToast('Debe digitar el monto recibido del cliente antes de procesar el cobro', 'warning');
+                document.getElementById('cobroMontoRecibido').focus();
                 return;
             }
 
@@ -699,11 +675,11 @@
                     mostrarModalReciboExito(res, distribucion);
                 } else {
                     showToast(res.message || 'Error al procesar cobro', 'danger');
-                    btnConfirmar.disabled = false;
-                    btnConfirmar.innerHTML = '<i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja';
                 }
             } catch (e) {
+                console.error('Error al procesar cobro:', e);
                 showToast('Error de conexión al procesar el cobro', 'danger');
+            } finally {
                 btnConfirmar.disabled = false;
                 btnConfirmar.innerHTML = '<i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja';
             }
@@ -733,18 +709,34 @@
         });
 
         document.getElementById('btnImprimirTicketOficial').href = '/cobros/recibo/' + res.recibo_id;
-        document.getElementById('modalReciboExito').classList.add('active');
+        
+        var modal = document.getElementById('modalReciboExito');
+        if (modal) {
+            modal.classList.add('is-open');
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+            modal.style.opacity = '1';
+            modal.style.visibility = 'visible';
+        }
     }
 
     function nuevoCobroLimpiar() {
         var modal = document.getElementById('modalReciboExito');
-        if (modal) modal.classList.remove('active');
+        if (modal) {
+            modal.classList.remove('is-open');
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+            modal.style.opacity = '0';
+            modal.style.visibility = 'hidden';
+        }
         clienteActual = null;
         facturasActuales = [];
         if (inputBuscar) {
             inputBuscar.value = '';
             inputBuscar.focus();
         }
+        var inpMonto = document.getElementById('cobroMontoRecibido');
+        if (inpMonto) inpMonto.value = '';
         var infoRight = document.getElementById('infoClienteDerecha');
         if (infoRight) infoRight.style.display = 'none';
         var hint = document.getElementById('hintSinCliente');
