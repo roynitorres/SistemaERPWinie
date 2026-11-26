@@ -5,103 +5,102 @@
 {% block topbar_title %}Módulo de Cobranza & Recibos{% endblock %}
 
 {% block content %}
-<div class="page-header-apex mb-3">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-            <h1 class="page-title-apex">
-                <i class="bi bi-wallet2 text-success px-2"></i>Cobros & Recibos de Caja
-            </h1>
-            <p class="page-subtitle-apex">Abona y liquida cuentas corrientes distribuyendo el pago en una o múltiples facturas.</p>
-        </div>
-        <div>
-            <a href="{{ url_for('cobros.historial') }}" class="btn-apex-outline">
-                <i class="bi bi-clock-history me-1"></i> Historial de Recibos
-            </a>
-        </div>
+<!-- ENCABEZADO COMPACTO DE PÁGINA -->
+<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <h1 class="page-title-apex" style="font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-wallet2" style="font-size: 1.15rem;"></i> Cobros & Recibos de Caja
+        </h1>
+        <span style="font-size: 0.78rem; color: var(--color-text-muted);">| Registro y distribución de pagos a cuentas corrientes</span>
+    </div>
+    <div>
+        <a href="{{ url_for('cobros.historial') }}" class="btn-apex-outline" style="padding: 5px 12px; font-size: 0.8rem;">
+            <i class="bi bi-clock-history me-1"></i> Historial de Recibos
+        </a>
     </div>
 </div>
 
 <!-- ===================================== -->
 <!-- BARRA SUPERIOR COMPACTA: BUSCADOR + CLIENTE Y SALDO A LA DERECHA -->
 <!-- ===================================== -->
-<div class="toolbar-apex mb-3" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; position: relative; overflow: visible;">
+<div class="toolbar-apex mb-2" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; position: relative; overflow: visible;">
     
     <!-- LADO IZQUIERDO: BUSCADOR CON DROPDOWN FLOTANTE SIN RECORTE -->
-    <div style="position: relative; width: 380px; max-width: 100%;">
+    <div style="position: relative; width: 340px; max-width: 100%;">
         <div style="position: relative;">
-            <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #38bdf8; font-size: 1rem;"></i>
-            <input type="text" class="form-input" id="inputBuscarClienteCobro" placeholder="Buscar cliente por nombre o teléfono..." style="padding-left: 38px; padding-top: 8px; padding-bottom: 8px; font-size: 0.88rem; font-weight: 600; background: #162032;" autocomplete="off">
+            <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.9rem;"></i>
+            <input type="text" class="form-input" id="inputBuscarClienteCobro" placeholder="Buscar cliente por nombre o teléfono..." style="padding-left: 34px; padding-top: 6px; padding-bottom: 6px; font-size: 0.85rem;" autocomplete="off">
         </div>
         
         <!-- Dropdown flotante con z-index 9999 para que NUNCA se corte -->
-        <div id="dropdownClientesCobro" style="position: absolute; top: calc(100% + 8px); left: 0; width: 480px; max-width: 90vw; background: #162032; border: 1px solid var(--color-border); border-radius: 10px; max-height: 350px; overflow-y: auto; z-index: 9999; box-shadow: 0 16px 36px rgba(0,0,0,0.7); display: none;">
+        <div id="dropdownClientesCobro" style="position: absolute; top: calc(100% + 6px); left: 0; width: 440px; max-width: 90vw; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 10px; max-height: 320px; overflow-y: auto; z-index: 9999; box-shadow: 0 16px 36px rgba(0,0,0,0.7); display: none;">
             <!-- Inyectado dinámicamente -->
         </div>
     </div>
 
     <!-- LADO DERECHO: CLIENTE SELECCIONADO Y SALDO PENDIENTE -->
-    <div id="infoClienteDerecha" style="display: none; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div id="infoClienteDerecha" style="display: none; align-items: center; gap: 14px; flex-wrap: wrap;">
         <!-- Avatar y Datos Cliente -->
         <div class="d-flex align-items-center gap-2">
-            <div class="avatar-circle-apex" style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--color-primary) 0%, #00b4d8 100%); color: #fff; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div class="avatar-circle-apex" style="width: 32px; height: 32px; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <i class="bi bi-person-fill"></i>
             </div>
             <div>
-                <div id="lblBannerNombreCliente" style="font-size: 0.95rem; font-weight: 800; color: var(--color-text-main); line-height: 1.2;">---</div>
-                <div style="font-size: 0.74rem; color: var(--color-text-muted); display: flex; gap: 8px;">
-                    <span id="lblBannerTelefono"><i class="bi bi-telephone-fill me-1" style="color: #38bdf8;"></i>---</span>
+                <div id="lblBannerNombreCliente" style="font-size: 0.9rem; font-weight: 800; color: var(--color-text-main); line-height: 1.2;">---</div>
+                <div style="font-size: 0.72rem; color: var(--color-text-muted); display: flex; gap: 6px;">
+                    <span id="lblBannerTelefono">---</span>
                     <span>•</span>
-                    <span><strong id="lblBannerFacturasCount" style="color: #f59e0b;">0</strong> facturas</span>
+                    <span><strong id="lblBannerFacturasCount">0</strong> facturas</span>
                 </div>
             </div>
         </div>
 
         <!-- Badge de Saldo Total Pendiente -->
-        <div style="text-align: right; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 5px 14px; border-radius: 8px;">
-            <div style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-warning);">Saldo Pendiente</div>
-            <div id="lblBannerSaldoTotal" style="font-size: 1.2rem; font-weight: 900; color: #f59e0b; line-height: 1.2;">C$ 0.00</div>
+        <div style="text-align: right; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--color-border); padding: 4px 12px; border-radius: 8px;">
+            <div style="font-size: 0.62rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">Saldo Pendiente</div>
+            <div id="lblBannerSaldoTotal" style="font-size: 1.1rem; font-weight: 800; line-height: 1.1;">C$ 0.00</div>
         </div>
 
         <!-- Botón Cambiar / Limpiar Cliente -->
-        <button type="button" class="btn-apex-outline" onclick="nuevoCobroLimpiar()" title="Cambiar de Cliente" style="padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; color: var(--color-text-muted);">
+        <button type="button" class="btn-apex-outline" onclick="nuevoCobroLimpiar()" title="Cambiar de Cliente" style="padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>
 
     <!-- Hint cuando aún no se ha seleccionado cliente -->
-    <div id="hintSinCliente" style="display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: 0.82rem;">
-        <i class="bi bi-info-circle text-primary"></i>
+    <div id="hintSinCliente" style="display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: 0.8rem;">
+        <i class="bi bi-info-circle"></i>
         <span>Escriba un nombre para cargar la cuenta del cliente</span>
     </div>
 
 </div>
 
 <!-- ===================================== -->
-<!-- ESPACIO DE TRABAJO EN 2 PANELES      -->
+<!-- ESPACIO DE TRABAJO EN 2 PANELES (UNA SOLA VISTA) -->
 <!-- ===================================== -->
-<div id="workspaceCobro" class="grid grid--2-cols mb-4" style="display: none; grid-template-columns: 1.45fr 1fr; gap: 20px; align-items: flex-start;">
+<div id="workspaceCobro" class="grid grid--2-cols mb-3" style="display: none; grid-template-columns: 1.35fr 1fr; gap: 14px; align-items: flex-start;">
     
     <!-- PANEL IZQUIERDO: FACTURAS PENDIENTES DEL CLIENTE -->
-    <div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);">
-        <div style="padding: 14px 18px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);">
-            <div style="font-size: 0.92rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-list-check" style="color: #38bdf8;"></i> Facturas a Afectar
+    <div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; display: flex; flex-direction: column;">
+        <div style="padding: 8px 14px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);">
+            <div style="font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                <i class="bi bi-list-check"></i> Facturas a Afectar
             </div>
-            <span style="font-size: 0.75rem; font-weight: 700; background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); padding: 3px 10px; border-radius: 999px;">
-                <i class="bi bi-sort-numeric-down me-1"></i> Orden FIFO (Antigua a Reciente)
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 2px 8px; border-radius: 999px;">
+                <i class="bi bi-sort-numeric-down me-1"></i> Orden FIFO
             </span>
         </div>
         
-        <div class="table-responsive">
-            <table class="data-table" style="table-layout: auto; width: 100%;">
-                <thead class="data-table__head">
+        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+            <table class="data-table" style="table-layout: auto; width: 100%; margin: 0;">
+                <thead class="data-table__head" style="position: sticky; top: 0; z-index: 2; background: var(--color-bg-card);">
                     <tr>
-                        <th style="width: 40px; text-align: center;">✓</th>
-                        <th style="width: 110px; white-space: nowrap;">Factura</th>
-                        <th style="width: 120px; white-space: nowrap;">Vencimiento</th>
-                        <th style="width: 100px; text-align: right; white-space: nowrap;">Total</th>
-                        <th style="width: 110px; text-align: right; white-space: nowrap;">Saldo</th>
-                        <th style="width: 130px; text-align: right; white-space: nowrap;">Abonar Hoy</th>
+                        <th style="width: 38px; text-align: center;">✓</th>
+                        <th style="width: 105px; white-space: nowrap;">Factura</th>
+                        <th style="width: 110px; white-space: nowrap;">Vencimiento</th>
+                        <th style="width: 95px; text-align: right; white-space: nowrap;">Total</th>
+                        <th style="width: 95px; text-align: right; white-space: nowrap;">Saldo</th>
+                        <th style="width: 115px; text-align: right; white-space: nowrap;">Abonar Hoy</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyFacturasCobro">
@@ -111,83 +110,88 @@
         </div>
     </div>
 
-    <!-- PANEL DERECHO: REGISTRO DEL PAGO -->
-    <div class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; gap: 16px;">
-        <div style="font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #10b981; padding-bottom: 10px; border-bottom: 1px solid var(--color-border);">
-            <i class="bi bi-cash-stack"></i> Datos del Cobro Recibido
+    <!-- PANEL DERECHO: REGISTRO DEL PAGO (COMPACTO Y EN UNA SOLA VISTA) -->
+    <div class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        
+        <!-- Encabezado del Panel con Atajos Rápidos Integrados a la Derecha -->
+        <div style="padding: 8px 14px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);">
+            <div style="font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                <i class="bi bi-cash-stack"></i> Datos del Cobro Recibido
+            </div>
+            <div id="cajaAtajosCobro" style="display: flex; gap: 6px;">
+                <button type="button" class="btn-apex-outline" id="btnPagarVencida" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; display: none;">
+                    <i class="bi bi-clock-history me-1"></i> Factura Vencida
+                </button>
+                <button type="button" class="btn-apex-outline" id="btnPagarTotal" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px;">
+                    <i class="bi bi-check2-all me-1"></i> Saldo Total
+                </button>
+            </div>
         </div>
 
-        <!-- MONTO RECIBIDO HERO -->
-        <div class="form-group">
-            <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">Monto Recibido del Cliente (C$)</label>
-            <input type="number" step="0.01" min="0.01" class="form-input" id="cobroMontoRecibido" placeholder="0.00" style="font-size: 1.45rem; font-weight: 900; color: #10b981; padding: 12px 14px;">
-        </div>
+        <!-- Formulario Compacto -->
+        <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;">
+            
+            <!-- Fila 1: Monto Recibido y Forma de Pago en 2 Columnas -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label class="form-label form-label--required" style="font-size: 0.72rem; margin-bottom: 4px;">Monto Recibido (C$)</label>
+                    <input type="number" step="0.01" min="0.01" class="form-input" id="cobroMontoRecibido" placeholder="0.00" style="padding: 7px 10px; font-size: 1rem; font-weight: 700;">
+                </div>
+                <div>
+                    <label class="form-label form-label--required" style="font-size: 0.72rem; margin-bottom: 4px;">Forma de Pago</label>
+                    <select class="form-input" id="cobroTipoPago" style="padding: 7px 10px; font-size: 0.85rem;">
+                        <option value="EFECTIVO">Efectivo</option>
+                        <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                    </select>
+                </div>
+            </div>
 
-        <!-- ATAJOS DE MONTO RÁPIDO -->
-        <div id="cajaAtajosCobro" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button type="button" class="btn-apex-outline" id="btnPagarVencida" style="font-size: 0.76rem; padding: 5px 10px; border-radius: 8px;">
-                <i class="bi bi-clock-history text-danger me-1"></i> Factura Vencida
+            <!-- Fila 2: Banco y Referencia (Visible sólo en Transferencia, 2 columnas) -->
+            <div id="cajaBancoRefCobro" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label class="form-label form-label--required" style="font-size: 0.72rem; margin-bottom: 4px;">Banco Destino</label>
+                    <select class="form-input" id="cobroBancoId" style="padding: 6px 10px; font-size: 0.85rem;">
+                        <option value="">-- Seleccionar --</option>
+                        {% if bancos %}
+                        {% for b in bancos %}
+                        <option value="{{ b.id }}">{{ b.nombre }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label form-label--required" style="font-size: 0.72rem; margin-bottom: 4px;">N° Referencia</label>
+                    <input type="text" class="form-input" id="cobroReferencia" placeholder="Ej: TR-884920" style="padding: 6px 10px; font-size: 0.85rem;">
+                </div>
+            </div>
+
+            <!-- Fila 3: Observaciones -->
+            <div>
+                <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px;">Observaciones (Opcional)</label>
+                <input type="text" class="form-input" id="cobroObservaciones" placeholder="Notas adicionales del cobro..." style="padding: 6px 10px; font-size: 0.85rem;">
+            </div>
+
+            <!-- Fila 4: Resumen de Saldos Horizontal en 3 Columnas -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; text-align: center;">
+                <div>
+                    <div style="font-size: 0.65rem; color: var(--color-text-muted); text-transform: uppercase;">Saldo Anterior</div>
+                    <div id="lblResumenSaldoAnterior" style="font-size: 0.9rem; font-weight: 700; margin-top: 2px;">C$ 0.00</div>
+                </div>
+                <div style="border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); padding: 0 4px;">
+                    <div style="font-size: 0.65rem; color: var(--color-text-muted); text-transform: uppercase;">Abono a Aplicar</div>
+                    <div id="lblResumenMontoAbono" style="font-size: 0.9rem; font-weight: 700; margin-top: 2px;">- C$ 0.00</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.65rem; color: var(--color-text-muted); text-transform: uppercase;">Nuevo Saldo</div>
+                    <div id="lblResumenNuevoSaldo" style="font-size: 0.9rem; font-weight: 800; margin-top: 2px;">C$ 0.00</div>
+                </div>
+            </div>
+
+            <!-- Fila 5: Botón Confirmar y Emitir Recibo -->
+            <button type="button" class="btn btn--primary" id="btnEmitirRecibo" style="padding: 9px 12px; font-size: 0.9rem; font-weight: 800; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+                <i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja
             </button>
-            <button type="button" class="btn-apex-outline" id="btnPagarTotal" style="font-size: 0.76rem; padding: 5px 10px; border-radius: 8px;">
-                <i class="bi bi-check2-all text-success me-1"></i> Saldo Total Completo
-            </button>
         </div>
-
-        <!-- FORMA DE PAGO -->
-        <div class="form-group">
-            <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">Forma de Pago</label>
-            <select class="form-input" id="cobroTipoPago">
-                <option value="EFECTIVO">Efectivo</option>
-                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
-            </select>
-        </div>
-
-        <!-- BANCO Y REFERENCIA (SI TRANSFERENCIA) -->
-        <div id="cajaBancoRefCobro" style="display: none; flex-direction: column; gap: 12px;">
-            <div class="form-group">
-                <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700;">Banco Destino</label>
-                <select class="form-input" id="cobroBancoId">
-                    <option value="">-- Seleccionar Banco --</option>
-                    {% if bancos %}
-                    {% for b in bancos %}
-                    <option value="{{ b.id }}">{{ b.nombre }}</option>
-                    {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label form-label--required" style="font-size: 0.78rem; font-weight: 700;">N° Referencia Bancaria</label>
-                <input type="text" class="form-input" id="cobroReferencia" placeholder="Ej: TR-884920">
-            </div>
-        </div>
-
-        <!-- OBSERVACIONES -->
-        <div class="form-group">
-            <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Observaciones (Opcional)</label>
-            <input type="text" class="form-input" id="cobroObservaciones" placeholder="Notas adicionales del cobro...">
-        </div>
-
-        <!-- RESUMEN DE SALDO -->
-        <div style="background: #141c2b; border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
-            <div class="d-flex justify-content-between align-items-center">
-                <span style="color: var(--color-text-muted);">Saldo Anterior:</span>
-                <strong id="lblResumenSaldoAnterior">C$ 0.00</strong>
-            </div>
-            <div class="d-flex justify-content-between align-items-center" style="color: #10b981; font-weight: 800;">
-                <span>Abono Aplicado:</span>
-                <span id="lblResumenMontoAbono">- C$ 0.00</span>
-            </div>
-            <div style="border-top: 1px dashed var(--color-border); margin: 4px 0;"></div>
-            <div class="d-flex justify-content-between align-items-center" style="font-size: 0.95rem;">
-                <span style="font-weight: 700;">Nuevo Saldo Deudor:</span>
-                <strong id="lblResumenNuevoSaldo" style="color: #f59e0b; font-size: 1.15rem;">C$ 0.00</strong>
-            </div>
-        </div>
-
-        <!-- BOTÓN PRINCIPAL -->
-        <button type="button" class="btn-neon-primary" id="btnEmitirRecibo" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 13px; font-size: 0.98rem; font-weight: 800; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja
-        </button>
     </div>
 </div>
 
@@ -341,7 +345,7 @@
 
         // Render datos a la derecha del buscador
         document.getElementById('lblBannerNombreCliente').innerText = clienteActual.nombres;
-        document.getElementById('lblBannerTelefono').innerHTML = '<i class="bi bi-telephone-fill me-1" style="color: #38bdf8;"></i>' + (clienteActual.telefono || 'Sin teléfono');
+        document.getElementById('lblBannerTelefono').innerHTML = '<i class="bi bi-telephone me-1"></i>' + (clienteActual.telefono || 'Sin teléfono');
         document.getElementById('lblBannerFacturasCount').innerText = clienteActual.total_facturas;
         document.getElementById('lblBannerSaldoTotal').innerText = 'C$ ' + clienteActual.saldo_total.toLocaleString('en-US', {minimumFractionDigits: 2});
 
@@ -377,25 +381,25 @@
 
             tr.innerHTML = `
                 <td class="text-center">
-                    <input type="checkbox" class="form-check-input check-factura-afectar" checked style="width: 18px; height: 18px; cursor: pointer;" onchange="recalcularDistribucion()">
+                    <input type="checkbox" class="form-check-input check-factura-afectar" checked style="width: 17px; height: 17px; cursor: pointer;" onchange="recalcularDistribucion()">
                 </td>
-                <td style="font-weight: 800; font-family: monospace; color: #38bdf8; white-space: nowrap;">
+                <td style="font-weight: 700; font-family: monospace; white-space: nowrap;">
                     #${f.numero_factura}
                 </td>
                 <td style="white-space: nowrap;">
-                    <div style="font-weight: 600; color: ${f.es_vencida ? '#ef4444' : 'var(--color-text-main)'};">
+                    <div style="font-weight: 600;">
                         ${f.fecha_limite_credito}
                     </div>
-                    ${f.es_vencida ? '<div style="font-size: 0.7rem; color: #ef4444; font-weight: 700;"><i class="bi bi-exclamation-triangle-fill"></i> Vencida (' + f.dias_vencida + 'd)</div>' : ''}
+                    ${f.es_vencida ? '<div style="font-size: 0.7rem; font-weight: 700;"><i class="bi bi-exclamation-triangle me-1"></i>Vencida (' + f.dias_vencida + 'd)</div>' : ''}
                 </td>
                 <td class="text-end" style="color: var(--color-text-muted); white-space: nowrap;">
                     C$ ${f.total_venta.toLocaleString('en-US', {minimumFractionDigits: 2})}
                 </td>
-                <td class="text-end" style="font-weight: 800; color: ${f.es_vencida ? '#ef4444' : '#f59e0b'}; white-space: nowrap;">
+                <td class="text-end" style="font-weight: 700; white-space: nowrap;">
                     C$ ${f.saldo_pendiente.toLocaleString('en-US', {minimumFractionDigits: 2})}
                 </td>
                 <td class="text-end" style="white-space: nowrap;">
-                    <input type="number" step="0.01" min="0" class="form-input input-monto-distribuido text-end" style="width: 110px; font-weight: 800; color: #10b981; padding: 5px 8px;" value="0.00" oninput="manualOverride()">
+                    <input type="number" step="0.01" min="0" class="form-input input-monto-distribuido text-end" style="width: 105px; font-weight: 700; padding: 4px 6px;" value="0.00" oninput="manualOverride()">
                 </td>
             `;
             tbody.appendChild(tr);
@@ -406,14 +410,14 @@
         if (totalVencido > 0) {
             btnVencida.style.display = 'inline-flex';
             btnVencida.onclick = function() { aplicarMonto(totalVencido); };
-            btnVencida.innerHTML = `<i class="bi bi-clock-history text-danger me-1"></i> Pagar Vencidas (C$ ${totalVencido.toFixed(2)})`;
+            btnVencida.innerHTML = `<i class="bi bi-clock-history me-1"></i> Vencidas (C$ ${totalVencido.toFixed(2)})`;
         } else {
             btnVencida.style.display = 'none';
         }
 
         var btnTotal = document.getElementById('btnPagarTotal');
         btnTotal.onclick = function() { aplicarMonto(clienteActual.saldo_total); };
-        btnTotal.innerHTML = `<i class="bi bi-check2-all text-success me-1"></i> Saldo Total (C$ ${clienteActual.saldo_total.toFixed(2)})`;
+        btnTotal.innerHTML = `<i class="bi bi-check2-all me-1"></i> Total (C$ ${clienteActual.saldo_total.toFixed(2)})`;
 
         // Monto por defecto sugerido: Primera cuota / saldo más antiguo
         var sugerido = primerFacturaVencidaMonto > 0 ? primerFacturaVencidaMonto : (facturasActuales[0] ? facturasActuales[0].saldo_pendiente : clienteActual.saldo_total);
@@ -480,7 +484,7 @@
     if (selectTipoPago) {
         selectTipoPago.addEventListener('change', function() {
             var caja = document.getElementById('cajaBancoRefCobro');
-            caja.style.display = (this.value === 'TRANSFERENCIA') ? 'flex' : 'none';
+            caja.style.display = (this.value === 'TRANSFERENCIA') ? 'grid' : 'none';
         });
     }
 
