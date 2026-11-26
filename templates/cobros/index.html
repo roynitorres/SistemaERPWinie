@@ -78,24 +78,29 @@
 <!-- ===================================== -->
 <!-- ESPACIO DE TRABAJO EN 2 PANELES (UNA SOLA VISTA) -->
 <!-- ===================================== -->
-<div id="workspaceCobro" class="grid grid--2-cols mb-3" style="display: none; grid-template-columns: 1.35fr 1fr; gap: 14px; align-items: flex-start;">
+<div id="workspaceCobro" class="grid mb-3" style="display: none; grid-template-columns: 1.35fr 1fr; gap: 14px; align-items: stretch;">
     
-    <!-- PANEL IZQUIERDO: FACTURAS PENDIENTES DEL CLIENTE -->
-    <div class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; display: flex; flex-direction: column;">
-        <div style="padding: 8px 14px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);">
-            <div style="font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-                <i class="bi bi-list-check"></i> Facturas a Afectar
-            </div>
-            <span style="font-size: 0.72rem; font-weight: 700; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 2px 8px; border-radius: 999px;">
-                <i class="bi bi-sort-numeric-down me-1"></i> Orden FIFO
+    <!-- PANEL IZQUIERDO: FACTURAS PENDIENTES DEL CLIENTE (ALTURA SINCRONIZADA CON SCROLL) -->
+    <div id="panelTablaFacturas" class="panel" style="padding: 0; overflow: hidden; background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; display: flex; flex-direction: column; min-height: 0;">
+        <div class="panel-header-compact" style="padding: 8px 14px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); flex-shrink: 0;">
+            <!-- CONTROL SELECT ALL -->
+            <label class="d-flex align-items-center gap-2" style="cursor: pointer; font-size: 0.84rem; font-weight: 700; margin: 0; user-select: none;">
+                <input type="checkbox" id="checkSelectAllFacturas" class="form-check-input" checked style="width: 17px; height: 17px; cursor: pointer;" onchange="toggleSelectAllFacturas(this.checked)">
+                <span>Seleccionar Todas</span>
+            </label>
+            <!-- CONTADOR DE FACTURAS -->
+            <span id="lblCantFacturasTabla" style="font-size: 0.72rem; font-weight: 700; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 2px 8px; border-radius: 999px;">
+                <span id="numFacturasTabla">0</span> facturas
             </span>
         </div>
         
-        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+        <div id="wrapperTablaFacturas" class="table-responsive" style="flex: 1 1 auto; overflow-y: auto; min-height: 0;">
             <table class="data-table" style="table-layout: auto; width: 100%; margin: 0;">
                 <thead class="data-table__head" style="position: sticky; top: 0; z-index: 2; background: var(--color-bg-card);">
                     <tr>
-                        <th style="width: 38px; text-align: center;">✓</th>
+                        <th style="width: 38px; text-align: center;">
+                            <input type="checkbox" id="checkThSelectAll" class="form-check-input" checked style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleSelectAllFacturas(this.checked)">
+                        </th>
                         <th style="width: 105px; white-space: nowrap;">Factura</th>
                         <th style="width: 110px; white-space: nowrap;">Vencimiento</th>
                         <th style="width: 95px; text-align: right; white-space: nowrap;">Total</th>
@@ -111,7 +116,7 @@
     </div>
 
     <!-- PANEL DERECHO: REGISTRO DEL PAGO (COMPACTO Y EN UNA SOLA VISTA) -->
-    <div class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+    <div id="panelDatosCobro" class="panel" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
         
         <!-- Encabezado del Panel con Atajos Rápidos Integrados a la Derecha -->
         <div style="padding: 8px 14px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);">
@@ -356,6 +361,16 @@
         if (hint) hint.style.display = 'none';
         document.getElementById('workspaceCobro').style.display = 'grid';
 
+        // Contador de facturas en la tabla
+        var numFact = document.getElementById('numFacturasTabla');
+        if (numFact) numFact.innerText = facturasActuales.length;
+
+        // Resetear select all
+        var chkAll = document.getElementById('checkSelectAllFacturas');
+        if (chkAll) chkAll.checked = true;
+        var chkTh = document.getElementById('checkThSelectAll');
+        if (chkTh) chkTh.checked = true;
+
         // Render Facturas
         var tbody = document.getElementById('tbodyFacturasCobro');
         tbody.innerHTML = '';
@@ -365,6 +380,7 @@
 
         if (facturasActuales.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Este cliente no tiene facturas pendientes</td></tr>';
+            sincronizarAlturasPaneles();
             return;
         }
 
@@ -381,7 +397,7 @@
 
             tr.innerHTML = `
                 <td class="text-center">
-                    <input type="checkbox" class="form-check-input check-factura-afectar" checked style="width: 17px; height: 17px; cursor: pointer;" onchange="recalcularDistribucion()">
+                    <input type="checkbox" class="form-check-input check-factura-afectar" checked style="width: 17px; height: 17px; cursor: pointer;" onchange="onCheckFacturaChanged(this)">
                 </td>
                 <td style="font-weight: 700; font-family: monospace; white-space: nowrap;">
                     #${f.numero_factura}
@@ -399,7 +415,7 @@
                     C$ ${f.saldo_pendiente.toLocaleString('en-US', {minimumFractionDigits: 2})}
                 </td>
                 <td class="text-end" style="white-space: nowrap;">
-                    <input type="number" step="0.01" min="0" class="form-input input-monto-distribuido text-end" style="width: 105px; font-weight: 700; padding: 4px 6px;" value="0.00" oninput="manualOverride()">
+                    <input type="number" step="0.01" min="0" class="form-input input-monto-distribuido text-end" style="width: 105px; font-weight: 700; padding: 4px 6px;" value="0.00" oninput="manualOverride(this)">
                 </td>
             `;
             tbody.appendChild(tr);
@@ -422,6 +438,94 @@
         // Monto por defecto sugerido: Primera cuota / saldo más antiguo
         var sugerido = primerFacturaVencidaMonto > 0 ? primerFacturaVencidaMonto : (facturasActuales[0] ? facturasActuales[0].saldo_pendiente : clienteActual.saldo_total);
         aplicarMonto(sugerido);
+
+        sincronizarAlturasPaneles();
+    }
+
+    function sincronizarAlturasPaneles() {
+        var panelCobro = document.getElementById('panelDatosCobro');
+        var panelTabla = document.getElementById('panelTablaFacturas');
+        var wrapper = document.getElementById('wrapperTablaFacturas');
+        if (!panelCobro || !panelTabla || !wrapper) return;
+
+        requestAnimationFrame(function() {
+            var h = panelCobro.offsetHeight;
+            if (h > 0) {
+                panelTabla.style.height = h + 'px';
+                var headerH = panelTabla.querySelector('.panel-header-compact')?.offsetHeight || 38;
+                var netH = (h - headerH);
+                wrapper.style.height = netH + 'px';
+                wrapper.style.maxHeight = netH + 'px';
+            }
+        });
+    }
+
+    window.addEventListener('resize', sincronizarAlturasPaneles);
+
+    function toggleSelectAllFacturas(checked) {
+        var sumaTotal = 0;
+        document.querySelectorAll('.fila-factura-cobro').forEach(function(row) {
+            var chk = row.querySelector('.check-factura-afectar');
+            var saldo = parseFloat(row.dataset.saldo) || 0;
+            var input = row.querySelector('.input-monto-distribuido');
+
+            if (chk) chk.checked = checked;
+            if (checked) {
+                input.value = saldo.toFixed(2);
+                sumaTotal += saldo;
+            } else {
+                input.value = "0.00";
+            }
+        });
+
+        var chkAll = document.getElementById('checkSelectAllFacturas');
+        var chkTh = document.getElementById('checkThSelectAll');
+        if (chkAll) chkAll.checked = checked;
+        if (chkTh) chkTh.checked = checked;
+
+        var inpMonto = document.getElementById('cobroMontoRecibido');
+        if (inpMonto) inpMonto.value = sumaTotal.toFixed(2);
+
+        actualizarResumen(sumaTotal);
+    }
+
+    function onCheckFacturaChanged(chkChanged) {
+        if (chkChanged) {
+            var row = chkChanged.closest('.fila-factura-cobro');
+            var saldo = parseFloat(row.dataset.saldo) || 0;
+            var input = row.querySelector('.input-monto-distribuido');
+            if (chkChanged.checked) {
+                input.value = saldo.toFixed(2);
+            } else {
+                input.value = "0.00";
+            }
+        }
+
+        var sumaTotal = 0;
+        var allChecked = true;
+        var anyChecked = false;
+
+        document.querySelectorAll('.fila-factura-cobro').forEach(function(r) {
+            var chk = r.querySelector('.check-factura-afectar');
+            var inp = r.querySelector('.input-monto-distribuido');
+            var val = parseFloat(inp.value) || 0;
+            if (chk && chk.checked) {
+                sumaTotal += val;
+                anyChecked = true;
+            } else {
+                allChecked = false;
+            }
+        });
+
+        var chkAll = document.getElementById('checkSelectAllFacturas');
+        var chkTh = document.getElementById('checkThSelectAll');
+        if (chkAll) chkAll.checked = allChecked && anyChecked;
+        if (chkTh) chkTh.checked = allChecked && anyChecked;
+
+        var inpMonto = document.getElementById('cobroMontoRecibido');
+        if (inpMonto) inpMonto.value = sumaTotal.toFixed(2);
+
+        actualizarResumen(sumaTotal);
     }
 
     function aplicarMonto(monto) {
@@ -434,40 +538,70 @@
         var m = parseFloat(montoRecibido) || 0;
         var restante = m;
         var filas = document.querySelectorAll('.fila-factura-cobro');
+        var allChecked = true;
+        var anyChecked = false;
 
         filas.forEach(function(row) {
             var check = row.querySelector('.check-factura-afectar');
             var saldo = parseFloat(row.dataset.saldo);
             var input = row.querySelector('.input-monto-distribuido');
 
-            if (check && check.checked) {
-                if (restante >= saldo) {
-                    input.value = saldo.toFixed(2);
-                    restante -= saldo;
-                } else if (restante > 0) {
-                    input.value = restante.toFixed(2);
-                    restante = 0;
-                } else {
-                    input.value = "0.00";
-                }
+            if (restante >= saldo) {
+                input.value = saldo.toFixed(2);
+                if (check) check.checked = true;
+                anyChecked = true;
+                restante -= saldo;
+            } else if (restante > 0) {
+                input.value = restante.toFixed(2);
+                if (check) check.checked = true;
+                anyChecked = true;
+                restante = 0;
             } else {
                 input.value = "0.00";
+                if (check) check.checked = false;
+                allChecked = false;
             }
         });
+
+        var chkAll = document.getElementById('checkSelectAllFacturas');
+        var chkTh = document.getElementById('checkThSelectAll');
+        if (chkAll) chkAll.checked = allChecked && anyChecked;
+        if (chkTh) chkTh.checked = allChecked && anyChecked;
 
         actualizarResumen(m);
     }
 
-    function recalcularDistribucion() {
-        var m = parseFloat(document.getElementById('cobroMontoRecibido').value) || 0;
-        distribuirMonto(m);
-    }
+    function manualOverride(inpEdited) {
+        if (inpEdited) {
+            var row = inpEdited.closest('.fila-factura-cobro');
+            var chk = row.querySelector('.check-factura-afectar');
+            var val = parseFloat(inpEdited.value) || 0;
+            if (chk) {
+                chk.checked = (val > 0);
+            }
+        }
 
-    function manualOverride() {
         var totalDistribuido = 0;
-        document.querySelectorAll('.input-monto-distribuido').forEach(function(inp) {
-            totalDistribuido += parseFloat(inp.value) || 0;
+        var allChecked = true;
+        var anyChecked = false;
+
+        document.querySelectorAll('.fila-factura-cobro').forEach(function(r) {
+            var chk = r.querySelector('.check-factura-afectar');
+            var inp = r.querySelector('.input-monto-distribuido');
+            var val = parseFloat(inp.value) || 0;
+            if (chk && chk.checked) {
+                totalDistribuido += val;
+                anyChecked = true;
+            } else {
+                allChecked = false;
+            }
         });
+
+        var chkAll = document.getElementById('checkSelectAllFacturas');
+        var chkTh = document.getElementById('checkThSelectAll');
+        if (chkAll) chkAll.checked = allChecked && anyChecked;
+        if (chkTh) chkTh.checked = allChecked && anyChecked;
+
         document.getElementById('cobroMontoRecibido').value = totalDistribuido.toFixed(2);
         actualizarResumen(totalDistribuido);
     }
@@ -485,6 +619,7 @@
         selectTipoPago.addEventListener('change', function() {
             var caja = document.getElementById('cajaBancoRefCobro');
             caja.style.display = (this.value === 'TRANSFERENCIA') ? 'grid' : 'none';
+            sincronizarAlturasPaneles();
         });
     }
 
@@ -621,6 +756,12 @@
             btnConf.disabled = false;
             btnConf.innerHTML = '<i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja';
         }
+        var chkAll = document.getElementById('checkSelectAllFacturas');
+        if (chkAll) chkAll.checked = true;
+        var chkTh = document.getElementById('checkThSelectAll');
+        if (chkTh) chkTh.checked = true;
+        var numFact = document.getElementById('numFacturasTabla');
+        if (numFact) numFact.innerText = '0';
     }
 
     // Inicialización si vino cliente_id por URL
