@@ -22,46 +22,58 @@
 </div>
 
 <!-- ===================================== -->
-<!-- BUSCADOR DEL CLIENTE (HERO)          -->
+<!-- BARRA SUPERIOR COMPACTA: BUSCADOR + CLIENTE Y SALDO A LA DERECHA -->
 <!-- ===================================== -->
-<div class="panel mb-4" style="background-color: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 14px; padding: 18px 22px;">
-    <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 8px;">
-        <i class="bi bi-person-bounding-box me-1 text-primary"></i> 1. Buscar y Seleccionar Cliente
-    </div>
-    <div style="position: relative; max-width: 650px;">
-        <i class="bi bi-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #38bdf8; font-size: 1.1rem;"></i>
-        <input type="text" class="form-input" id="inputBuscarClienteCobro" placeholder="Escriba el nombre, RUC, cédula o teléfono..." style="padding-left: 44px; font-size: 0.95rem; font-weight: 600;" autocomplete="off">
+<div class="toolbar-apex mb-3" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; position: relative; overflow: visible;">
+    
+    <!-- LADO IZQUIERDO: BUSCADOR CON DROPDOWN FLOTANTE SIN RECORTE -->
+    <div style="position: relative; width: 380px; max-width: 100%;">
+        <div style="position: relative;">
+            <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #38bdf8; font-size: 1rem;"></i>
+            <input type="text" class="form-input" id="inputBuscarClienteCobro" placeholder="Buscar cliente por nombre o teléfono..." style="padding-left: 38px; padding-top: 8px; padding-bottom: 8px; font-size: 0.88rem; font-weight: 600; background: #162032;" autocomplete="off">
+        </div>
         
-        <!-- Dropdown flotante de autocompletado -->
-        <div id="dropdownClientesCobro" style="position: absolute; top: calc(100% + 6px); left: 0; width: 100%; background: #162032; border: 1px solid var(--color-border); border-radius: 10px; max-height: 320px; overflow-y: auto; z-index: 1000; box-shadow: 0 12px 30px rgba(0,0,0,0.6); display: none;">
+        <!-- Dropdown flotante con z-index 9999 para que NUNCA se corte -->
+        <div id="dropdownClientesCobro" style="position: absolute; top: calc(100% + 8px); left: 0; width: 480px; max-width: 90vw; background: #162032; border: 1px solid var(--color-border); border-radius: 10px; max-height: 350px; overflow-y: auto; z-index: 9999; box-shadow: 0 16px 36px rgba(0,0,0,0.7); display: none;">
             <!-- Inyectado dinámicamente -->
         </div>
     </div>
-</div>
 
-<!-- ===================================== -->
-<!-- BANNER DE RESUMEN DEL CLIENTE        -->
-<!-- ===================================== -->
-<div id="bannerClienteSeleccionado" class="panel mb-4" style="display: none; background: linear-gradient(135deg, rgba(0, 71, 171, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 18px 24px;">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="avatar-circle-apex" style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--color-primary) 0%, #00b4d8 100%); color: #fff; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+    <!-- LADO DERECHO: CLIENTE SELECCIONADO Y SALDO PENDIENTE -->
+    <div id="infoClienteDerecha" style="display: none; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <!-- Avatar y Datos Cliente -->
+        <div class="d-flex align-items-center gap-2">
+            <div class="avatar-circle-apex" style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--color-primary) 0%, #00b4d8 100%); color: #fff; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <i class="bi bi-person-fill"></i>
             </div>
             <div>
-                <h3 id="lblBannerNombreCliente" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; color: var(--color-text-main);">---</h3>
-                <div style="font-size: 0.82rem; color: var(--color-text-muted); display: flex; gap: 16px; flex-wrap: wrap;">
-                    <span><i class="bi bi-telephone-fill me-1" style="color: #38bdf8;"></i> <span id="lblBannerTelefono">---</span></span>
-                    <span><i class="bi bi-card-text me-1" style="color: #10b981;"></i> <span id="lblBannerIdentificacion">---</span></span>
-                    <span><i class="bi bi-receipt me-1" style="color: #f59e0b;"></i> <strong id="lblBannerFacturasCount" style="color: #f59e0b;">0</strong> facturas pendientes</span>
+                <div id="lblBannerNombreCliente" style="font-size: 0.95rem; font-weight: 800; color: var(--color-text-main); line-height: 1.2;">---</div>
+                <div style="font-size: 0.74rem; color: var(--color-text-muted); display: flex; gap: 8px;">
+                    <span id="lblBannerTelefono"><i class="bi bi-telephone-fill me-1" style="color: #38bdf8;"></i>---</span>
+                    <span>•</span>
+                    <span><strong id="lblBannerFacturasCount" style="color: #f59e0b;">0</strong> facturas</span>
                 </div>
             </div>
         </div>
-        <div style="text-align: right; background: rgba(0, 0, 0, 0.25); padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
-            <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-warning);">Saldo Total Pendiente</div>
-            <div id="lblBannerSaldoTotal" style="font-size: 1.7rem; font-weight: 900; color: #f59e0b;">C$ 0.00</div>
+
+        <!-- Badge de Saldo Total Pendiente -->
+        <div style="text-align: right; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 5px 14px; border-radius: 8px;">
+            <div style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-warning);">Saldo Pendiente</div>
+            <div id="lblBannerSaldoTotal" style="font-size: 1.2rem; font-weight: 900; color: #f59e0b; line-height: 1.2;">C$ 0.00</div>
         </div>
+
+        <!-- Botón Cambiar / Limpiar Cliente -->
+        <button type="button" class="btn-apex-outline" onclick="nuevoCobroLimpiar()" title="Cambiar de Cliente" style="padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; color: var(--color-text-muted);">
+            <i class="bi bi-x-lg"></i>
+        </button>
     </div>
+
+    <!-- Hint cuando aún no se ha seleccionado cliente -->
+    <div id="hintSinCliente" style="display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: 0.82rem;">
+        <i class="bi bi-info-circle text-primary"></i>
+        <span>Escriba un nombre para cargar la cuenta del cliente</span>
+    </div>
+
 </div>
 
 <!-- ===================================== -->
@@ -269,7 +281,7 @@
                             var html = '';
                             data.clientes.forEach(function(c) {
                                 html += `
-                                <div class="p-3 d-flex justify-content-between align-items-center" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);" onclick="seleccionarCliente(${c.id})">
+                                <div class="p-3 d-flex justify-content-between align-items-center" style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'" onclick="seleccionarCliente(${c.id})">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="avatar-circle-apex" style="width: 32px; height: 32px; font-size: 0.85rem;"><i class="bi bi-person-fill"></i></div>
                                         <div>
@@ -315,6 +327,7 @@
                 if (data.success) {
                     clienteActual = data.cliente;
                     facturasActuales = data.facturas;
+                    if (inputBuscar) inputBuscar.value = data.cliente.nombres;
                     renderClienteWorkspace();
                 } else {
                     showToast(data.message || 'Error cargando facturas del cliente', 'danger');
@@ -326,16 +339,17 @@
     function renderClienteWorkspace() {
         if (!clienteActual) return;
 
-        // Render Banner
+        // Render datos a la derecha del buscador
         document.getElementById('lblBannerNombreCliente').innerText = clienteActual.nombres;
-        document.getElementById('lblBannerTelefono').innerText = clienteActual.telefono || 'Sin teléfono';
-        document.getElementById('lblBannerIdentificacion').innerText = clienteActual.identificacion || 'Consumidor';
+        document.getElementById('lblBannerTelefono').innerHTML = '<i class="bi bi-telephone-fill me-1" style="color: #38bdf8;"></i>' + (clienteActual.telefono || 'Sin teléfono');
         document.getElementById('lblBannerFacturasCount').innerText = clienteActual.total_facturas;
         document.getElementById('lblBannerSaldoTotal').innerText = 'C$ ' + clienteActual.saldo_total.toLocaleString('en-US', {minimumFractionDigits: 2});
 
         document.getElementById('lblResumenSaldoAnterior').innerText = 'C$ ' + clienteActual.saldo_total.toLocaleString('en-US', {minimumFractionDigits: 2});
 
-        document.getElementById('bannerClienteSeleccionado').style.display = 'block';
+        document.getElementById('infoClienteDerecha').style.display = 'flex';
+        var hint = document.getElementById('hintSinCliente');
+        if (hint) hint.style.display = 'none';
         document.getElementById('workspaceCobro').style.display = 'grid';
 
         // Render Facturas
@@ -584,8 +598,25 @@
     }
 
     function nuevoCobroLimpiar() {
-        document.getElementById('modalReciboExito').classList.remove('active');
-        location.reload();
+        var modal = document.getElementById('modalReciboExito');
+        if (modal) modal.classList.remove('active');
+        clienteActual = null;
+        facturasActuales = [];
+        if (inputBuscar) {
+            inputBuscar.value = '';
+            inputBuscar.focus();
+        }
+        var infoRight = document.getElementById('infoClienteDerecha');
+        if (infoRight) infoRight.style.display = 'none';
+        var hint = document.getElementById('hintSinCliente');
+        if (hint) hint.style.display = 'flex';
+        var ws = document.getElementById('workspaceCobro');
+        if (ws) ws.style.display = 'none';
+        var btnConf = document.getElementById('btnEmitirRecibo');
+        if (btnConf) {
+            btnConf.disabled = false;
+            btnConf.innerHTML = '<i class="bi bi-printer-fill"></i> Confirmar y Emitir Recibo de Caja';
+        }
     }
 
     // Inicialización si vino cliente_id por URL
